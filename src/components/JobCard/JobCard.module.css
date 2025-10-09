@@ -19,8 +19,14 @@
 }
 
 .previewCard.expanded {
-  border-radius: 0.5rem 0.5rem 0 0;
+  border-radius: 0;
   border-left-color: #2563eb;
+  background: #f9fafb;
+}
+
+.previewCard.expanded:hover {
+  transform: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   background: #f9fafb;
 }
 
@@ -29,6 +35,20 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 1rem;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.companyLogo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .company {
@@ -116,7 +136,7 @@
 .details {
   background: white;
   border-left: 4px solid #2563eb;
-  border-radius: 0 0 0.5rem 0.5rem;
+  border-radius: 0;
   padding: 2rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -221,7 +241,6 @@
   width: 100%;
   border-radius: 0.5rem;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .projectImage img {
@@ -252,14 +271,30 @@
   }
 }
 
-/* Mobile optimizations */
 @media (max-width: 767px) {
   .previewCard {
     padding: 1.25rem 1rem;
   }
 
+  .previewCard:hover {
+    transform: translateX(2px);
+  }
+
+  .previewCard.expanded:hover {
+    transform: none;
+  }
+
   .details {
     padding: 1.5rem 1rem;
+  }
+
+  .companyLogo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .headerContent {
+    gap: 0.75rem;
   }
 
   .company {

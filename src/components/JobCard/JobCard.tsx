@@ -28,24 +28,33 @@ function JobCard({ job }: JobCardProps) {
         }}
       >
         <div className={styles.header}>
-          <div>
-            <h3 className={styles.company}>{job.company}</h3>
-            <p className={styles.role}>{job.role}</p>
-            <p className={styles.period}>{job.period}</p>
-          </div>
-          <div className={styles.expandIcon}>
-            <svg 
-              width="24" 
-              height="24" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-              className={isExpanded ? styles.rotated : ''}
-            >
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </div>
+            <div className={styles.headerContent}>
+                {job.logo && (
+                <img 
+                    src={job.logo} 
+                    alt={`${job.company} logo`} 
+                    className={styles.companyLogo}
+                />
+                )}
+                <div>
+                <h3 className={styles.company}>{job.company}</h3>
+                <p className={styles.role}>{job.role}</p>
+                <p className={styles.period}>{job.period}</p>
+                </div>
+            </div>
+            <div className={styles.expandIcon}>
+                <svg 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2"
+                className={isExpanded ? styles.rotated : ''}
+                >
+                <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </div>
         </div>
 
         {/* Skills tags */}
@@ -98,16 +107,16 @@ function JobCard({ job }: JobCardProps) {
                   <div className={styles.projectContent}>
                     <h5 className={styles.projectTitle}>{project.name}</h5>
                     <p className={styles.projectDescription}>{project.description}</p>
-                    {project.demoLink && (
-                      <a 
-                        href={project.demoLink} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className={styles.demoLink}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        View Live Demo →
-                      </a>
+                    {project.externalProjectLink && (
+                        <a 
+                            href={project.externalProjectLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className={styles.demoLink}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            View Live Demo →
+                        </a>
                     )}
                   </div>
                   {project.image && (
