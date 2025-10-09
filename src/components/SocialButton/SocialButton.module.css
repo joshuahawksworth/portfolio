@@ -18,9 +18,10 @@
   transform: scale(1.15) translateY(-3px);
   background-color: rgba(37, 99, 235, 0.2);
   border-color: rgba(59, 130, 246, 0.8);
-  box-shadow: 0 0 25px rgba(59, 130, 246, 0.8), 
-              0 0 50px rgba(59, 130, 246, 0.5),
-              0 10px 40px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    0 0 25px rgba(59, 130, 246, 0.8),
+    0 0 50px rgba(59, 130, 246, 0.5),
+    0 10px 40px rgba(0, 0, 0, 0.4);
 }
 
 .icon {
@@ -61,34 +62,34 @@
     width: 48px;
     height: 48px;
   }
-  
+
   .icon {
     width: 24px;
     height: 24px;
   }
-  
+
   .top-left,
   .top-right {
     top: 1rem;
   }
-  
+
   .top-left {
     left: 1rem;
   }
-  
+
   .top-right {
     right: 1rem;
   }
-  
+
   .bottom-left,
   .bottom-right {
     bottom: 1rem;
   }
-  
+
   .bottom-left {
     left: 1rem;
   }
-  
+
   .bottom-right {
     right: 1rem;
   }

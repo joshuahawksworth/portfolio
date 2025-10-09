@@ -2,11 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import styles from './Hero.module.css';
 import githubIcon from '../../assets/github.svg';
 import linkedinIcon from '../../assets/linkedin.png';
-import { 
-  PARTICLE_POSITIONS, 
-  calculateParallax, 
-  isDesktop, 
-  smoothScrollToElement 
+import {
+  PARTICLE_POSITIONS,
+  calculateParallax,
+  isDesktop,
+  smoothScrollToElement,
 } from '../../utils/heroHelpers';
 import SocialButton from '../SocialButton/SocialButton';
 
@@ -55,14 +55,14 @@ function Hero() {
   return (
     <section className={styles.heroSection}>
       {/* Social buttons */}
-      <SocialButton 
+      <SocialButton
         href="https://github.com/joshuahawksworth"
         icon={githubIcon}
         alt="GitHub"
         position="top-left"
         ariaLabel="Visit my GitHub profile"
       />
-      <SocialButton 
+      <SocialButton
         href="https://linkedin.com/in/joshua-hawksworth-9741aa209"
         icon={linkedinIcon}
         alt="LinkedIn"
@@ -85,7 +85,7 @@ function Hero() {
               left: `${pos.left}%`,
               top: `${pos.top}%`,
               animationDelay: `${index * 0.7}s`,
-              animationDuration: `${6 + (index % 4) * 2}s`
+              animationDuration: `${6 + (index % 4) * 2}s`,
             }}
           />
         ))}
@@ -97,38 +97,35 @@ function Hero() {
       </div>
 
       {/* Custom cursor follower (desktop only) */}
-      <div 
+      <div
         ref={cursorRef}
         className={styles.cursorFollower}
         style={{
           left: mousePosition.x - 16,
-          top: mousePosition.y - 16
+          top: mousePosition.y - 16,
         }}
       />
 
       {/* Main content with parallax effect */}
       <div className={styles.content}>
-        <h1 
+        <h1
           className={styles.title}
           style={{
-            transform: `translate3d(${titleParallax.x}px, ${titleParallax.y}px, 0)`
+            transform: `translate3d(${titleParallax.x}px, ${titleParallax.y}px, 0)`,
           }}
         >
           Hello, I'm Josh.
         </h1>
-        <p 
+        <p
           className={styles.subtitle}
           style={{
-            transform: `translate3d(${subtitleParallax.x}px, ${subtitleParallax.y}px, 0)`
+            transform: `translate3d(${subtitleParallax.x}px, ${subtitleParallax.y}px, 0)`,
           }}
         >
           I'm a Web & Software developer.
         </p>
         <div className={styles.buttonContainer}>
-          <button
-            onClick={handleScrollToExperience}
-            className={styles.ctaButton}
-          >
+          <button onClick={handleScrollToExperience} className={styles.ctaButton}>
             <span className={styles.ctaButtonText}>View My Work</span>
             <div className={styles.ctaButtonGradient}></div>
           </button>

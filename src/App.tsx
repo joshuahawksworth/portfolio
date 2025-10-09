@@ -1,6 +1,6 @@
-import Hero from './components/Hero/Hero'
-import Experience from './components/Experience/Experience'
-import './App.css'
+import Hero from './components/Hero/Hero';
+import Experience from './components/Experience/Experience';
+import './App.css';
 
 function App() {
   return (
@@ -8,7 +8,7 @@ function App() {
       <Hero />
       <Experience />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
