@@ -6,7 +6,7 @@ function Experience() {
   return (
     <section id="experience" className={styles.experienceSection}>
       <div className={styles.container}>
-        <h2 className={styles.title}>Experience</h2>
+        <h2 className={styles.title}>Work Experience</h2>
         <div className={styles.jobsList}>
           {jobsData.map((job) => (
             <JobCard key={job.id} job={job} />

@@ -48,8 +48,8 @@ function Hero() {
   const titleParallax = calculateParallax(mousePosition.x, mousePosition.y, 0.015);
   const subtitleParallax = calculateParallax(mousePosition.x, mousePosition.y, 0.008);
 
-  const handleScrollToExperience = () => {
-    smoothScrollToElement('experience');
+  const handleScroll = (targetId: string) => {
+    smoothScrollToElement(targetId);
   };
 
   return (
@@ -125,7 +125,7 @@ function Hero() {
           A Web & Mobile developer
         </p>
         <div className={styles.buttonContainer}>
-          <button onClick={handleScrollToExperience} className={styles.ctaButton}>
+          <button onClick={() => handleScroll('about')} className={styles.ctaButton}>
             <span className={styles.ctaButtonText}>View My Work</span>
           </button>
         </div>

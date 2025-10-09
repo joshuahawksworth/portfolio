@@ -8,6 +8,8 @@ import drawingRoomLogo from '../assets/company-logos/tdrc.jpg';
 import tofsImage from '../assets/tofs.jpg';
 import langleyFoxallLogo from '../assets/company-logos/langleyfoxall.png';
 import ciclozoneImage from '../assets/ciclo-zone.png';
+import edynamixLogo from '../assets/company-logos/edynamix.svg';
+import webMasterImage from '../assets/webmaster.webp';
 
 export const jobsData: Job[] = [
   {
@@ -43,7 +45,7 @@ export const jobsData: Job[] = [
         description:
           'A monorepo consisting of four integrated applications: an Outlook Add-in for email filing, a Discovery platform using Microsoft Graph API for email search and retrieval, an Admin site for project migration and user management, and an Install application for automated SharePoint hub site provisioning with search schemas, site designs, and permission configurations. Built for architects and engineers wanting to manage project documents and prepare for auditing season.',
         externalProjectLink: 'https://www.cmap.io/product-tours/atvero-mail-overview',
-        linkText: 'View Live Demo',
+        linkText: 'View Online Demo',
         image: cmapMailImage,
       },
     ],
@@ -186,12 +188,47 @@ export const jobsData: Job[] = [
     ],
     projects: [
       {
-        name: 'CicloZone Fitness Platform',
+        name: 'CicloZone',
         description:
           'A fitness ecosystem consisting of three integrated components: a React Native mobile app with Bluetooth connectivity for pairing with exercise bikes and tracking workouts in real-time, a Laravel-based CMS for uploading and managing video content displayed during workouts, and a React brochure website.',
         externalProjectLink: 'https://www.ciclozone.com/',
         linkText: 'Visit Website',
         image: ciclozoneImage,
+      },
+    ],
+  },
+  {
+    id: 'edynamix',
+    company: 'eDynamix',
+    logo: edynamixLogo,
+    role: 'Junior Web Developer & Designer',
+    period: 'Oct 2019 - Apr 2021',
+    skills: [
+      'PHP',
+      'WordPress (JS + PHP)',
+      'jQuery',
+      'Laravel',
+      'UI & UX Design',
+      'RESTful APIs',
+      'CMS Development',
+    ],
+    summary:
+      'Contributed to the development of a CRM platform that enabled car dealerships to build and manage their websites through a content management system. Worked closely with a team to design user-friendly interfaces and implement custom functionality per cusotmer requests.',
+    responsibilities: [
+      'Developed Web Master, a CRM platform for car dealership website creation and management',
+      'Designed and implemented UI/UX workflows for the Web Master CRM interface',
+      'Built a custom WordPress plugin using PHP and JavaScript',
+      'Worked with Laravel framework for backend functionality and CRM features',
+      'Maintained and updated existing dealership websites through the CRM platform',
+    ],
+    projects: [
+      {
+        name: 'Web Master',
+        description:
+          'A CRM platform designed specifically for the automotive industry, enabling car dealerships and developers to create, customize, and manage dealership websites without technical expertise. The system provides an intuitive interface for content management, vehicle inventory display, and customer engagement tools.',
+        externalProjectLink: 'https://www.edynamix-demo.com/web-master',
+        linkText: 'View Brochure Site',
+        image: webMasterImage,
       },
     ],
   },
