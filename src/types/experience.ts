@@ -2,6 +2,7 @@ export interface Project {
   name: string;
   description: string;
   externalProjectLink?: string;
+  linkText?: string;
   image?: string;
 }
 

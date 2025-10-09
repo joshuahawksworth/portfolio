@@ -109,7 +109,7 @@ function JobCard({ job }: JobCardProps) {
                         className={styles.demoLink}
                         onClick={(e) => e.stopPropagation()}
                       >
-                        View Live Demo →
+                        {project.linkText || 'View Project'} →
                       </a>
                     )}
                   </div>
