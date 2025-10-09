@@ -1,0 +1,95 @@
+.socialButton {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: rgba(17, 24, 39, 0.8);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  transition: all 300ms ease;
+  cursor: pointer;
+  z-index: 20;
+}
+
+.socialButton:hover {
+  transform: scale(1.15) translateY(-3px);
+  background-color: rgba(37, 99, 235, 0.2);
+  border-color: rgba(59, 130, 246, 0.8);
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.8), 
+              0 0 50px rgba(59, 130, 246, 0.5),
+              0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.icon {
+  width: 28px;
+  height: 28px;
+  filter: brightness(0) invert(1);
+  transition: filter 300ms ease;
+}
+
+.socialButton:hover .icon {
+  filter: brightness(0) invert(1) drop-shadow(0 0 10px rgba(59, 130, 246, 1));
+}
+
+/* Position variants */
+.top-left {
+  top: 2rem;
+  left: 2rem;
+}
+
+.top-right {
+  top: 2rem;
+  right: 2rem;
+}
+
+.bottom-left {
+  bottom: 2rem;
+  left: 2rem;
+}
+
+.bottom-right {
+  bottom: 2rem;
+  right: 2rem;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .socialButton {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .top-left,
+  .top-right {
+    top: 1rem;
+  }
+  
+  .top-left {
+    left: 1rem;
+  }
+  
+  .top-right {
+    right: 1rem;
+  }
+  
+  .bottom-left,
+  .bottom-right {
+    bottom: 1rem;
+  }
+  
+  .bottom-left {
+    left: 1rem;
+  }
+  
+  .bottom-right {
+    right: 1rem;
+  }
+}

@@ -1,11 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import styles from './Hero.module.css';
+import githubIcon from '../../assets/github.svg';
+import linkedinIcon from '../../assets/linkedin.png';
 import { 
   PARTICLE_POSITIONS, 
   calculateParallax, 
   isDesktop, 
   smoothScrollToElement 
 } from '../../utils/heroHelpers';
+import SocialButton from '../SocialButton/SocialButton';
 
 function Hero() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -51,6 +54,22 @@ function Hero() {
 
   return (
     <section className={styles.heroSection}>
+      {/* Social buttons */}
+      <SocialButton 
+        href="https://github.com/joshuahawksworth"
+        icon={githubIcon}
+        alt="GitHub"
+        position="top-left"
+        ariaLabel="Visit my GitHub profile"
+      />
+      <SocialButton 
+        href="https://linkedin.com/in/joshua-hawksworth-9741aa209"
+        icon={linkedinIcon}
+        alt="LinkedIn"
+        position="top-right"
+        ariaLabel="Visit my LinkedIn profile"
+      />
+
       {/* Animated background grid */}
       <div className={styles.gridBackground}>
         <div className={styles.gridPattern}></div>
