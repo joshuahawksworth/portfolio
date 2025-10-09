@@ -1,0 +1,39 @@
+.experienceSection {
+  min-height: 100vh;
+  background: white;
+  padding: 5rem 1.5rem;
+}
+
+.container {
+  width: 100%;
+  max-width: 75rem;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 4rem;
+  text-align: center;
+}
+
+.jobsList {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .title {
+    font-size: 3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .title {
+    font-size: 3.75rem;
+  }
+  .experienceSection {
+    padding: 5rem 4rem;
+  }
+}

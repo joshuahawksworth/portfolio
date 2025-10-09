@@ -1,5 +1,5 @@
 import Hero from './components/Hero/Hero'
-import Experience from './components/Experience'
+import Experience from './components/Experience/Experience'
 import './App.css'
 
 function App() {
