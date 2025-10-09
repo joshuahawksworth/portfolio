@@ -122,12 +122,11 @@ function Hero() {
             transform: `translate3d(${subtitleParallax.x}px, ${subtitleParallax.y}px, 0)`,
           }}
         >
-          I'm a Web & Software developer.
+          A Web & Mobile developer
         </p>
         <div className={styles.buttonContainer}>
           <button onClick={handleScrollToExperience} className={styles.ctaButton}>
             <span className={styles.ctaButtonText}>View My Work</span>
-            <div className={styles.ctaButtonGradient}></div>
           </button>
         </div>
       </div>

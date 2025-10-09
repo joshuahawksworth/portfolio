@@ -2,6 +2,12 @@ import { Job } from '../types/experience';
 import cmapMailImage from '../assets/cmap-mail.png';
 import cmapLogo from '../assets/company-logos/cmap.svg';
 import orangesLogo from '../assets/company-logos/17oranges.jpg';
+import accessGroupLogo from '../assets/company-logos/access-group.svg';
+import orderbeeImage from '../assets/orderbee.png';
+import drawingRoomLogo from '../assets/company-logos/tdrc.jpg';
+import tofsImage from '../assets/tofs.jpg';
+import langleyFoxallLogo from '../assets/company-logos/langleyfoxall.png';
+import ciclozoneImage from '../assets/ciclo-zone.png';
 
 export const jobsData: Job[] = [
   {
@@ -18,7 +24,7 @@ export const jobsData: Job[] = [
       'UI/UX (Figma)',
       'CI/CD',
       'TDD',
-      'Monorepo Architecture',
+      'Monorepo',
     ],
     summary:
       'Led the architecture and development of a email management ecosystem, building a monorepo that integrates a Outlook Add-in with SharePoint to enhance how architects organize and retrieve their emails, records, and drawings within a architectual project. This tool allows architects to prepare for auditing season.',
@@ -74,6 +80,118 @@ export const jobsData: Job[] = [
           'A social planning mobile application that streamlines group coordination by simplifying it to a single platform. Built from scratch using React Native for cross-platform deployment, with a custom NestJS backend API. The app eliminates the frustration of coordinating events across various apps, phone calls, and emails, providing users with a unified solution for managing their social lives.',
         externalProjectLink: 'https://www.17oranges.com/about/case-studies/app-development',
         linkText: 'Read Case Study',
+      },
+    ],
+  },
+  {
+    id: 'the-access-group',
+    company: 'The Access Group',
+    logo: accessGroupLogo,
+    role: 'Full Stack Web and Mobile Developer',
+    period: 'Sep 2022 - Feb 2023',
+    skills: [
+      'VueJS',
+      'React Native',
+      'TypeScript',
+      'TDD',
+      'Azure DevOps',
+      'Scrum Methodology',
+      'Agile Development',
+      'Client Management',
+    ],
+    summary:
+      'Contributed to the development of Orderbee, a hospitality ordering platform, working in a fast-paced agile environment to deliver features across web and mobile applications while managing client relationships and coordinating team workflows.',
+    responsibilities: [
+      'Developed features for Orderbee web application using VueJS and TypeScript',
+      'Built and maintained mobile app functionality using React Native',
+      'Practiced Test-Driven Development to ensure code quality and reliability',
+      'Participated in daily standups, sprint planning, and retrospectives following Scrum methodology',
+      'Coordinated development workflows through Azure DevOps',
+      'Prioritized and triaged issues to maintain smooth developmental cycles for the team',
+      'Delivered features in iterative sprints within an agency environment',
+    ],
+    projects: [
+      {
+        name: 'Orderbee',
+        description:
+          'A hospitality ordering solution that simplifies the ordering process for restaurants, pubs, and hotels. Built with to support web and mobile, Orderbee enables customers to quickly order and pay and helps businesses manage these transactons easily. Worked on both the customer-facing applications and internal management systems.',
+        externalProjectLink: 'https://www.theaccessgroup.com/en-gb/products/orderbee/',
+        linkText: 'Learn More',
+        image: orderbeeImage,
+      },
+    ],
+  },
+  {
+    id: 'drawing-room-creative',
+    company: 'The Drawing Room Creative',
+    logo: drawingRoomLogo,
+    role: 'Mobile Developer',
+    period: 'Dec 2021 - Sep 2022',
+    skills: [
+      'React Native',
+      'TypeScript',
+      'iOS & Android',
+      'Micro Services',
+      'Git Management',
+      'App Deployment',
+      'CI/CD',
+      'Team Leadership & Mentoring',
+    ],
+    summary:
+      'Led frontend development for a loyalty application that onboarded over 150,000 users in its first year, delivering a bespoke solution in a fast-paced agency environment while mentoring team members and implementing CI/CD practices.',
+    responsibilities: [
+      'Architected and implemented a custom loyalty badge system with rewards and referral mechanics (achievements!)',
+      'Built an interactive daily scratchcard game to drive user engagement and retention',
+      'Integrated push notification system using Firebase Cloud Messaging for real-time user updates',
+      'Collaborated with backend team to implement microservices architecture',
+      'Mentored junior developers and conducted code reviews to maintain quality standards',
+      'Deployed and maintained applications on both iOS and Android platforms',
+      'Worked under tight deadlines in a high-pressure agency environment',
+    ],
+    projects: [
+      {
+        name: 'TOFS App',
+        description:
+          'A customer engagement and loyalty application for retailer The Original Factory Shop, featuring a badge collection system, daily scratchcard rewards, and personalized offers. The app successfully onboarded over 150,000 users in its first year, resulting in increased shopping frequency and higher average spend per customer. Built with React Native for cross-platform deployment.',
+        externalProjectLink: 'https://thedrawingroomcreative.com/work/the-original-factory-shop',
+        linkText: 'View Case Study',
+        image: tofsImage,
+      },
+    ],
+  },
+  {
+    id: 'langley-foxall',
+    company: 'Langley Foxall',
+    logo: langleyFoxallLogo,
+    role: 'Web & Mobile Developer',
+    period: 'Apr 2021 - Dec 2021',
+    skills: [
+      'React & React Native',
+      'PHP Laravel',
+      'RESTful APIs',
+      'JS Unit Testing',
+      'Bluetooth Integration',
+      'AWS',
+      'Pair Programming',
+      'CMS Development',
+    ],
+    summary:
+      'Delivered multiple client solutions in an agency environment, building custom content management systems for healthcare and sales sectors. Contributed to the development of a fitness platform called CicloZone featuring a mobile application with Bluetooth connectivity, video content management, and web brochure.',
+    responsibilities: [
+      'Developed CMS solutions for diverse clients including osteopathy clinics and a door manufacturing sales company',
+      'Contributed to iOS and Android application development with Bluetooth connectivity for exercise bikes',
+      'Designed and implemented RESTful APIs using PHP Laravel',
+      'Worked on a Laravel-based video content management system for bike workout videos',
+      'Practiced pair programming to ensure code quality and knowledge sharing',
+    ],
+    projects: [
+      {
+        name: 'CicloZone Fitness Platform',
+        description:
+          'A fitness ecosystem consisting of three integrated components: a React Native mobile app with Bluetooth connectivity for pairing with exercise bikes and tracking workouts in real-time, a Laravel-based CMS for uploading and managing video content displayed during workouts, and a React brochure website.',
+        externalProjectLink: 'https://www.ciclozone.com/',
+        linkText: 'Visit Website',
+        image: ciclozoneImage,
       },
     ],
   },
