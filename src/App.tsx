@@ -3,6 +3,7 @@ import Experience from './components/Experience/Experience';
 import './App.css';
 import About from './components/About/About';
 import Contact from './components/Contact/Contact';
+import DownloadCV from './components/DownloadCV/DownloadCV';
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <About />
       <Experience />
       <Contact />
+      <DownloadCV />
     </div>
   );
 }
