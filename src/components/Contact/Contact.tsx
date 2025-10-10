@@ -26,7 +26,7 @@ function Contact() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setStatus({ type: 'loading', message: 'Sending...' });
+    setStatus({ type: 'loading', message: '' });
 
     try {
       const response = await fetch('/api/contact', {
@@ -134,6 +134,10 @@ function Contact() {
               'Send Message'
             )}
           </button>
+
+          {status.message && (
+            <div className={`${styles.statusMessage} ${styles[status.type]}`}>{status.message}</div>
+          )}
         </form>
       </div>
     </section>
