@@ -38,7 +38,7 @@ function JobCard({ job }: JobCardProps) {
               <p className={styles.period}>{job.period}</p>
             </div>
           </div>
-          <div className={styles.expandIcon}>
+          <div className={`${styles.expandIcon} ${isExpanded ? styles.rotated : ''}`}>
             <svg
               width="24"
               height="24"
@@ -46,7 +46,6 @@ function JobCard({ job }: JobCardProps) {
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
-              className={isExpanded ? styles.rotated : ''}
             >
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
