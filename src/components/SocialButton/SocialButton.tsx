@@ -1,10 +1,11 @@
+import { SocialButtonPosition } from '../../types/socialButton';
 import styles from './SocialButton.module.css';
 
 interface SocialButtonProps {
   href: string;
   icon: string;
   alt: string;
-  position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  position: SocialButtonPosition;
   ariaLabel: string;
 }
 

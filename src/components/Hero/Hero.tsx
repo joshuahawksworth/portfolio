@@ -126,7 +126,7 @@ function Hero() {
         </p>
         <div className={styles.buttonContainer}>
           <button onClick={() => handleScroll('about')} className={styles.ctaButton}>
-            <span className={styles.ctaButtonText}>View My Work</span>
+            <span className={styles.ctaButtonText}>Learn More</span>
           </button>
         </div>
       </div>

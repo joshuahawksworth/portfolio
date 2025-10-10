@@ -56,6 +56,20 @@
   right: 2rem;
 }
 
+/* Footer position - not absolute, inline in footer */
+.footer {
+  position: relative;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.footer:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1) translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .socialButton {

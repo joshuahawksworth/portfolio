@@ -4,6 +4,7 @@ import './App.css';
 import About from './components/About/About';
 import Contact from './components/Contact/Contact';
 import ViewCV from './components/ViewCV/ViewCV';
+import Footer from './components/Footer/Footer';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <Experience />
       <Contact />
       <ViewCV />
+      <Footer />
     </div>
   );
 }

@@ -1,0 +1,76 @@
+.footer {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 3rem 1.5rem;
+  color: white;
+}
+
+.container {
+  max-width: 75rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.socialLinks {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.emailButton {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: all 300ms ease;
+  cursor: pointer;
+  color: white;
+}
+
+.emailButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1) translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.emailButton svg {
+  width: 28px;
+  height: 28px;
+}
+
+.copyright {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  text-align: center;
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+  .socialLinks {
+    gap: 2.5rem;
+  }
+
+  .copyright {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .emailButton {
+    width: 48px;
+    height: 48px;
+  }
+
+  .emailButton svg {
+    width: 24px;
+    height: 24px;
+  }
+}
