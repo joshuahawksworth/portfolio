@@ -8,7 +8,7 @@ import vueIcon from '../../assets/tech-icons/vue.png';
 import nodeIcon from '../../assets/tech-icons/node.png';
 import phpIcon from '../../assets/tech-icons/php.png';
 import laravelIcon from '../../assets/tech-icons/laravel.png';
-import nestjsIcon from '../../assets/tech-icons/nestjs.svg';
+import reactNativeIcon from '../../assets/tech-icons/react-native.svg';
 import sqlIcon from '../../assets/tech-icons/sql.svg';
 import gitIcon from '../../assets/tech-icons/git.svg';
 import azureIcon from '../../assets/tech-icons/azure.png';
@@ -27,12 +27,12 @@ function About() {
     { name: 'CSS3', icon: cssIcon, category: 'frontend' },
     { name: 'JavaScript', icon: jsIcon, category: 'frontend' },
     { name: 'TypeScript', icon: tsIcon, category: 'frontend' },
-    { name: 'React.js', icon: reactIcon, category: 'frontend' },
+    { name: 'React', icon: reactIcon, category: 'frontend' },
+    { name: 'React Native', icon: reactNativeIcon, category: 'frontend' },
     { name: 'Vue.js', icon: vueIcon, category: 'frontend' },
     { name: 'Node.js', icon: nodeIcon, category: 'backend' },
     { name: 'PHP', icon: phpIcon, category: 'backend' },
     { name: 'Laravel', icon: laravelIcon, category: 'backend' },
-    { name: 'NestJS', icon: nestjsIcon, category: 'backend' },
     { name: 'SQL', icon: sqlIcon, category: 'backend' },
     { name: 'Git', icon: gitIcon, category: 'tools' },
     { name: 'Azure', icon: azureIcon, category: 'tools' },
