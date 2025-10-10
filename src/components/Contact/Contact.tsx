@@ -125,7 +125,14 @@ function Contact() {
             className={styles.submitButton}
             disabled={status.type === 'loading'}
           >
-            {status.type === 'loading' ? 'Sending...' : 'Send Message'}
+            {status.type === 'loading' ? (
+              <span className={styles.buttonContent}>
+                <span className={styles.spinner}></span>
+                Sending...
+              </span>
+            ) : (
+              'Send Message'
+            )}
           </button>
 
           {status.message && (
