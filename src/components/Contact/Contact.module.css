@@ -143,26 +143,6 @@
   }
 }
 
-.statusMessage {
-  margin-top: 1rem;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  text-align: center;
-  font-weight: 500;
-}
-
-.statusMessage.success {
-  background: rgba(16, 185, 129, 0.2);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #6ee7b7;
-}
-
-.statusMessage.error {
-  background: rgba(239, 68, 68, 0.2);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #fca5a5;
-}
-
 /* Tablet and up */
 @media (min-width: 768px) {
   .title {

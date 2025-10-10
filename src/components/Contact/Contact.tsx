@@ -134,10 +134,6 @@ function Contact() {
               'Send Message'
             )}
           </button>
-
-          {status.message && (
-            <div className={`${styles.statusMessage} ${styles[status.type]}`}>{status.message}</div>
-          )}
         </form>
       </div>
     </section>
