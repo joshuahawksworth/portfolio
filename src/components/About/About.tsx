@@ -47,12 +47,24 @@ function About() {
 
         <div className={styles.content}>
           <p className={styles.description}>
-            Full Stack Senior Developer with over 5 years of experience building scalable web and
-            mobile applications across diverse industries. I specialize in architecting modern
-            solutions using React, TypeScript, and Node.js, with a strong focus on user experience
-            and clean code. From leading monorepo projects to mentoring junior developers, I thrive
-            in collaborative environments where I can solve complex problems and deliver products
-            that make a real impact.
+            Senior Full Stack Developer with 6 years building React and React Native applications
+            across multiple industries. I specialize in creating web and mobile applications using
+            TypeScript and React.js, with a focus on user experience and clean code. Recently led
+            development of an email management platform for architects, building a monorepo that
+            connects Outlook with SharePoint by allowing users to file emails to Sharepoint Projects
+            using the Microsoft Graph API. Previously created a mobile loyalty app that gained 150K
+            users in its first year. Working in a collaborative environment and mentoring developers
+            is where I feel I do my best work.
+          </p>
+
+          <p className={styles.description}>
+            Outside of work, I'm currently learning about .NET Blazor and MongoDB through an
+            automotive side project with my dad! Other things I enjoy in my free time include
+            keeping up with the latest frontend technologies via YouTube and Twitch, working on
+            small video game side projects and participating in game jams, staying sharp with daily
+            code katas, and hitting the gym for weight training My office is supervised by Jiji, my
+            cat and unofficial code reviewer, who specializes in keyboard QA testing (usually at the
+            worst possible moments 🐈‍⬛).
           </p>
 
           <div className={styles.techSection}>
