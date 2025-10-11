@@ -14,6 +14,7 @@ import gitIcon from '../../assets/tech-icons/git.svg';
 import azureIcon from '../../assets/tech-icons/azure.png';
 import dockerIcon from '../../assets/tech-icons/docker.svg';
 import figmaIcon from '../../assets/tech-icons/figma.svg';
+import nestIcon from '../../assets/tech-icons/nestjs.svg';
 
 interface TechItem {
   name: string;
@@ -34,6 +35,7 @@ function About() {
     { name: 'PHP', icon: phpIcon, category: 'backend' },
     { name: 'Laravel', icon: laravelIcon, category: 'backend' },
     { name: 'SQL', icon: sqlIcon, category: 'backend' },
+    { name: 'Nest.js', icon: nestIcon, category: 'backend' },
     { name: 'Git', icon: gitIcon, category: 'tools' },
     { name: 'Azure', icon: azureIcon, category: 'tools' },
     { name: 'Docker', icon: dockerIcon, category: 'tools' },
