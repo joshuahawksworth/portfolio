@@ -63,8 +63,8 @@ function About() {
             keeping up with the latest frontend technologies via YouTube and Twitch, working on
             small video game side projects and participating in game jams, staying sharp with daily
             code katas, and hitting the gym for weight training. My office is supervised by Jiji, my
-            cat and unofficial code reviewer, who specializes in keyboard QA testing (usually at the
-            worst possible moments 🐈‍⬛).
+            cat and code reviewer, who specializes in keyboard QA testing (usually at the worst
+            possible moments 🐈‍⬛).
           </p>
 
           <div className={styles.techSection}>
