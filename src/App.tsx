@@ -5,12 +5,14 @@ import About from './components/About/About';
 import Contact from './components/Contact/Contact';
 import ViewCV from './components/ViewCV/ViewCV';
 import Footer from './components/Footer/Footer';
+import Location from './components/Location/Location';
 
 function App() {
   return (
     <div className="font-sans">
       <Hero />
       <About />
+      <Location />
       <Experience />
       <Contact />
       <ViewCV />
