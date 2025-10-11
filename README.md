@@ -1,21 +1,49 @@
-# React + TypeScript + Vite
+# Joshua Hawksworth - Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A personal portfolio website showcasing my work experience and technical skills. Built with React and TypeScript.
 
-While this project uses React, Vite supports many popular JS frameworks. [See all the supported frameworks](https://vitejs.dev/guide/#scaffolding-your-first-vite-project).
+🔗 **[Live Site](https://hawksworth.dev/)**
 
-## Deploy Your Own
+![Portfolio Demo](./demo.gif)
 
-Deploy your own Vite project with Vercel.
+## Overview
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/vercel/examples/tree/main/framework-boilerplates/vite-react&template=vite-react)
+Single-page portfolio featuring my professional experience across my previous companies, the tech stack I worked with, and a contact form to get in touvh! Includes some animations and interactive elements for visual interest.
 
-_Live Example: https://vite-react-example.vercel.app_
+## Features
 
-### Deploying From Your Terminal
+- Hero section with animated background elements
+- Tech stack icons grid
+- Contact form with serverless email (using Resend's Free API)
+- Responsive layout for mobile/tablet/desktop
 
-You can deploy your new Vite project with a single command from your terminal using [Vercel CLI](https://vercel.com/download):
+## Tech Stack
 
-```shell
-$ vercel
+- **Frontend**: React 18, TypeScript
+- **Styling**: CSS Modules
+- **Deployment**: Vercel
+- **API**: Vercel serverless functions
+- **Email**: Resend
+- **Code Quality**: ESLint, Prettier
+
+## Running Locally
+
+```bash
+# Install dependencies
+npm install
+
+# Add environment variables
+# Create .env with RESEND_API_KEY
+
+# Start dev server
+npm run dev
+
+# Build for production
+npm run build
 ```
+
+## Contact
+
+Joshua Hawksworth - joshuahawksworth@me.com
+
+[LinkedIn](https://www.linkedin.com/in/joshua-hawksworth-9741aa209/) • [GitHub](https://github.com/joshuahawksworth)
