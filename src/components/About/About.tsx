@@ -53,7 +53,7 @@ function About() {
             across multiple industries. I specialize in creating web and mobile applications using
             TypeScript and React.js, with a focus on user experience and clean code. Recently led
             development of an email management platform for architects, building a monorepo that
-            connects Outlook with SharePoint by allowing users to file emails to Sharepoint Projects
+            connects Outlook with SharePoint by allowing users to file emails to SharePoint Projects
             using the Microsoft Graph API. Previously created a mobile loyalty app that gained 150K
             users in its first year. Working in a collaborative environment and mentoring developers
             is where I feel I do my best work.

@@ -29,7 +29,7 @@ export const jobsData: Job[] = [
       'Monorepo',
     ],
     summary:
-      'Led the architecture and development of a email management ecosystem, building a monorepo that integrates a Outlook Add-in with SharePoint to enhance how architects organize and retrieve their emails, records, and drawings within a architectual project. This tool allows architects to prepare for auditing season.',
+      'Led the architecture and development of an email management ecosystem, building a monorepo that integrates an Outlook Add-in with SharePoint to enhance how architects organize and retrieve their emails, records, and drawings within an architectural project. This tool allows architects to prepare for auditing season.',
     responsibilities: [
       'Architected and maintained a monorepo containing four interconnected applications',
       'Developed an Outlook Add-in enabling users to file emails directly into SharePoint sites',
@@ -107,14 +107,14 @@ export const jobsData: Job[] = [
       'Practiced Test-Driven Development to ensure code quality and reliability',
       'Participated in daily standups, sprint planning, and retrospectives following Scrum methodology',
       'Coordinated development workflows through Azure DevOps',
-      'Prioritized and triaged issues to maintain smooth developmental cycles for the team',
+      'Prioritized and triaged issues to maintain smooth development cycles for the team',
       'Delivered features in iterative sprints within an agency environment',
     ],
     projects: [
       {
         name: 'Orderbee',
         description:
-          'A hospitality ordering solution that simplifies the ordering process for restaurants, pubs, and hotels. Built with to support web and mobile, Orderbee enables customers to quickly order and pay and helps businesses manage these transactons easily. Worked on both the customer-facing applications and internal management systems.',
+          'A hospitality ordering solution that simplifies the ordering process for restaurants, pubs, and hotels. Built to support web and mobile, Orderbee enables customers to quickly order and pay and helps businesses manage these transactions easily. Worked on both the customer-facing applications and internal management systems.',
         externalProjectLink: 'https://www.theaccessgroup.com/en-gb/products/orderbee/',
         linkText: 'Learn More',
         image: orderbeeImage,
@@ -211,7 +211,7 @@ export const jobsData: Job[] = [
       'CMS Development',
     ],
     summary:
-      'Contributed to the development of a CRM platform that enabled car dealerships to build and manage their websites through a content management system. Worked closely with a team to design user-friendly interfaces and implement custom functionality per cusotmer requests.',
+      'Contributed to the development of a CRM platform that enabled car dealerships to build and manage their websites through a content management system. Worked closely with a team to design user-friendly interfaces and implement custom functionality per customer requests.',
     responsibilities: [
       'Developed Web Master, a CRM platform for car dealership website creation and management',
       'Designed and implemented UI/UX workflows for the Web Master CRM interface',
