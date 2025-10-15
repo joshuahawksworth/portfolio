@@ -12,8 +12,8 @@ function App() {
     <div className="font-sans">
       <Hero />
       <About />
-      <Location />
       <Experience />
+      <Location />
       <Contact />
       <ViewCV />
       <Footer />

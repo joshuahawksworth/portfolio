@@ -5,26 +5,24 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.875rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-  background-size: 200% 200%;
-  color: white;
-  border: none;
-  border-radius: 2rem;
-  font-size: 1rem;
-  font-weight: 600;
+  padding: 0.75rem 1.25rem;
+  background: white;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 0.9375rem;
+  font-weight: 500;
   cursor: pointer;
-  box-shadow: 0 10px 25px -5px rgba(102, 126, 234, 0.6);
-  transition: all 300ms ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 200ms ease;
   z-index: 1000;
-  animation:
-    gradientShift 3s ease infinite,
-    fadeIn 0.5s ease;
 }
 
 .viewButton:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 35px -5px rgba(102, 126, 234, 0.8);
+  background: #f9fafb;
+  border-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .viewButton.hidden {
@@ -34,8 +32,8 @@
 }
 
 .icon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
 }
 
@@ -71,13 +69,13 @@
   .viewButton {
     bottom: 1.5rem;
     right: 1.5rem;
-    padding: 0.75rem 1.25rem;
+    padding: 0.625rem 1rem;
     font-size: 0.875rem;
   }
 
   .icon {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
   }
 
   .text {

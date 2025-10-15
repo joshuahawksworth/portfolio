@@ -107,14 +107,14 @@
 }
 
 .projectBadge {
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  background: #2563eb;
   color: white;
-  padding: 0.25rem 0.625rem;
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 2px;
+  font-size: 0.6875rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
 }
 
 .projectName {

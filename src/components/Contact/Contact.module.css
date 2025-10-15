@@ -87,28 +87,27 @@
   padding: 1rem 2rem;
   font-size: 1.125rem;
   font-weight: 600;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-  background-size: 200% 200%;
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
+  background: white;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 300ms ease;
-  box-shadow: 0 10px 25px -5px rgba(102, 126, 234, 0.4);
-  animation: gradientShift 3s ease infinite;
+  transition: all 200ms ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   margin-top: 1rem;
 }
 
 .submitButton:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 40px -5px rgba(102, 126, 234, 0.6);
+  background: #f9fafb;
+  border-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .submitButton:disabled {
-  opacity: 1;
+  opacity: 0.6;
   cursor: not-allowed;
 }
-
 .statusMessage {
   margin-top: 1rem;
   padding: 1rem;
