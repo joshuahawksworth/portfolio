@@ -34,7 +34,6 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 1rem;
   padding: 2rem;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
 }
 
 .formGroup {
@@ -62,6 +61,7 @@
   font-size: 1rem;
   font-family: inherit;
   transition: all 200ms ease;
+  box-sizing: border-box;
 }
 
 .input::placeholder,

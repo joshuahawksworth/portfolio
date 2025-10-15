@@ -1,7 +1,7 @@
 .locationSection {
   min-height: 80vh;
   background: white;
-  padding: 5rem 1.5rem;
+  padding: 0 1.5rem 5rem 1.5rem;
 }
 
 .container {
@@ -22,9 +22,8 @@
   position: relative;
   width: 100%;
   height: 500px;
-  border-radius: 1rem;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
 }
 
 .mapContainer {
@@ -50,7 +49,7 @@
   }
 
   .locationSection {
-    padding: 5rem 4rem;
+    padding: 0 4rem 5rem 4rem;
   }
 
   .mapWrapper {
