@@ -1,14 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useTime } from '../../hooks/useTime';
 import styles from './Login.module.css';
 
 interface Props { onLogin: () => void }
 
 function Clock() {
-  const [now, setNow] = useState(new Date());
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(id);
-  }, []);
+  const now = useTime();
   return (
     <div className={styles.clock}>
       <div className={styles.time}>
@@ -24,6 +21,7 @@ function Clock() {
 export default function Login({ onLogin }: Props) {
   const [visible, setVisible] = useState(false);
   const [leaving, setLeaving] = useState(false);
+  const leavingRef = useRef(false);
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80);
@@ -31,13 +29,19 @@ export default function Login({ onLogin }: Props) {
   }, []);
 
   useEffect(() => {
-    function onKey() { enter(); }
+    function onKey() {
+      if (leavingRef.current) return;
+      leavingRef.current = true;
+      setLeaving(true);
+      setTimeout(onLogin, 500);
+    }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  }, [onLogin]);
 
   function enter() {
-    if (leaving) return;
+    if (leavingRef.current) return;
+    leavingRef.current = true;
     setLeaving(true);
     setTimeout(onLogin, 500);
   }

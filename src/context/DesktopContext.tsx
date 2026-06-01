@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useRef } from 'react';
+import { createContext, use, useState, useCallback, useRef } from 'react';
 
 export interface WindowInstance {
   id: string;
@@ -87,7 +87,7 @@ interface DesktopCtx {
 export const DesktopContext = createContext<DesktopCtx | null>(null);
 
 export function useDesktop() {
-  const ctx = useContext(DesktopContext);
+  const ctx = use(DesktopContext);
   if (!ctx) throw new Error('useDesktop outside DesktopProvider');
   return ctx;
 }

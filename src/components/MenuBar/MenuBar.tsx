@@ -1,13 +1,9 @@
-import { useState, useEffect } from 'react';
 import { useDesktop } from '../../context/DesktopContext';
+import { useTime } from '../../hooks/useTime';
 import styles from './MenuBar.module.css';
 
 function Clock() {
-  const [time, setTime] = useState(() => new Date());
-  useEffect(() => {
-    const id = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(id);
-  }, []);
+  const time = useTime();
   return (
     <span className={styles.clock}>
       {time.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}{' '}
@@ -23,6 +19,7 @@ export default function MenuBar() {
 
   return (
     <div className={styles.bar}>
+      <title>{appName} — Josh Hawksworth</title>
       <div className={styles.left}>
         <span className={styles.apple}>&#63743;</span>
         <span className={styles.appName}>{appName}</span>

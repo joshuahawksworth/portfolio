@@ -1,31 +1,46 @@
-import { useState } from 'react';
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import styles from './ContactApp.module.css';
 
-type Status = 'idle' | 'sending' | 'success' | 'error';
+type ActionState = { status: 'idle' | 'success' | 'error' };
+
+async function contactAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  try {
+    const res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: formData.get('name'),
+        email: formData.get('email'),
+        message: formData.get('message'),
+      }),
+    });
+    if (!res.ok) throw new Error();
+    return { status: 'success' };
+  } catch {
+    return { status: 'error' };
+  }
+}
+
+function SendButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button type="submit" className={styles.sendBtn} disabled={pending}>
+      {pending
+        ? <><span className={styles.spinner} /> Sending…</>
+        : <>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2L2 6.5l5 2.5 2.5 5L14 2z"/>
+            </svg>
+            Send
+          </>
+      }
+    </button>
+  );
+}
 
 export default function ContactApp() {
-  const [form, setForm] = useState({ name: '', email: '', message: '' });
-  const [status, setStatus] = useState<Status>('idle');
-
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setForm(p => ({ ...p, [k]: e.target.value }));
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setStatus('sending');
-    try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-      if (!res.ok) throw new Error();
-      setStatus('success');
-      setForm({ name: '', email: '', message: '' });
-    } catch {
-      setStatus('error');
-    }
-  }
+  const [state, action] = useActionState<ActionState, FormData>(contactAction, { status: 'idle' });
 
   return (
     <div className={styles.root}>
@@ -42,7 +57,7 @@ export default function ContactApp() {
         <span className={styles.toolbarTitle}>New Message</span>
       </div>
 
-      <form className={styles.form} onSubmit={submit}>
+      <form className={styles.form} action={action}>
         {/* To */}
         <div className={styles.field}>
           <label className={styles.label}>To</label>
@@ -55,10 +70,9 @@ export default function ContactApp() {
           <label className={styles.label} htmlFor="name">From</label>
           <input
             id="name"
+            name="name"
             className={styles.input}
             placeholder="Your name"
-            value={form.name}
-            onChange={set('name')}
             required
           />
         </div>
@@ -69,11 +83,10 @@ export default function ContactApp() {
           <label className={styles.label} htmlFor="email">Reply-To</label>
           <input
             id="email"
+            name="email"
             type="email"
             className={styles.input}
             placeholder="your@email.com"
-            value={form.email}
-            onChange={set('email')}
             required
           />
         </div>
@@ -81,28 +94,17 @@ export default function ContactApp() {
 
         {/* Message */}
         <textarea
+          name="message"
           className={styles.textarea}
           placeholder="Write your message here…"
-          value={form.message}
-          onChange={set('message')}
           required
         />
 
         {/* Footer */}
         <div className={styles.footer}>
-          {status === 'success' && <span className={styles.success}>Message sent!</span>}
-          {status === 'error'   && <span className={styles.error}>Failed to send. Try again.</span>}
-          <button type="submit" className={styles.sendBtn} disabled={status === 'sending'}>
-            {status === 'sending'
-              ? <><span className={styles.spinner}/> Sending…</>
-              : <>
-                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M14 2L2 6.5l5 2.5 2.5 5L14 2z"/>
-                  </svg>
-                  Send
-                </>
-            }
-          </button>
+          {state.status === 'success' && <span className={styles.success}>Message sent!</span>}
+          {state.status === 'error'   && <span className={styles.error}>Failed to send. Try again.</span>}
+          <SendButton />
         </div>
       </form>
     </div>

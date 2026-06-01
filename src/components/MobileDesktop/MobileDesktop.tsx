@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useTime } from '../../hooks/useTime';
 import AboutApp from '../apps/AboutApp';
 import ExperienceApp from '../apps/ExperienceApp';
 import SkillsApp from '../apps/SkillsApp';
@@ -84,11 +84,7 @@ const APP_LABELS: Record<string, string> = {
 
 // ── Clock for status bar ─────────────────────────────────────────────────
 function StatusClock() {
-  const [now, setNow] = useState(new Date());
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(id);
-  }, []);
+  const now = useTime();
   return <span>{now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</span>;
 }
 

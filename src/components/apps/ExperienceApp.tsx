@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { jobsData } from '../../data/experienceData';
 import { Job } from '../../types/experience';
 import styles from './ExperienceApp.module.css';
@@ -6,12 +6,7 @@ import styles from './ExperienceApp.module.css';
 interface Props { props?: Record<string, unknown> }
 
 export default function ExperienceApp({ props }: Props) {
-  const initialId = (props?.jobId as string) ?? jobsData[0].id;
-  const [selectedId, setSelectedId] = useState(initialId);
-
-  useEffect(() => {
-    if (props?.jobId) setSelectedId(props.jobId as string);
-  }, [props?.jobId]);
+  const [selectedId, setSelectedId] = useState((props?.jobId as string) ?? jobsData[0].id);
 
   const selected = jobsData.find(j => j.id === selectedId) ?? jobsData[0];
 
