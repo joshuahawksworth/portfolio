@@ -1,15 +1,20 @@
+import { useId } from 'react';
 import { useDesktop, WindowInstance } from '../../context/DesktopContext';
+import logoSvg from '../../assets/logo.svg';
 import styles from './Dock.module.css';
 
-/* ─────────────────────────────────────────────
-   Reusable Mac-style icon shell
-   Each icon gets a gradient bg + top gloss
-───────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────────
+   MacIcon — each render instance gets its own gradient IDs via useId()
+   so duplicate icons (dock + minimised thumb) never share an SVG ID.
+   Previously used prop-based IDs which caused gradient lookup failures
+   in Firefox when the same id appeared in multiple <svg> elements.
+───────────────────────────────────────────────────────────────────────── */
 function MacIcon({
-  id, top, bottom, children,
-}: { id: string; top: string; bottom: string; children: React.ReactNode }) {
-  const g = `g-${id}`;
-  const gl = `gl-${id}`;
+  top, bottom, children,
+}: { top: string; bottom: string; children: React.ReactNode }) {
+  const uid = useId();
+  const g  = `${uid}g`;
+  const gl = `${uid}gl`;
   return (
     <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
       <defs>
@@ -27,96 +32,84 @@ function MacIcon({
   );
 }
 
-/* ─────────────────────────────────────────────
-   Individual icons — macOS visual language
-───────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────────
+   Individual dock icons — macOS visual language
+───────────────────────────────────────────────────────────────────────── */
 const I = {
   finder: (
-    <MacIcon id="finder" top="#5ecfff" bottom="#1a7aff">
-      {/* Finder: two-tone happy face */}
+    <MacIcon top="#5ecfff" bottom="#1a7aff">
       <ellipse cx="22" cy="21" rx="11" ry="10" fill="white" opacity="0.95"/>
       <circle cx="17" cy="19" r="2.2" fill="#1a7aff"/>
       <circle cx="27" cy="19" r="2.2" fill="#1a7aff"/>
-      {/* left eye white */}
       <circle cx="17.8" cy="18.3" r="0.8" fill="white"/>
       <circle cx="27.8" cy="18.3" r="0.8" fill="white"/>
-      {/* smile */}
       <path d="M16 24 Q22 29 28 24" stroke="#1a7aff" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
     </MacIcon>
   ),
-  safari: (
-    <MacIcon id="safari" top="#48c8ff" bottom="#007aff">
-      {/* Safari: compass */}
-      <circle cx="22" cy="22" r="11" stroke="rgba(255,255,255,0.35)" strokeWidth="0.8" fill="none"/>
-      {/* compass needle — red/white */}
-      <polygon points="22,12 24.5,22 22,20 19.5,22" fill="#ff3b30" opacity="0.9"/>
-      <polygon points="22,32 19.5,22 22,24 24.5,22" fill="rgba(255,255,255,0.9)"/>
-      {/* N S ticks */}
-      <path d="M22 13v2M22 29v2M13 22h2M29 22h2" stroke="rgba(255,255,255,0.55)" strokeWidth="1" strokeLinecap="round"/>
-    </MacIcon>
+  /* Real GitHub invertocat path (original 24×24, scaled to 44×44 canvas) */
+  github: (
+    <svg viewBox="0 0 44 44" width="44" height="44" fill="none">
+      <rect width="44" height="44" rx="11" fill="#1b1f24"/>
+      <rect width="44" height="20" rx="11" fill="rgba(255,255,255,0.07)"/>
+      <g transform="translate(6,6) scale(1.333)">
+        <path d="M12 .297c-6.63 0-12 5.373-12 12c0 5.303 3.438 9.8 8.205 11.385c.6.113.82-.258.82-.577c0-.285-.01-1.04-.015-2.04c-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729c1.205.084 1.838 1.236 1.838 1.236c1.07 1.835 2.809 1.305 3.495.998c.108-.776.417-1.305.76-1.605c-2.665-.3-5.466-1.332-5.466-5.93c0-1.31.465-2.38 1.235-3.22c-.135-.303-.54-1.523.105-3.176c0 0 1.005-.322 3.3 1.23c.96-.267 1.98-.399 3-.405c1.02.006 2.04.138 3 .405c2.28-1.552 3.285-1.23 3.285-1.23c.645 1.653.24 2.873.12 3.176c.765.84 1.23 1.91 1.23 3.22c0 4.61-2.805 5.625-5.475 5.92c.42.36.81 1.096.81 2.22c0 1.606-.015 2.896-.015 3.286c0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="white" opacity="0.92"/>
+      </g>
+    </svg>
   ),
+  /* About icon uses the personal logo (yellow #JH mark) */
   about: (
-    <MacIcon id="about" top="#4fa3f7" bottom="#1a5fd4">
-      {/* Person */}
-      <circle cx="22" cy="17" r="5.5" fill="rgba(255,255,255,0.92)"/>
-      <path d="M10 36 Q10 26 22 26 Q34 26 34 36" fill="rgba(255,255,255,0.92)"/>
-    </MacIcon>
+    <img
+      src={logoSvg}
+      alt="About"
+      width="44"
+      height="44"
+      style={{ borderRadius: 11, display: 'block', boxShadow: '0 2px 8px rgba(0,0,0,0.35)' }}
+    />
   ),
   experience: (
-    <MacIcon id="experience" top="#ffa030" bottom="#c25c00">
-      {/* Briefcase */}
+    <MacIcon top="#ffa030" bottom="#c25c00">
       <rect x="8" y="17" width="28" height="18" rx="3" fill="rgba(255,255,255,0.92)"/>
       <path d="M16 17v-3a2 2 0 012-2h8a2 2 0 012 2v3" stroke="rgba(255,255,255,0.92)" strokeWidth="2" fill="none"/>
-      {/* clasp */}
       <rect x="18.5" y="23" width="7" height="4" rx="1.5" fill="#c25c00"/>
       <path d="M8 24h28" stroke="rgba(255,120,0,0.4)" strokeWidth="1.2"/>
     </MacIcon>
   ),
   skills: (
-    <MacIcon id="skills" top="#d070ff" bottom="#7928ca">
-      {/* </> code brackets */}
+    <MacIcon top="#d070ff" bottom="#7928ca">
       <path d="M16 16L9 22L16 28" stroke="rgba(255,255,255,0.9)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
       <path d="M28 16L35 22L28 28" stroke="rgba(255,255,255,0.9)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
       <path d="M25 14L19 30" stroke="rgba(255,255,255,0.55)" strokeWidth="2" strokeLinecap="round"/>
     </MacIcon>
   ),
   contact: (
-    <MacIcon id="contact" top="#3a9fff" bottom="#0060df">
-      {/* Envelope — macOS Mail style */}
+    <MacIcon top="#3a9fff" bottom="#0060df">
       <rect x="7" y="12" width="30" height="21" rx="3.5" fill="rgba(255,255,255,0.92)"/>
-      {/* flap */}
       <path d="M7 15L22 24L37 15" stroke="#0060df" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
     </MacIcon>
   ),
   location: (
-    <MacIcon id="location" top="#34d870" bottom="#1a8f3f">
-      {/* Map pin */}
+    <MacIcon top="#34d870" bottom="#1a8f3f">
       <path d="M22 8 Q31 11 31 18 Q31 27 22 36 Q13 27 13 18 Q13 11 22 8Z" fill="rgba(255,255,255,0.92)"/>
       <circle cx="22" cy="18" r="4" fill="#1a8f3f"/>
       <circle cx="22" cy="18" r="1.8" fill="white"/>
     </MacIcon>
   ),
   terminal: (
-    <MacIcon id="terminal" top="#3a3a3c" bottom="#1c1c1e">
-      {/* Terminal prompt */}
+    <MacIcon top="#3a3a3c" bottom="#1c1c1e">
       <path d="M10 22L17 16L10 22L17 28" stroke="#30d158" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
       <path d="M20 28H34" stroke="#30d158" strokeWidth="2.2" strokeLinecap="round"/>
     </MacIcon>
   ),
   cv: (
-    <MacIcon id="cv" top="#ff5257" bottom="#c0292e">
-      {/* Document */}
+    <MacIcon top="#ff5257" bottom="#c0292e">
       <rect x="10" y="6" width="24" height="32" rx="3" fill="rgba(255,255,255,0.92)"/>
-      {/* dog ear */}
       <path d="M27 6L34 13" stroke="#c0292e" strokeWidth="1.2"/>
       <path d="M27 6L27 13L34 13" fill="rgba(192,41,46,0.2)" stroke="none"/>
-      {/* lines */}
       <path d="M14 18H30M14 22H30M14 26H23" stroke="#c0292e" strokeWidth="1.5" strokeLinecap="round"/>
     </MacIcon>
   ),
   trash: (
-    <MacIcon id="trash" top="#aeaeb2" bottom="#6c6c70">
-      {/* Trash can */}
+    <MacIcon top="#aeaeb2" bottom="#6c6c70">
       <path d="M11 14H33M20 10H24M13 14L15 36H29L31 14" stroke="rgba(255,255,255,0.9)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
       <path d="M19 19V31M22 19V31M25 19V31" stroke="rgba(255,255,255,0.6)" strokeWidth="1.3" strokeLinecap="round"/>
     </MacIcon>
@@ -130,9 +123,13 @@ interface Item {
   action: () => void;
 }
 
-// Gradient backgrounds per app — used in the thumbnail
+interface DockProps {
+  bouncingKey?: string | null;
+  onItemActivate?: (key: string, action: () => void) => void;
+}
+
 const THUMB_GRAD: Record<string, [string, string]> = {
-  about:      ['#0f1e40', '#1a3060'],
+  about:      ['#2a1e00', '#3d2e00'],
   experience: ['#1a0e00', '#2d1a00'],
   skills:     ['#1a0a2e', '#2d1050'],
   contact:    ['#0a1428', '#0f2045'],
@@ -146,16 +143,13 @@ function MinimizedThumb({ appId, icon }: { appId: string; icon: React.ReactNode 
   const [c1, c2] = THUMB_GRAD[appId] ?? ['#0d1020', '#151a30'];
   return (
     <div className={styles.thumb}>
-      {/* Mini title bar chrome */}
       <div className={styles.thumbBar}>
         <div className={styles.thumbDot} style={{ background: '#FF5F57' }} />
         <div className={styles.thumbDot} style={{ background: '#FEBC2E' }} />
         <div className={styles.thumbDot} style={{ background: '#28C840' }} />
       </div>
-      {/* Window content area — gradient representing the app */}
       <div className={styles.thumbContent}
         style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }} />
-      {/* App icon in the bottom-right corner, like macOS */}
       <div className={styles.thumbIconBadge}>
         {icon}
       </div>
@@ -168,14 +162,14 @@ function MinimizedSlot({ win }: { win: WindowInstance }) {
   const iconMap: Record<string, React.ReactNode> = {
     about: I.about, experience: I.experience, skills: I.skills,
     contact: I.contact, location: I.location, terminal: I.terminal,
-    finder: I.finder, trash: I.trash, cv: I.cv, safari: I.safari,
+    finder: I.finder, trash: I.trash, cv: I.cv, github: I.github,
   };
   const icon = iconMap[win.appId] ?? I.about;
 
   return (
     <div className={styles.item}>
       <button
-        className={`${styles.minimizedBtn}`}
+        className={styles.minimizedBtn}
         onClick={() => focusWindow(win.id)}
         aria-label={`Restore ${win.title}`}
         title={`Restore "${win.title}"`}
@@ -187,12 +181,12 @@ function MinimizedSlot({ win }: { win: WindowInstance }) {
   );
 }
 
-export default function Dock() {
+export default function Dock({ bouncingKey, onItemActivate }: DockProps = {}) {
   const { openApp, windows } = useDesktop();
 
   const LEFT: Item[] = [
-    { key: 'finder',  label: 'Finder',  icon: I.finder,  action: () => openApp('finder') },
-    { key: 'safari',  label: 'Safari',  icon: I.safari,  action: () => window.open('https://github.com/joshhawksworth', '_blank') },
+    { key: 'finder', label: 'Finder', icon: I.finder, action: () => openApp('finder') },
+    { key: 'github', label: 'GitHub', icon: I.github, action: () => window.open('https://github.com/joshuahawksworth', '_blank') },
   ];
   const MIDDLE: Item[] = [
     { key: 'about',      label: 'About',      icon: I.about,      action: () => openApp('about') },
@@ -214,9 +208,18 @@ export default function Dock() {
   }
 
   function renderItem(item: Item) {
+    const isBouncing = bouncingKey === item.key;
+    function handleClick() {
+      if (onItemActivate) onItemActivate(item.key, item.action);
+      else item.action();
+    }
     return (
       <div key={item.key} className={styles.item}>
-        <button className={styles.iconBtn} onClick={item.action} aria-label={item.label}>
+        <button
+          className={`${styles.iconBtn} ${isBouncing ? styles.bouncing : ''}`}
+          onClick={handleClick}
+          aria-label={item.label}
+        >
           {item.icon}
         </button>
         <span className={styles.label}>{item.label}</span>
@@ -234,7 +237,6 @@ export default function Dock() {
         <div className={styles.sep} />
         {RIGHT.map(renderItem)}
 
-        {/* Minimized window slots — shown after trash with a separator */}
         {minimizedWindows.length > 0 && (
           <>
             <div className={styles.sep} />

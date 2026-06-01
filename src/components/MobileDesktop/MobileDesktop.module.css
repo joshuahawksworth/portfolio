@@ -68,6 +68,7 @@
 .iconGrid > *:last-child:nth-child(4n + 1) {
   grid-column: 2 / 4;
   justify-self: center;
+  width: auto;
 }
 
 .iconItem {

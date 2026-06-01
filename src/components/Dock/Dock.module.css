@@ -40,12 +40,13 @@
   flex-shrink: 0;
 }
 
-/* Item */
+/* Item — fixed height so the running dot never resizes the panel */
 .item {
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
+  padding-bottom: 7px; /* reserve dot space always */
 }
 
 .item:hover .label {
@@ -69,7 +70,7 @@
 }
 
 .iconBtn:hover {
-  transform: scale(1.28) translateY(-6px);
+  transform: translateY(-4px);
 }
 
 .iconBtn svg {
@@ -169,13 +170,50 @@
   display: block;
 }
 
-/* Running dot */
+/* Running dot — absolutely positioned so it never changes the panel height */
 .dot {
-  display: block;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 4px;
   height: 4px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.8);
-  margin-top: 3px;
-  flex-shrink: 0;
+}
+
+/* macOS launch bounce — single slow jump (rise ease-out, fall ease-in) */
+.bouncing {
+  animation: dockBounce 1400ms both;
+}
+
+@keyframes dockBounce {
+  0% {
+    transform: translateY(0);
+    animation-timing-function: ease-out;   /* spring up: fast start, slow at peak */
+  }
+  38% {
+    transform: translateY(-26px);          /* peak — roughly half the icon height */
+    animation-timing-function: ease-in;    /* gravity fall: slow at top, fast landing */
+  }
+  72% {
+    transform: translateY(0);              /* land */
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* About icon is an <img> — mirror the SVG drop-shadow treatment */
+.iconBtn img {
+  display: block;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.5));
+}
+
+.thumbIconBadge img {
+  width: 22px;
+  height: 22px;
+  display: block;
+  object-fit: contain;
+  border-radius: 5px;
 }

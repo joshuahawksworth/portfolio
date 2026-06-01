@@ -72,6 +72,9 @@ function cascadePosition(idx: number, w: number, h: number) {
   };
 }
 
+/** Folder created by the user on the desktop, shared via context so Finder can see it */
+export interface DesktopFolder { id: string; label: string }
+
 interface DesktopCtx {
   windows: WindowInstance[];
   focusedId: string | null;
@@ -82,6 +85,8 @@ interface DesktopCtx {
   moveWindow: (id: string, x: number, y: number) => void;
   resizeWindow: (id: string, x: number, y: number, w: number, h: number) => void;
   toggleMaximize: (id: string) => void;
+  desktopFolders: DesktopFolder[];
+  syncDesktopFolders: (folders: DesktopFolder[]) => void;
 }
 
 export const DesktopContext = createContext<DesktopCtx | null>(null);
@@ -114,6 +119,8 @@ export function DesktopProvider({
 }) {
   const [windows, setWindows] = useState<WindowInstance[]>(() => startWithAbout ? [makeAbout()] : []);
   const [focusedId, setFocusedId] = useState<string | null>(() => startWithAbout ? 'about-0' : null);
+  const [desktopFolders, setDesktopFolders] = useState<DesktopFolder[]>([]);
+  const syncDesktopFolders = useCallback((folders: DesktopFolder[]) => setDesktopFolders(folders), []);
   const counter = useRef(1);
 
   const focusWindow = useCallback((id: string) => {
@@ -206,7 +213,11 @@ export function DesktopProvider({
   }, []);
 
   return (
-    <DesktopContext.Provider value={{ windows, focusedId, openApp, closeWindow, minimizeWindow, focusWindow, moveWindow, resizeWindow, toggleMaximize }}>
+    <DesktopContext.Provider value={{
+      windows, focusedId,
+      openApp, closeWindow, minimizeWindow, focusWindow, moveWindow, resizeWindow, toggleMaximize,
+      desktopFolders, syncDesktopFolders,
+    }}>
       {children}
     </DesktopContext.Provider>
   );

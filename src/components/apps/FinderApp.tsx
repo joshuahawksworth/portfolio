@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import { useDesktop } from '../../context/DesktopContext';
 import { jobsData } from '../../data/experienceData';
 import styles from './FinderApp.module.css';
@@ -9,14 +9,34 @@ interface FileItem { name: string; type: 'folder' | 'file' | 'app'; action?: () 
 
 export default function FinderApp({ props: _ }: { props?: Record<string, unknown> }) {
   const [section, setSection] = useState<Section>('desktop');
-  const { openApp } = useDesktop();
+  const [folderStack, setFolderStack] = useState<Array<{ id: string; name: string }>>([]);
+  const { openApp, desktopFolders } = useDesktop();
+
+  function enterFolder(id: string, name: string) {
+    setFolderStack(prev => [...prev, { id, name }]);
+  }
+
+  function handleSectionChange(s: Section) {
+    setSection(s);
+    setFolderStack([]);
+  }
+
+  const inFolder      = folderStack.length > 0;
+  const currentFolder = inFolder ? folderStack[folderStack.length - 1] : null;
 
   const SECTIONS: Record<Section, FileItem[]> = {
-    desktop: jobsData.map(j => ({
-      name: j.company,
-      type: 'app',
-      action: () => openApp('experience', { jobId: j.id, title: j.company }),
-    })),
+    desktop: [
+      ...jobsData.map(j => ({
+        name: j.company,
+        type: 'app' as const,
+        action: () => openApp('experience', { jobId: j.id, title: j.company }),
+      })),
+      ...desktopFolders.map(f => ({
+        name: f.label,
+        type: 'folder' as const,
+        action: () => enterFolder(f.id, f.label),
+      })),
+    ],
     documents: [
       { name: 'README.md',    type: 'file' },
       { name: 'CV.pdf',       type: 'file', action: () => window.open('/JoshuaHawksworthCV.pdf', '_blank') },
@@ -46,10 +66,14 @@ export default function FinderApp({ props: _ }: { props?: Record<string, unknown
     { label: 'Applications', key: 'applications', icon: <AppsIcon /> },
   ];
 
-  const pathLabel = section === 'desktop' ? '~/Desktop'
-    : section === 'documents' ? '~/Documents'
-    : section === 'downloads' ? '~/Downloads'
+  const pathLabel = inFolder
+    ? '~/Desktop/' + folderStack.map(f => f.name).join('/')
+    : section === 'desktop'      ? '~/Desktop'
+    : section === 'documents'    ? '~/Documents'
+    : section === 'downloads'    ? '~/Downloads'
     : '/Applications';
+
+  const displayItems = inFolder ? [] : SECTIONS[section];
 
   return (
     <div className={styles.root}>
@@ -60,7 +84,7 @@ export default function FinderApp({ props: _ }: { props?: Record<string, unknown
           <button
             key={s.key}
             className={`${styles.sidebarBtn} ${section === s.key ? styles.active : ''}`}
-            onClick={() => setSection(s.key)}
+            onClick={() => handleSectionChange(s.key)}
           >
             <span className={styles.sidebarIcon}>{s.icon}</span>
             {s.label}
@@ -70,9 +94,14 @@ export default function FinderApp({ props: _ }: { props?: Record<string, unknown
 
       {/* Main */}
       <main className={styles.main}>
-        {/* Toolbar — CSS only, no LiquidGlass */}
+        {/* Toolbar */}
         <div className={styles.toolbar}>
-          <button className={styles.toolBtn} disabled>
+          <button
+            className={styles.toolBtn}
+            disabled={!inFolder}
+            onClick={() => setFolderStack(prev => prev.slice(0, -1))}
+            title="Back"
+          >
             <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M8 2L4 6l4 4"/></svg>
           </button>
           <button className={styles.toolBtn} disabled>
@@ -89,24 +118,36 @@ export default function FinderApp({ props: _ }: { props?: Record<string, unknown
           </div>
         </div>
 
-        {/* Files grid */}
-        <div className={styles.grid}>
-          {SECTIONS[section].map((item, i) => (
-            <div
-              key={i}
-              className={`${styles.item} ${item.action ? styles.itemClickable : ''}`}
-              onClick={item.action}
-              title={item.name}
-            >
-              <div className={styles.itemIcon}>
-                {item.type === 'folder' ? <FolderIcon /> :
-                 item.type === 'app'    ? <AppIcon name={item.name} /> :
-                 <FileIcon name={item.name} />}
+        {/* Files grid — or empty folder message */}
+        {inFolder ? (
+          <div className={styles.emptyFolder}>
+            <svg viewBox="0 0 52 44" fill="none" width="52" height="44" style={{ opacity: 0.3 }}>
+              <path d="M2 9Q2 5 6 5L20 5L24 9L47 9Q49 9 49 11L49 38Q49 40 47 40L5 40Q3 40 3 38Z" fill="#4a9eff"/>
+              <path d="M2 9Q2 5 6 5L20 5L24 9L47 9Q49 9 49 11L49 14L2 14Z" fill="#5aabff" opacity="0.5"/>
+            </svg>
+            <span className={styles.emptyFolderLabel}>
+              {currentFolder?.name ?? 'Folder'} is empty
+            </span>
+          </div>
+        ) : (
+          <div className={styles.grid}>
+            {displayItems.map((item, i) => (
+              <div
+                key={i}
+                className={`${styles.item} ${item.action ? styles.itemClickable : ''}`}
+                onClick={item.action}
+                title={item.name}
+              >
+                <div className={styles.itemIcon}>
+                  {item.type === 'folder' ? <FolderIcon /> :
+                   item.type === 'app'    ? <AppIcon name={item.name} /> :
+                   <FileIcon name={item.name} />}
+                </div>
+                <span className={styles.itemName}>{item.name}</span>
               </div>
-              <span className={styles.itemName}>{item.name}</span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
@@ -165,24 +206,26 @@ const APP_GRADS: Record<string, [string, string]> = {
 };
 
 function AppIcon({ name }: { name: string }) {
+  const uid = useId();
   const [c1, c2] = APP_GRADS[name] ?? ['#3b82f6','#1d4ed8'];
   const initials = name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const gId  = `${uid}g`;
+  const ggId = `${uid}gg`;
   return (
     <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
       <defs>
-        <linearGradient id={`ag-${name.replace(/\s/g,'')}`} x1="0" y1="0" x2="44" y2="44">
+        <linearGradient id={gId} x1="0" y1="0" x2="44" y2="44">
           <stop stopColor={c1}/><stop offset="1" stopColor={c2}/>
         </linearGradient>
-        <linearGradient id={`agg-${name.replace(/\s/g,'')}`} x1="0" y1="0" x2="0" y2="22">
+        <linearGradient id={ggId} x1="0" y1="0" x2="0" y2="22">
           <stop stopColor="rgba(255,255,255,0.18)"/><stop offset="1" stopColor="transparent"/>
         </linearGradient>
       </defs>
-      <rect width="44" height="44" rx="11" fill={`url(#ag-${name.replace(/\s/g,'')})`}/>
-      {/* gloss */}
-      <rect width="44" height="22" rx="11" fill={`url(#agg-${name.replace(/\s/g,'')})`}/>
-      <rect x="0" y="11" width="44" height="11" fill={`url(#agg-${name.replace(/\s/g,'')})`} opacity="0"/>
+      <rect width="44" height="44" rx="11" fill={`url(#${gId})`}/>
+      <rect width="44" height="22" rx="11" fill={`url(#${ggId})`}/>
+      {/* cross-browser safe font stack — no -apple-system in Firefox */}
       <text x="22" y="29" textAnchor="middle" fill="white" fontSize="16" fontWeight="700"
-        fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" opacity="0.92">{initials}</text>
+        fontFamily="'Helvetica Neue', Arial, Helvetica, sans-serif" opacity="0.92">{initials}</text>
     </svg>
   );
 }

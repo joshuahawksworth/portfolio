@@ -22,7 +22,14 @@ const ICON_GRADS: Record<string, [string, string]> = {
 const ICON_GLYPHS: Record<string, React.ReactNode> = {
   about: <><circle cx="14" cy="10" r="4.5" fill="white" opacity="0.92"/><path d="M5 26Q5 18.5 14 18.5Q23 18.5 23 26" fill="white" opacity="0.92"/></>,
   experience: <><rect x="5.5" y="12.5" width="17" height="12" rx="2" stroke="white" strokeWidth="1.8" fill="none" opacity="0.92"/><path d="M9.5 12.5V9.5Q9.5 6.5 14 6.5Q18.5 6.5 18.5 9.5V12.5" stroke="white" strokeWidth="1.8" fill="none" opacity="0.92"/></>,
-  skills: <><path d="M8 21L14 9L20 21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.92"/><path d="M10.5 16.5H17.5" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.92"/></>,
+  skills: <>
+    <rect x="5" y="7.5"  width="18" height="3" rx="1.5" fill="white" opacity="0.2"/>
+    <rect x="5" y="7.5"  width="14" height="3" rx="1.5" fill="white" opacity="0.92"/>
+    <rect x="5" y="12.5" width="18" height="3" rx="1.5" fill="white" opacity="0.2"/>
+    <rect x="5" y="12.5" width="10" height="3" rx="1.5" fill="white" opacity="0.92"/>
+    <rect x="5" y="17.5" width="18" height="3" rx="1.5" fill="white" opacity="0.2"/>
+    <rect x="5" y="17.5" width="16" height="3" rx="1.5" fill="white" opacity="0.92"/>
+  </>,
   contact: <><rect x="4" y="8" width="20" height="13" rx="2.5" stroke="white" strokeWidth="1.8" fill="none" opacity="0.92"/><path d="M4 11L14 17.5L24 11" stroke="white" strokeWidth="1.8" strokeLinecap="round" opacity="0.92"/></>,
   location: <><path d="M14 4Q21 7.5 21 12.5Q21 20 14 26Q7 20 7 12.5Q7 7.5 14 4Z" stroke="white" strokeWidth="1.8" fill="none" opacity="0.92"/><circle cx="14" cy="12.5" r="3" stroke="white" strokeWidth="1.5" fill="none" opacity="0.92"/></>,
   terminal: <><path d="M6 18.5L13 12.5L6 18.5L13 24.5" stroke="#30d158" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/><path d="M15 24.5H22" stroke="#30d158" strokeWidth="2.2" strokeLinecap="round"/></>,
@@ -39,7 +46,6 @@ const ICON_OFFSETS: Record<string, number> = {
   trash:      -1.75,
   experience: -1.5,
   location:   -1,
-  skills:     -1,
   contact:    -0.5,
 };
 
