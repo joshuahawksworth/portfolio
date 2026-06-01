@@ -31,10 +31,23 @@ const ICON_GLYPHS: Record<string, React.ReactNode> = {
   cv: <><rect x="7.5" y="3.5" width="13" height="21" rx="2.5" stroke="white" strokeWidth="1.7" fill="none" opacity="0.92"/><path d="M10.5 10H17.5M10.5 14H17.5M10.5 18H14" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.92"/></>,
 };
 
+// Vertical nudge (in 28-unit viewBox coords) to visually centre each glyph
+const ICON_OFFSETS: Record<string, number> = {
+  terminal:   -4.5,
+  finder:      2,
+  about:      -1.75,
+  trash:      -1.75,
+  experience: -1.5,
+  location:   -1,
+  skills:     -1,
+  contact:    -0.5,
+};
+
 function AppIcon({ appId, size = 60 }: { appId: string; size?: number }) {
   const [c1, c2] = ICON_GRADS[appId] ?? ['#3b82f6','#1d4ed8'];
   const radius = Math.round(size * 0.23);
   const glyphSize = Math.round(size * 0.72);
+  const offset = ICON_OFFSETS[appId] ?? 0;
 
   return (
     <div style={{
@@ -53,7 +66,7 @@ function AppIcon({ appId, size = 60 }: { appId: string; size?: number }) {
         borderRadius: `${radius}px ${radius}px 0 0`,
         pointerEvents: 'none',
       }} />
-      {/* Glyph — no SVG defs/gradients, no ID conflicts */}
+      {/* Glyph */}
       <svg
         viewBox="0 0 28 28" fill="none"
         width={glyphSize} height={glyphSize}
@@ -63,7 +76,9 @@ function AppIcon({ appId, size = 60 }: { appId: string; size?: number }) {
           transform: 'translate(-50%, -50%)',
         }}
       >
-        {ICON_GLYPHS[appId]}
+        <g transform={`translate(0, ${offset})`}>
+          {ICON_GLYPHS[appId]}
+        </g>
       </svg>
     </div>
   );
@@ -154,19 +169,22 @@ function MobileInner() {
       <div className={`${styles.panel} ${activeWindow ? styles.panelOpen : ''}`}>
         {activeWindow && (
           <>
+            <div className={styles.panelHandle}>
+              <div className={styles.panelHandlePill} />
+            </div>
             <div className={styles.panelHeader}>
               <button
-                className={styles.backBtn}
+                className={styles.closeBtn}
                 onClick={() => closeWindow(activeWindow.id)}
+                aria-label="Close"
               >
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
-                  strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M10 3L5 8l5 5"/>
+                <svg viewBox="0 0 10 10" fill="none" stroke="currentColor"
+                  strokeWidth="2" strokeLinecap="round">
+                  <path d="M1 1l8 8M9 1L1 9"/>
                 </svg>
-                Back
               </button>
               <span className={styles.panelTitle}>{activeWindow.title}</span>
-              <div style={{ width: 60 }} />
+              <div className={styles.headerSpacer} />
             </div>
             <div className={styles.panelBody}>
               {(() => {

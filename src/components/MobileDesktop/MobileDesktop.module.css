@@ -64,6 +64,12 @@
   padding-bottom: 20px;
 }
 
+/* Center a lone icon in the last row of a 4-column grid */
+.iconGrid > *:last-child:nth-child(4n + 1) {
+  grid-column: 2 / 4;
+  justify-self: center;
+}
+
 .iconItem {
   display: flex;
   flex-direction: column;
@@ -74,6 +80,7 @@
   cursor: pointer;
   padding: 8px 4px;
   border-radius: 16px;
+  width: 100%;
   -webkit-tap-highlight-color: transparent;
   transition: transform 120ms ease, background 120ms ease;
   touch-action: manipulation;
@@ -100,7 +107,8 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
-  padding: 12px 24px env(safe-area-inset-bottom, 20px);
+  padding: 12px 24px;
+  padding-bottom: max(calc(env(safe-area-inset-bottom, 0px) + 16px), 24px);
   flex-shrink: 0;
   z-index: 10;
 
@@ -140,6 +148,7 @@
 .panelOpen {
   transform: translateY(0);
   border-radius: 0;
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 /* ── Panel header — iOS-native style ──────────────────── */

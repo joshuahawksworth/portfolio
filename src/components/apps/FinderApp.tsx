@@ -94,9 +94,9 @@ export default function FinderApp({ props: _ }: { props?: Record<string, unknown
           {SECTIONS[section].map((item, i) => (
             <div
               key={i}
-              className={styles.item}
-              onDoubleClick={item.action}
-              title={item.action ? `Double-click to open` : item.name}
+              className={`${styles.item} ${item.action ? styles.itemClickable : ''}`}
+              onClick={item.action}
+              title={item.name}
             >
               <div className={styles.itemIcon}>
                 {item.type === 'folder' ? <FolderIcon /> :
