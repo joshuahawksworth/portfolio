@@ -12,7 +12,10 @@ import styles from './Dock.module.css';
 function MacIcon({
   top, bottom, children,
 }: { top: string; bottom: string; children: React.ReactNode }) {
-  const uid = useId();
+  // React useId() returns strings like ":r0:" — colons are invalid XML ID
+  // characters, which Firefox enforces strictly. Strip them so the SVG
+  // gradient url(#...) reference resolves correctly in all browsers.
+  const uid = useId().replace(/:/g, '');
   const g  = `${uid}g`;
   const gl = `${uid}gl`;
   return (

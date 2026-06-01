@@ -453,6 +453,9 @@ function DesktopSurface() {
               if (renaming) return;
               if (item.type === 'job' && item.jobId) {
                 openWithBounce('experience', 'experience', { jobId: item.jobId, title: item.label });
+              } else if (item.type === 'folder') {
+                // Open Finder and navigate into this folder
+                openWithBounce('finder', 'finder', { folderId: item.id, folderName: item.label });
               }
             }}
             onClick={e => {
@@ -475,9 +478,13 @@ function DesktopSurface() {
             tabIndex={0}
             aria-label={item.label}
             onKeyDown={e => {
-              if (e.key === 'Enter'  && item.type === 'job' && item.jobId)
-                openWithBounce('experience', 'experience', { jobId: item.jobId, title: item.label });
-              if (e.key === 'F2')    startRename(item.id);
+              if (e.key === 'Enter') {
+                if (item.type === 'job' && item.jobId)
+                  openWithBounce('experience', 'experience', { jobId: item.jobId, title: item.label });
+                else if (item.type === 'folder')
+                  openWithBounce('finder', 'finder', { folderId: item.id, folderName: item.label });
+              }
+              if (e.key === 'F2')     startRename(item.id);
               if (e.key === 'Delete') deleteItem(item.id);
             }}
           >

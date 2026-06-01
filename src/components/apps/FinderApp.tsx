@@ -7,9 +7,15 @@ type Section = 'desktop' | 'documents' | 'downloads' | 'applications';
 
 interface FileItem { name: string; type: 'folder' | 'file' | 'app'; action?: () => void }
 
-export default function FinderApp({ props: _ }: { props?: Record<string, unknown> }) {
+export default function FinderApp({ props }: { props?: Record<string, unknown> }) {
   const [section, setSection] = useState<Section>('desktop');
-  const [folderStack, setFolderStack] = useState<Array<{ id: string; name: string }>>([]);
+  const [folderStack, setFolderStack] = useState<Array<{ id: string; name: string }>>(() => {
+    // If launched from a desktop folder double-click, start inside that folder
+    if (props?.folderId && props?.folderName) {
+      return [{ id: props.folderId as string, name: props.folderName as string }];
+    }
+    return [];
+  });
   const { openApp, desktopFolders } = useDesktop();
 
   function enterFolder(id: string, name: string) {
@@ -206,7 +212,9 @@ const APP_GRADS: Record<string, [string, string]> = {
 };
 
 function AppIcon({ name }: { name: string }) {
-  const uid = useId();
+  // Strip colons from useId() output — colons are invalid XML ID characters
+  // and cause SVG gradient url(#...) lookups to fail in Firefox.
+  const uid  = useId().replace(/:/g, '');
   const [c1, c2] = APP_GRADS[name] ?? ['#3b82f6','#1d4ed8'];
   const initials = name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
   const gId  = `${uid}g`;
