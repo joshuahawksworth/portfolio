@@ -182,6 +182,19 @@
   background: rgba(255, 255, 255, 0.8);
 }
 
+/* Drag-to-reorder states */
+.itemDragging { opacity: 0.3; }
+
+/* Vertical insert-line shown on the drop target */
+.dropBefore {
+  box-shadow: -3px 0 0 rgba(255,255,255,0.75);
+  border-radius: 2px;
+}
+.dropAfter {
+  box-shadow: 3px 0 0 rgba(255,255,255,0.75);
+  border-radius: 2px;
+}
+
 /* macOS launch bounce — single slow jump (rise ease-out, fall ease-in) */
 .bouncing {
   animation: dockBounce 1400ms both;

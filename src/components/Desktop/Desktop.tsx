@@ -406,6 +406,8 @@ function DesktopSurface() {
 
   // ── Dock item activate (bounce + delayed open) ────────────────────────
   function handleDockActivate(key: string, action: () => void) {
+    // Finder and Trash open instantly — no animation delay
+    if (key === 'finder' || key === 'trash') { action(); return; }
     setBouncingKey(key);
     setTimeout(() => { setBouncingKey(null); action(); }, BOUNCE_MS);
   }
@@ -542,7 +544,10 @@ function DesktopSurface() {
                 </>
               )}
               <button className={styles.ctxItem} onClick={() => startRename(ctxTarget.id)}>Rename</button>
-              <button className={`${styles.ctxItem} ${styles.ctxDanger}`} onClick={() => deleteItem(ctxTarget.id)}>Delete</button>
+              {/* Only folders can be deleted — job icons are permanent */}
+              {ctxTarget.type === 'folder' && (
+                <button className={`${styles.ctxItem} ${styles.ctxDanger}`} onClick={() => deleteItem(ctxTarget.id)}>Delete</button>
+              )}
               <div className={styles.ctxDivider} />
               <button className={styles.ctxItem} onClick={() => { setGetInfoTarget(ctxTarget); setCtxMenu(null); }}>Get Info</button>
             </>

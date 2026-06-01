@@ -1,23 +1,19 @@
-import { useId } from 'react';
+import { useId, useState } from 'react';
 import { useDesktop, WindowInstance } from '../../context/DesktopContext';
 import logoSvg from '../../assets/logo.svg';
 import styles from './Dock.module.css';
 
-/* ─────────────────────────────────────────────────────────────────────────
-   MacIcon — each render instance gets its own gradient IDs via useId()
-   so duplicate icons (dock + minimised thumb) never share an SVG ID.
-   Previously used prop-based IDs which caused gradient lookup failures
-   in Firefox when the same id appeared in multiple <svg> elements.
-───────────────────────────────────────────────────────────────────────── */
+/* ─── MacIcon ─────────────────────────────────────────────────────────────
+   useId() returns strings like ":r0:" — colons are invalid XML ID chars and
+   cause SVG gradient url(#…) lookups to silently fail in Firefox.
+   Strip them before using as SVG id attributes.
+────────────────────────────────────────────────────────────────────────── */
 function MacIcon({
   top, bottom, children,
 }: { top: string; bottom: string; children: React.ReactNode }) {
-  // React useId() returns strings like ":r0:" — colons are invalid XML ID
-  // characters, which Firefox enforces strictly. Strip them so the SVG
-  // gradient url(#...) reference resolves correctly in all browsers.
   const uid = useId().replace(/:/g, '');
-  const g  = `${uid}g`;
-  const gl = `${uid}gl`;
+  const g   = `${uid}g`;
+  const gl  = `${uid}gl`;
   return (
     <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
       <defs>
@@ -35,9 +31,7 @@ function MacIcon({
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────────────
-   Individual dock icons — macOS visual language
-───────────────────────────────────────────────────────────────────────── */
+/* ─── Icons ───────────────────────────────────────────────────────────── */
 const I = {
   finder: (
     <MacIcon top="#5ecfff" bottom="#1a7aff">
@@ -49,7 +43,6 @@ const I = {
       <path d="M16 24 Q22 29 28 24" stroke="#1a7aff" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
     </MacIcon>
   ),
-  /* Real GitHub invertocat path (original 24×24, scaled to 44×44 canvas) */
   github: (
     <svg viewBox="0 0 44 44" width="44" height="44" fill="none">
       <rect width="44" height="44" rx="11" fill="#1b1f24"/>
@@ -59,15 +52,10 @@ const I = {
       </g>
     </svg>
   ),
-  /* About icon uses the personal logo (yellow #JH mark) */
   about: (
-    <img
-      src={logoSvg}
-      alt="About"
-      width="44"
-      height="44"
-      style={{ borderRadius: 11, display: 'block', boxShadow: '0 2px 8px rgba(0,0,0,0.35)' }}
-    />
+    <img src={logoSvg} alt="About" width="44" height="44"
+      style={{ width: 44, height: 44, borderRadius: 11, display: 'block',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.35)', flexShrink: 0 }} />
   ),
   experience: (
     <MacIcon top="#ffa030" bottom="#c25c00">
@@ -119,31 +107,24 @@ const I = {
   ),
 };
 
-interface Item {
-  key: string;
-  label: string;
-  icon: React.ReactNode;
-  action: () => void;
-}
+/* ─── Types ───────────────────────────────────────────────────────────── */
+interface Item { key: string; label: string; icon: React.ReactNode; action: () => void }
 
 interface DockProps {
   bouncingKey?: string | null;
   onItemActivate?: (key: string, action: () => void) => void;
 }
 
+/* ─── Gradient backgrounds for minimised thumbnails ─────────────────── */
 const THUMB_GRAD: Record<string, [string, string]> = {
-  about:      ['#2a1e00', '#3d2e00'],
-  experience: ['#1a0e00', '#2d1a00'],
-  skills:     ['#1a0a2e', '#2d1050'],
-  contact:    ['#0a1428', '#0f2045'],
-  location:   ['#001a10', '#002a1a'],
-  terminal:   ['#090909', '#141414'],
-  finder:     ['#001030', '#001a50'],
-  trash:      ['#1a1a1e', '#2a2a2e'],
+  about: ['#2a1e00','#3d2e00'], experience: ['#1a0e00','#2d1a00'],
+  skills: ['#1a0a2e','#2d1050'], contact: ['#0a1428','#0f2045'],
+  location: ['#001a10','#002a1a'], terminal: ['#090909','#141414'],
+  finder: ['#001030','#001a50'], trash: ['#1a1a1e','#2a2a2e'],
 };
 
 function MinimizedThumb({ appId, icon }: { appId: string; icon: React.ReactNode }) {
-  const [c1, c2] = THUMB_GRAD[appId] ?? ['#0d1020', '#151a30'];
+  const [c1, c2] = THUMB_GRAD[appId] ?? ['#0d1020','#151a30'];
   return (
     <div className={styles.thumb}>
       <div className={styles.thumbBar}>
@@ -151,11 +132,8 @@ function MinimizedThumb({ appId, icon }: { appId: string; icon: React.ReactNode 
         <div className={styles.thumbDot} style={{ background: '#FEBC2E' }} />
         <div className={styles.thumbDot} style={{ background: '#28C840' }} />
       </div>
-      <div className={styles.thumbContent}
-        style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }} />
-      <div className={styles.thumbIconBadge}>
-        {icon}
-      </div>
+      <div className={styles.thumbContent} style={{ background: `linear-gradient(135deg,${c1},${c2})` }} />
+      <div className={styles.thumbIconBadge}>{icon}</div>
     </div>
   );
 }
@@ -167,42 +145,39 @@ function MinimizedSlot({ win }: { win: WindowInstance }) {
     contact: I.contact, location: I.location, terminal: I.terminal,
     finder: I.finder, trash: I.trash, cv: I.cv, github: I.github,
   };
-  const icon = iconMap[win.appId] ?? I.about;
-
   return (
     <div className={styles.item}>
-      <button
-        className={styles.minimizedBtn}
-        onClick={() => focusWindow(win.id)}
-        aria-label={`Restore ${win.title}`}
-        title={`Restore "${win.title}"`}
-      >
-        <MinimizedThumb appId={win.appId} icon={icon} />
+      <button className={styles.minimizedBtn} onClick={() => focusWindow(win.id)}
+        aria-label={`Restore ${win.title}`} title={`Restore "${win.title}"`}>
+        <MinimizedThumb appId={win.appId} icon={iconMap[win.appId] ?? I.about} />
       </button>
       <span className={styles.label}>{win.title}</span>
     </div>
   );
 }
 
+/* ─── Default reorderable key order (Finder & Trash excluded) ────────── */
+const DEFAULT_ORDER = ['github','about','experience','skills','contact','location','terminal','cv'];
+
+const ALL_ITEMS_STATIC: Omit<Item, 'action'>[] = [
+  { key: 'github',     label: 'GitHub',     icon: I.github },
+  { key: 'about',      label: 'About',      icon: I.about },
+  { key: 'experience', label: 'Experience', icon: I.experience },
+  { key: 'skills',     label: 'Skills',     icon: I.skills },
+  { key: 'contact',    label: 'Contact',    icon: I.contact },
+  { key: 'location',   label: 'Location',   icon: I.location },
+  { key: 'terminal',   label: 'Terminal',   icon: I.terminal },
+  { key: 'cv',         label: 'CV',         icon: I.cv },
+];
+
+/* ─── Dock ────────────────────────────────────────────────────────────── */
 export default function Dock({ bouncingKey, onItemActivate }: DockProps = {}) {
   const { openApp, windows } = useDesktop();
 
-  const LEFT: Item[] = [
-    { key: 'finder', label: 'Finder', icon: I.finder, action: () => openApp('finder') },
-    { key: 'github', label: 'GitHub', icon: I.github, action: () => window.open('https://github.com/joshuahawksworth', '_blank') },
-  ];
-  const MIDDLE: Item[] = [
-    { key: 'about',      label: 'About',      icon: I.about,      action: () => openApp('about') },
-    { key: 'experience', label: 'Experience', icon: I.experience, action: () => openApp('experience') },
-    { key: 'skills',     label: 'Skills',     icon: I.skills,     action: () => openApp('skills') },
-    { key: 'contact',    label: 'Contact',    icon: I.contact,    action: () => openApp('contact') },
-    { key: 'location',   label: 'Location',   icon: I.location,   action: () => openApp('location') },
-    { key: 'terminal',   label: 'Terminal',   icon: I.terminal,   action: () => openApp('terminal') },
-    { key: 'cv',         label: 'CV',         icon: I.cv,         action: () => window.open('/JoshuaHawksworthCV.pdf', '_blank') },
-  ];
-  const RIGHT: Item[] = [
-    { key: 'trash', label: 'Trash', icon: I.trash, action: () => openApp('trash') },
-  ];
+  const [order,       setOrder]       = useState<string[]>(DEFAULT_ORDER);
+  const [dragKey,     setDragKey]     = useState<string | null>(null);
+  const [hoverKey,    setHoverKey]    = useState<string | null>(null);
+  const [insertBefore, setInsertBefore] = useState(true);
 
   const minimizedWindows = windows.filter(w => w.minimized);
 
@@ -210,23 +185,94 @@ export default function Dock({ bouncingKey, onItemActivate }: DockProps = {}) {
     return windows.some(w => w.appId === key && !w.minimized);
   }
 
-  function renderItem(item: Item) {
-    const isBouncing = bouncingKey === item.key;
-    function handleClick() {
-      if (onItemActivate) onItemActivate(item.key, item.action);
-      else item.action();
+  // Build Item with action for each key
+  function makeAction(key: string): () => void {
+    switch (key) {
+      case 'github':  return () => window.open('https://github.com/joshuahawksworth', '_blank');
+      case 'cv':      return () => window.open('/JoshuaHawksworthCV.pdf', '_blank');
+      default:        return () => openApp(key);
     }
+  }
+
+  function handleClick(key: string) {
+    const action = makeAction(key);
+    if (onItemActivate) onItemActivate(key, action);
+    else action();
+  }
+
+  /* ── Drag-to-reorder handlers ─────────────────────────────────────── */
+  function onDragStart(e: React.DragEvent, key: string) {
+    e.dataTransfer.effectAllowed = 'move';
+    setDragKey(key);
+  }
+
+  function onDragOver(e: React.DragEvent, key: string) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setHoverKey(key);
+    setInsertBefore(e.clientX < rect.left + rect.width / 2);
+  }
+
+  function onDragLeave(e: React.DragEvent) {
+    // Only clear if leaving the entire dock
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setHoverKey(null);
+    }
+  }
+
+  function onDrop(e: React.DragEvent, targetKey: string) {
+    e.preventDefault();
+    if (!dragKey || dragKey === targetKey) { resetDrag(); return; }
+    setOrder(prev => {
+      const from = prev.indexOf(dragKey);
+      const to   = prev.indexOf(targetKey);
+      if (from === -1 || to === -1) return prev;
+      const next = [...prev];
+      next.splice(from, 1);
+      // Recalculate target index after removal
+      const newTo = next.indexOf(targetKey);
+      next.splice(insertBefore ? newTo : newTo + 1, 0, dragKey);
+      return next;
+    });
+    resetDrag();
+  }
+
+  function resetDrag() { setDragKey(null); setHoverKey(null); }
+
+  /* ── Render a single dock item ────────────────────────────────────── */
+  function renderItem(
+    key: string,
+    label: string,
+    icon: React.ReactNode,
+    draggable = false,
+  ) {
+    const isBouncing  = bouncingKey === key;
+    const isDragging  = dragKey === key;
+    const isHovered   = hoverKey === key && dragKey !== null && dragKey !== key;
+    const dropClass   = isHovered ? (insertBefore ? styles.dropBefore : styles.dropAfter) : '';
+
     return (
-      <div key={item.key} className={styles.item}>
+      <div
+        key={key}
+        className={`${styles.item} ${isDragging ? styles.itemDragging : ''} ${dropClass}`}
+        draggable={draggable}
+        onDragStart={draggable ? e => onDragStart(e, key) : undefined}
+        onDragOver={draggable ? e => onDragOver(e, key) : undefined}
+        onDragLeave={draggable ? onDragLeave : undefined}
+        onDrop={draggable ? e => onDrop(e, key) : undefined}
+        onDragEnd={draggable ? resetDrag : undefined}
+      >
         <button
           className={`${styles.iconBtn} ${isBouncing ? styles.bouncing : ''}`}
-          onClick={handleClick}
-          aria-label={item.label}
+          onClick={() => handleClick(key)}
+          aria-label={label}
+          style={draggable ? { cursor: isDragging ? 'grabbing' : 'grab' } : undefined}
         >
-          {item.icon}
+          {icon}
         </button>
-        <span className={styles.label}>{item.label}</span>
-        {hasOpen(item.key) && <span className={styles.dot} />}
+        <span className={styles.label}>{label}</span>
+        {hasOpen(key) && <span className={styles.dot} />}
       </div>
     );
   }
@@ -234,18 +280,26 @@ export default function Dock({ bouncingKey, onItemActivate }: DockProps = {}) {
   return (
     <div className={styles.wrapper}>
       <div className={styles.panel}>
-        {LEFT.map(renderItem)}
+        {/* Fixed — Finder */}
+        {renderItem('finder', 'Finder', I.finder, false)}
+
         <div className={styles.sep} />
-        {MIDDLE.map(renderItem)}
+
+        {/* Reorderable middle items */}
+        {order.map(key => {
+          const meta = ALL_ITEMS_STATIC.find(i => i.key === key)!;
+          return renderItem(key, meta.label, meta.icon, true);
+        })}
+
         <div className={styles.sep} />
-        {RIGHT.map(renderItem)}
+
+        {/* Fixed — Trash */}
+        {renderItem('trash', 'Trash', I.trash, false)}
 
         {minimizedWindows.length > 0 && (
           <>
             <div className={styles.sep} />
-            {minimizedWindows.map(win => (
-              <MinimizedSlot key={win.id} win={win} />
-            ))}
+            {minimizedWindows.map(win => <MinimizedSlot key={win.id} win={win} />)}
           </>
         )}
       </div>

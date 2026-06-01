@@ -173,6 +173,41 @@
 
 .itemClickable { cursor: pointer; }
 
+.itemSelected {
+  background: rgba(59,130,246,0.22) !important;
+  border-radius: 7px;
+}
+.itemSelected .itemName { color: #93c5fd; }
+
+/* Finder in-window context menu */
+.ctxMenu {
+  position: fixed;
+  z-index: 9000;
+  min-width: 170px;
+  padding: 4px;
+  border-radius: 9px;
+  background: rgba(26,28,38,0.95);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.6);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  animation: ctxIn 110ms ease;
+}
+@keyframes ctxIn {
+  from { opacity:0; transform: scale(0.96) translateY(-4px); }
+  to   { opacity:1; transform: scale(1)    translateY(0); }
+}
+.ctxItem {
+  display: block; width: 100%; padding: 5px 12px;
+  font-size: 13px; color: rgba(255,255,255,0.92);
+  background: none; border: none; border-radius: 6px;
+  text-align: left; cursor: pointer; font-family: inherit;
+  transition: background 80ms ease;
+}
+.ctxItem:hover { background: rgba(255,255,255,0.1); }
+.ctxSep { height:1px; background: rgba(255,255,255,0.08); margin: 3px 6px; }
+
 .emptyFolder {
   flex: 1;
   display: flex;

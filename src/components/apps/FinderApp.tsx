@@ -1,16 +1,23 @@
-import { useState, useId } from 'react';
+import { useState, useId, useRef, useCallback } from 'react';
 import { useDesktop } from '../../context/DesktopContext';
 import { jobsData } from '../../data/experienceData';
 import styles from './FinderApp.module.css';
 
 type Section = 'desktop' | 'documents' | 'downloads' | 'applications';
 
-interface FileItem { name: string; type: 'folder' | 'file' | 'app'; action?: () => void }
+interface FileItem {
+  id: string;
+  name: string;
+  type: 'folder' | 'file' | 'app';
+  action?: () => void;
+  deletable?: boolean;
+}
+
+interface GridItemPos { x: number; y: number }
 
 export default function FinderApp({ props }: { props?: Record<string, unknown> }) {
   const [section, setSection] = useState<Section>('desktop');
   const [folderStack, setFolderStack] = useState<Array<{ id: string; name: string }>>(() => {
-    // If launched from a desktop folder double-click, start inside that folder
     if (props?.folderId && props?.folderName) {
       return [{ id: props.folderId as string, name: props.folderName as string }];
     }
@@ -18,13 +25,23 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
   });
   const { openApp, desktopFolders } = useDesktop();
 
+  // ── Finder-grid interaction state ──────────────────────────────────────
+  const [selected, setSelected]   = useState<Set<string>>(new Set());
+  const [ctxMenu, setCtxMenu]     = useState<{ x: number; y: number; itemId?: string } | null>(null);
+  const [positions, setPositions] = useState<Record<string, GridItemPos>>({});
+  const [freeMode, setFreeMode]   = useState(false);   // true after first drag
+  const dragRef = useRef<{ id: string; sx: number; sy: number; ox: number; oy: number } | null>(null);
+
   function enterFolder(id: string, name: string) {
     setFolderStack(prev => [...prev, { id, name }]);
+    setSelected(new Set());
   }
 
   function handleSectionChange(s: Section) {
     setSection(s);
     setFolderStack([]);
+    setSelected(new Set());
+    setCtxMenu(null);
   }
 
   const inFolder      = folderStack.length > 0;
@@ -33,35 +50,34 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
   const SECTIONS: Record<Section, FileItem[]> = {
     desktop: [
       ...jobsData.map(j => ({
-        name: j.company,
-        type: 'app' as const,
+        id: `job-${j.id}`, name: j.company, type: 'app' as const,
         action: () => openApp('experience', { jobId: j.id, title: j.company }),
       })),
       ...desktopFolders.map(f => ({
-        name: f.label,
-        type: 'folder' as const,
+        id: `folder-${f.id}`, name: f.label, type: 'folder' as const,
         action: () => enterFolder(f.id, f.label),
+        deletable: false,
       })),
     ],
     documents: [
-      { name: 'README.md',    type: 'file' },
-      { name: 'CV.pdf',       type: 'file', action: () => window.open('/JoshuaHawksworthCV.pdf', '_blank') },
-      { name: 'Projects',     type: 'folder' },
-      { name: 'Notes.txt',    type: 'file' },
+      { id: 'doc-readme', name: 'README.md',    type: 'file' as const },
+      { id: 'doc-cv',     name: 'CV.pdf',       type: 'file' as const, action: () => window.open('/JoshuaHawksworthCV.pdf', '_blank') },
+      { id: 'doc-proj',   name: 'Projects',     type: 'folder' as const },
+      { id: 'doc-notes',  name: 'Notes.txt',    type: 'file' as const },
     ],
     downloads: [
-      { name: 'dotnet-blazor.pdf',  type: 'file' },
-      { name: 'react-19-guide.pdf', type: 'file' },
+      { id: 'dl-blazor', name: 'dotnet-blazor.pdf',  type: 'file' as const },
+      { id: 'dl-react',  name: 'react-19-guide.pdf', type: 'file' as const },
     ],
     applications: [
-      { name: 'About',      type: 'app', action: () => openApp('about') },
-      { name: 'Experience', type: 'app', action: () => openApp('experience') },
-      { name: 'Skills',     type: 'app', action: () => openApp('skills') },
-      { name: 'Contact',    type: 'app', action: () => openApp('contact') },
-      { name: 'Location',   type: 'app', action: () => openApp('location') },
-      { name: 'Terminal',   type: 'app', action: () => openApp('terminal') },
-      { name: 'Finder',     type: 'app' },
-      { name: 'Trash',      type: 'app', action: () => openApp('trash') },
+      { id: 'app-about',   name: 'About',      type: 'app' as const, action: () => openApp('about') },
+      { id: 'app-exp',     name: 'Experience', type: 'app' as const, action: () => openApp('experience') },
+      { id: 'app-skills',  name: 'Skills',     type: 'app' as const, action: () => openApp('skills') },
+      { id: 'app-contact', name: 'Contact',    type: 'app' as const, action: () => openApp('contact') },
+      { id: 'app-loc',     name: 'Location',   type: 'app' as const, action: () => openApp('location') },
+      { id: 'app-term',    name: 'Terminal',   type: 'app' as const, action: () => openApp('terminal') },
+      { id: 'app-finder',  name: 'Finder',     type: 'app' as const },
+      { id: 'app-trash',   name: 'Trash',      type: 'app' as const, action: () => openApp('trash') },
     ],
   };
 
@@ -136,24 +152,94 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
             </span>
           </div>
         ) : (
-          <div className={styles.grid}>
-            {displayItems.map((item, i) => (
-              <div
-                key={i}
-                className={`${styles.item} ${item.action ? styles.itemClickable : ''}`}
-                onClick={item.action}
-                title={item.name}
-              >
-                <div className={styles.itemIcon}>
-                  {item.type === 'folder' ? <FolderIcon /> :
-                   item.type === 'app'    ? <AppIcon name={item.name} /> :
-                   <FileIcon name={item.name} />}
+          <div
+            className={styles.grid}
+            onClick={() => { setSelected(new Set()); setCtxMenu(null); }}
+            onContextMenu={e => {
+              if (e.target === e.currentTarget) {
+                e.preventDefault();
+                setCtxMenu({ x: e.clientX, y: e.clientY });
+              }
+            }}
+          >
+            {displayItems.map(item => {
+              const isSelected = selected.has(item.id);
+              return (
+                <div
+                  key={item.id}
+                  className={[
+                    styles.item,
+                    item.action ? styles.itemClickable : '',
+                    isSelected  ? styles.itemSelected  : '',
+                  ].join(' ')}
+                  onClick={e => {
+                    e.stopPropagation();
+                    if (e.shiftKey || e.metaKey || e.ctrlKey) {
+                      setSelected(prev => {
+                        const n = new Set(prev);
+                        n.has(item.id) ? n.delete(item.id) : n.add(item.id);
+                        return n;
+                      });
+                    } else {
+                      setSelected(new Set([item.id]));
+                    }
+                  }}
+                  onDoubleClick={e => { e.stopPropagation(); item.action?.(); }}
+                  onContextMenu={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (!selected.has(item.id)) setSelected(new Set([item.id]));
+                    setCtxMenu({ x: e.clientX, y: e.clientY, itemId: item.id });
+                  }}
+                  title={item.name}
+                >
+                  <div className={styles.itemIcon}>
+                    {item.type === 'folder' ? <FolderIcon /> :
+                     item.type === 'app'    ? <AppIcon name={item.name} /> :
+                     <FileIcon name={item.name} />}
+                  </div>
+                  <span className={styles.itemName}>{item.name}</span>
                 </div>
-                <span className={styles.itemName}>{item.name}</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
+
+        {/* Finder context menu */}
+        {ctxMenu && (() => {
+          const targetItem = ctxMenu.itemId ? displayItems.find(i => i.id === ctxMenu.itemId) : null;
+          return (
+            <div
+              className={styles.ctxMenu}
+              style={{
+                left: Math.min(ctxMenu.x, window.innerWidth  - 180),
+                top:  Math.min(ctxMenu.y, window.innerHeight - 150),
+              }}
+              onClick={e => e.stopPropagation()}
+              onContextMenu={e => e.preventDefault()}
+            >
+              {targetItem ? (
+                <>
+                  {targetItem.action && (
+                    <>
+                      <button className={styles.ctxItem} onClick={() => { targetItem.action?.(); setCtxMenu(null); }}>Open</button>
+                      <div className={styles.ctxSep} />
+                    </>
+                  )}
+                  <button className={styles.ctxItem}
+                    onClick={() => { setSelected(new Set(Array.from(selected).filter(id => displayItems.some(i => i.id === id)))); setCtxMenu(null); }}>
+                    {selected.size > 1 ? `Select All (${selected.size})` : 'Select'}
+                  </button>
+                </>
+              ) : (
+                <button className={styles.ctxItem}
+                  onClick={() => { setSelected(new Set(displayItems.map(i => i.id))); setCtxMenu(null); }}>
+                  Select All
+                </button>
+              )}
+            </div>
+          );
+        })()}
       </main>
     </div>
   );
