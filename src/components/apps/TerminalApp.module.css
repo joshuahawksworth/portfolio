@@ -1,0 +1,68 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: rgba(12, 13, 18, 0.96);
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Menlo', monospace;
+  font-size: 12.5px;
+  cursor: text;
+  color: #e2e8f0;
+}
+
+.output {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+.line {
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.prompt { color: #a3e635; }
+.out    { color: #e2e8f0; }
+.err    { color: #f87171; }
+.blank  { height: 4px; }
+
+.inputRow {
+  display: flex;
+  align-items: center;
+  padding: 6px 14px 10px;
+  flex-shrink: 0;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.promptLabel {
+  color: #a3e635;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+
+.input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #e2e8f0;
+  font-family: inherit;
+  font-size: 12.5px;
+  caret-color: #a3e635;
+  line-height: 1.65;
+}
+
+@keyframes blink { 50% { opacity: 0; } }
+
+.cursor {
+  width: 7px;
+  height: 14px;
+  background: #a3e635;
+  border-radius: 1px;
+  animation: blink 1s step-end infinite;
+  flex-shrink: 0;
+}

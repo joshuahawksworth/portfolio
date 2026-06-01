@@ -1,0 +1,116 @@
+.desktop {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+
+  background:
+    radial-gradient(ellipse at 18% 25%, rgba(59,100,220,0.22) 0%, transparent 48%),
+    radial-gradient(ellipse at 80% 70%, rgba(120,60,200,0.15) 0%, transparent 45%),
+    radial-gradient(ellipse at 55% 5%,  rgba(30,60,140,0.25)  0%, transparent 40%),
+    radial-gradient(ellipse at 50% 100%,rgba(15,35,80,0.6)    0%, transparent 50%),
+    linear-gradient(175deg, #06090f 0%, #08101e 20%, #0d1628 45%, #101c32 65%, #0c1520 80%, #06090f 100%);
+}
+
+/* starfield */
+.desktop::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 8%  12%, rgba(255,255,255,0.55) 0%, transparent 100%),
+    radial-gradient(1px 1px at 22% 8%,  rgba(255,255,255,0.40) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 38% 5%,  rgba(255,255,255,0.65) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 10%, rgba(255,255,255,0.35) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 7%,  rgba(255,255,255,0.50) 0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 15%, rgba(255,255,255,0.45) 0%, transparent 100%),
+    radial-gradient(1px 1px at 92% 9%,  rgba(255,255,255,0.30) 0%, transparent 100%),
+    radial-gradient(1px 1px at 14% 30%, rgba(255,255,255,0.35) 0%, transparent 100%),
+    radial-gradient(1px 1px at 46% 25%, rgba(255,255,255,0.40) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 72% 22%, rgba(255,255,255,0.30) 0%, transparent 100%),
+    radial-gradient(1px 1px at 95% 38%, rgba(255,255,255,0.35) 0%, transparent 100%);
+}
+
+/* mountain silhouettes */
+.desktop::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 38%;
+  pointer-events: none;
+  background: linear-gradient(to top, #07090e 0%, transparent 100%);
+  clip-path: polygon(
+    0 100%, 0 72%, 4% 60%, 8% 68%, 12% 48%, 16% 62%, 20% 40%,
+    24% 56%, 28% 44%, 33% 58%, 37% 38%, 41% 52%, 45% 32%, 49% 50%,
+    53% 38%, 57% 54%, 61% 36%, 65% 52%, 69% 40%, 73% 58%, 77% 44%,
+    81% 60%, 85% 48%, 89% 64%, 93% 52%, 97% 68%, 100% 60%, 100% 100%
+  );
+  opacity: 0.85;
+}
+
+/* ── Desktop icons ──────────────────────── */
+.icon {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 76px;
+  padding: 8px 4px 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  z-index: 50;
+  transition: background 120ms ease;
+  animation: iconFadeIn 0.35s ease both;
+}
+
+@keyframes iconFadeIn {
+  from { opacity: 0; transform: scale(0.88); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.icon:hover   { background: rgba(255,255,255,0.1); }
+.iconSelected { background: rgba(59,130,246,0.25) !important; }
+
+.iconImg {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: white;
+  padding: 3px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+  pointer-events: none;
+}
+
+.iconFallback {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+  pointer-events: none;
+}
+
+.iconLabel {
+  font-size: 11px;
+  color: white;
+  text-align: center;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  max-width: 72px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  pointer-events: none;
+}

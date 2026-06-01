@@ -1,0 +1,40 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+}
+
+.pinIcon {
+  width: 14px;
+  height: 14px;
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.sub {
+  font-size: 11px;
+  color: #4b5563;
+  margin-left: auto;
+}
+
+.map {
+  flex: 1;
+  min-height: 0;
+}

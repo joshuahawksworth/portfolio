@@ -1,0 +1,265 @@
+.root {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+}
+
+/* ── Sidebar ──────────────────────────────── */
+.sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  background: #171921;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  overflow-y: auto;
+  padding: 8px 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+.sidebarLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #4b5563;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 8px 12px 6px;
+  margin: 0;
+}
+
+.sidebarItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 120ms ease;
+  border-radius: 0;
+}
+
+.sidebarItem:hover { background: rgba(255,255,255,0.04); }
+.sidebarItem.active { background: rgba(59,130,246,0.18); }
+.sidebarItem.active .sidebarCompany { color: #93c5fd; }
+
+.sidebarLogo {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  object-fit: contain;
+  background: white;
+  padding: 2px;
+  flex-shrink: 0;
+}
+
+.logoFallback {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebarText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sidebarCompany {
+  font-size: 12px;
+  font-weight: 500;
+  color: #d1d5db;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebarPeriod {
+  font-size: 10px;
+  color: #4b5563;
+}
+
+/* ── Detail ───────────────────────────────── */
+.detail {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+.jobDetail {
+  padding: 20px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: #d1d5db;
+}
+
+.jobHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.jobLogoWrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+.jobLogo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.jobLogoFallback {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  font-size: 22px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.jobCompany {
+  font-size: 17px;
+  font-weight: 700;
+  color: #f3f4f6;
+  margin: 0 0 3px;
+  letter-spacing: -0.02em;
+}
+
+.jobRole {
+  font-size: 13px;
+  color: #60a5fa;
+  margin: 0 0 2px;
+  font-weight: 500;
+}
+
+.jobPeriod {
+  font-size: 12px;
+  color: #4b5563;
+  margin: 0;
+}
+
+.skillTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  padding: 3px 10px;
+  background: rgba(59,130,246,0.12);
+  border: 1px solid rgba(59,130,246,0.25);
+  border-radius: 20px;
+  font-size: 11.5px;
+  color: #93c5fd;
+}
+
+.summary {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.sectionTitle {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #4b5563;
+  margin: 0;
+}
+
+.responsibilities {
+  margin: 0;
+  padding: 0 0 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  list-style: none;
+}
+
+.responsibility {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #9ca3af;
+  padding-left: 16px;
+  position: relative;
+}
+
+.responsibility::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: #3b82f6;
+  font-size: 11px;
+  top: 2px;
+}
+
+.project {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+}
+
+.projectImage {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 7px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.projectDesc {
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.projectLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #60a5fa;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 120ms ease;
+}
+
+.projectLink:hover { color: #93c5fd; }
+
+.projectLink svg {
+  width: 10px;
+  height: 10px;
+}

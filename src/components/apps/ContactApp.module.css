@@ -1,0 +1,148 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.toolbarLeft { display: flex; gap: 4px; }
+
+.toolBtn {
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: rgba(255,255,255,0.3);
+  cursor: default;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolBtn svg { width: 13px; height: 13px; }
+
+.toolbarTitle {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  text-align: center;
+  margin-right: 60px; /* visually center past left buttons */
+}
+
+.form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b5563;
+  width: 54px;
+  flex-shrink: 0;
+}
+
+.fieldValue {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  color: #e5e7eb;
+  font-family: inherit;
+}
+
+.input::placeholder { color: #374151; }
+
+.divider {
+  height: 1px;
+  background: rgba(255,255,255,0.05);
+  margin: 0 16px;
+  flex-shrink: 0;
+}
+
+.textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #d1d5db;
+  font-family: inherit;
+  resize: none;
+  line-height: 1.65;
+}
+
+.textarea::placeholder { color: #374151; }
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+
+.success { font-size: 12px; color: #10b981; }
+.error   { font-size: 12px; color: #ef4444; }
+
+.sendBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.sendBtn:hover:not(:disabled) { background: #2563eb; }
+.sendBtn:disabled { opacity: 0.5; cursor: default; }
+.sendBtn svg { width: 13px; height: 13px; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}

@@ -1,0 +1,122 @@
+.screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+
+  background:
+    radial-gradient(ellipse at 18% 25%, rgba(59, 100, 220, 0.22) 0%, transparent 48%),
+    radial-gradient(ellipse at 80% 70%, rgba(120, 60, 200, 0.15) 0%, transparent 45%),
+    linear-gradient(175deg, #06090f 0%, #0d1628 50%, #06090f 100%);
+}
+
+.show  { opacity: 1; }
+.leave { opacity: 0; transition: opacity 0.45s ease; }
+
+/* ── Clock ───────────────────────────── */
+.clock {
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  color: white;
+  flex-shrink: 0;
+}
+
+.time {
+  font-size: 72px;
+  font-weight: 200;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+}
+
+.date {
+  font-size: 16px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 6px;
+}
+
+/* ── Login card ──────────────────────── */
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 32px 40px 28px;
+  border-radius: 20px;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  /* CSS glass — reliable flex layout, no LiquidGlass breakage */
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 0 0 0.5px rgba(255, 255, 255, 0.05) inset,
+    0 20px 60px rgba(0, 0, 0, 0.45);
+
+  transition: background 180ms ease, box-shadow 180ms ease;
+}
+
+.card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 0 0 0.5px rgba(255, 255, 255, 0.08) inset,
+    0 24px 70px rgba(0, 0, 0, 0.55);
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 700;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.name {
+  font-size: 18px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.92);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  margin: 0;
+}
+
+.enterBtn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.card:hover .enterBtn {
+  background: rgba(255, 255, 255, 0.22);
+  transform: scale(1.08);
+}
+
+.enterBtn svg { width: 16px; height: 16px; }
+
+.hint {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.38);
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  margin: 0;
+}
