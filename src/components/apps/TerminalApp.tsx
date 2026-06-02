@@ -50,7 +50,7 @@ function resolvePath(cwd: string, target: string): string {
   return cwd === '/' ? `/${target}` : `${cwd}/${target}`;
 }
 
-export default function TerminalApp({ props: _ }: { props?: Record<string, unknown> }) {
+export default function TerminalApp({ props }: { props?: Record<string, unknown> }) {
   const { openApp } = useDesktop();
   const [cwd, setCwd] = useState(INIT_CWD);
   const [lines, setLines] = useState<Line[]>([
@@ -62,10 +62,20 @@ export default function TerminalApp({ props: _ }: { props?: Record<string, unkno
   const [histIdx, setHistIdx] = useState(-1);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const autoRanRef = useRef(false);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [lines]);
+
+  useEffect(() => {
+    const cmd = props?.autoRun as string | undefined;
+    if (cmd && !autoRanRef.current) {
+      autoRanRef.current = true;
+      setTimeout(() => runCommand(cmd), 400);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function prompt(c: string) {
     return `${USER}@${HOST} ${c.replace(`/Users/${USER}`, '~')} % `;

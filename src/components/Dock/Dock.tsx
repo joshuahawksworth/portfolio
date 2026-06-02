@@ -105,6 +105,27 @@ const I = {
       <path d="M19 19V31M22 19V31M25 19V31" stroke="rgba(255,255,255,0.6)" strokeWidth="1.3" strokeLinecap="round"/>
     </MacIcon>
   ),
+  slotslop: (
+    <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
+      <rect width="44" height="44" rx="11" fill="#000"/>
+      <rect width="44" height="20" rx="11" fill="rgba(255,255,255,0.04)"/>
+      <defs>
+        <linearGradient id="t3rainbow" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="#ff0080"/>
+          <stop offset="25%"  stopColor="#ff8c00"/>
+          <stop offset="50%"  stopColor="#ffe000"/>
+          <stop offset="75%"  stopColor="#00d4ff"/>
+          <stop offset="100%" stopColor="#a855f7"/>
+        </linearGradient>
+      </defs>
+      {/* T3 wordmark — bold T and 3 */}
+      <text x="22" y="30" textAnchor="middle" fill="url(#t3rainbow)"
+        fontSize="20" fontWeight="900"
+        fontFamily="'Helvetica Neue', Arial, Helvetica, sans-serif">
+        T3
+      </text>
+    </svg>
+  ),
 };
 
 /* ─── Types ───────────────────────────────────────────────────────────── */
@@ -158,17 +179,18 @@ function MinimizedSlot({ win }: { win: WindowInstance }) {
 }
 
 /* ─── Default reorderable key order (Finder & Trash excluded) ────────── */
-const DEFAULT_ORDER = ['github','about','experience','skills','contact','location','terminal','cv'];
+const DEFAULT_ORDER = ['github','about','experience','skills','contact','location','terminal','cv','slotslop'];
 
 const ALL_ITEMS_STATIC: Omit<Item, 'action'>[] = [
-  { key: 'github',     label: 'GitHub',     icon: I.github },
-  { key: 'about',      label: 'About',      icon: I.about },
-  { key: 'experience', label: 'Experience', icon: I.experience },
-  { key: 'skills',     label: 'Skills',     icon: I.skills },
-  { key: 'contact',    label: 'Contact',    icon: I.contact },
-  { key: 'location',   label: 'Location',   icon: I.location },
-  { key: 'terminal',   label: 'Terminal',   icon: I.terminal },
-  { key: 'cv',         label: 'CV',         icon: I.cv },
+  { key: 'github',    label: 'GitHub',    icon: I.github },
+  { key: 'about',     label: 'About',     icon: I.about },
+  { key: 'experience',label: 'Experience',icon: I.experience },
+  { key: 'skills',    label: 'Skills',    icon: I.skills },
+  { key: 'contact',   label: 'Contact',   icon: I.contact },
+  { key: 'location',  label: 'Location',  icon: I.location },
+  { key: 'terminal',  label: 'Terminal',  icon: I.terminal },
+  { key: 'cv',        label: 'CV',        icon: I.cv },
+  { key: 'slotslop',  label: 'Slotslop',  icon: I.slotslop },
 ];
 
 /* ─── Dock ────────────────────────────────────────────────────────────── */
@@ -189,9 +211,10 @@ export default function Dock({ bouncingKey, onItemActivate, trashHighlighted }: 
   // Build Item with action for each key
   function makeAction(key: string): () => void {
     switch (key) {
-      case 'github':  return () => openApp('safari');
-      case 'cv':      return () => window.open('/JoshuaHawksworthCV.pdf', '_blank');
-      default:        return () => openApp(key);
+      case 'github':   return () => openApp('safari');
+      case 'cv':       return () => window.open('/JoshuaHawksworthCV.pdf', '_blank');
+      case 'slotslop': return () => openApp('terminal', { autoRun: 'slotslop' });
+      default:         return () => openApp(key);
     }
   }
 
