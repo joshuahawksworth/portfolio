@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useId, useState, useRef, useEffect } from 'react';
 import { useDesktop, WindowInstance } from '../../context/DesktopContext';
 import logoSvg from '../../assets/logo.svg';
 import styles from './Dock.module.css';
@@ -232,17 +232,22 @@ function MinimizedSlot({ win }: { win: WindowInstance }) {
 const DEFAULT_ORDER = ['github','safari','about','experience','skills','contact','location','terminal','cv','slotslop'];
 
 const ALL_ITEMS_STATIC: Omit<Item, 'action'>[] = [
-  { key: 'github',    label: 'GitHub',    icon: I.github },
-  { key: 'safari',    label: 'Google Chrome', icon: I.safari },
-  { key: 'about',     label: 'About',     icon: I.about },
-  { key: 'experience',label: 'Experience',icon: I.experience },
-  { key: 'skills',    label: 'Skills',    icon: I.skills },
-  { key: 'contact',   label: 'Contact',   icon: I.contact },
-  { key: 'location',  label: 'Location',  icon: I.location },
-  { key: 'terminal',  label: 'Terminal',  icon: I.terminal },
-  { key: 'cv',        label: 'CV',        icon: I.cv },
-  { key: 'slotslop',  label: 'Slotslop',  icon: I.slotslop },
+  { key: 'github',    label: 'GitHub',       icon: I.github },
+  { key: 'safari',    label: 'Google Chrome',icon: I.safari },
+  { key: 'about',     label: 'About',        icon: I.about },
+  { key: 'experience',label: 'Experience',   icon: I.experience },
+  { key: 'skills',    label: 'Skills',       icon: I.skills },
+  { key: 'contact',   label: 'Contact',      icon: I.contact },
+  { key: 'location',  label: 'Location',     icon: I.location },
+  { key: 'terminal',  label: 'Terminal',     icon: I.terminal },
+  { key: 'cv',        label: 'CV',           icon: I.cv },
+  { key: 'slotslop',  label: 'Slotslop',     icon: I.slotslop },
+  { key: 'doom',      label: 'DOOM',         icon: I.doom },
+  { key: 'snake',     label: 'Snake',        icon: I.snake },
 ];
+
+// Apps that live on the desktop as shortcuts — only appear in dock when running
+const DESKTOP_ONLY = new Set(['doom', 'snake']);
 
 /* ─── Dock ────────────────────────────────────────────────────────────── */
 export default function Dock({ bouncingKeys, onItemActivate, trashHighlighted }: DockProps = {}) {
@@ -254,6 +259,28 @@ export default function Dock({ bouncingKeys, onItemActivate, trashHighlighted }:
   const [insertBefore, setInsertBefore] = useState(true);
 
   const minimizedWindows = windows.filter(w => w.minimized);
+
+  // Running desktop-only apps (doom/snake) — shown in dock only while open
+  const runningDesktopKeys = [...new Set(
+    windows
+      .filter(w => !w.minimized && DESKTOP_ONLY.has(w.appId))
+      .map(w => w.appId)
+  )];
+
+  // Track which keys are newly appeared so we can play the spring animation
+  const prevRunningRef = useRef<Set<string>>(new Set());
+  const [newKeys, setNewKeys] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    const prev = prevRunningRef.current;
+    const added = new Set(runningDesktopKeys.filter(k => !prev.has(k)));
+    if (added.size > 0) {
+      setNewKeys(added);
+      // Clear the "new" flag after animation completes
+      const t = setTimeout(() => setNewKeys(new Set()), 500);
+      return () => clearTimeout(t);
+    }
+    prevRunningRef.current = new Set(runningDesktopKeys);
+  });
 
   const KEY_TO_APPID: Record<string, string> = { github: 'githubapp' };
   function hasOpen(key: string) {
@@ -325,6 +352,7 @@ export default function Dock({ bouncingKeys, onItemActivate, trashHighlighted }:
     icon: React.ReactNode,
     draggable = false,
     highlighted = false,
+    springing = false,
   ) {
     const isBouncing  = bouncingKeys?.has(key) ?? false;
     const isDragging  = dragKey === key;
@@ -334,7 +362,12 @@ export default function Dock({ bouncingKeys, onItemActivate, trashHighlighted }:
     return (
       <div
         key={key}
-        className={`${styles.item} ${isDragging ? styles.itemDragging : ''} ${dropClass}`}
+        className={[
+          styles.item,
+          isDragging   ? styles.itemDragging : '',
+          springing    ? styles.itemSpring   : '',
+          dropClass,
+        ].join(' ')}
         draggable={draggable}
         onDragStart={draggable ? e => onDragStart(e, key) : undefined}
         onDragOver={draggable ? e => onDragOver(e, key) : undefined}
@@ -368,6 +401,13 @@ export default function Dock({ bouncingKeys, onItemActivate, trashHighlighted }:
         {order.map(key => {
           const meta = ALL_ITEMS_STATIC.find(i => i.key === key)!;
           return renderItem(key, meta.label, meta.icon, true);
+        })}
+
+        {/* Running desktop-only apps (doom/snake) — spring in when launched */}
+        {runningDesktopKeys.length > 0 && <div className={styles.sep} />}
+        {runningDesktopKeys.map(key => {
+          const meta = ALL_ITEMS_STATIC.find(i => i.key === key)!;
+          return renderItem(key, meta.label, meta.icon, false, false, newKeys.has(key));
         })}
 
         <div className={styles.sep} />

@@ -1,14 +1,172 @@
 .root {
+  position: relative;
   width: 100%;
   height: 100%;
   background: #000;
   overflow: hidden;
+  user-select: none;
 }
 
-/* Make the js-dos player fill the window completely */
-.root > div,
-.root :global(.jsdos),
-.root :global(.jsdos-container) {
-  width: 100% !important;
-  height: 100% !important;
+/* ── Canvas — keyboard only, no cursor change ───────────────────────── */
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  opacity: 0;
+  transition: opacity 300ms;
+  pointer-events: none; /* mouse never reaches the game */
+}
+.canvas.show { opacity: 1; }
+
+/* ── Loading splash ──────────────────────────────────────────────────── */
+.splash {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: #050000;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.doomTitle {
+  font-family: 'Impact', 'Arial Black', sans-serif;
+  font-size: 56px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  color: #cc1100;
+  text-shadow: 0 0 40px rgba(255,0,0,0.5), 4px 4px 0 #300;
+}
+
+.bar { width: 180px; height: 3px; background: #2a0000; border-radius: 2px; overflow: hidden; }
+.fill {
+  height: 100%; background: #cc0000;
+  animation: sweep 2s ease-in-out infinite;
+}
+@keyframes sweep {
+  0%   { width: 0%;  margin-left: 0;    }
+  50%  { width: 60%; margin-left: 20%;  }
+  100% { width: 0%;  margin-left: 100%; }
+}
+.sub {
+  margin: 0;
+  font-family: 'SF Mono', monospace;
+  font-size: 11px; color: #663333; letter-spacing: .06em;
+}
+
+/* ── Controls panel ──────────────────────────────────────────────────── */
+.panel {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 210px;
+  transform: translateX(100%);
+  transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(6, 1, 1, 0.97);
+  border-left: 1px solid rgba(120, 25, 15, 0.45);
+  z-index: 30;
+  pointer-events: auto;
+}
+.panelOpen { transform: translateX(0); }
+
+.panelInner {
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.panelTitle {
+  margin: 0;
+  font-family: 'Impact', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  color: #cc2200;
+  text-transform: uppercase;
+}
+
+/* ── Mute button ─────────────────────────────────────────────────────── */
+.muteBtn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 5px;
+  background: rgba(30, 8, 4, 0.8);
+  border: 1px solid rgba(120, 30, 15, 0.4);
+  color: #cc6644;
+  font-family: -apple-system, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 120ms, color 120ms;
+}
+.muteBtn:hover { background: rgba(50, 12, 6, 0.9); color: #ee8866; }
+.muteBtnMuted  { color: #886655; border-color: rgba(80, 20, 10, 0.3); }
+.muteBtnMuted:hover { color: #aa8866; }
+
+/* ── Controls table ─────────────────────────────────────────────────── */
+.tbl { border-collapse: collapse; width: 100%; }
+.tbl tr { border-bottom: 1px solid rgba(70, 12, 8, 0.45); }
+.tbl tr:last-child { border-bottom: none; }
+
+.tblKey {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 10px; font-weight: 700;
+  color: #dd4422;
+  padding: 5px 10px 5px 0;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.tblVal {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 11px;
+  color: #9a7060;
+  padding: 5px 0;
+  vertical-align: middle;
+}
+
+/* ── Toggle tab ──────────────────────────────────────────────────────── */
+.tab {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: right 280ms cubic-bezier(0.4, 0, 0.2, 1), background 120ms;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 26px;
+  padding: 14px 0;
+  border-radius: 6px 0 0 6px;
+  background: rgba(10, 2, 2, 0.9);
+  border: 1px solid rgba(120, 25, 15, 0.45);
+  border-right: none;
+  cursor: pointer;
+  z-index: 31;
+  pointer-events: auto;
+}
+.tabOpen { right: 210px; }
+.tab:hover { background: rgba(28, 5, 3, 0.97); }
+
+.tabArrow { font-size: 13px; color: #cc3300; line-height: 1; }
+.tabLabel {
+  font-family: -apple-system, sans-serif;
+  font-size: 8px; font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #884433;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
 }

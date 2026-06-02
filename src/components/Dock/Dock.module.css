@@ -202,26 +202,23 @@
   transition: transform 150ms ease, filter 150ms ease;
 }
 
-/* macOS launch bounce — single slow jump (rise ease-out, fall ease-in) */
+/* macOS launch bounce — 4 decreasing bounces over ~1.8 s */
 .bouncing {
-  animation: dockBounce 1400ms both;
+  animation: dockBounce 1800ms both;
 }
 
 @keyframes dockBounce {
-  0% {
-    transform: translateY(0);
-    animation-timing-function: ease-out;   /* spring up: fast start, slow at peak */
-  }
-  38% {
-    transform: translateY(-26px);          /* peak — roughly half the icon height */
-    animation-timing-function: ease-in;    /* gravity fall: slow at top, fast landing */
-  }
-  72% {
-    transform: translateY(0);              /* land */
-  }
-  100% {
-    transform: translateY(0);
-  }
+  0%   { transform: translateY(0);     animation-timing-function: ease-out; }
+  12%  { transform: translateY(-26px); animation-timing-function: ease-in;  }
+  24%  { transform: translateY(0);     animation-timing-function: ease-out; }
+  36%  { transform: translateY(-22px); animation-timing-function: ease-in;  }
+  48%  { transform: translateY(0);     animation-timing-function: ease-out; }
+  60%  { transform: translateY(-16px); animation-timing-function: ease-in;  }
+  70%  { transform: translateY(0);     animation-timing-function: ease-out; }
+  80%  { transform: translateY(-8px);  animation-timing-function: ease-in;  }
+  88%  { transform: translateY(0);     animation-timing-function: ease-out; }
+  94%  { transform: translateY(-3px);  animation-timing-function: ease-in;  }
+  100% { transform: translateY(0); }
 }
 
 /* About icon is an <img> — mirror the SVG drop-shadow treatment */
@@ -236,4 +233,25 @@
   display: block;
   object-fit: contain;
   border-radius: 5px;
+}
+
+/* ── Spring-in animation when a running app icon enters the dock ─── */
+@keyframes dockSpring {
+  0%   { transform: scale(0) translateY(24px); opacity: 0; }
+  55%  { transform: scale(1.14) translateY(-6px); opacity: 1; }
+  75%  { transform: scale(0.94) translateY(2px); }
+  90%  { transform: scale(1.04) translateY(-1px); }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.itemSpring {
+  animation: dockSpring 480ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Smooth layout shift when items enter/leave */
+.panel {
+  transition: width 300ms ease;
+}
+.item {
+  transition: transform 300ms ease, opacity 300ms ease;
 }

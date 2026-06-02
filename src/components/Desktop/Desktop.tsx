@@ -84,7 +84,7 @@ const WALLPAPER_SWATCH: Record<WallpaperKey, string> = {
 const ICON_W  = 76;
 const ICON_H  = 84;
 const ICON_GAP = 8;
-const BOUNCE_MS = 1450; // matches 1400ms animation + 50ms buffer
+const BOUNCE_MS = 1850; // matches 1800ms animation + 50ms buffer
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 const APP_SHORTCUTS: DesktopItem[] = [
@@ -147,36 +147,12 @@ function FolderIcon() {
 function DoomIcon() {
   return (
     <svg viewBox="0 0 48 48" width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Background */}
       <rect width="48" height="48" rx="10" fill="#060000"/>
-      {/* Hell glow */}
-      <radialGradient id="dg" cx="24" cy="36" r="18" gradientUnits="userSpaceOnUse">
-        <stop offset="0%" stopColor="#8b0000" stopOpacity="0.55"/>
-        <stop offset="100%" stopColor="#060000" stopOpacity="0"/>
-      </radialGradient>
-      <rect width="48" height="48" rx="10" fill="url(#dg)"/>
-      {/* Demon skull */}
-      <ellipse cx="24" cy="19" rx="12" ry="11" fill="#1a0000"/>
-      {/* Left eye socket + glow */}
-      <ellipse cx="18.5" cy="18" rx="4" ry="3.5" fill="#b81200" opacity="0.7"/>
-      <ellipse cx="18.5" cy="18" rx="2.6" ry="2.2" fill="#ff3c00"/>
-      <circle  cx="18.5" cy="18" r="1.1"           fill="#110000"/>
-      {/* Right eye socket + glow */}
-      <ellipse cx="29.5" cy="18" rx="4" ry="3.5" fill="#b81200" opacity="0.7"/>
-      <ellipse cx="29.5" cy="18" rx="2.6" ry="2.2" fill="#ff3c00"/>
-      <circle  cx="29.5" cy="18" r="1.1"           fill="#110000"/>
-      {/* Nose */}
-      <path d="M22 22 L24 25 L26 22" fill="none" stroke="#3a0000" strokeWidth="1.2" strokeLinecap="round"/>
-      {/* Teeth */}
-      <rect x="17" y="26" width="2.2" height="3.5" rx="0.4" fill="#cc1800" opacity="0.65"/>
-      <rect x="21" y="26" width="2.2" height="3.5" rx="0.4" fill="#cc1800" opacity="0.65"/>
-      <rect x="25" y="26" width="2.2" height="3.5" rx="0.4" fill="#cc1800" opacity="0.65"/>
-      <rect x="29" y="26" width="2.2" height="3.5" rx="0.4" fill="#cc1800" opacity="0.65"/>
-      {/* DOOM text */}
-      <text x="24" y="44" textAnchor="middle"
+      <text x="24" y="30" textAnchor="middle"
         fontFamily="Impact, Arial Black, sans-serif"
-        fontSize="13" fontWeight="900" letterSpacing="0.8"
-        fill="#cc1500">DOOM</text>
+        fontSize="17" fontWeight="900" letterSpacing="2"
+        fill="#cc1500"
+        style={{ filter: 'drop-shadow(0 0 6px rgba(200,20,0,0.7))' }}>DOOM</text>
     </svg>
   );
 }
