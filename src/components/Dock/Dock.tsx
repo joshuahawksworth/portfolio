@@ -99,6 +99,36 @@ const I = {
       <path d="M14 18H30M14 22H30M14 26H23" stroke="#c0292e" strokeWidth="1.5" strokeLinecap="round"/>
     </MacIcon>
   ),
+  safari: (
+    <MacIcon top="#59c8fa" bottom="#007aff">
+      {/* Metallic bezel outer ring */}
+      <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1.8"/>
+      <circle cx="22" cy="22" r="16.8" fill="none" stroke="rgba(0,0,0,0.18)" strokeWidth="0.6"/>
+      {/* Compass face — deep blue overlay */}
+      <circle cx="22" cy="22" r="16" fill="rgba(0,45,110,0.42)"/>
+      {/* Cardinal tick marks */}
+      <line x1="22" y1="4.2"  x2="22" y2="8"    stroke="white"                  strokeWidth="1.8" strokeLinecap="round"/>
+      <line x1="22" y1="36"   x2="22" y2="39.8"  stroke="rgba(255,255,255,0.45)" strokeWidth="1.2" strokeLinecap="round"/>
+      <line x1="36"  y1="22"  x2="39.8" y2="22"  stroke="rgba(255,255,255,0.45)" strokeWidth="1.2" strokeLinecap="round"/>
+      <line x1="4.2" y1="22"  x2="8"    y2="22"  stroke="rgba(255,255,255,0.45)" strokeWidth="1.2" strokeLinecap="round"/>
+      {/* Intercardinal ticks */}
+      <line x1="34.9" y1="9.1"  x2="33.0" y2="11.0" stroke="rgba(255,255,255,0.28)" strokeWidth="0.9" strokeLinecap="round"/>
+      <line x1="9.1"  y1="9.1"  x2="11.0" y2="11.0" stroke="rgba(255,255,255,0.28)" strokeWidth="0.9" strokeLinecap="round"/>
+      <line x1="34.9" y1="34.9" x2="33.0" y2="33.0" stroke="rgba(255,255,255,0.28)" strokeWidth="0.9" strokeLinecap="round"/>
+      <line x1="9.1"  y1="34.9" x2="11.0" y2="33.0" stroke="rgba(255,255,255,0.28)" strokeWidth="0.9" strokeLinecap="round"/>
+      {/* Compass needle — diamond shape, NE-pointing, red north / white south */}
+      {/* Red (north → NE after rotation) */}
+      <polygon points="22,7.5 20.2,22 23.8,22" fill="#ff3830"             transform="rotate(45,22,22)"/>
+      {/* White (south → SW after rotation) */}
+      <polygon points="22,36.5 20.2,22 23.8,22" fill="rgba(255,255,255,0.88)" transform="rotate(45,22,22)"/>
+      {/* Highlight edge on red needle */}
+      <polygon points="22,7.5 20.2,22 22,22" fill="rgba(255,100,80,0.5)"  transform="rotate(45,22,22)"/>
+      {/* Center pivot cap */}
+      <circle cx="22" cy="22" r="2.2" fill="#3a3a3a"/>
+      <circle cx="22" cy="22" r="1.3" fill="#b0b0b0"/>
+      <circle cx="21.5" cy="21.5" r="0.5" fill="rgba(255,255,255,0.6)"/>
+    </MacIcon>
+  ),
   trash: (
     <MacIcon top="#aeaeb2" bottom="#6c6c70">
       <path d="M11 14H33M20 10H24M13 14L15 36H29L31 14" stroke="rgba(255,255,255,0.9)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
@@ -179,10 +209,11 @@ function MinimizedSlot({ win }: { win: WindowInstance }) {
 }
 
 /* ─── Default reorderable key order (Finder & Trash excluded) ────────── */
-const DEFAULT_ORDER = ['github','about','experience','skills','contact','location','terminal','cv','slotslop'];
+const DEFAULT_ORDER = ['github','safari','about','experience','skills','contact','location','terminal','cv','slotslop'];
 
 const ALL_ITEMS_STATIC: Omit<Item, 'action'>[] = [
   { key: 'github',    label: 'GitHub',    icon: I.github },
+  { key: 'safari',    label: 'Safari',    icon: I.safari },
   { key: 'about',     label: 'About',     icon: I.about },
   { key: 'experience',label: 'Experience',icon: I.experience },
   { key: 'skills',    label: 'Skills',    icon: I.skills },
@@ -212,6 +243,7 @@ export default function Dock({ bouncingKey, onItemActivate, trashHighlighted }: 
   function makeAction(key: string): () => void {
     switch (key) {
       case 'github':   return () => openApp('safari');
+      case 'safari':   return () => openApp('safari');
       case 'cv':       return () => window.open('/JoshuaHawksworthCV.pdf', '_blank');
       case 'slotslop': return () => openApp('terminal', { autoRun: 'slotslop' });
       default:         return () => openApp(key);
