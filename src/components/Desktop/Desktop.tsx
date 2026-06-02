@@ -229,7 +229,7 @@ function DesktopSurface() {
   const [showWallpaper, setShowWallpaper]= useState(false);
   const [wallpaper,     setWallpaper]    = useState<WallpaperKey>('space');
   const [cleaning,      setCleaning]     = useState(false);
-  const [bouncingKey,   setBouncingKey]  = useState<string | null>(null);
+  const [bouncingKeys,  setBouncingKeys] = useState<Set<string>>(new Set());
   const [nearTrash,     setNearTrash]    = useState(false);
   const [draggingIds,   setDraggingIds]  = useState<Set<string>>(new Set());
 
@@ -273,9 +273,9 @@ function DesktopSurface() {
 
   // ── Open with bounce animation (delay window until bounce done) ────────
   function openWithBounce(dockKey: string, appId: string, props?: Record<string, unknown>) {
-    setBouncingKey(dockKey);
+    setBouncingKeys(prev => new Set([...prev, dockKey]));
     setTimeout(() => {
-      setBouncingKey(null);
+      setBouncingKeys(prev => { const n = new Set(prev); n.delete(dockKey); return n; });
       openApp(appId, props);
     }, BOUNCE_MS);
   }
@@ -444,8 +444,8 @@ function DesktopSurface() {
     // Skip bounce animation if app is already open
     const alreadyOpen = windows.some(w => w.appId === key && !w.minimized);
     if (alreadyOpen) { action(); return; }
-    setBouncingKey(key);
-    setTimeout(() => { setBouncingKey(null); action(); }, BOUNCE_MS);
+    setBouncingKeys(prev => new Set([...prev, key]));
+    setTimeout(() => { setBouncingKeys(prev => { const n = new Set(prev); n.delete(key); return n; }); action(); }, BOUNCE_MS);
   }
 
   // ── Render ────────────────────────────────────────────────────────────
@@ -561,7 +561,7 @@ function DesktopSurface() {
         return <Window key={win.id} win={win}><Comp props={win.props} /></Window>;
       })}
 
-      <Dock bouncingKey={bouncingKey} onItemActivate={handleDockActivate} trashHighlighted={nearTrash} />
+      <Dock bouncingKeys={bouncingKeys} onItemActivate={handleDockActivate} trashHighlighted={nearTrash} />
 
       {/* Context menu */}
       {ctxMenu && (

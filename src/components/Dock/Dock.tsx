@@ -155,7 +155,7 @@ const I = {
 interface Item { key: string; label: string; icon: React.ReactNode; action: () => void }
 
 interface DockProps {
-  bouncingKey?: string | null;
+  bouncingKeys?: Set<string>;
   onItemActivate?: (key: string, action: () => void) => void;
   trashHighlighted?: boolean;
 }
@@ -219,7 +219,7 @@ const ALL_ITEMS_STATIC: Omit<Item, 'action'>[] = [
 ];
 
 /* ─── Dock ────────────────────────────────────────────────────────────── */
-export default function Dock({ bouncingKey, onItemActivate, trashHighlighted }: DockProps = {}) {
+export default function Dock({ bouncingKeys, onItemActivate, trashHighlighted }: DockProps = {}) {
   const { openApp, windows } = useDesktop();
 
   const [order,       setOrder]       = useState<string[]>(DEFAULT_ORDER);
@@ -300,7 +300,7 @@ export default function Dock({ bouncingKey, onItemActivate, trashHighlighted }: 
     draggable = false,
     highlighted = false,
   ) {
-    const isBouncing  = bouncingKey === key;
+    const isBouncing  = bouncingKeys?.has(key) ?? false;
     const isDragging  = dragKey === key;
     const isHovered   = hoverKey === key && dragKey !== null && dragKey !== key;
     const dropClass   = isHovered ? (insertBefore ? styles.dropBefore : styles.dropAfter) : '';
