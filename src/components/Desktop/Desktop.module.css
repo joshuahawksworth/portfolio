@@ -342,3 +342,254 @@
 }
 .wallpaperSwatch:hover    { transform: scale(1.06); }
 .wallpaperActive          { border-color: rgba(80,140,255,0.9) !important; }
+
+/* ── Nokia Phone Window — 8-bit chunky early-2000s brick ─────────────────── */
+
+/* Classic Nokia navy plastic — main body */
+.nokia {
+  width: 290px;
+  background: #1c2d5e;   /* Nokia deep navy */
+  border-radius: 18px 18px 30px 30px;
+  border: 2px solid #2a3f80;
+  /* 8-bit-style hard drop shadow gives the "brick" 3D thickness */
+  box-shadow:
+    /* Face highlight stripe */
+    inset 0 3px 0 rgba(255,255,255,0.18),
+    inset -3px 0 0 rgba(0,0,0,0.25),
+    /* Hard right edge — 8px "wall" depth */
+    3px 0 0 #0f1a40,
+    6px 0 0 #0a1230,
+    8px 0 0 #060d20,
+    /* Hard bottom edge */
+    0 4px 0 #0f1a40,
+    0 7px 0 #060d20,
+    /* Corner */
+    8px 7px 0 #040a18,
+    /* Ambient drop */
+    8px 8px 30px rgba(0,0,0,0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: default;
+  font-family: 'Arial', sans-serif;
+}
+
+/* Raised top cap — darker shade for depth illusion */
+.nokiaTop {
+  width: 100%;
+  background: #162348;
+  border-radius: 16px 16px 0 0;
+  border-bottom: 2px solid #0d1830;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px 8px;
+  box-sizing: border-box;
+}
+
+/* Tiny camera lens dot */
+.nokiaDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #3a5090, #0a1430);
+  border: 1px solid #0a1030;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.7), 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* Speaker — pixel-art rows of dots */
+.nokiaSpeaker {
+  width: 64px;
+  height: 6px;
+  background: repeating-linear-gradient(
+    90deg,
+    #0d1830 0px, #0d1830 3px,
+    #1c2d5e 3px, #1c2d5e 5px
+  );
+  border-radius: 2px;
+  border: 1px solid #0a1430;
+}
+
+/* Close button */
+.nokiaClose {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: #8b1a1a;
+  border: 2px solid #500e0e;
+  color: rgba(255,255,255,0.95);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 80ms;
+  box-shadow: 0 3px 0 #2a0505, inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.nokiaClose:hover  { background: #c02020; }
+.nokiaClose:active { transform: translateY(2px); box-shadow: none; }
+
+/* Screen bezel — chunky plastic frame around LCD */
+.nokiaBezel {
+  width: calc(100% - 16px);
+  background: #0a0f1a;
+  border-radius: 4px;
+  border: 3px solid #080c16;
+  padding: 5px;
+  box-shadow:
+    inset 0 4px 12px rgba(0,0,0,1),
+    inset 2px 0 4px rgba(0,0,0,0.6),
+    0 2px 0 rgba(255,255,255,0.04);
+}
+
+.nokiaScreen {
+  border-radius: 2px;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 320 / 306;
+}
+
+/* NOKIA wordmark */
+.nokiaBrand {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.45em;
+  color: rgba(140,170,230,0.55);
+  margin: 7px 0 2px;
+  text-transform: uppercase;
+}
+
+/* ── Navigation disc — big chunky oval ──────────────────────────────────── */
+.nokiaNav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  margin: 5px 0 2px;
+  background: #141e3c;
+  border-radius: 50%;
+  padding: 4px;
+  border: 2px solid #0a1230;
+  box-shadow: 0 4px 0 #06091a, inset 0 2px 0 rgba(255,255,255,0.06);
+}
+
+.navRow {
+  display: flex;
+  align-items: center;
+}
+
+/* Arrow buttons — softly rounded like real Nokia d-pad arms */
+.navBtn {
+  width: 36px;
+  height: 24px;
+  background: linear-gradient(180deg, #2c4490 0%, #1a2c6e 100%);
+  border: 1.5px solid #0f1840;
+  border-radius: 10px 10px 8px 8px;   /* pill-ish top, slightly squarer bottom */
+  color: rgba(210,225,255,0.9);
+  font-size: 10px;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-shadow: 0 4px 0 #09113a, inset 0 1px 0 rgba(255,255,255,0.14);
+  transition: background 40ms;
+}
+/* Left / Right arms are taller, rotated pill */
+.navRow .navBtn {
+  width: 24px;
+  height: 36px;
+  border-radius: 10px 8px 8px 10px;
+}
+.navBtn:hover  { background: linear-gradient(180deg, #3554b0 0%, #223888 100%); }
+.navBtn:active { background: #1a2040; box-shadow: none; transform: translateY(3px); }
+
+/* Centre OK button — large oval like the Nokia navigation disc */
+.navCenterBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #344ea8, #111e50);
+  border: 1.5px solid #0a1030;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #06091a, inset 0 1px 0 rgba(255,255,255,0.12);
+}
+.navCenterBtn:active { transform: translateY(3px); box-shadow: none; }
+
+/* ── Soft keys — wide pill shape ────────────────────────────────────────── */
+.nokiaSoftRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 4px 14px;
+  box-sizing: border-box;
+  gap: 6px;
+}
+
+.nokiaSoftKey {
+  flex: 1;
+  height: 24px;
+  background: linear-gradient(180deg, #2c4490 0%, #1a2c6e 100%);
+  border: 1.5px solid #0f1840;
+  border-radius: 12px;           /* full pill */
+  color: rgba(200,220,255,0.8);
+  font-size: 8px;
+  font-weight: 700;
+  font-family: Arial, sans-serif;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #09113a, inset 0 1px 0 rgba(255,255,255,0.12);
+}
+.nokiaSoftKey:hover  { background: linear-gradient(180deg, #3554b0 0%, #223888 100%); }
+.nokiaSoftKey:active { background: #1a2040; box-shadow: none; transform: translateY(3px); }
+
+/* Call keys — classic Nokia oval shape */
+.nokiaCallBtns { display: flex; gap: 6px; }
+.nokiaCallBtn  {
+  width: 28px;
+  height: 24px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(0,0,0,0.45);
+  cursor: pointer;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.nokiaCallBtn:active { transform: translateY(3px); box-shadow: none; }
+
+/* ── Numpad — rounded rectangle keys like Nokia 3310 ───────────────────── */
+.nokiaNumpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  width: 100%;
+  padding: 4px 14px 6px;
+  box-sizing: border-box;
+}
+
+.nokiaNumKey {
+  height: 24px;
+  background: linear-gradient(180deg, #2c4490 0%, #1a2c6e 100%);
+  border: 1.5px solid #0f1840;
+  border-radius: 8px;            /* gently rounded rectangle */
+  color: rgba(200,220,255,0.75);
+  font-size: 10px;
+  font-weight: 700;
+  font-family: Arial, sans-serif;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #09113a, inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.nokiaNumKey:hover  { background: linear-gradient(180deg, #3554b0 0%, #223888 100%); }
+.nokiaNumKey:active { background: #1a2040; box-shadow: none; transform: translateY(3px); }
+
+/* Bottom chin of phone */
+.nokiaChin {
+  height: 16px;
+  width: 100%;
+  background: #162348;
+  border-radius: 0 0 28px 28px;
+  border-top: 2px solid #0d1830;
+}

@@ -122,36 +122,77 @@ const I = {
       <circle cx="22" cy="22" r="13" fill="none" stroke="white" strokeWidth="1.5"/>
     </svg>
   ),
-  trash: (
-    <MacIcon top="#aeaeb2" bottom="#6c6c70">
-      <path d="M11 14H33M20 10H24M13 14L15 36H29L31 14" stroke="rgba(255,255,255,0.9)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-      <path d="M19 19V31M22 19V31M25 19V31" stroke="rgba(255,255,255,0.6)" strokeWidth="1.3" strokeLinecap="round"/>
+  trashEmpty: (
+    <MacIcon top="#b0b0b8" bottom="#70707a">
+      {/* Lid handle */}
+      <path d="M19 10.5H25" stroke="rgba(255,255,255,0.9)" strokeWidth="2" strokeLinecap="round"/>
+      {/* Lid bar */}
+      <rect x="10" y="13" width="24" height="3" rx="1.5" fill="rgba(255,255,255,0.82)"/>
+      {/* Can body — tapers slightly at bottom */}
+      <path d="M13.5 16 L15.5 36 Q15.5 37.5 22 37.5 Q28.5 37.5 28.5 36 L30.5 16 Z"
+        fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.78)" strokeWidth="1.6" strokeLinejoin="round"/>
+      {/* Vertical ribs */}
+      <path d="M19.5 18.5 L19 34 M22 18.5 L22 34 M24.5 18.5 L25 34"
+        stroke="rgba(255,255,255,0.38)" strokeWidth="1.2" strokeLinecap="round"/>
+    </MacIcon>
+  ),
+  trashFull: (
+    <MacIcon top="#b0b0b8" bottom="#70707a">
+      {/* Papers sticking out above lid */}
+      <rect x="16.5" y="6" width="3.5" height="7.5" rx="1" fill="rgba(255,255,255,0.72)" transform="rotate(-8 16.5 6)"/>
+      <rect x="20.5" y="5.5" width="3.5" height="8" rx="1" fill="rgba(255,255,255,0.85)"/>
+      <rect x="24" y="6.5" width="3.5" height="7" rx="1" fill="rgba(255,255,255,0.65)" transform="rotate(7 24 6.5)"/>
+      {/* Lid handle */}
+      <path d="M19 12H25" stroke="rgba(255,255,255,0.9)" strokeWidth="2" strokeLinecap="round"/>
+      {/* Lid bar */}
+      <rect x="10" y="14.5" width="24" height="3" rx="1.5" fill="rgba(255,255,255,0.82)"/>
+      {/* Can body */}
+      <path d="M13.5 17.5 L15.5 37.5 Q15.5 39 22 39 Q28.5 39 28.5 37.5 L30.5 17.5 Z"
+        fill="rgba(255,255,255,0.16)" stroke="rgba(255,255,255,0.78)" strokeWidth="1.6" strokeLinejoin="round"/>
+      {/* Vertical ribs */}
+      <path d="M19.5 20 L19 35 M22 20 L22 35 M24.5 20 L25 35"
+        stroke="rgba(255,255,255,0.38)" strokeWidth="1.2" strokeLinecap="round"/>
     </MacIcon>
   ),
   doom: (
-    <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
-      <rect width="44" height="44" rx="11" fill="#1a0000"/>
-      <rect width="44" height="20" rx="11" fill="rgba(180,0,0,0.18)"/>
-      <text x="22" y="29" textAnchor="middle" fill="#cc2200"
-        fontSize="15" fontWeight="900"
-        fontFamily="'Impact','Arial Black',sans-serif">
-        DOOM
-      </text>
-      <circle cx="22" cy="36" r="3.5" fill="#cc2200" opacity="0.85"/>
-      <circle cx="14" cy="35" r="2.2" fill="#880000" opacity="0.7"/>
-      <circle cx="30" cy="35" r="2.2" fill="#880000" opacity="0.7"/>
-    </svg>
+    <img
+      src="/doom-icon.png"
+      alt="DOOM"
+      width="44"
+      height="44"
+      style={{ width: 44, height: 44, borderRadius: 10, display: 'block', objectFit: 'cover' }}
+      onError={(e) => {
+        // Fallback SVG if PNG not yet added
+        const el = e.target as HTMLImageElement;
+        el.style.display = 'none';
+        const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+        svg.setAttribute('viewBox','0 0 44 44');
+        svg.setAttribute('width','44');
+        svg.setAttribute('height','44');
+        svg.innerHTML = `<rect width="44" height="44" rx="11" fill="#0a0000"/>
+          <text x="22" y="29" text-anchor="middle" fill="#cc2200"
+            font-size="15" font-weight="900" font-style="italic"
+            font-family="Impact,Arial Black,sans-serif">DOOM</text>`;
+        el.parentElement?.appendChild(svg);
+      }}
+    />
   ),
   snake: (
     <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
-      <rect width="44" height="44" rx="11" fill="#081408"/>
-      <rect width="44" height="20" rx="11" fill="rgba(48,209,88,0.08)"/>
-      <path d="M8 34 Q8 26 14 26 Q20 26 20 20 Q20 14 26 14 Q32 14 32 20 Q32 26 37 26"
-        stroke="#1d5e2e" strokeWidth="5" strokeLinecap="round" fill="none"/>
-      <circle cx="37" cy="26" r="4.5" fill="#30d158"/>
-      <circle cx="35.5" cy="24.5" r="1.2" fill="#081408"/>
-      <circle cx="38.5" cy="24.5" r="1.2" fill="#081408"/>
-      <circle cx="8" cy="34" r="3" fill="#ff453a"/>
+      <rect width="44" height="44" rx="11" fill="#0a1f0a"/>
+      <rect width="44" height="20" rx="11" fill="rgba(48,209,88,0.06)"/>
+      {/* Body — thick sinuous S-curve */}
+      <path d="M10 36 Q10 26 18 26 Q26 26 26 18 Q26 10 34 10"
+        stroke="#1d5e2e" strokeWidth="7" strokeLinecap="round" fill="none"/>
+      {/* Head — triangular/elongated pointing right */}
+      <ellipse cx="36" cy="10" rx="5.5" ry="4" fill="#30d158" transform="rotate(-35 36 10)"/>
+      {/* Eyes */}
+      <circle cx="37.5" cy="7.5" r="1.3" fill="#081408"/>
+      {/* Tongue */}
+      <path d="M40 11 L43 10 M43 10 L43 8.5 M43 10 L43 11.5"
+        stroke="#ff453a" strokeWidth="0.9" strokeLinecap="round"/>
+      {/* Apple food */}
+      <text x="10" y="40" fontSize="11" textAnchor="middle">🍎</text>
     </svg>
   ),
   slotslop: (
@@ -168,8 +209,8 @@ const I = {
         </linearGradient>
       </defs>
       {/* T3 wordmark — bold T and 3 */}
-      <text x="22" y="30" textAnchor="middle" fill="url(#t3rainbow)"
-        fontSize="20" fontWeight="900"
+      <text x="22" y="32" textAnchor="middle" fill="url(#t3rainbow)"
+        fontSize="26" fontWeight="900"
         fontFamily="'Helvetica Neue', Arial, Helvetica, sans-serif">
         T3
       </text>
@@ -214,7 +255,7 @@ function MinimizedSlot({ win }: { win: WindowInstance }) {
   const iconMap: Record<string, React.ReactNode> = {
     about: I.about, experience: I.experience, skills: I.skills,
     contact: I.contact, location: I.location, terminal: I.terminal,
-    finder: I.finder, trash: I.trash, cv: I.cv,
+    finder: I.finder, trash: I.trashEmpty, cv: I.cv,
     github: I.github, githubapp: I.github, safari: I.safari,
   };
   return (
@@ -251,7 +292,8 @@ const DESKTOP_ONLY = new Set(['doom', 'snake']);
 
 /* ─── Dock ────────────────────────────────────────────────────────────── */
 export default function Dock({ bouncingKeys, onItemActivate, trashHighlighted }: DockProps = {}) {
-  const { openApp, windows } = useDesktop();
+  const { openApp, windows, trashedItems, trashEmptied } = useDesktop();
+  const trashHasItems = !trashEmptied && trashedItems.length > 0;
 
   const [order,       setOrder]       = useState<string[]>(DEFAULT_ORDER);
   const [dragKey,     setDragKey]     = useState<string | null>(null);
@@ -270,17 +312,20 @@ export default function Dock({ bouncingKeys, onItemActivate, trashHighlighted }:
   // Track which keys are newly appeared so we can play the spring animation
   const prevRunningRef = useRef<Set<string>>(new Set());
   const [newKeys, setNewKeys] = useState<Set<string>>(new Set());
+  // Use a stable string so the effect only re-runs when the set actually changes
+  const runningKey = runningDesktopKeys.join(',');
   useEffect(() => {
-    const prev = prevRunningRef.current;
-    const added = new Set(runningDesktopKeys.filter(k => !prev.has(k)));
+    const current = new Set(runningDesktopKeys);
+    const prev    = prevRunningRef.current;
+    const added   = new Set([...current].filter(k => !prev.has(k)));
+    prevRunningRef.current = current; // always update — prevents the infinite-loop bug
     if (added.size > 0) {
       setNewKeys(added);
-      // Clear the "new" flag after animation completes
       const t = setTimeout(() => setNewKeys(new Set()), 500);
       return () => clearTimeout(t);
     }
-    prevRunningRef.current = new Set(runningDesktopKeys);
-  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [runningKey]);
 
   const KEY_TO_APPID: Record<string, string> = { github: 'githubapp' };
   function hasOpen(key: string) {
@@ -412,8 +457,8 @@ export default function Dock({ bouncingKeys, onItemActivate, trashHighlighted }:
 
         <div className={styles.sep} />
 
-        {/* Fixed — Trash */}
-        {renderItem('trash', 'Trash', I.trash, false, !!trashHighlighted)}
+        {/* Fixed — Trash (icon changes when items present) */}
+        {renderItem('trash', 'Trash', trashHasItems ? I.trashFull : I.trashEmpty, false, !!trashHighlighted)}
 
         {minimizedWindows.length > 0 && (
           <>

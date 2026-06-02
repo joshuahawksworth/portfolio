@@ -2,11 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import styles from './SnakeApp.module.css';
 
 const COLS = 20;
-const ROWS = 20;
+const ROWS = 18;
 const TICK = 115;
-const CELL = 20;
-const W    = COLS * CELL;
-const H    = ROWS * CELL;
+const CELL = 16;
+export const SNAKE_W = COLS * CELL;  // 320
+export const SNAKE_H = ROWS * CELL;  // 288
 
 type Phase = 'idle' | 'playing' | 'dead';
 type Dir   = 'U' | 'D' | 'L' | 'R';
@@ -22,43 +22,64 @@ function randPt(snake: Pt[]): Pt {
   return p;
 }
 
+let appleCache: HTMLCanvasElement | null = null;
+function getAppleCanvas(size: number): HTMLCanvasElement {
+  if (!appleCache || appleCache.width !== size) {
+    appleCache = document.createElement('canvas');
+    appleCache.width  = size;
+    appleCache.height = size;
+    const ctx = appleCache.getContext('2d')!;
+    ctx.font = `${size - 2}px serif`;
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🍎', size / 2, size / 2 + 1);
+  }
+  return appleCache;
+}
+
 function draw(canvas: HTMLCanvasElement, snake: Pt[], food: Pt) {
   const ctx = canvas.getContext('2d')!;
-  ctx.fillStyle = '#0d1117';
-  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#8bac0f';
+  ctx.fillRect(0, 0, SNAKE_W, SNAKE_H);
 
-  ctx.strokeStyle = 'rgba(25,55,25,0.6)';
-  ctx.lineWidth = 0.5;
+  ctx.strokeStyle = 'rgba(100,130,0,0.3)';
+  ctx.lineWidth = 0.4;
   for (let i = 1; i < COLS; i++) {
-    ctx.beginPath(); ctx.moveTo(i * CELL, 0); ctx.lineTo(i * CELL, H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(i * CELL, 0); ctx.lineTo(i * CELL, SNAKE_H); ctx.stroke();
   }
   for (let i = 1; i < ROWS; i++) {
-    ctx.beginPath(); ctx.moveTo(0, i * CELL); ctx.lineTo(W, i * CELL); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, i * CELL); ctx.lineTo(SNAKE_W, i * CELL); ctx.stroke();
   }
 
-  // Body
-  ctx.fillStyle = '#1d5e2e';
+  ctx.fillStyle = '#306230';
   for (let i = 1; i < snake.length; i++) {
     const { x, y } = snake[i];
     ctx.fillRect(x * CELL + 1, y * CELL + 1, CELL - 2, CELL - 2);
   }
 
-  // Head
-  ctx.fillStyle = '#30d158';
-  ctx.fillRect(snake[0].x * CELL + 1, snake[0].y * CELL + 1, CELL - 2, CELL - 2);
+  ctx.fillStyle = '#0f380f';
+  const { x: hx, y: hy } = snake[0];
+  ctx.fillRect(hx * CELL + 1, hy * CELL + 1, CELL - 2, CELL - 2);
 
-  // Food
-  ctx.fillStyle = '#ff453a';
-  ctx.beginPath();
-  ctx.arc(food.x * CELL + CELL / 2, food.y * CELL + CELL / 2, CELL / 2 - 2, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.drawImage(getAppleCanvas(CELL), food.x * CELL, food.y * CELL, CELL, CELL);
 }
 
-export default function SnakeApp() {
+// Props shape used both standalone and from NokiaWindow
+export interface SnakeAppProps {
+  onPushDir?: (cb: (d: Dir) => void) => void;
+  onStartGame?: (cb: () => void) => void;
+  hideDpad?: boolean;
+  props?: Record<string, unknown>;
+}
+
+export default function SnakeApp({ onPushDir, onStartGame, hideDpad, props: outerProps }: SnakeAppProps) {
+  // Support hideDpad via generic props when rendered from window system
+  const shouldHideDpad = hideDpad ?? (outerProps?.hideDpad === true);
+
   const wrapRef   = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const snakeRef  = useRef<Pt[]>([{ x: 10, y: 10 }]);
+  const snakeRef  = useRef<Pt[]>([{ x: 10, y: 9 }]);
   const foodRef   = useRef<Pt>({ x: 5, y: 5 });
   const dirRef    = useRef<Dir>('R');
   const queueRef  = useRef<Dir[]>([]);
@@ -78,7 +99,7 @@ export default function SnakeApp() {
   }
 
   function startGame() {
-    const snake = [{ x: 10, y: 10 }, { x: 9, y: 10 }, { x: 8, y: 10 }];
+    const snake = [{ x: 10, y: 9 }, { x: 9, y: 9 }, { x: 8, y: 9 }];
     const food  = randPt(snake);
     snakeRef.current = snake;
     foodRef.current  = food;
@@ -107,6 +128,19 @@ export default function SnakeApp() {
     e.preventDefault();
     pushDir(d);
   }
+
+  // Keep latest versions in refs so the stable wrappers below always call current closures
+  const pushDirRef2   = useRef(pushDir);
+  const startGameRef2 = useRef(startGame);
+  pushDirRef2.current   = pushDir;
+  startGameRef2.current = startGame;
+
+  // Expose stable wrappers to NokiaWindow once on mount — never re-runs
+  useEffect(() => {
+    onPushDir?.((d) => pushDirRef2.current(d));
+    onStartGame?.(() => startGameRef2.current());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (canvasRef.current) draw(canvasRef.current, snakeRef.current, foodRef.current);
@@ -151,36 +185,40 @@ export default function SnakeApp() {
   }, []);
 
   return (
-    <div ref={wrapRef} className={styles.root} tabIndex={0} onKeyDown={handleKey}>
-      <div className={styles.hud}>
-        <span>Score <b>{score}</b></span>
-        <span className={styles.title}>SNAKE</span>
-        <span>Best <b>{best}</b></span>
+    <div ref={wrapRef} className={styles.gameArea} tabIndex={0} onKeyDown={handleKey}>
+      {/* Status bar */}
+      <div className={styles.statusBar}>
+        <span>{score}</span>
+        <span className={styles.gameName}>SNAKE</span>
+        <span>HI: {best}</span>
       </div>
 
+      {/* Canvas */}
       <div className={styles.canvasWrap}>
-        <canvas ref={canvasRef} width={W} height={H} className={styles.canvas} />
+        <canvas ref={canvasRef} width={SNAKE_W} height={SNAKE_H} className={styles.canvas} />
         {phase !== 'playing' && (
           <div className={styles.overlay}>
             {phase === 'dead' && <p className={styles.gameOver}>GAME OVER</p>}
             {phase === 'dead' && <p className={styles.deathScore}>{score}</p>}
             <button className={styles.playBtn} onClick={startGame}>
-              {phase === 'idle' ? '▶  Start Game' : '▶  Play Again'}
+              {phase === 'idle' ? '▶  START' : '▶  AGAIN'}
             </button>
-            <p className={styles.hint}>Arrow keys · WASD to move</p>
           </div>
         )}
       </div>
 
-      <div className={styles.dpad}>
-        <button className={styles.dpadBtn} onPointerDown={e => { e.preventDefault(); pushDir('U'); }}>▲</button>
-        <div className={styles.dpadRow}>
-          <button className={styles.dpadBtn} onPointerDown={e => { e.preventDefault(); pushDir('L'); }}>◄</button>
-          <div className={styles.dpadCenter} />
-          <button className={styles.dpadBtn} onPointerDown={e => { e.preventDefault(); pushDir('R'); }}>►</button>
+      {/* D-pad — shown on mobile / non-Nokia usage */}
+      {!shouldHideDpad && (
+        <div className={styles.dpad}>
+          <button className={styles.dpadBtn} onPointerDown={e => { e.preventDefault(); pushDir('U'); }}>▲</button>
+          <div className={styles.dpadRow}>
+            <button className={styles.dpadBtn} onPointerDown={e => { e.preventDefault(); pushDir('L'); }}>◄</button>
+            <div className={styles.dpadCenter} />
+            <button className={styles.dpadBtn} onPointerDown={e => { e.preventDefault(); pushDir('R'); }}>►</button>
+          </div>
+          <button className={styles.dpadBtn} onPointerDown={e => { e.preventDefault(); pushDir('D'); }}>▼</button>
         </div>
-        <button className={styles.dpadBtn} onPointerDown={e => { e.preventDefault(); pushDir('D'); }}>▼</button>
-      </div>
+      )}
     </div>
   );
 }

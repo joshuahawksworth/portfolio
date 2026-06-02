@@ -66,11 +66,30 @@
 
 .fileIcon { font-size: 20px; flex-shrink: 0; }
 
-.info { display: flex; flex-direction: column; gap: 2px; }
+.info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 
-.name { font-size: 13px; color: rgba(255,255,255,0.75); }
+.name { font-size: 13px; color: rgba(255,255,255,0.75); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .meta { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+.restoreBtn {
+  flex-shrink: 0;
+  padding: 3px 8px;
+  background: rgba(48, 209, 88, 0.1);
+  border: 1px solid rgba(48, 209, 88, 0.25);
+  border-radius: 5px;
+  color: rgba(48, 209, 88, 0.8);
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+  white-space: nowrap;
+}
+.restoreBtn:hover {
+  background: rgba(48, 209, 88, 0.2);
+  border-color: rgba(48, 209, 88, 0.45);
+  color: #30d158;
+}
 
 .note {
   padding: 12px 16px;

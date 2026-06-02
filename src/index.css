@@ -7,6 +7,9 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Prevent Samsung Internet / forced-dark-mode from recolouring anything */
+  color-scheme: only light;
 }
 
 *,

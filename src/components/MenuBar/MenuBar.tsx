@@ -21,8 +21,22 @@ export default function MenuBar() {
     <div className={styles.bar}>
       <title>{appName} — Josh Hawksworth</title>
       <div className={styles.left}>
-        <svg className={styles.apple} viewBox="0 0 24 24" fill="currentColor" aria-label="Apple">
-          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.37 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+        {/* JH logo — white square background, dark letters (yellow→white, dark→dark) */}
+        <svg
+          viewBox="0 0 212 212"
+          width="16"
+          height="16"
+          className={styles.apple}
+          aria-label="JH"
+          style={{ borderRadius: 3 }}
+        >
+          {/* White square replacing the original yellow */}
+          <rect width="212" height="212" fill="rgba(255,255,255,0.90)" rx="16"/>
+          {/* JH letters in dark — same as original logo but on white bg */}
+          <path
+            d="m 64.986601,198.54254 c 17.955449,0 30.263619,-9.55694 30.263619,-30.55323 V 98.773958 H 74.97794 v 68.925752 c 0,10.13614 -4.199258,12.74258 -10.860151,12.74258 -6.950496,0 -9.846536,-4.77847 -13.03218,-10.42575 l -16.507428,9.99134 c 4.778466,10.13614 14.190596,18.53466 30.40842,18.53466 z m 49.811939,-1.30322 h 20.27228 V 167.2653 h 42.13738 v 29.97402 h 20.27228 V 98.773958 H 177.2082 V 149.16505 H 135.07082 V 98.773958 h -20.27228 z"
+            fill="#1a1a1a"
+          />
         </svg>
         <span className={styles.appName}>{appName}</span>
         {['File', 'View', 'Window', 'Help'].map(m => (

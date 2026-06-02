@@ -85,7 +85,23 @@ function cascadePosition(idx: number, w: number, h: number) {
 /** Folder created by the user on the desktop, shared via context so Finder can see it */
 export interface DesktopFolder { id: string; label: string }
 
-export interface TrashedItem { id: string; name: string; date: string }
+export interface TrashedItem { id: string; name: string; date: string; isJoke?: boolean; content?: string }
+
+// Joke items live in context so restoreItem() can find and remove them
+const JOKE_TRASH: TrashedItem[] = [
+  { id: 'joke-jquery', name: 'jQuery.js', date: '2019', isJoke: true,
+    content: `// jQuery v1.11.3 — "Because we had no choice"\n(function( global, factory ) {\n  if ( typeof module === 'object' ) {\n    module.exports = factory( global );\n  } else {\n    factory( global );\n  }\n}(window, function( window ) {\n  // TODO: migrate to vanilla JS... next sprint, promise\n  console.log('jQuery loaded. I am so sorry.');\n}));` },
+  { id: 'joke-confusion', name: 'var let const confusion.txt', date: '2020', isJoke: true,
+    content: `My notes on JavaScript variable declarations:\n\nvar   - hoisted, function-scoped, can be redeclared. Why? ¯\\_(ツ)_/¯\nlet   - block-scoped, temporal dead zone. OK actually fine.\nconst - block-scoped, immutable binding (not the value!). Use this.\n\nTODO: stop using var\nStatus: still using var in production (2020)\nStatus: still using var in production (2021)\nStatus: stopped, had a stern talk with myself` },
+  { id: 'joke-index', name: 'index2_FINAL_v3.html', date: '2021', isJoke: true,
+    content: `<!DOCTYPE html>\n<html>\n<head>\n  <title>My Portfolio (FINAL - this is the real one)</title>\n  <!-- index.html was the draft -->\n  <!-- index_v2.html was the "good" draft -->\n  <!-- this one is FINAL. Do NOT edit. -->\n  <!-- note: edited 47 times since calling it FINAL -->\n</head>\n<body>\n  <h1>Hi, I am a developer</h1>\n  <!-- TODO: say something more interesting -->\n</body>\n</html>` },
+  { id: 'joke-console', name: 'console.log("here").js', date: '2022', isJoke: true,
+    content: `// Debug session: 3 hours, 47 minutes\n// Root cause: off-by-one error in line 12\n\nconsole.log("here");\nconsole.log("here 2");\nconsole.log("HERE");\nconsole.log("HERE??");\nconsole.log("why");\nconsole.log(data);\n// spoiler: it was not the API\nconsole.log(typeof undefined); // "undefined" ← found it` },
+  { id: 'joke-spaghetti', name: 'spaghetti-code.ts', date: '2023', isJoke: true,
+    content: `// Written at 2am before a deadline\n// Do not touch. It works. Nobody knows why.\n\nexport function doTheThing(x: any, y?: any, z?: any) {\n  if (x) {\n    if (y) {\n      if (z) { return x + y + z; // trust me\n      } else { return x + y; }\n    } else {\n      if (z) { return x + z; }\n    }\n  } else {\n    if (y && z) { return y + z || x || 0; // don't ask\n    }\n  }\n  return null; // :)\n}` },
+  { id: 'joke-todo', name: 'TODO_do_this_later.md', date: '2024', isJoke: true,
+    content: `# TODO: Do This Later\n\nCreated: January 2024\n\n## High Priority\n- [ ] Refactor auth module\n- [ ] Write tests (lol)\n- [ ] Update dependencies\n\n## Medium Priority\n- [ ] Do the thing from last sprint\n- [ ] Reply to that Slack message\n\n## Low Priority (realistically: never)\n- [ ] Document everything\n- [ ] Remove all console.logs\n- [ ] Actually learn Docker properly\n\n---\n*Est. completion: Q3 2024*\n*Actual completion: ¯\\_(ツ)_/¯*` },
+];
 
 interface DesktopCtx {
   windows: WindowInstance[];
@@ -103,6 +119,9 @@ interface DesktopCtx {
   trashEmptied: boolean;
   trashItem: (item: TrashedItem) => void;
   emptyTrash: () => void;
+  restoreItem: (id: string) => void;
+  restoredItemQueue: TrashedItem[];
+  ackRestoredItem: (id: string) => void;
 }
 
 export const DesktopContext = createContext<DesktopCtx | null>(null);
@@ -137,8 +156,10 @@ export function DesktopProvider({
   const [focusedId, setFocusedId] = useState<string | null>(() => startWithAbout ? 'about-0' : null);
   const [desktopFolders, setDesktopFolders] = useState<DesktopFolder[]>([]);
   const syncDesktopFolders = useCallback((folders: DesktopFolder[]) => setDesktopFolders(folders), []);
-  const [trashedItems,  setTrashedItems]  = useState<TrashedItem[]>([]);
-  const [trashEmptied, setTrashEmptied]  = useState(false);
+  const [trashedItems,      setTrashedItems]      = useState<TrashedItem[]>(JOKE_TRASH);
+  const [trashEmptied,     setTrashEmptied]     = useState(false);
+  const [restoredItemQueue, setRestoredItemQueue] = useState<TrashedItem[]>([]);
+
   const trashItem  = useCallback((item: TrashedItem) => {
     setTrashedItems(p => [...p, item]);
     setTrashEmptied(false);
@@ -146,6 +167,16 @@ export function DesktopProvider({
   const emptyTrash = useCallback(() => {
     setTrashedItems([]);
     setTrashEmptied(true);
+  }, []);
+  const restoreItem = useCallback((id: string) => {
+    setTrashedItems(prev => {
+      const item = prev.find(i => i.id === id);
+      if (item) setRestoredItemQueue(q => [...q, item]);
+      return prev.filter(i => i.id !== id);
+    });
+  }, []);
+  const ackRestoredItem = useCallback((id: string) => {
+    setRestoredItemQueue(prev => prev.filter(i => i.id !== id));
   }, []);
   const counter = useRef(1);
 
@@ -246,6 +277,7 @@ export function DesktopProvider({
       openApp, closeWindow, minimizeWindow, focusWindow, moveWindow, resizeWindow, toggleMaximize,
       desktopFolders, syncDesktopFolders,
       trashedItems, trashEmptied, trashItem, emptyTrash,
+      restoreItem, restoredItemQueue, ackRestoredItem,
     }}>
       {children}
     </DesktopContext.Provider>

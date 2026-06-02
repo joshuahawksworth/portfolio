@@ -24,12 +24,12 @@
 }
 
 .apple {
-  width: 14px;
-  height: 14px;
-  color: rgba(255,255,255,0.9);
+  width: 15px;
+  height: 15px;
   cursor: default;
   flex-shrink: 0;
   display: block;
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .appName {

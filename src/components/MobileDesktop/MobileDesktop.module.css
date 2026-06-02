@@ -7,9 +7,10 @@
   flex-direction: column;
 
   background:
-    radial-gradient(ellipse at 18% 25%, rgba(59,100,220,0.22) 0%, transparent 48%),
-    radial-gradient(ellipse at 80% 70%, rgba(120,60,200,0.15) 0%, transparent 45%),
-    linear-gradient(175deg, #06090f 0%, #0d1628 50%, #06090f 100%);
+    radial-gradient(ellipse at 18% 25%, rgba(80,130,255,0.38) 0%, transparent 52%),
+    radial-gradient(ellipse at 82% 65%, rgba(140,70,220,0.28) 0%, transparent 48%),
+    radial-gradient(ellipse at 50% 100%, rgba(30,60,160,0.35) 0%, transparent 55%),
+    linear-gradient(175deg, #0e1830 0%, #192e50 45%, #0e1830 100%);
 }
 
 .screen::after {
@@ -18,13 +19,13 @@
   bottom: 0; left: 0; right: 0;
   height: 30%;
   pointer-events: none;
-  background: linear-gradient(to top, #07090e 0%, transparent 100%);
+  background: linear-gradient(to top, #0b1428 0%, transparent 100%);
   clip-path: polygon(
     0 100%, 0 72%, 5% 55%, 10% 68%, 15% 48%, 20% 62%, 26% 40%,
     32% 55%, 37% 38%, 43% 52%, 48% 32%, 54% 50%, 59% 36%,
     65% 53%, 70% 38%, 76% 55%, 81% 42%, 87% 60%, 93% 50%, 100% 60%, 100% 100%
   );
-  opacity: 0.9;
+  opacity: 0.7;
 }
 
 /* ── Status bar ─────────────────────────────────────── */
@@ -90,6 +91,16 @@
 .iconItem:active {
   transform: scale(0.88);
   background: rgba(255,255,255,0.08);
+}
+
+.tricksterItem {
+  animation: tricksterPop 0.22s ease-out both;
+}
+
+@keyframes tricksterPop {
+  0%   { transform: scale(0.65); opacity: 0.4; }
+  65%  { transform: scale(1.1);  opacity: 1;   }
+  100% { transform: scale(1);    opacity: 1;   }
 }
 
 .iconLabel {
