@@ -1,94 +1,75 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import styles from './SafariApp.module.css';
 
-const HOME = 'https://www.apple.com/safari/';
+const HOME = 'https://www.google.com';
 
 function proxyUrl(url: string) {
   return `/api/browser-proxy?url=${encodeURIComponent(url)}`;
 }
 
-export default function SafariApp({ props: _ }: { props?: Record<string, unknown> }) {
-  const [historyStack, setHistoryStack] = useState<string[]>([HOME]);
-  const [histIdx,      setHistIdx]      = useState(0);
-  const [inputUrl,     setInputUrl]     = useState(HOME);
-  const [loading,      setLoading]      = useState(true);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+export default function SafariApp({ props }: { props?: Record<string, unknown> }) {
+  const start = (props?.url as string | undefined) ?? HOME;
+  const [stack,    setStack]    = useState<string[]>([start]);
+  const [idx,      setIdx]      = useState(0);
+  const [inputUrl, setInputUrl] = useState(start);
+  const [loading,  setLoading]  = useState(true);
 
-  const currentUrl = historyStack[histIdx];
+  // Always-fresh refs so the message listener never has a stale closure
+  const stackRef   = useRef(stack);
+  const idxRef     = useRef(idx);
+  useEffect(() => { stackRef.current = stack; }, [stack]);
+  useEffect(() => { idxRef.current   = idx;   }, [idx]);
 
-  // Update address bar when history changes
+  const currentUrl = stack[idx];
+
   useEffect(() => { setInputUrl(currentUrl); }, [currentUrl]);
 
-  // Listen for navigation messages relayed from the injected script inside the iframe
+  const navigate = useCallback((raw: string) => {
+    let url = raw.trim();
+    if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+    const cur = idxRef.current;
+    setStack(prev => [...prev.slice(0, cur + 1), url]);
+    setIdx(cur + 1);
+    setLoading(true);
+  }, []);
+
+  // Register once; always calls the stable navigate callback
   useEffect(() => {
     function onMessage(e: MessageEvent) {
       if (e.data?.type !== '__browse__') return;
-      const url: string = e.data.url;
-      if (!url || url === currentUrl) return;
+      const url: string = e.data.url ?? '';
+      if (!url || url === stackRef.current[idxRef.current]) return;
       navigate(url);
     }
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUrl, histIdx, historyStack]);
+  }, [navigate]);
 
-  const navigate = useCallback((url: string) => {
-    let full = url.trim();
-    if (!full.startsWith('http://') && !full.startsWith('https://')) {
-      full = 'https://' + full;
-    }
-    setHistoryStack(prev => {
-      const trimmed = prev.slice(0, histIdx + 1);
-      return [...trimmed, full];
-    });
-    setHistIdx(prev => prev + 1);
-    setLoading(true);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [histIdx]);
-
-  function goBack() {
-    if (histIdx > 0) { setHistIdx(h => h - 1); setLoading(true); }
-  }
-  function goForward() {
-    if (histIdx < historyStack.length - 1) { setHistIdx(h => h + 1); setLoading(true); }
-  }
-  function reload() {
-    setLoading(true);
-    if (iframeRef.current) {
-      iframeRef.current.src = proxyUrl(currentUrl);
-    }
-  }
+  function goBack()    { if (idx > 0)                   { setIdx(i => i - 1); setLoading(true); } }
+  function goForward() { if (idx < stack.length - 1)    { setIdx(i => i + 1); setLoading(true); } }
+  function reload()    { setLoading(true); setStack(s => [...s]); /* force iframe remount via key */ }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     navigate(inputUrl);
   }
 
-  const canBack    = histIdx > 0;
-  const canForward = histIdx < historyStack.length - 1;
-
   return (
     <div className={styles.root}>
-      {/* ── Browser chrome ── */}
+      {/* Browser chrome */}
       <div className={styles.chrome}>
         <div className={styles.navBtns}>
-          <button className={styles.navBtn} onClick={goBack} disabled={!canBack} aria-label="Back">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-              <path d="M10 3L5 8L10 13"/>
-            </svg>
+          <button className={styles.navBtn} onClick={goBack}    disabled={idx <= 0}               aria-label="Back">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M10 3L5 8L10 13"/></svg>
           </button>
-          <button className={styles.navBtn} onClick={goForward} disabled={!canForward} aria-label="Forward">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-              <path d="M6 3L11 8L6 13"/>
-            </svg>
+          <button className={styles.navBtn} onClick={goForward} disabled={idx >= stack.length - 1} aria-label="Forward">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M6 3L11 8L6 13"/></svg>
           </button>
           <button className={styles.navBtn} onClick={reload} aria-label="Reload">
-            <svg
-              width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-              strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
-              className={loading ? styles.navBtnSpin : ''}
-            >
-              <path d="M13.5 2.5A7 7 0 1 0 14 8"/><path d="M14 2.5V6h-3.5"/>
+            {/* Feather-icons "refresh-cw" — recognisable circular arrow */}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={loading ? styles.spin : ''}>
+              <polyline points="23 4 23 10 17 10"/>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
             </svg>
           </button>
         </div>
@@ -109,31 +90,20 @@ export default function SafariApp({ props: _ }: { props?: Record<string, unknown
           </div>
         </form>
 
-        <a
-          href={currentUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.newTabBtn}
-          title="Open in new tab"
-        >
+        <a href={currentUrl} target="_blank" rel="noopener noreferrer" className={styles.newTabBtn} title="Open in new tab">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9"/><path d="M10 2h4v4"/><path d="M14 2L8 8"/>
           </svg>
         </a>
       </div>
 
-      {/* ── Loading bar ── */}
       {loading && (
-        <div className={styles.loadingBar}>
-          <div className={styles.loadingFill}/>
-        </div>
+        <div className={styles.loadingBar}><div className={styles.loadingFill}/></div>
       )}
 
-      {/* ── Browser viewport ── */}
       <div className={styles.viewport}>
         <iframe
-          ref={iframeRef}
-          key={currentUrl}
+          key={`${currentUrl}-${idx}`}
           src={proxyUrl(currentUrl)}
           className={styles.iframe}
           title="Browser"

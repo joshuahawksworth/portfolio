@@ -18,7 +18,7 @@ import styles from './Desktop.module.css';
 const APP_COMPONENTS: Record<string, React.ComponentType<{ props?: Record<string, unknown> }>> = {
   about: AboutApp, experience: ExperienceApp, skills: SkillsApp,
   contact: ContactApp, location: LocationApp, terminal: TerminalApp,
-  finder: FinderApp, trash: TrashApp, safari: SafariApp,
+  finder: FinderApp, trash: TrashApp, safari: SafariApp, githubapp: SafariApp,
 };
 
 // ── Types ──────────────────────────────────────────────────────────────────

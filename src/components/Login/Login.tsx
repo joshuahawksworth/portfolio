@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useTime } from '../../hooks/useTime';
 import styles from './Login.module.css';
 
-interface Props { onLogin: () => void; onLiquidLogin: () => void }
+interface Props { onLogin: () => void; onLiquidLogin?: () => void }
 
 function Clock() {
   const now = useTime();
@@ -18,7 +18,7 @@ function Clock() {
   );
 }
 
-export default function Login({ onLogin, onLiquidLogin }: Props) {
+export default function Login({ onLogin, onLiquidLogin: _onLiquidLogin }: Props) {
   const [visible, setVisible] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const leavingRef = useRef(false);

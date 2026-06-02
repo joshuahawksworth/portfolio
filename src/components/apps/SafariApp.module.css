@@ -31,6 +31,9 @@
 .navBtn:disabled { opacity: 0.28; cursor: default; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin 0.7s linear infinite; transform-origin: center; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
 .navBtnSpin { animation: spin 0.7s linear infinite; }
 
 .urlForm { flex: 1; min-width: 0; }

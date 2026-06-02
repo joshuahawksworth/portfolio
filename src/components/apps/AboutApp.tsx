@@ -24,7 +24,8 @@ export default function AboutApp() {
         <p className={styles.bio}>
           Outside of work, I'm learning .NET Blazor through an automotive side project, enjoy
           keeping up with frontend tech, working on video game side projects, and daily code katas.
-          My office is supervised by Jiji, my cat and code reviewer. 🐈‍⬛
+          My office is supervised by Jiji, my cat and code reviewer.{' '}
+          <span style={{ fontFamily: '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif' }}>🐈‍⬛</span>
         </p>
 
         <div className={styles.actions}>

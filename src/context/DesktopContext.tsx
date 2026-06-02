@@ -28,6 +28,7 @@ export const APP_DEFAULTS: Record<string, { title: string; width: number; height
   finder:     { title: 'Finder',           width: 780,  height: 520 },
   trash:      { title: 'Trash',            width: 480,  height: 360 },
   safari:     { title: 'Safari',           width: 900,  height: 620 },
+  githubapp:  { title: 'GitHub',           width: 900,  height: 620 },
 };
 
 // Minimum resize bounds per app
@@ -41,6 +42,7 @@ export const APP_MIN: Record<string, { width: number; height: number }> = {
   finder:     { width: 460, height: 320 },
   trash:      { width: 320, height: 240 },
   safari:     { width: 600, height: 400 },
+  githubapp:  { width: 600, height: 400 },
 };
 
 // Per-app "zoom" target (green button) — bounded by screen at runtime
@@ -159,7 +161,9 @@ export function DesktopProvider({
     setWindows(prev => {
       const existing = props?.jobId
         ? prev.find(w => w.props?.jobId === props.jobId)
-        : (!props ? prev.find(w => w.appId === appId && !w.props?.jobId) : undefined);
+        : props?.url
+          ? prev.find(w => w.appId === appId && w.props?.url === props.url)
+          : (!props ? prev.find(w => w.appId === appId && !w.props?.jobId) : undefined);
 
       if (existing) {
         setFocusedId(existing.id);

@@ -9,22 +9,59 @@ const STRIP = new Set([
   'frame-options',
   'x-xss-protection',
   'transfer-encoding',
-  'content-encoding',   // Node fetch decompresses automatically; forwarding this causes ERR_CONTENT_DECODING_FAILED
+  'content-encoding',
 ]);
 
+// Injected at the very top of <head> so it runs before any site script.
+// Intercepts link clicks AND form submissions AND history.pushState/replaceState
+// and relays the destination URL to the parent frame for proxy navigation.
 const NAV_RELAY = `<script>
 (function(){
+  // Wrap history API so cross-origin SecurityErrors (e.g. Google calling
+  // replaceState with a google.com URL while our iframe origin is localhost)
+  // are caught silently instead of crashing the page before it renders.
+  var _push=history.pushState, _rep=history.replaceState;
+  history.pushState=function(s,t,u){try{_push.call(history,s,t,u);}catch(e){}};
+  history.replaceState=function(s,t,u){try{_rep.call(history,s,t,u);}catch(e){}};
+
+  function relay(url){
+    try{var abs=new URL(url,document.baseURI).href;window.parent.postMessage({type:'__browse__',url:abs},'*');}catch(e){}
+  }
+  // Link clicks (capture phase — fires before site handlers)
   document.addEventListener('click',function(e){
     var a=e.target&&e.target.closest&&e.target.closest('a[href]');
-    if(a){var href=a.getAttribute('href');
-      if(href&&href.indexOf('#')!==0&&href.indexOf('javascript:')!==0&&a.target!=='_blank'){
-        try{var abs=new URL(href,document.baseURI).href;
-          e.preventDefault();window.parent.postMessage({type:'__browse__',url:abs},'*');
-        }catch(ex){}}
+    if(a){var h=a.getAttribute('href');
+      if(h&&h[0]!=='#'&&h.indexOf('javascript:')!==0&&a.target!=='_blank'){
+        e.preventDefault();e.stopImmediatePropagation();relay(h);
+      }
     }
+  },true);
+  // GET form submissions (e.g. Google search box)
+  document.addEventListener('submit',function(e){
+    var f=e.target;
+    if((f.method||'get').toLowerCase()!=='get')return;
+    e.preventDefault();e.stopImmediatePropagation();
+    try{
+      var u=new URL(f.action||document.baseURI);
+      new FormData(f).forEach(function(v,k){u.searchParams.set(k,String(v));});
+      relay(u.href);
+    }catch(ex){}
   },true);
 })();
 </script>`;
+
+function processHtml(html: string, target: string): string {
+  // Strip inline CSP meta tags that would block our injected scripts
+  html = html.replace(/<meta[^>]+http-equiv=["']?content-security-policy["']?[^>]*\/?>/gi, '');
+  // Inject base + relay at the very top of <head>
+  const inject = `<base href="${target}">${NAV_RELAY}`;
+  if (/<head[^>]*>/i.test(html)) {
+    html = html.replace(/<head[^>]*>/i, m => `${m}${inject}`);
+  } else {
+    html = inject + html;
+  }
+  return html;
+}
 
 function browserProxyPlugin(): Plugin {
   return {
@@ -37,15 +74,13 @@ function browserProxyPlugin(): Plugin {
           if (!raw) { res.statusCode = 400; res.end('Missing url'); return; }
 
           const target = decodeURIComponent(raw);
-          new URL(target); // validate
+          new URL(target);
 
           const upstream = await fetch(target, {
             headers: {
-              'User-Agent':
-                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+              'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
               Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
               'Accept-Language': 'en-US,en;q=0.9',
-              'Cache-Control': 'no-cache',
             },
             redirect: 'follow',
           });
@@ -60,15 +95,7 @@ function browserProxyPlugin(): Plugin {
           res.setHeader('Access-Control-Allow-Origin', '*');
 
           if (ct.includes('text/html')) {
-            let html = await upstream.text();
-            const base = `<base href="${target}">`;
-            html = /<head[^>]*>/i.test(html)
-              ? html.replace(/<head[^>]*>/i, m => `${m}${base}`)
-              : base + html;
-            html = /<\/body>/i.test(html)
-              ? html.replace(/<\/body>/i, `${NAV_RELAY}</body>`)
-              : html + NAV_RELAY;
-
+            const html = processHtml(await upstream.text(), target);
             res.statusCode = upstream.status;
             res.setHeader('Content-Type', 'text/html; charset=utf-8');
             res.end(html);

@@ -100,34 +100,27 @@ const I = {
     </MacIcon>
   ),
   safari: (
-    <MacIcon top="#59c8fa" bottom="#007aff">
-      {/* Metallic bezel outer ring */}
-      <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1.8"/>
-      <circle cx="22" cy="22" r="16.8" fill="none" stroke="rgba(0,0,0,0.18)" strokeWidth="0.6"/>
-      {/* Compass face — deep blue overlay */}
-      <circle cx="22" cy="22" r="16" fill="rgba(0,45,110,0.42)"/>
-      {/* Cardinal tick marks */}
-      <line x1="22" y1="4.2"  x2="22" y2="8"    stroke="white"                  strokeWidth="1.8" strokeLinecap="round"/>
-      <line x1="22" y1="36"   x2="22" y2="39.8"  stroke="rgba(255,255,255,0.45)" strokeWidth="1.2" strokeLinecap="round"/>
-      <line x1="36"  y1="22"  x2="39.8" y2="22"  stroke="rgba(255,255,255,0.45)" strokeWidth="1.2" strokeLinecap="round"/>
-      <line x1="4.2" y1="22"  x2="8"    y2="22"  stroke="rgba(255,255,255,0.45)" strokeWidth="1.2" strokeLinecap="round"/>
-      {/* Intercardinal ticks */}
-      <line x1="34.9" y1="9.1"  x2="33.0" y2="11.0" stroke="rgba(255,255,255,0.28)" strokeWidth="0.9" strokeLinecap="round"/>
-      <line x1="9.1"  y1="9.1"  x2="11.0" y2="11.0" stroke="rgba(255,255,255,0.28)" strokeWidth="0.9" strokeLinecap="round"/>
-      <line x1="34.9" y1="34.9" x2="33.0" y2="33.0" stroke="rgba(255,255,255,0.28)" strokeWidth="0.9" strokeLinecap="round"/>
-      <line x1="9.1"  y1="34.9" x2="11.0" y2="33.0" stroke="rgba(255,255,255,0.28)" strokeWidth="0.9" strokeLinecap="round"/>
-      {/* Compass needle — diamond shape, NE-pointing, red north / white south */}
-      {/* Red (north → NE after rotation) */}
-      <polygon points="22,7.5 20.2,22 23.8,22" fill="#ff3830"             transform="rotate(45,22,22)"/>
-      {/* White (south → SW after rotation) */}
-      <polygon points="22,36.5 20.2,22 23.8,22" fill="rgba(255,255,255,0.88)" transform="rotate(45,22,22)"/>
-      {/* Highlight edge on red needle */}
-      <polygon points="22,7.5 20.2,22 22,22" fill="rgba(255,100,80,0.5)"  transform="rotate(45,22,22)"/>
-      {/* Center pivot cap */}
-      <circle cx="22" cy="22" r="2.2" fill="#3a3a3a"/>
-      <circle cx="22" cy="22" r="1.3" fill="#b0b0b0"/>
-      <circle cx="21.5" cy="21.5" r="0.5" fill="rgba(255,255,255,0.6)"/>
-    </MacIcon>
+    // Google Chrome icon — junctions at 2 o'clock (330°), 6 o'clock (90°), 10 o'clock (210°)
+    // so red is centred at 12 o'clock (top), yellow at 4 o'clock, green at 8 o'clock
+    <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
+      <rect width="44" height="44" rx="11" fill="white"/>
+      {/* Red — 210° → 330° clockwise, centred at top (270°) */}
+      <path d="M22 22 L5.55 12.5 A19 19 0 0 1 38.45 12.5 Z" fill="#EA4335"/>
+      {/* Yellow — 330° → 90° clockwise, centred at lower-right */}
+      <path d="M22 22 L38.45 12.5 A19 19 0 0 1 22 41 Z" fill="#FBBC05"/>
+      {/* Green — 90° → 210° clockwise, centred at lower-left */}
+      <path d="M22 22 L22 41 A19 19 0 0 1 5.55 12.5 Z" fill="#34A853"/>
+      {/* White inner ring covers the pie centres */}
+      <circle cx="22" cy="22" r="13" fill="white"/>
+      {/* White dividers: from inner edge (r=13) to outer edge (r=19) at each junction */}
+      <line x1="10.74" y1="15.5"  x2="5.55"  y2="12.5" stroke="white" strokeWidth="2"/>
+      <line x1="33.26" y1="15.5"  x2="38.45" y2="12.5" stroke="white" strokeWidth="2"/>
+      <line x1="22"    y1="35"    x2="22"    y2="41"    stroke="white" strokeWidth="2"/>
+      {/* Blue centre */}
+      <circle cx="22" cy="22" r="10.5" fill="#4285F4"/>
+      {/* White separator ring */}
+      <circle cx="22" cy="22" r="13" fill="none" stroke="white" strokeWidth="1.5"/>
+    </svg>
   ),
   trash: (
     <MacIcon top="#aeaeb2" bottom="#6c6c70">
@@ -195,7 +188,8 @@ function MinimizedSlot({ win }: { win: WindowInstance }) {
   const iconMap: Record<string, React.ReactNode> = {
     about: I.about, experience: I.experience, skills: I.skills,
     contact: I.contact, location: I.location, terminal: I.terminal,
-    finder: I.finder, trash: I.trash, cv: I.cv, github: I.github,
+    finder: I.finder, trash: I.trash, cv: I.cv,
+    github: I.github, githubapp: I.github, safari: I.safari,
   };
   return (
     <div className={styles.item}>
@@ -213,7 +207,7 @@ const DEFAULT_ORDER = ['github','safari','about','experience','skills','contact'
 
 const ALL_ITEMS_STATIC: Omit<Item, 'action'>[] = [
   { key: 'github',    label: 'GitHub',    icon: I.github },
-  { key: 'safari',    label: 'Safari',    icon: I.safari },
+  { key: 'safari',    label: 'Chrome',    icon: I.safari },
   { key: 'about',     label: 'About',     icon: I.about },
   { key: 'experience',label: 'Experience',icon: I.experience },
   { key: 'skills',    label: 'Skills',    icon: I.skills },
@@ -235,14 +229,16 @@ export default function Dock({ bouncingKey, onItemActivate, trashHighlighted }: 
 
   const minimizedWindows = windows.filter(w => w.minimized);
 
+  const KEY_TO_APPID: Record<string, string> = { github: 'githubapp' };
   function hasOpen(key: string) {
-    return windows.some(w => w.appId === key && !w.minimized);
+    const appId = KEY_TO_APPID[key] ?? key;
+    return windows.some(w => w.appId === appId && !w.minimized);
   }
 
   // Build Item with action for each key
   function makeAction(key: string): () => void {
     switch (key) {
-      case 'github':   return () => openApp('safari');
+      case 'github':   return () => openApp('githubapp', { url: 'https://github.com/joshuahawksworth' });
       case 'safari':   return () => openApp('safari');
       case 'cv':       return () => window.open('/JoshuaHawksworthCV.pdf', '_blank');
       case 'slotslop': return () => openApp('terminal', { autoRun: 'slotslop' });
