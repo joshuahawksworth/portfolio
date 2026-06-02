@@ -29,9 +29,10 @@ interface IconPos { x: number; y: number }
 
 interface DesktopItem {
   id: string;
-  type: 'job' | 'folder';
+  type: 'job' | 'folder' | 'app';
   label: string;
   jobId?: string;
+  appId?: string;
 }
 
 interface CtxMenu {
@@ -86,32 +87,49 @@ const ICON_GAP = 8;
 const BOUNCE_MS = 1450; // matches 1400ms animation + 50ms buffer
 
 // ── Helpers ────────────────────────────────────────────────────────────────
+const APP_SHORTCUTS: DesktopItem[] = [
+  { id: 'shortcut-doom',  type: 'app', label: 'DOOM',  appId: 'doom'  },
+  { id: 'shortcut-snake', type: 'app', label: 'Snake', appId: 'snake' },
+];
+
 function makeDefaultItems(): DesktopItem[] {
-  return jobsData.map(j => ({ id: j.id, type: 'job' as const, label: j.company, jobId: j.id }));
+  return [
+    ...APP_SHORTCUTS,
+    ...jobsData.map(j => ({ id: j.id, type: 'job' as const, label: j.company, jobId: j.id })),
+  ];
 }
 
 function initPositions(items: DesktopItem[]): Record<string, IconPos> {
-  const startX = window.innerWidth - ICON_W - 20;
+  const rightX = window.innerWidth - ICON_W - 20;
   const startY = 54;
-  return Object.fromEntries(
-    items.map((item, i) => [item.id, { x: startX, y: startY + i * (ICON_H + ICON_GAP) }])
-  );
+  const result: Record<string, IconPos> = {};
+  let leftI = 0, rightI = 0;
+  for (const item of items) {
+    if (item.type === 'app') {
+      result[item.id] = { x: 20, y: startY + leftI++ * (ICON_H + ICON_GAP) };
+    } else {
+      result[item.id] = { x: rightX, y: startY + rightI++ * (ICON_H + ICON_GAP) };
+    }
+  }
+  return result;
 }
 
 function computeCleanPositions(items: DesktopItem[], sortByName: boolean): Record<string, IconPos> {
-  const sorted = sortByName ? [...items].sort((a, b) => a.label.localeCompare(b.label)) : [...items];
+  const apps   = items.filter(i => i.type === 'app');
+  const others = items.filter(i => i.type !== 'app');
+  const sorted = sortByName ? [...others].sort((a, b) => a.label.localeCompare(b.label)) : [...others];
   const maxRows = Math.max(1, Math.floor((window.innerHeight - 110) / (ICON_H + ICON_GAP)));
   const startX = window.innerWidth - ICON_W - 20;
   const startY = 54;
-  return Object.fromEntries(
-    sorted.map((item, i) => [
-      item.id,
-      {
-        x: startX - Math.floor(i / maxRows) * (ICON_W + ICON_GAP),
-        y: startY + (i % maxRows) * (ICON_H + ICON_GAP),
-      },
-    ])
-  );
+  const result: Record<string, IconPos> = {};
+  apps.forEach((item, i) => { result[item.id] = { x: 20, y: startY + i * (ICON_H + ICON_GAP) }; });
+  sorted.forEach((item, i) => {
+    result[item.id] = {
+      x: startX - Math.floor(i / maxRows) * (ICON_W + ICON_GAP),
+      y: startY + (i % maxRows) * (ICON_H + ICON_GAP),
+    };
+  });
+  return result;
 }
 
 // ── Sub-components ─────────────────────────────────────────────────────────
@@ -122,6 +140,92 @@ function FolderIcon() {
         fill="#4a9eff" opacity="0.88"/>
       <path d="M2 9Q2 5 6 5L20 5L24 9L47 9Q49 9 49 11L49 14L2 14Z"
         fill="rgba(255,255,255,0.22)"/>
+    </svg>
+  );
+}
+
+function DoomIcon() {
+  return (
+    <svg viewBox="0 0 48 48" width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Background */}
+      <rect width="48" height="48" rx="10" fill="#060000"/>
+      {/* Hell glow */}
+      <radialGradient id="dg" cx="24" cy="36" r="18" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#8b0000" stopOpacity="0.55"/>
+        <stop offset="100%" stopColor="#060000" stopOpacity="0"/>
+      </radialGradient>
+      <rect width="48" height="48" rx="10" fill="url(#dg)"/>
+      {/* Demon skull */}
+      <ellipse cx="24" cy="19" rx="12" ry="11" fill="#1a0000"/>
+      {/* Left eye socket + glow */}
+      <ellipse cx="18.5" cy="18" rx="4" ry="3.5" fill="#b81200" opacity="0.7"/>
+      <ellipse cx="18.5" cy="18" rx="2.6" ry="2.2" fill="#ff3c00"/>
+      <circle  cx="18.5" cy="18" r="1.1"           fill="#110000"/>
+      {/* Right eye socket + glow */}
+      <ellipse cx="29.5" cy="18" rx="4" ry="3.5" fill="#b81200" opacity="0.7"/>
+      <ellipse cx="29.5" cy="18" rx="2.6" ry="2.2" fill="#ff3c00"/>
+      <circle  cx="29.5" cy="18" r="1.1"           fill="#110000"/>
+      {/* Nose */}
+      <path d="M22 22 L24 25 L26 22" fill="none" stroke="#3a0000" strokeWidth="1.2" strokeLinecap="round"/>
+      {/* Teeth */}
+      <rect x="17" y="26" width="2.2" height="3.5" rx="0.4" fill="#cc1800" opacity="0.65"/>
+      <rect x="21" y="26" width="2.2" height="3.5" rx="0.4" fill="#cc1800" opacity="0.65"/>
+      <rect x="25" y="26" width="2.2" height="3.5" rx="0.4" fill="#cc1800" opacity="0.65"/>
+      <rect x="29" y="26" width="2.2" height="3.5" rx="0.4" fill="#cc1800" opacity="0.65"/>
+      {/* DOOM text */}
+      <text x="24" y="44" textAnchor="middle"
+        fontFamily="Impact, Arial Black, sans-serif"
+        fontSize="13" fontWeight="900" letterSpacing="0.8"
+        fill="#cc1500">DOOM</text>
+    </svg>
+  );
+}
+
+function NokiaIcon() {
+  return (
+    <svg viewBox="0 0 48 48" width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Phone body */}
+      <rect x="9" y="1" width="30" height="46" rx="7" fill="#1c2233"/>
+      <rect x="10" y="2" width="28" height="44" rx="6" fill="#243044"/>
+      {/* Top speaker grill */}
+      <rect x="18" y="5" width="12" height="2" rx="1" fill="#161f2e"/>
+      {/* Screen bezel */}
+      <rect x="12" y="9" width="24" height="18" rx="2.5" fill="#0d0f0d"/>
+      {/* LCD screen */}
+      <rect x="13" y="10" width="22" height="16" rx="1.5" fill="#1c2c10"/>
+      {/* Snake game pixels on screen */}
+      {/* Snake head */}
+      <rect x="22" y="12" width="3" height="3" fill="#4ddd4d"/>
+      {/* Snake body */}
+      <rect x="19" y="12" width="3" height="3" fill="#35bb35"/>
+      <rect x="16" y="12" width="3" height="3" fill="#2aaa2a"/>
+      <rect x="16" y="15" width="3" height="3" fill="#2aaa2a"/>
+      <rect x="16" y="18" width="3" height="3" fill="#2aaa2a"/>
+      <rect x="19" y="18" width="3" height="3" fill="#2aaa2a"/>
+      <rect x="22" y="18" width="3" height="3" fill="#2aaa2a"/>
+      {/* Food */}
+      <rect x="30" y="13" width="2" height="2" fill="#88ff44"/>
+      {/* Nokia logo text */}
+      <text x="24" y="32" textAnchor="middle"
+        fontFamily="Arial, Helvetica, sans-serif"
+        fontSize="4.5" fontWeight="700" letterSpacing="1.2"
+        fill="#5a78a0">NOKIA</text>
+      {/* Navigation key (oval d-pad) */}
+      <ellipse cx="24" cy="37.5" rx="5.5" ry="3.5" fill="#1a2535"/>
+      <circle cx="24" cy="37.5" r="2.5" fill="#141d28"/>
+      <circle cx="24" cy="37.5" r="1.2" fill="#1e2a3a"/>
+      {/* Left soft key */}
+      <rect x="12" y="34" width="7" height="4" rx="2" fill="#1a2535"/>
+      {/* Right soft key */}
+      <rect x="29" y="34" width="7" height="4" rx="2" fill="#1a2535"/>
+      {/* Number keys row 1 */}
+      <rect x="12" y="40" width="6" height="3" rx="1.5" fill="#1a2535"/>
+      <rect x="21" y="40" width="6" height="3" rx="1.5" fill="#1a2535"/>
+      <rect x="30" y="40" width="6" height="3" rx="1.5" fill="#1a2535"/>
+      {/* Number keys row 2 */}
+      <rect x="12" y="44" width="6" height="2.5" rx="1.2" fill="#1a2535"/>
+      <rect x="21" y="44" width="6" height="2.5" rx="1.2" fill="#1a2535"/>
+      <rect x="30" y="44" width="6" height="2.5" rx="1.2" fill="#1a2535"/>
     </svg>
   );
 }
@@ -493,10 +597,11 @@ function DesktopSurface() {
             onMouseDown={e => { e.stopPropagation(); startDrag(e, item.id); }}
             onDoubleClick={() => {
               if (renaming) return;
-              if (item.type === 'job' && item.jobId) {
+              if (item.type === 'app' && item.appId) {
+                openWithBounce(item.appId, item.appId);
+              } else if (item.type === 'job' && item.jobId) {
                 openWithBounce('experience', 'experience', { jobId: item.jobId, title: item.label });
               } else if (item.type === 'folder') {
-                // Open Finder and navigate into this folder
                 openWithBounce('finder', 'finder', { folderId: item.id, folderName: item.label });
               }
             }}
@@ -521,16 +626,22 @@ function DesktopSurface() {
             aria-label={item.label}
             onKeyDown={e => {
               if (e.key === 'Enter') {
-                if (item.type === 'job' && item.jobId)
+                if (item.type === 'app' && item.appId)
+                  openWithBounce(item.appId, item.appId);
+                else if (item.type === 'job' && item.jobId)
                   openWithBounce('experience', 'experience', { jobId: item.jobId, title: item.label });
                 else if (item.type === 'folder')
                   openWithBounce('finder', 'finder', { folderId: item.id, folderName: item.label });
               }
-              if (e.key === 'F2')     startRename(item.id);
-              if (e.key === 'Delete') deleteItem(item.id);
+              if (item.type !== 'app') {
+                if (e.key === 'F2')     startRename(item.id);
+                if (e.key === 'Delete') deleteItem(item.id);
+              }
             }}
           >
-            {item.type === 'folder' ? <FolderIcon /> :
+            {item.type === 'app' && item.appId === 'doom' ? <DoomIcon /> :
+             item.type === 'app' && item.appId === 'snake' ? <NokiaIcon /> :
+             item.type === 'folder' ? <FolderIcon /> :
              job?.logo ? <img src={job.logo} alt={item.label} className={styles.iconImg} /> :
              <div className={styles.iconFallback}>{item.label[0]}</div>}
 
@@ -574,6 +685,15 @@ function DesktopSurface() {
           onContextMenu={e => e.preventDefault()}>
           {ctxTarget ? (
             <>
+              {ctxTarget.type === 'app' && ctxTarget.appId && (
+                <>
+                  <button className={styles.ctxItem} onClick={() => {
+                    openWithBounce(ctxTarget.appId!, ctxTarget.appId!);
+                    setCtxMenu(null);
+                  }}>Open</button>
+                  <div className={styles.ctxDivider} />
+                </>
+              )}
               {ctxTarget.type === 'job' && ctxTarget.jobId && (
                 <>
                   <button className={styles.ctxItem} onClick={() => {
@@ -583,8 +703,9 @@ function DesktopSurface() {
                   <div className={styles.ctxDivider} />
                 </>
               )}
-              <button className={styles.ctxItem} onClick={() => startRename(ctxTarget.id)}>Rename</button>
-              {/* Only folders can be deleted — job icons are permanent */}
+              {ctxTarget.type !== 'app' && (
+                <button className={styles.ctxItem} onClick={() => startRename(ctxTarget.id)}>Rename</button>
+              )}
               {ctxTarget.type === 'folder' && (
                 <button className={`${styles.ctxItem} ${styles.ctxDanger}`} onClick={() => deleteItem(ctxTarget.id)}>Delete</button>
               )}

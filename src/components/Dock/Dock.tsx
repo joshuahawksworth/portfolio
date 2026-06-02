@@ -229,7 +229,7 @@ function MinimizedSlot({ win }: { win: WindowInstance }) {
 }
 
 /* ─── Default reorderable key order (Finder & Trash excluded) ────────── */
-const DEFAULT_ORDER = ['github','safari','about','experience','skills','contact','location','terminal','cv','slotslop','doom','snake'];
+const DEFAULT_ORDER = ['github','safari','about','experience','skills','contact','location','terminal','cv','slotslop'];
 
 const ALL_ITEMS_STATIC: Omit<Item, 'action'>[] = [
   { key: 'github',    label: 'GitHub',    icon: I.github },
@@ -242,8 +242,6 @@ const ALL_ITEMS_STATIC: Omit<Item, 'action'>[] = [
   { key: 'terminal',  label: 'Terminal',  icon: I.terminal },
   { key: 'cv',        label: 'CV',        icon: I.cv },
   { key: 'slotslop',  label: 'Slotslop',  icon: I.slotslop },
-  { key: 'doom',      label: 'DOOM',      icon: I.doom },
-  { key: 'snake',     label: 'Snake',     icon: I.snake },
 ];
 
 /* ─── Dock ────────────────────────────────────────────────────────────── */

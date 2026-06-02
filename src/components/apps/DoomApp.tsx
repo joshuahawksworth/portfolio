@@ -1,38 +1,30 @@
-import { useState } from 'react';
+import { useEffect, useRef } from 'react';
+import 'js-dos/dist/js-dos.css';
 import styles from './DoomApp.module.css';
 
-const DOOM_URL = 'https://archive.org/embed/doom_shareware_episode1_v1.9';
+// Extend window so TS is happy with the Dos global set by js-dos
+declare global {
+  interface Window {
+    Dos: (element: HTMLDivElement, options: Record<string, unknown>) => { stop: () => void };
+  }
+}
+
+const DOOM_BUNDLE = 'https://cdn.dos.zone/custom/dos/doom.jsdos';
 
 export default function DoomApp() {
-  const [loaded, setLoaded] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
 
-  return (
-    <div className={styles.root}>
-      <div className={styles.bar}>
-        <span className={styles.skull}>💀</span>
-        <span className={styles.tip}>Click inside the game to capture keyboard · WASD / Arrow keys</span>
-        <span className={styles.skull}>💀</span>
-      </div>
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
 
-      {!loaded && (
-        <div className={styles.splash}>
-          <div className={styles.doomTitle}>DOOM</div>
-          <div className={styles.loading}>
-            <div className={styles.loadingBar}><div className={styles.loadingFill} /></div>
-            <span>Loading shareware episode…</span>
-          </div>
-        </div>
-      )}
+    // Dynamically import the js-dos bundle (sets window.Dos as a side-effect)
+    import('js-dos/dist/js-dos.js').then(() => {
+      if (!window.Dos || !rootRef.current) return;
+      const ci = window.Dos(rootRef.current, { url: DOOM_BUNDLE });
+      return () => { try { ci.stop(); } catch { /* ignore */ } };
+    });
+  }, []);
 
-      <iframe
-        src={DOOM_URL}
-        className={`${styles.iframe} ${loaded ? styles.iframeVisible : ''}`}
-        title="DOOM"
-        allowFullScreen
-        allow="fullscreen"
-        onLoad={() => setLoaded(true)}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-      />
-    </div>
-  );
+  return <div ref={rootRef} className={styles.root} />;
 }
