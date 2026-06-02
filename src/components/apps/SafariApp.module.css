@@ -1,0 +1,167 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #0d1117;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+}
+
+/* ── Chrome ── */
+.chrome {
+  height: 44px;
+  background: rgba(22, 27, 34, 0.98);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.navBtns { display: flex; gap: 2px; }
+.navBtn {
+  width: 28px; height: 28px; border-radius: 6px; background: none;
+  border: none; cursor: pointer; color: rgba(255,255,255,0.4);
+  display: flex; align-items: center; justify-content: center;
+  transition: color 140ms, background 140ms;
+}
+.navBtn:hover:not(:disabled) { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.07); }
+.navBtn:disabled { opacity: 0.25; cursor: default; }
+
+.urlBar {
+  flex: 1; display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; padding: 0 10px; height: 28px;
+}
+.lockIcon { color: rgba(255,255,255,0.35); flex-shrink: 0; }
+.urlText {
+  flex: 1; font-size: 12px; color: rgba(255,255,255,0.6);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  pointer-events: none;
+}
+
+.newTabBtn {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 6px;
+  color: rgba(255,255,255,0.4); text-decoration: none; flex-shrink: 0;
+  transition: color 140ms, background 140ms;
+}
+.newTabBtn:hover { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.07); }
+
+/* ── Page ── */
+.page {
+  flex: 1; overflow-y: auto; color: #e6edf3;
+  scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+/* ── Loading ── */
+.loadWrap {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; gap: 20px;
+}
+.loadBar {
+  width: 200px; height: 3px; background: rgba(255,255,255,0.08);
+  border-radius: 2px; overflow: hidden;
+}
+@keyframes loadSlide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+.loadFill {
+  height: 100%; width: 40%; background: #58a6ff;
+  border-radius: 2px; animation: loadSlide 1.1s ease-in-out infinite;
+}
+.loadMsg { font-size: 13px; color: rgba(255,255,255,0.3); }
+
+/* ── Error ── */
+.errWrap {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; gap: 10px;
+}
+.errTitle { font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.55); margin: 0; }
+.errSub { font-size: 12px; color: rgba(255,255,255,0.3); margin: 0; }
+.openBtn {
+  margin-top: 8px; font-size: 13px; color: #58a6ff; text-decoration: none;
+  padding: 7px 18px; border: 1px solid rgba(88,166,255,0.4); border-radius: 8px;
+  transition: background 140ms;
+}
+.openBtn:hover { background: rgba(88,166,255,0.1); }
+
+/* ── GitHub page ── */
+.ghPage { min-height: 100%; background: #0d1117; }
+
+.ghNav {
+  background: #161b22; border-bottom: 1px solid #30363d;
+  padding: 10px 20px; display: flex; align-items: center; gap: 18px;
+  color: rgba(255,255,255,0.75); font-size: 13px;
+}
+.ghNavItem { opacity: 0.65; cursor: default; }
+
+.ghBody {
+  display: flex; gap: 24px; padding: 24px 20px;
+  max-width: 1020px; margin: 0 auto;
+}
+
+/* Sidebar */
+.ghSidebar { width: 240px; flex-shrink: 0; }
+.ghAvatar {
+  width: 80px; height: 80px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.12);
+  object-fit: cover; display: block; margin-bottom: 14px;
+}
+.ghAvatarFallback {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 700; color: white; margin-bottom: 14px;
+}
+.ghName { font-size: 20px; font-weight: 600; margin: 0 0 2px; color: #e6edf3; }
+.ghLogin { font-size: 14px; color: #8b949e; margin: 0 0 12px; font-weight: 300; }
+.ghBio { font-size: 13px; color: #c9d1d9; margin: 0 0 12px; line-height: 1.5; }
+.ghMeta { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #8b949e; margin-bottom: 12px; }
+.ghStats { display: flex; gap: 12px; font-size: 12px; color: #8b949e; }
+.ghStats strong { color: #e6edf3; }
+
+/* Main */
+.ghMain { flex: 1; min-width: 0; }
+.ghTabs {
+  display: flex; align-items: center; gap: 0;
+  border-bottom: 1px solid #30363d; margin-bottom: 16px;
+}
+.ghTab {
+  padding: 8px 16px; font-size: 13px; cursor: default;
+  color: #8b949e; border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.ghTabActive { color: #e6edf3; border-bottom-color: #f78166; font-weight: 600; }
+.repoCount {
+  margin-left: auto; font-size: 11px; color: #8b949e;
+  background: rgba(255,255,255,0.08); padding: 1px 7px;
+  border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Repo cards */
+.repoGrid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+.repoCard {
+  background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+  padding: 14px; display: flex; flex-direction: column; gap: 8px;
+  text-decoration: none; color: inherit;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+.repoCard:hover { border-color: #58a6ff; background: rgba(88,166,255,0.04); }
+.repoTop { display: flex; align-items: center; gap: 6px; }
+.repoIcon { color: #8b949e; flex-shrink: 0; }
+.repoName { font-size: 13px; font-weight: 600; color: #58a6ff; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.repoBadge {
+  font-size: 10px; color: #8b949e; border: 1px solid #30363d;
+  border-radius: 10px; padding: 1px 7px; flex-shrink: 0;
+}
+.repoDesc { font-size: 12px; color: #8b949e; margin: 0; line-height: 1.4; flex: 1; }
+.repoMeta { display: flex; align-items: center; gap: 12px; font-size: 11px; color: #8b949e; flex-wrap: wrap; }
+.repoLang { display: flex; align-items: center; gap: 4px; }
+.langDot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.repoStars { display: flex; align-items: center; gap: 3px; }
+.repoUpdated { color: rgba(139,148,158,0.7); margin-left: auto; }

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useTime } from '../../hooks/useTime';
 import styles from './Login.module.css';
 
-interface Props { onLogin: () => void }
+interface Props { onLogin: () => void; onLiquidLogin: () => void }
 
 function Clock() {
   const now = useTime();
@@ -18,7 +18,7 @@ function Clock() {
   );
 }
 
-export default function Login({ onLogin }: Props) {
+export default function Login({ onLogin, onLiquidLogin }: Props) {
   const [visible, setVisible] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const leavingRef = useRef(false);
@@ -59,6 +59,20 @@ export default function Login({ onLogin }: Props) {
           </svg>
         </div>
         <p className={styles.hint}>Click or press any key</p>
+      </div>
+
+      <div className={styles.liquidSection}>
+        <button
+          className={styles.liquidBtn}
+          onClick={e => { e.stopPropagation(); if (!leavingRef.current) { leavingRef.current = true; setLeaving(true); setTimeout(onLiquidLogin, 500); } }}
+          type="button"
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M8 2c0 0-5 3.5-5 7a5 5 0 0010 0c0-3.5-5-7-5-7z"/>
+          </svg>
+          Try Liquid DOM Version
+        </button>
+        <p className={styles.liquidHint}>Requires <code>chrome://flags/#canvas-draw-element</code></p>
       </div>
     </div>
   );

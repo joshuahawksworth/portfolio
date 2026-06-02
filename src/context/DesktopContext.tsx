@@ -27,6 +27,7 @@ export const APP_DEFAULTS: Record<string, { title: string; width: number; height
   terminal:   { title: 'Terminal',         width: 680,  height: 460 },
   finder:     { title: 'Finder',           width: 780,  height: 520 },
   trash:      { title: 'Trash',            width: 480,  height: 360 },
+  safari:     { title: 'Safari',           width: 900,  height: 620 },
 };
 
 // Minimum resize bounds per app
@@ -39,6 +40,7 @@ export const APP_MIN: Record<string, { width: number; height: number }> = {
   terminal:   { width: 380, height: 240 },
   finder:     { width: 460, height: 320 },
   trash:      { width: 320, height: 240 },
+  safari:     { width: 600, height: 400 },
 };
 
 // Per-app "zoom" target (green button) — bounded by screen at runtime
@@ -75,6 +77,8 @@ function cascadePosition(idx: number, w: number, h: number) {
 /** Folder created by the user on the desktop, shared via context so Finder can see it */
 export interface DesktopFolder { id: string; label: string }
 
+export interface TrashedItem { id: string; name: string; date: string }
+
 interface DesktopCtx {
   windows: WindowInstance[];
   focusedId: string | null;
@@ -87,6 +91,10 @@ interface DesktopCtx {
   toggleMaximize: (id: string) => void;
   desktopFolders: DesktopFolder[];
   syncDesktopFolders: (folders: DesktopFolder[]) => void;
+  trashedItems: TrashedItem[];
+  trashEmptied: boolean;
+  trashItem: (item: TrashedItem) => void;
+  emptyTrash: () => void;
 }
 
 export const DesktopContext = createContext<DesktopCtx | null>(null);
@@ -121,6 +129,16 @@ export function DesktopProvider({
   const [focusedId, setFocusedId] = useState<string | null>(() => startWithAbout ? 'about-0' : null);
   const [desktopFolders, setDesktopFolders] = useState<DesktopFolder[]>([]);
   const syncDesktopFolders = useCallback((folders: DesktopFolder[]) => setDesktopFolders(folders), []);
+  const [trashedItems,  setTrashedItems]  = useState<TrashedItem[]>([]);
+  const [trashEmptied, setTrashEmptied]  = useState(false);
+  const trashItem  = useCallback((item: TrashedItem) => {
+    setTrashedItems(p => [...p, item]);
+    setTrashEmptied(false);
+  }, []);
+  const emptyTrash = useCallback(() => {
+    setTrashedItems([]);
+    setTrashEmptied(true);
+  }, []);
   const counter = useRef(1);
 
   const focusWindow = useCallback((id: string) => {
@@ -217,6 +235,7 @@ export function DesktopProvider({
       windows, focusedId,
       openApp, closeWindow, minimizeWindow, focusWindow, moveWindow, resizeWindow, toggleMaximize,
       desktopFolders, syncDesktopFolders,
+      trashedItems, trashEmptied, trashItem, emptyTrash,
     }}>
       {children}
     </DesktopContext.Provider>

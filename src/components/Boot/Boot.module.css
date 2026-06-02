@@ -15,9 +15,10 @@
 }
 
 .logo {
-  font-size: 96px;
   color: white;
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   animation: logoIn 0.8s ease 0.2s both;
 }
 

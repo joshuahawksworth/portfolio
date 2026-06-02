@@ -195,6 +195,13 @@
   border-radius: 2px;
 }
 
+/* Trash drop-target highlight — scale + white glow */
+.trashHighlight {
+  transform: scale(1.22) translateY(-8px) !important;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.85)) brightness(1.3);
+  transition: transform 150ms ease, filter 150ms ease;
+}
+
 /* macOS launch bounce — single slow jump (rise ease-out, fall ease-in) */
 .bouncing {
   animation: dockBounce 1400ms both;

@@ -28,7 +28,23 @@
   transition: background 150ms ease;
 }
 
-.emptyBtn:hover { background: rgba(239,68,68,0.25); }
+.emptyBtn:hover:not(:disabled) { background: rgba(239,68,68,0.25); }
+.emptyBtn:disabled { opacity: 0.35; cursor: default; }
+
+.empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.emptyLabel {
+  font-size: 14px;
+  color: rgba(255,255,255,0.28);
+  margin: 0;
+}
 
 .list {
   flex: 1;

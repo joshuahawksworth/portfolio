@@ -62,7 +62,7 @@
   border-radius: 8px;
   cursor: pointer;
   user-select: none;
-  z-index: 50;
+  z-index: 10;
   transition: background 120ms ease;
   animation: iconFadeIn 0.35s ease both;
 }
@@ -74,6 +74,8 @@
 
 .icon:hover   { background: rgba(255,255,255,0.1); }
 .iconSelected { background: rgba(59,130,246,0.25) !important; }
+/* Elevated during drag so the ghost appears above other windows */
+.iconDragging { z-index: 9000 !important; }
 
 .iconImg {
   width: 48px;

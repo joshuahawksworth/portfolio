@@ -11,13 +11,14 @@ import LocationApp from '../apps/LocationApp';
 import TerminalApp from '../apps/TerminalApp';
 import FinderApp from '../apps/FinderApp';
 import TrashApp from '../apps/TrashApp';
+import SafariApp from '../apps/SafariApp';
 import { jobsData } from '../../data/experienceData';
 import styles from './Desktop.module.css';
 
 const APP_COMPONENTS: Record<string, React.ComponentType<{ props?: Record<string, unknown> }>> = {
   about: AboutApp, experience: ExperienceApp, skills: SkillsApp,
   contact: ContactApp, location: LocationApp, terminal: TerminalApp,
-  finder: FinderApp, trash: TrashApp,
+  finder: FinderApp, trash: TrashApp, safari: SafariApp,
 };
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -215,7 +216,7 @@ function WallpaperPicker({ current, onChange, onClose }: {
 
 // ── DesktopSurface ─────────────────────────────────────────────────────────
 function DesktopSurface() {
-  const { windows, openApp, syncDesktopFolders } = useDesktop();
+  const { windows, openApp, syncDesktopFolders, trashItem } = useDesktop();
 
   const [items,         setItems]        = useState<DesktopItem[]>(makeDefaultItems);
   const [iconPos,       setIconPos]      = useState<Record<string, IconPos>>(() => initPositions(makeDefaultItems()));
@@ -229,6 +230,8 @@ function DesktopSurface() {
   const [wallpaper,     setWallpaper]    = useState<WallpaperKey>('space');
   const [cleaning,      setCleaning]     = useState(false);
   const [bouncingKey,   setBouncingKey]  = useState<string | null>(null);
+  const [nearTrash,     setNearTrash]    = useState(false);
+  const [draggingIds,   setDraggingIds]  = useState<Set<string>>(new Set());
 
   // Refs for always-fresh state inside event handler closures
   const selectedIconsRef = useRef<Set<string>>(new Set());
@@ -328,6 +331,17 @@ function DesktopSurface() {
     const origins: Record<string, IconPos> = {};
     for (const did of dragIds) origins[did] = { ...(fresh[did] ?? { x: 0, y: 0 }) };
     multiDragRef.current = { ids: dragIds, sx: e.clientX, sy: e.clientY, origins };
+    setDraggingIds(new Set(dragIds));
+
+    // Only folder items can be dragged to trash
+    const isDraggingFolder = dragIds.some(did => items.find(i => i.id === did)?.type === 'folder');
+
+    function isInTrashZone(x: number, y: number) {
+      // Trash is second-to-last item in dock. Dock width ≈ 648px, trash at center+283px from left.
+      const trashX = window.innerWidth / 2 + 283;
+      const trashY = window.innerHeight - 55;
+      return Math.abs(x - trashX) < 44 && Math.abs(y - trashY) < 50;
+    }
 
     function onMove(ev: MouseEvent) {
       if (!multiDragRef.current) return;
@@ -340,11 +354,31 @@ function DesktopSurface() {
         }
         return next;
       });
+      if (isDraggingFolder) {
+        const firstPos = iconPosRef.current[dragIds[0]];
+        if (firstPos) setNearTrash(isInTrashZone(firstPos.x + 38, firstPos.y + 42));
+      }
     }
     function onUp() {
+      setNearTrash(false);
+      setDraggingIds(new Set());
       multiDragRef.current = null;
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup',   onUp);
+      if (!isDraggingFolder) return;
+      const freshPos = iconPosRef.current;
+      for (const did of dragIds) {
+        const p = freshPos[did];
+        if (p && isInTrashZone(p.x + 38, p.y + 42)) {
+          const item = items.find(i => i.id === did);
+          if (item && item.type === 'folder') {
+            trashItem({ id: did, name: item.label, date: new Date().toLocaleDateString('en-GB') });
+            setItems(prev => prev.filter(i => i.id !== did));
+            setIconPos(prev => { const n = { ...prev }; delete n[did]; return n; });
+            setSelectedIcons(new Set());
+          }
+        }
+      }
     }
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup',   onUp);
@@ -406,8 +440,10 @@ function DesktopSurface() {
 
   // ── Dock item activate (bounce + delayed open) ────────────────────────
   function handleDockActivate(key: string, action: () => void) {
-    // Finder and Trash open instantly — no animation delay
-    if (key === 'finder' || key === 'trash') { action(); return; }
+    if (key === 'finder' || key === 'trash' || key === 'github' || key === 'cv') { action(); return; }
+    // Skip bounce animation if app is already open
+    const alreadyOpen = windows.some(w => w.appId === key && !w.minimized);
+    if (alreadyOpen) { action(); return; }
     setBouncingKey(key);
     setTimeout(() => { setBouncingKey(null); action(); }, BOUNCE_MS);
   }
@@ -446,8 +482,9 @@ function DesktopSurface() {
             key={item.id}
             className={[
               styles.icon,
-              selected  ? styles.iconSelected : '',
-              cleaning  ? styles.iconCleaning  : '',
+              selected             ? styles.iconSelected  : '',
+              cleaning             ? styles.iconCleaning  : '',
+              draggingIds.has(item.id) ? styles.iconDragging : '',
             ].join(' ')}
             style={{ left: pos.x, top: pos.y }}
             onMouseDown={e => { e.stopPropagation(); startDrag(e, item.id); }}
@@ -524,7 +561,7 @@ function DesktopSurface() {
         return <Window key={win.id} win={win}><Comp props={win.props} /></Window>;
       })}
 
-      <Dock bouncingKey={bouncingKey} onItemActivate={handleDockActivate} />
+      <Dock bouncingKey={bouncingKey} onItemActivate={handleDockActivate} trashHighlighted={nearTrash} />
 
       {/* Context menu */}
       {ctxMenu && (

@@ -1,0 +1,42 @@
+.desktop {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+.flagNotice {
+  position: absolute;
+  top: 36px;
+  right: 16px;
+  z-index: 10001;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 7px 12px;
+  background: rgba(14, 16, 26, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 9px;
+  color: rgba(255, 255, 255, 0.50);
+  font-size: 11px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  max-width: 380px;
+  text-align: left;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+.flagNotice code {
+  font-family: 'SF Mono', 'Menlo', monospace;
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.flagNotice em {
+  color: rgba(255, 180, 60, 0.9);
+  font-style: normal;
+}

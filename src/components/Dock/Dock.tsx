@@ -113,6 +113,7 @@ interface Item { key: string; label: string; icon: React.ReactNode; action: () =
 interface DockProps {
   bouncingKey?: string | null;
   onItemActivate?: (key: string, action: () => void) => void;
+  trashHighlighted?: boolean;
 }
 
 /* ─── Gradient backgrounds for minimised thumbnails ─────────────────── */
@@ -171,7 +172,7 @@ const ALL_ITEMS_STATIC: Omit<Item, 'action'>[] = [
 ];
 
 /* ─── Dock ────────────────────────────────────────────────────────────── */
-export default function Dock({ bouncingKey, onItemActivate }: DockProps = {}) {
+export default function Dock({ bouncingKey, onItemActivate, trashHighlighted }: DockProps = {}) {
   const { openApp, windows } = useDesktop();
 
   const [order,       setOrder]       = useState<string[]>(DEFAULT_ORDER);
@@ -188,7 +189,7 @@ export default function Dock({ bouncingKey, onItemActivate }: DockProps = {}) {
   // Build Item with action for each key
   function makeAction(key: string): () => void {
     switch (key) {
-      case 'github':  return () => window.open('https://github.com/joshuahawksworth', '_blank');
+      case 'github':  return () => openApp('safari');
       case 'cv':      return () => window.open('/JoshuaHawksworthCV.pdf', '_blank');
       default:        return () => openApp(key);
     }
@@ -246,6 +247,7 @@ export default function Dock({ bouncingKey, onItemActivate }: DockProps = {}) {
     label: string,
     icon: React.ReactNode,
     draggable = false,
+    highlighted = false,
   ) {
     const isBouncing  = bouncingKey === key;
     const isDragging  = dragKey === key;
@@ -264,7 +266,7 @@ export default function Dock({ bouncingKey, onItemActivate }: DockProps = {}) {
         onDragEnd={draggable ? resetDrag : undefined}
       >
         <button
-          className={`${styles.iconBtn} ${isBouncing ? styles.bouncing : ''}`}
+          className={`${styles.iconBtn} ${isBouncing ? styles.bouncing : ''} ${highlighted ? styles.trashHighlight : ''}`}
           onClick={() => handleClick(key)}
           aria-label={label}
           style={draggable ? { cursor: isDragging ? 'grabbing' : 'grab' } : undefined}
@@ -294,7 +296,7 @@ export default function Dock({ bouncingKey, onItemActivate }: DockProps = {}) {
         <div className={styles.sep} />
 
         {/* Fixed — Trash */}
-        {renderItem('trash', 'Trash', I.trash, false)}
+        {renderItem('trash', 'Trash', I.trash, false, !!trashHighlighted)}
 
         {minimizedWindows.length > 0 && (
           <>

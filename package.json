@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@liquid-dom/core": "^0.1.1",
+    "@liquid-dom/react": "^0.1.1",
     "liquid-glass-react": "^1.1.1",
     "mapbox-gl": "^3.15.0",
     "react": "^19.2.6",

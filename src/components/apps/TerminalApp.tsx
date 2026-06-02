@@ -151,7 +151,7 @@ export default function TerminalApp({ props: _ }: { props?: Record<string, unkno
       case 'open': {
         const appMap: Record<string, string> = {
           about: 'about', experience: 'experience', skills: 'skills',
-          contact: 'contact', location: 'location', finder: 'finder', trash: 'trash',
+          contact: 'contact', location: 'location', finder: 'finder', trash: 'trash', safari: 'safari',
         };
         const key = args[0]?.replace('.app', '').toLowerCase();
         if (key && appMap[key]) {
@@ -160,6 +160,48 @@ export default function TerminalApp({ props: _ }: { props?: Record<string, unkno
         } else {
           push({ type: 'err', text: `open: no application named '${args[0]}'` });
         }
+        break;
+      }
+
+      case 'slotslop': {
+        const models = ['gpt-4o', 'claude-opus-4', 'gemini-2.5', 'deepseek-r1', 'grok-3', 'llama-3.3', 'mistral-large', 'o3-mini'];
+        const agents = ['CodeWizard', 'BugSlayer', 'ArchitectGPT', 'OptimiserBot', 'ReviewDaemon', 'RefactorAI'];
+        const efforts = ['low', 'medium', 'high', 'ultra', 'maximum', 'overkill', '∞'];
+        const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
+
+        push({ type: 'out', text: '' });
+        push({ type: 'out', text: '🎰  SLOTSLOP — by t3gg' });
+        push({ type: 'out', text: '   "Claude Code, but make it a slot machine"' });
+        push({ type: 'out', text: '' });
+        push({ type: 'out', text: 'Spinning reels...' });
+        push({ type: 'out', text: '' });
+
+        let count = 0;
+        const totalSpins = 10;
+        const interval = setInterval(() => {
+          count++;
+          const bar = `  [ ${pick(models).padEnd(16)} | ${pick(agents).padEnd(14)} | effort: ${pick(efforts)} ]`;
+          push({ type: 'out', text: bar });
+          if (count >= totalSpins) {
+            clearInterval(interval);
+            const finalModel = 'claude-opus-4';
+            const finalAgent = 'ArchitectGPT';
+            const finalEffort = 'ultra';
+            setTimeout(() => {
+              push({ type: 'out', text: '' });
+              push({ type: 'out', text: '🎯  JACKPOT! Final selection:' });
+              push({ type: 'out', text: `  Model:  ${finalModel}` });
+              push({ type: 'out', text: `  Agent:  ${finalAgent}` });
+              push({ type: 'out', text: `  Effort: ${finalEffort}` });
+              push({ type: 'out', text: '' });
+              push({ type: 'out', text: '  Cost estimate: $4.20  |  Tokens: ∞  |  Vibes: immaculate' });
+              push({ type: 'out', text: '' });
+              push({ type: 'out', text: '"Engineered to make you feel in control while burning credits."' });
+              push({ type: 'out', text: '                                                  — Theo Browne' });
+              push({ type: 'out', text: '' });
+            }, 300);
+          }
+        }, 120);
         break;
       }
 
@@ -182,6 +224,7 @@ export default function TerminalApp({ props: _ }: { props?: Record<string, unkno
           { type: 'out', text: '  uptime         — show system uptime' },
           { type: 'out', text: '  history        — show command history' },
           { type: 'out', text: '  neofetch       — system info art' },
+          { type: 'out', text: '  slotslop       — AI model slot machine (by t3gg)' },
           { type: 'out', text: '  clear          — clear the terminal' },
           { type: 'out', text: '  help           — show this help' },
         );

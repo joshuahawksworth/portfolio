@@ -23,24 +23,41 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
   });
   const { openApp, desktopFolders } = useDesktop();
 
-  // ── Finder-grid interaction state ──────────────────────────────────────
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; itemId?: string } | null>(null);
+  // user-created folders within Documents
+  const [docFolders, setDocFolders] = useState<Array<{ id: string; name: string }>>([]);
 
   function enterFolder(id: string, name: string) {
     setFolderStack((prev) => [...prev, { id, name }]);
     setSelected(new Set());
+    setCtxMenu(null);
   }
 
   function handleSectionChange(s: Section) {
-    setSection(s);
-    setFolderStack([]);
-    setSelected(new Set());
-    setCtxMenu(null);
+    setSection(s); setFolderStack([]); setSelected(new Set()); setCtxMenu(null);
   }
 
   const inFolder = folderStack.length > 0;
   const currentFolder = inFolder ? folderStack[folderStack.length - 1] : null;
+
+  // Contents of built-in navigable folders
+  const FOLDER_CONTENTS: Record<string, FileItem[]> = {
+    'doc-proj': [
+      { id: 'proj-cmap',    name: 'cmap-mail',   type: 'folder', action: () => enterFolder('proj-cmap', 'cmap-mail') },
+      { id: 'proj-kwando',  name: 'kwando',      type: 'folder', action: () => enterFolder('proj-kwando', 'kwando') },
+      { id: 'proj-orderbee',name: 'orderbee',    type: 'folder', action: () => enterFolder('proj-orderbee', 'orderbee') },
+      { id: 'proj-tofs',    name: 'tofs-app',    type: 'folder', action: () => enterFolder('proj-tofs', 'tofs-app') },
+      { id: 'proj-ciclo',   name: 'ciclozone',   type: 'folder', action: () => enterFolder('proj-ciclo', 'ciclozone') },
+      { id: 'proj-web',     name: 'webmaster',   type: 'folder', action: () => enterFolder('proj-web', 'webmaster') },
+    ],
+    'proj-cmap':     [{ id: 'cmap-readme', name: 'README.md', type: 'file' }, { id: 'cmap-pkg', name: 'package.json', type: 'file' }, { id: 'cmap-src', name: 'src', type: 'folder', action: () => enterFolder('cmap-src', 'src') }],
+    'proj-kwando':   [{ id: 'kwa-readme', name: 'README.md', type: 'file' }, { id: 'kwa-app', name: 'App.tsx', type: 'file' }],
+    'proj-orderbee': [{ id: 'ord-readme', name: 'README.md', type: 'file' }, { id: 'ord-index', name: 'index.js', type: 'file' }],
+    'proj-tofs':     [{ id: 'tofs-readme', name: 'README.md', type: 'file' }, { id: 'tofs-src', name: 'src', type: 'folder', action: () => enterFolder('tofs-src', 'src') }],
+    'proj-ciclo':    [{ id: 'ciclo-readme', name: 'README.md', type: 'file' }],
+    'proj-web':      [{ id: 'web-readme', name: 'README.md', type: 'file' }, { id: 'web-index', name: 'index.html', type: 'file' }],
+  };
 
   const SECTIONS: Record<Section, FileItem[]> = {
     desktop: [
@@ -55,45 +72,38 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
         name: f.label,
         type: 'folder' as const,
         action: () => enterFolder(f.id, f.label),
-        deletable: false,
       })),
     ],
     documents: [
       { id: 'doc-readme', name: 'README.md', type: 'file' as const },
-      {
-        id: 'doc-cv',
-        name: 'CV.pdf',
-        type: 'file' as const,
-        action: () => window.open('/JoshuaHawksworthCV.pdf', '_blank'),
-      },
-      { id: 'doc-proj', name: 'Projects', type: 'folder' as const },
+      { id: 'doc-cv', name: 'CV.pdf', type: 'file' as const, action: () => window.open('/JoshuaHawksworthCV.pdf', '_blank') },
+      { id: 'doc-proj', name: 'Projects', type: 'folder' as const, action: () => enterFolder('doc-proj', 'Projects') },
       { id: 'doc-notes', name: 'Notes.txt', type: 'file' as const },
+      ...docFolders.map(f => ({ id: `userfolder-${f.id}`, name: f.name, type: 'folder' as const, action: () => enterFolder(`userfolder-${f.id}`, f.name) })),
     ],
     downloads: [
       { id: 'dl-blazor', name: 'dotnet-blazor.pdf', type: 'file' as const },
       { id: 'dl-react', name: 'react-19-guide.pdf', type: 'file' as const },
     ],
     applications: [
-      { id: 'app-about', name: 'About', type: 'app' as const, action: () => openApp('about') },
-      {
-        id: 'app-exp',
-        name: 'Experience',
-        type: 'app' as const,
-        action: () => openApp('experience'),
-      },
-      { id: 'app-skills', name: 'Skills', type: 'app' as const, action: () => openApp('skills') },
-      {
-        id: 'app-contact',
-        name: 'Contact',
-        type: 'app' as const,
-        action: () => openApp('contact'),
-      },
-      { id: 'app-loc', name: 'Location', type: 'app' as const, action: () => openApp('location') },
-      { id: 'app-term', name: 'Terminal', type: 'app' as const, action: () => openApp('terminal') },
-      { id: 'app-finder', name: 'Finder', type: 'app' as const },
-      { id: 'app-trash', name: 'Trash', type: 'app' as const, action: () => openApp('trash') },
+      { id: 'app-about', name: 'About.app', type: 'app' as const, action: () => openApp('about') },
+      { id: 'app-exp', name: 'Experience.app', type: 'app' as const, action: () => openApp('experience') },
+      { id: 'app-skills', name: 'Skills.app', type: 'app' as const, action: () => openApp('skills') },
+      { id: 'app-contact', name: 'Contact.app', type: 'app' as const, action: () => openApp('contact') },
+      { id: 'app-loc', name: 'Location.app', type: 'app' as const, action: () => openApp('location') },
+      { id: 'app-term', name: 'Terminal.app', type: 'app' as const, action: () => openApp('terminal') },
+      { id: 'app-safari', name: 'Safari.app', type: 'app' as const, action: () => openApp('safari') },
+      { id: 'app-finder', name: 'Finder.app', type: 'app' as const },
+      { id: 'app-trash', name: 'Trash.app', type: 'app' as const, action: () => openApp('trash') },
     ],
   };
+
+  function createNewFolder() {
+    const id = `${Date.now()}`;
+    const name = 'New Folder';
+    setDocFolders(prev => [...prev, { id, name }]);
+    setCtxMenu(null);
+  }
 
   const SIDEBAR: { label: string; key: Section; icon: React.ReactNode }[] = [
     { label: 'Desktop', key: 'desktop', icon: <MonitorIcon /> },
@@ -102,17 +112,13 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
     { label: 'Applications', key: 'applications', icon: <AppsIcon /> },
   ];
 
-  const pathLabel = inFolder
-    ? '~/Desktop/' + folderStack.map((f) => f.name).join('/')
-    : section === 'desktop'
-      ? '~/Desktop'
-      : section === 'documents'
-        ? '~/Documents'
-        : section === 'downloads'
-          ? '~/Downloads'
-          : '/Applications';
+  const sectionRoot = section === 'desktop' ? '~/Desktop' : section === 'documents' ? '~/Documents' : section === 'downloads' ? '~/Downloads' : '/Applications';
+  const pathLabel = inFolder ? sectionRoot + '/' + folderStack.map(f => f.name).join('/') : sectionRoot;
 
-  const displayItems = inFolder ? [] : SECTIONS[section];
+  // Show folder contents when navigated into a folder, empty if no contents defined
+  const displayItems = inFolder
+    ? (FOLDER_CONTENTS[currentFolder?.id ?? ''] ?? [])
+    : SECTIONS[section];
 
   return (
     <div className={styles.root}>
@@ -187,22 +193,13 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
         </div>
 
         {/* Files grid — or empty folder message */}
-        {inFolder ? (
+        {inFolder && displayItems.length === 0 ? (
           <div className={styles.emptyFolder}>
             <svg viewBox="0 0 52 44" fill="none" width="52" height="44" style={{ opacity: 0.3 }}>
-              <path
-                d="M2 9Q2 5 6 5L20 5L24 9L47 9Q49 9 49 11L49 38Q49 40 47 40L5 40Q3 40 3 38Z"
-                fill="#4a9eff"
-              />
-              <path
-                d="M2 9Q2 5 6 5L20 5L24 9L47 9Q49 9 49 11L49 14L2 14Z"
-                fill="#5aabff"
-                opacity="0.5"
-              />
+              <path d="M2 9Q2 5 6 5L20 5L24 9L47 9Q49 9 49 11L49 38Q49 40 47 40L5 40Q3 40 3 38Z" fill="#4a9eff"/>
+              <path d="M2 9Q2 5 6 5L20 5L24 9L47 9Q49 9 49 11L49 14L2 14Z" fill="#5aabff" opacity="0.5"/>
             </svg>
-            <span className={styles.emptyFolderLabel}>
-              {currentFolder?.name ?? 'Folder'} is empty
-            </span>
+            <span className={styles.emptyFolderLabel}>{currentFolder?.name ?? 'Folder'} is empty</span>
           </div>
         ) : (
           <div
@@ -212,6 +209,7 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
               setCtxMenu(null);
             }}
             onContextMenu={(e) => {
+              e.stopPropagation();
               if (e.target === e.currentTarget) {
                 e.preventDefault();
                 setCtxMenu({ x: e.clientX, y: e.clientY });
@@ -238,15 +236,18 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
                       });
                     } else {
                       setSelected(new Set([item.id]));
+                      // Single-click opens folders immediately (no delay)
+                      if (item.type === 'folder') item.action?.();
                     }
                   }}
                   onDoubleClick={(e) => {
                     e.stopPropagation();
-                    item.action?.();
+                    // Double-click opens apps and files
+                    if (item.type !== 'folder') item.action?.();
                   }}
                   onContextMenu={(e) => {
                     e.preventDefault();
-                    e.stopPropagation();
+                    e.stopPropagation(); // prevent Desktop context menu opening on top
                     if (!selected.has(item.id)) setSelected(new Set([item.id]));
                     setCtxMenu({ x: e.clientX, y: e.clientY, itemId: item.id });
                   }}
@@ -282,50 +283,43 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
                   top: Math.min(ctxMenu.y, window.innerHeight - 150),
                 }}
                 onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
                 onContextMenu={(e) => e.preventDefault()}
               >
                 {targetItem ? (
                   <>
                     {targetItem.action && (
                       <>
-                        <button
-                          className={styles.ctxItem}
-                          onClick={() => {
-                            targetItem.action?.();
-                            setCtxMenu(null);
-                          }}
-                        >
+                        <button className={styles.ctxItem} onClick={() => { targetItem.action?.(); setCtxMenu(null); }}>
                           Open
                         </button>
                         <div className={styles.ctxSep} />
                       </>
                     )}
-                    <button
-                      className={styles.ctxItem}
-                      onClick={() => {
-                        setSelected(
-                          new Set(
-                            Array.from(selected).filter((id) =>
-                              displayItems.some((i) => i.id === id)
-                            )
-                          )
-                        );
-                        setCtxMenu(null);
-                      }}
-                    >
+                    <button className={styles.ctxItem} onClick={() => {
+                      setSelected(new Set(Array.from(selected).filter(id => displayItems.some(i => i.id === id))));
+                      setCtxMenu(null);
+                    }}>
                       {selected.size > 1 ? `Select All (${selected.size})` : 'Select'}
                     </button>
                   </>
                 ) : (
-                  <button
-                    className={styles.ctxItem}
-                    onClick={() => {
-                      setSelected(new Set(displayItems.map((i) => i.id)));
+                  <>
+                    {section === 'documents' && !inFolder && (
+                      <>
+                        <button className={styles.ctxItem} onClick={createNewFolder}>
+                          New Folder
+                        </button>
+                        <div className={styles.ctxSep} />
+                      </>
+                    )}
+                    <button className={styles.ctxItem} onClick={() => {
+                      setSelected(new Set(displayItems.map(i => i.id)));
                       setCtxMenu(null);
-                    }}
-                  >
-                    Select All
-                  </button>
+                    }}>
+                      Select All
+                    </button>
+                  </>
                 )}
               </div>
             );
