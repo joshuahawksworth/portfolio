@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import styles from './SafariApp.module.css';
 
-const HOME = 'https://github.com/joshuahawksworth';
+const HOME = 'https://www.apple.com/safari/';
 
 function proxyUrl(url: string) {
   return `/api/browser-proxy?url=${encodeURIComponent(url)}`;

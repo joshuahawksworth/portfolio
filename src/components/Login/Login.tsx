@@ -61,7 +61,7 @@ export default function Login({ onLogin, onLiquidLogin }: Props) {
         <p className={styles.hint}>Click or press any key</p>
       </div>
 
-      <div className={styles.liquidSection}>
+      {/* <div className={styles.liquidSection}>
         <button
           className={styles.liquidBtn}
           onClick={e => { e.stopPropagation(); if (!leavingRef.current) { leavingRef.current = true; setLeaving(true); setTimeout(onLiquidLogin, 500); } }}
@@ -73,7 +73,7 @@ export default function Login({ onLogin, onLiquidLogin }: Props) {
           Try Liquid DOM Version
         </button>
         <p className={styles.liquidHint}>Requires <code>chrome://flags/#canvas-draw-element</code></p>
-      </div>
+      </div> */}
     </div>
   );
 }
