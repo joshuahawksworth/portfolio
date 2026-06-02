@@ -207,7 +207,7 @@ const DEFAULT_ORDER = ['github','safari','about','experience','skills','contact'
 
 const ALL_ITEMS_STATIC: Omit<Item, 'action'>[] = [
   { key: 'github',    label: 'GitHub',    icon: I.github },
-  { key: 'safari',    label: 'Chrome',    icon: I.safari },
+  { key: 'safari',    label: 'Google Chrome', icon: I.safari },
   { key: 'about',     label: 'About',     icon: I.about },
   { key: 'experience',label: 'Experience',icon: I.experience },
   { key: 'skills',    label: 'Skills',    icon: I.skills },

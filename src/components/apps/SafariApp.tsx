@@ -17,6 +17,7 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
   // Always-fresh refs so the message listener never has a stale closure
   const stackRef   = useRef(stack);
   const idxRef     = useRef(idx);
+  const iframeRef  = useRef<HTMLIFrameElement>(null);
   useEffect(() => { stackRef.current = stack; }, [stack]);
   useEffect(() => { idxRef.current   = idx;   }, [idx]);
 
@@ -33,10 +34,11 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
     setLoading(true);
   }, []);
 
-  // Register once; always calls the stable navigate callback
+  // Register once; only handle messages from THIS instance's iframe
   useEffect(() => {
     function onMessage(e: MessageEvent) {
       if (e.data?.type !== '__browse__') return;
+      if (e.source !== iframeRef.current?.contentWindow) return;
       const url: string = e.data.url ?? '';
       if (!url || url === stackRef.current[idxRef.current]) return;
       navigate(url);
@@ -103,6 +105,7 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
 
       <div className={styles.viewport}>
         <iframe
+          ref={iframeRef}
           key={`${currentUrl}-${idx}`}
           src={proxyUrl(currentUrl)}
           className={styles.iframe}

@@ -27,7 +27,7 @@ export const APP_DEFAULTS: Record<string, { title: string; width: number; height
   terminal:   { title: 'Terminal',         width: 680,  height: 460 },
   finder:     { title: 'Finder',           width: 780,  height: 520 },
   trash:      { title: 'Trash',            width: 480,  height: 360 },
-  safari:     { title: 'Safari',           width: 900,  height: 620 },
+  safari:     { title: 'Google Chrome',    width: 900,  height: 620 },
   githubapp:  { title: 'GitHub',           width: 900,  height: 620 },
 };
 
