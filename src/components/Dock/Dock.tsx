@@ -128,6 +128,32 @@ const I = {
       <path d="M19 19V31M22 19V31M25 19V31" stroke="rgba(255,255,255,0.6)" strokeWidth="1.3" strokeLinecap="round"/>
     </MacIcon>
   ),
+  doom: (
+    <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
+      <rect width="44" height="44" rx="11" fill="#1a0000"/>
+      <rect width="44" height="20" rx="11" fill="rgba(180,0,0,0.18)"/>
+      <text x="22" y="29" textAnchor="middle" fill="#cc2200"
+        fontSize="15" fontWeight="900"
+        fontFamily="'Impact','Arial Black',sans-serif">
+        DOOM
+      </text>
+      <circle cx="22" cy="36" r="3.5" fill="#cc2200" opacity="0.85"/>
+      <circle cx="14" cy="35" r="2.2" fill="#880000" opacity="0.7"/>
+      <circle cx="30" cy="35" r="2.2" fill="#880000" opacity="0.7"/>
+    </svg>
+  ),
+  snake: (
+    <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
+      <rect width="44" height="44" rx="11" fill="#081408"/>
+      <rect width="44" height="20" rx="11" fill="rgba(48,209,88,0.08)"/>
+      <path d="M8 34 Q8 26 14 26 Q20 26 20 20 Q20 14 26 14 Q32 14 32 20 Q32 26 37 26"
+        stroke="#1d5e2e" strokeWidth="5" strokeLinecap="round" fill="none"/>
+      <circle cx="37" cy="26" r="4.5" fill="#30d158"/>
+      <circle cx="35.5" cy="24.5" r="1.2" fill="#081408"/>
+      <circle cx="38.5" cy="24.5" r="1.2" fill="#081408"/>
+      <circle cx="8" cy="34" r="3" fill="#ff453a"/>
+    </svg>
+  ),
   slotslop: (
     <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
       <rect width="44" height="44" rx="11" fill="#000"/>
@@ -203,7 +229,7 @@ function MinimizedSlot({ win }: { win: WindowInstance }) {
 }
 
 /* ─── Default reorderable key order (Finder & Trash excluded) ────────── */
-const DEFAULT_ORDER = ['github','safari','about','experience','skills','contact','location','terminal','cv','slotslop'];
+const DEFAULT_ORDER = ['github','safari','about','experience','skills','contact','location','terminal','cv','slotslop','doom','snake'];
 
 const ALL_ITEMS_STATIC: Omit<Item, 'action'>[] = [
   { key: 'github',    label: 'GitHub',    icon: I.github },
@@ -216,6 +242,8 @@ const ALL_ITEMS_STATIC: Omit<Item, 'action'>[] = [
   { key: 'terminal',  label: 'Terminal',  icon: I.terminal },
   { key: 'cv',        label: 'CV',        icon: I.cv },
   { key: 'slotslop',  label: 'Slotslop',  icon: I.slotslop },
+  { key: 'doom',      label: 'DOOM',      icon: I.doom },
+  { key: 'snake',     label: 'Snake',     icon: I.snake },
 ];
 
 /* ─── Dock ────────────────────────────────────────────────────────────── */

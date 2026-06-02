@@ -29,6 +29,8 @@ export const APP_DEFAULTS: Record<string, { title: string; width: number; height
   trash:      { title: 'Trash',            width: 480,  height: 360 },
   safari:     { title: 'Google Chrome',    width: 900,  height: 620 },
   githubapp:  { title: 'GitHub',           width: 900,  height: 620 },
+  doom:       { title: 'DOOM',             width: 800,  height: 640 },
+  snake:      { title: 'Snake',            width: 480,  height: 560 },
 };
 
 // Minimum resize bounds per app
@@ -43,6 +45,8 @@ export const APP_MIN: Record<string, { width: number; height: number }> = {
   trash:      { width: 320, height: 240 },
   safari:     { width: 600, height: 400 },
   githubapp:  { width: 600, height: 400 },
+  doom:       { width: 540, height: 460 },
+  snake:      { width: 380, height: 440 },
 };
 
 // Per-app "zoom" target (green button) — bounded by screen at runtime
@@ -55,6 +59,8 @@ export const APP_MAX: Record<string, { width: number; height: number }> = {
   terminal:   { width: 960,  height: 640 },
   finder:     { width: 1060, height: 720 },
   trash:      { width: 580,  height: 440 },
+  doom:       { width: 1060, height: 760 },
+  snake:      { width: 640,  height: 680 },
 };
 
 const CASCADE_STEPS = 8;

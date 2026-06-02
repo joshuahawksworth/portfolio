@@ -12,6 +12,8 @@ import TerminalApp from '../apps/TerminalApp';
 import FinderApp from '../apps/FinderApp';
 import TrashApp from '../apps/TrashApp';
 import SafariApp from '../apps/SafariApp';
+import DoomApp from '../apps/DoomApp';
+import SnakeApp from '../apps/SnakeApp';
 import { jobsData } from '../../data/experienceData';
 import styles from './Desktop.module.css';
 
@@ -19,6 +21,7 @@ const APP_COMPONENTS: Record<string, React.ComponentType<{ props?: Record<string
   about: AboutApp, experience: ExperienceApp, skills: SkillsApp,
   contact: ContactApp, location: LocationApp, terminal: TerminalApp,
   finder: FinderApp, trash: TrashApp, safari: SafariApp, githubapp: SafariApp,
+  doom: DoomApp, snake: SnakeApp,
 };
 
 // ── Types ──────────────────────────────────────────────────────────────────
