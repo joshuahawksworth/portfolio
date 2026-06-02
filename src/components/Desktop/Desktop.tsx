@@ -1064,13 +1064,6 @@ function DesktopSurface() {
   }
 
   // ── Render ────────────────────────────────────────────────────────────
-  // Computed at render time — is any dragging icon a folder?
-  const isDraggingFolder =
-    draggingIds.size > 0 &&
-    Array.from(draggingIds).some((did) => {
-      const t = items.find((i) => i.id === did)?.type;
-      return t === 'folder' || t === 'file';
-    });
   const ctxTarget = ctxMenu?.targetId ? items.find((i) => i.id === ctxMenu.targetId) : null;
   const ctxX = ctxMenu ? Math.min(ctxMenu.x, window.innerWidth - 210) : 0;
   const ctxY = ctxMenu ? Math.min(ctxMenu.y, window.innerHeight - (ctxTarget ? 180 : 260)) : 0;
