@@ -140,16 +140,15 @@ function SlotColumn({
 }
 
 // ── Full slot machine TUI ──────────────────────────────────────────────────
-function SlotSlopUI({ slot, onKey, onQuit }: {
+function SlotSlopUI({ slot, onKey }: {
   slot: SlotState;
   onKey: (e: KeyboardEvent<HTMLDivElement>) => void;
-  onQuit: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => { containerRef.current?.focus(); }, []);
 
-  const activeCol = slot.stopped[0] ? (slot.stopped[1] ? (slot.stopped[2] ? -1 : 2) : 1) : 0;
-  const activeName = activeCol >= 0 ? COL_NAMES[activeCol].toLowerCase() : '';
+  const activeCol: number = slot.stopped[0] ? (slot.stopped[1] ? (slot.stopped[2] ? -1 : 2) : 1) : 0;
+  const activeName = activeCol >= 0 ? COL_NAMES[activeCol as 0 | 1 | 2].toLowerCase() : '';
 
   return (
     <div
@@ -215,7 +214,7 @@ function SlotSlopUI({ slot, onKey, onQuit }: {
         ) : activeCol >= 0 ? (
           <>
             press <strong style={{ color: 'white' }}>⌘ / space</strong> to stop the{' '}
-            <strong style={{ color: COL_COLORS[activeCol] }}>{activeName}</strong> reel
+            <strong style={{ color: COL_COLORS[activeCol as 0 | 1 | 2] }}>{activeName}</strong> reel
             {'    '}
             <span style={{ opacity: 0.4 }}>(q to quit)</span>
           </>
@@ -517,10 +516,6 @@ export default function TerminalApp({ props }: { props?: Record<string, unknown>
         <SlotSlopUI
           slot={slot}
           onKey={handleSlotKey}
-          onQuit={() => {
-            if (intervalRef.current) clearInterval(intervalRef.current);
-            setSlot(null);
-          }}
         />
       )}
     </div>
