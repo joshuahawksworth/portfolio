@@ -580,7 +580,6 @@ const ICON_H = 84;
 const ICON_GAP = 8;
 const BOUNCE_MS = 1850; // matches 1800ms animation + 50ms buffer
 
-/** Desktop icons that cannot be moved to Trash (drag or context menu). */
 const DESKTOP_TRASH_BLOCKLIST = new Set(['shortcut-trash', 'shortcut-mycomputer', 'trickster']);
 
 function canTrashDesktopItem(item: DesktopItem): boolean {

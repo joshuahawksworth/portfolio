@@ -68,6 +68,98 @@
   }
 }
 
+.gameAreaMobile .statusBar {
+  font-size: 10px;
+  padding: 3px 8px;
+}
+
+.gameAreaMobile .gameName {
+  font-size: 11px;
+}
+
+.gameAreaMobile .canvas {
+  filter: saturate(1.06) contrast(1.04);
+}
+
+.gameAreaMobile .overlay {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 4px;
+}
+
+.gameAreaMobile .overlayInner {
+  gap: 10px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.gameAreaMobile .playBtn,
+.gameAreaMobile .confirmBtn {
+  min-height: 40px;
+  padding: 8px 20px;
+  font-size: 11px;
+  touch-action: manipulation;
+}
+
+.gameAreaMobile .boardBtn,
+.gameAreaMobile .skipBtn {
+  min-height: 36px;
+  padding: 7px 16px;
+  font-size: 10px;
+  touch-action: manipulation;
+}
+
+.gameAreaMobile .gameOver {
+  font-size: 15px;
+}
+
+.gameAreaMobile .deathScore {
+  font-size: 42px;
+}
+
+.gameAreaMobile .letterArrow {
+  width: 40px;
+  height: 28px;
+  font-size: 12px;
+}
+
+.gameAreaMobile .nameChar {
+  width: 40px;
+  height: 44px;
+  font-size: 22px;
+}
+
+.gameAreaMobile .nameEntry {
+  gap: 10px;
+}
+
+.gameAreaMobile .boardOverlay {
+  max-height: 100%;
+  padding: 10px 8px 12px;
+}
+
+.gameAreaMobile .boardTitle {
+  font-size: 13px;
+}
+
+.gameAreaMobile .boardList {
+  max-height: min(42vh, 220px);
+}
+
+.gameAreaMobile .boardRow {
+  font-size: 11px;
+  padding: 4px 6px;
+}
+
+.gameAreaMobile .boardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 8px;
+  width: 100%;
+}
+
 /* ── Game content area ────────────────────────────────────────────────────── */
 .gameArea {
   display: flex;
@@ -381,6 +473,21 @@
 }
 .boardRow:first-child {
   background: rgba(15, 56, 15, 0.08);
+}
+
+.boardRowPending {
+  opacity: 0.72;
+}
+
+.boardRowPending .boardScore {
+  font-style: italic;
+}
+
+.boardActions {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 6px;
 }
 .boardRank {
   width: 20px;

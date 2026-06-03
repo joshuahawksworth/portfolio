@@ -1,8 +1,3 @@
-/**
- * Shared Snake leaderboard persistence (Supabase + in-memory fallback).
- * Used by the Vercel handler and the Vite dev middleware.
- */
-
 export const SNAKE_LEADERBOARD_TABLE = 'snake_leaderboard';
 
 export type LeaderboardRow = {

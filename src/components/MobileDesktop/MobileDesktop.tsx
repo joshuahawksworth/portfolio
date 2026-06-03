@@ -9,7 +9,7 @@ import TerminalApp from '../apps/TerminalApp';
 import FinderApp from '../apps/FinderApp';
 import TrashApp from '../apps/TrashApp';
 import SafariApp from '../apps/SafariApp';
-import SnakeApp from '../apps/SnakeApp';
+import MobileSnakeApp from '../apps/MobileSnakeApp';
 import RubberDuckApp from '../apps/RubberDuckApp';
 import KeyboardShortcutsApp from '../apps/KeyboardShortcutsApp';
 import { AboutLogoIcon } from '../icons/AboutLogoIcon';
@@ -361,7 +361,7 @@ const APP_COMPONENTS: Record<string, React.ComponentType<{ props?: Record<string
   finder: FinderApp,
   trash: TrashApp,
   safari: SafariApp,
-  snake: SnakeApp,
+  snake: MobileSnakeApp,
   rubberduck: RubberDuckApp,
   shortcuts: KeyboardShortcutsApp,
 };

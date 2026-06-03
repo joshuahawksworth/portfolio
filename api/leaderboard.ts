@@ -1,25 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getLeaderboard, postLeaderboardScore } from './leaderboard-store';
 
-/**
- * Global Snake leaderboard backed by Supabase.
- *
- * Required environment variables (Vercel dashboard or .env.local):
- *   SUPABASE_URL       – e.g. https://xxxx.supabase.co
- *   SUPABASE_ANON_KEY  – anon/public key from Project Settings → API
- *
- * One-time Supabase SQL setup:
- *   CREATE TABLE snake_leaderboard (
- *     id         bigserial PRIMARY KEY,
- *     name       TEXT NOT NULL,
- *     score      INTEGER NOT NULL,
- *     created_at TIMESTAMPTZ DEFAULT now()
- *   );
- *   ALTER TABLE snake_leaderboard ENABLE ROW LEVEL SECURITY;
- *   CREATE POLICY "public read"   ON snake_leaderboard FOR SELECT USING (true);
- *   CREATE POLICY "public insert" ON snake_leaderboard FOR INSERT WITH CHECK (score > 0);
- */
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');

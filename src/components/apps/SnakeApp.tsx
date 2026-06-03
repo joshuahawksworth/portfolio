@@ -10,7 +10,8 @@ const FETCH_TIMEOUT_MS = 6000;
 export const SNAKE_W = COLS * CELL;
 export const SNAKE_H = ROWS * CELL;
 
-type Phase = 'idle' | 'playing' | 'dead' | 'entry' | 'board';
+export type SnakePhase = 'idle' | 'playing' | 'dead' | 'entry' | 'board';
+type Phase = SnakePhase;
 type Dir = 'U' | 'D' | 'L' | 'R';
 type Pt = { x: number; y: number };
 
@@ -133,17 +134,30 @@ function mergeBoard(remote: LeaderboardEntry[], pending: LeaderboardEntry[]): Le
 export interface SnakeAppProps {
   onPushDir?: (cb: (d: Dir) => void) => void;
   onStartGame?: (cb: () => void) => void;
+  onOpenBoard?: (cb: () => void) => void;
+  onConfirm?: (cb: () => void) => void;
+  onSkipEntry?: (cb: () => void) => void;
+  onPhaseChange?: (phase: SnakePhase) => void;
   hideDpad?: boolean;
+  mobileMode?: boolean;
+  className?: string;
   props?: Record<string, unknown>;
 }
 
 export default function SnakeApp({
   onPushDir,
   onStartGame,
+  onOpenBoard,
+  onConfirm,
+  onSkipEntry,
+  onPhaseChange,
   hideDpad,
+  mobileMode,
+  className,
   props: outerProps,
 }: SnakeAppProps) {
   const shouldHideDpad = hideDpad ?? outerProps?.hideDpad === true;
+  const isMobileMode = mobileMode ?? outerProps?.mobileMode === true;
 
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -222,12 +236,11 @@ export default function SnakeApp({
     })();
   }, []);
 
-  // const handleSkip = useCallback(() => {
-  //   syncPhase('board');
-  //   setBoardStatus('loading');
-  //   fetchBoard().then(entries => { setBoard(entries); setBoardStatus('done'); });
-  // // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
+  const handleSkip = useCallback(() => {
+    if (phaseRef.current !== 'entry') return;
+    void openBoard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function openBoard() {
     syncPhase('board');
@@ -290,11 +303,27 @@ export default function SnakeApp({
   pushDirRef2.current = pushDir;
   triggerRef.current = triggerStart;
 
+  const openBoardRef = useRef(openBoard);
+  const confirmRef = useRef(handleConfirm);
+  const skipRef = useRef(handleSkip);
+  openBoardRef.current = openBoard;
+  confirmRef.current = handleConfirm;
+  skipRef.current = handleSkip;
+
   useEffect(() => {
     onPushDir?.((d) => pushDirRef2.current(d));
     onStartGame?.(() => triggerRef.current());
+    onOpenBoard?.(() => {
+      void openBoardRef.current();
+    });
+    onConfirm?.(() => confirmRef.current());
+    onSkipEntry?.(() => skipRef.current());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    onPhaseChange?.(phase);
+  }, [phase, onPhaseChange]);
 
   useEffect(() => {
     if (canvasRef.current) draw(canvasRef.current, snakeRef.current, foodRef.current);
@@ -413,7 +442,14 @@ export default function SnakeApp({
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div ref={wrapRef} className={styles.gameArea} tabIndex={0} onKeyDown={handleKey}>
+    <div
+      ref={wrapRef}
+      className={[styles.gameArea, isMobileMode ? styles.gameAreaMobile : '', className ?? '']
+        .filter(Boolean)
+        .join(' ')}
+      tabIndex={0}
+      onKeyDown={handleKey}
+    >
       <div className={styles.statusBar}>
         <span>{score}</span>
         <span className={styles.gameName}>SNAKE</span>
@@ -459,9 +495,6 @@ export default function SnakeApp({
             <div className={styles.overlayInner}>
               <p className={styles.gameOver}>GAME OVER</p>
               <p className={styles.deathScore}>{score}</p>
-              <p className={styles.enterNameLabel} style={{ opacity: 0.6 }}>
-                loading name entry…
-              </p>
             </div>
           </div>
         )}
@@ -505,10 +538,14 @@ export default function SnakeApp({
                 ))}
               </div>
 
-              {/* Confirm */}
-              <button className={styles.confirmBtn} onClick={handleConfirm}>
-                ✓ SUBMIT
-              </button>
+              <div className={styles.nameActions}>
+                <button className={styles.confirmBtn} onClick={handleConfirm}>
+                  ✓ SUBMIT
+                </button>
+                <button className={styles.skipBtn} onClick={handleSkip}>
+                  SKIP
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -518,8 +555,10 @@ export default function SnakeApp({
           <div className={styles.overlay}>
             <div className={styles.boardOverlay}>
               <p className={styles.boardTitle}>🏆 TOP SCORES</p>
-              {boardStatus === 'loading' && board.length === 0 && (
-                <p className={styles.boardLoading}>Loading…</p>
+              {(boardStatus === 'loading' || boardStatus === 'syncing') && board.length === 0 && (
+                <p className={styles.boardLoading}>
+                  {boardStatus === 'syncing' ? 'Saving score…' : 'Loading…'}
+                </p>
               )}
               {boardStatus === 'done' && board.length === 0 && (
                 <p className={styles.boardEmpty}>No scores yet — be first!</p>
@@ -529,22 +568,37 @@ export default function SnakeApp({
                   {board.map((e, i) => (
                     <li
                       key={`${e.name}-${e.score}-${i}-${e.pending ? 'pending' : 'saved'}`}
-                      className={`${styles.boardRow} ${i === 0 ? styles.boardRowFirst : ''}`}
+                      className={[
+                        styles.boardRow,
+                        i === 0 ? styles.boardRowFirst : '',
+                        e.pending ? styles.boardRowPending : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
                     >
                       <span className={styles.boardRank}>#{i + 1}</span>
                       <span className={styles.boardName}>{e.name}</span>
-                      <span className={styles.boardScore}>{e.score}</span>
+                      <span className={styles.boardScore}>
+                        {e.score}
+                        {e.pending ? ' …' : ''}
+                      </span>
                     </li>
                   ))}
                 </ol>
               )}
-              <button
-                className={styles.playBtn}
-                style={{ marginTop: 6 }}
-                onClick={() => syncPhase('idle')}
-              >
-                BACK
-              </button>
+              <div className={styles.boardActions}>
+                <button
+                  className={styles.boardBtn}
+                  onClick={() => {
+                    void openBoard();
+                  }}
+                >
+                  ↻ REFRESH
+                </button>
+                <button className={styles.playBtn} onClick={() => syncPhase('idle')}>
+                  BACK
+                </button>
+              </div>
             </div>
           </div>
         )}
