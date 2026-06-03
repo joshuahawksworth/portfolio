@@ -67,6 +67,12 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.statusWifi {
+  display: block;
+  flex-shrink: 0;
 }
 
 /* ── Home screen ─────────────────────────────────────── */

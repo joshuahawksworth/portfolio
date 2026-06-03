@@ -388,10 +388,22 @@ function MobileInner() {
       <div className={styles.statusBar}>
         <StatusClock />
         <div className={styles.statusIcons}>
-          <svg viewBox="0 0 16 12" width="16" height="12" fill="white" opacity="0.8">
-            <path d="M8 2a9 9 0 019 0l-1.5 1.5a7 7 0 00-15 0L0 2a9 9 0 018 0z" />
-            <path d="M8 5a5.5 5.5 0 015.5 0L12 6.5a3.5 3.5 0 00-8 0L2.5 5A5.5 5.5 0 018 5z" />
-            <circle cx="8" cy="10" r="1.5" />
+          <svg
+            viewBox="0 0 18 12"
+            width="18"
+            height="12"
+            aria-hidden
+            className={styles.statusWifi}
+          >
+            <path
+              d="M1.5 4.8c4-3.5 11-3.5 15 0M4.5 7.4c2.5-2.2 6.5-2.2 9 0M7.5 9.8c1.1-1 2.9-1 4 0"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.35"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <circle cx="9" cy="11" r="0.9" fill="currentColor" />
           </svg>
           <svg
             viewBox="0 0 22 12"
