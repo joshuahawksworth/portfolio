@@ -10,6 +10,14 @@
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
 }
 
+.frameless {
+  width: 500px;
+  height: auto;
+  overflow: visible;
+  background: transparent;
+  grid-template-rows: auto;
+}
+
 .stage {
   position: relative;
   display: flex;
@@ -19,132 +27,203 @@
   perspective: 900px;
 }
 
+.frameless .stage {
+  min-height: 260px;
+}
+
 .duck {
   position: relative;
-  width: 210px;
+  width: 260px;
   height: 180px;
-  transform: rotateX(8deg) rotateY(-12deg);
-  filter: drop-shadow(0 28px 20px rgba(0, 0, 0, 0.38));
-  animation: bob 2.8s ease-in-out infinite;
+  transform: translateX(-118px);
+  filter: drop-shadow(12px 18px 0 rgba(0, 0, 0, 0.2));
+  animation: pixelBob 2.8s steps(2, end) infinite;
+}
+
+.closeButton {
+  position: absolute;
+  left: 78px;
+  top: 118px;
+  z-index: 5;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #9a6a00;
+  border-radius: 0;
+  background: #f8d646;
+  color: #805000;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 12px;
+  padding: 0;
+  box-shadow: 2px 2px 0 #8a5a00;
+  image-rendering: pixelated;
+}
+
+.closeButton:hover {
+  background: #fff09a;
+}
+
+.closeButton:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
 }
 
 .body {
   position: absolute;
-  left: 22px;
-  bottom: 24px;
-  width: 150px;
-  height: 92px;
-  border-radius: 54% 46% 48% 52% / 58% 60% 40% 42%;
-  background:
-    radial-gradient(circle at 35% 24%, rgba(255, 255, 255, 0.42), transparent 16%),
-    linear-gradient(145deg, #ffe86a 0%, #ffc928 46%, #e4a712 100%);
+  left: 30px;
+  top: 82px;
+  width: 146px;
+  height: 74px;
+  border-radius: 0;
+  background: #ffd52e;
+  box-shadow:
+    18px -18px 0 #ffd52e,
+    36px -18px 0 #ffd52e,
+    54px -18px 0 #f6bd16,
+    -18px 18px 0 #e6a80f,
+    0 18px 0 #e6a80f,
+    18px 18px 0 #e6a80f,
+    36px 18px 0 #d9960a,
+    54px 18px 0 #d9960a,
+    72px 0 0 #f6bd16,
+    90px 0 0 #f6bd16,
+    108px 0 0 #d9960a;
+}
+
+.body::before {
+  content: '';
+  position: absolute;
+  left: -36px;
+  top: 18px;
+  width: 36px;
+  height: 36px;
+  background: #ffd52e;
+  box-shadow:
+    -18px 18px 0 #e6a80f,
+    0 18px 0 #e6a80f;
 }
 
 .wing {
   position: absolute;
-  left: 58px;
-  bottom: 42px;
-  width: 76px;
-  height: 48px;
-  border-radius: 52% 48% 54% 46%;
-  background: linear-gradient(150deg, #f5bd18 0%, #d99908 100%);
-  opacity: 0.9;
-  transform: rotate(-8deg);
+  left: 66px;
+  top: 104px;
+  width: 70px;
+  height: 36px;
+  border-radius: 0;
+  background: #e5a80f;
+  box-shadow:
+    18px 0 0 #d9960a,
+    36px -18px 0 #e5a80f;
 }
 
 .neck {
   position: absolute;
-  left: 122px;
-  bottom: 88px;
+  left: 150px;
+  top: 58px;
   width: 42px;
   height: 54px;
-  border-radius: 48% 52% 38% 62%;
-  background: linear-gradient(130deg, #ffdc42 0%, #efb31a 100%);
-  transform: rotate(-16deg);
+  border-radius: 0;
+  background: #ffd52e;
+  box-shadow:
+    18px 0 0 #f6bd16,
+    18px 18px 0 #f6bd16;
 }
 
 .head {
   position: absolute;
-  left: 134px;
-  top: 22px;
-  width: 66px;
-  height: 58px;
-  border-radius: 54% 46% 48% 52%;
-  background:
-    radial-gradient(circle at 33% 22%, rgba(255, 255, 255, 0.5), transparent 14%),
-    linear-gradient(145deg, #ffea70 0%, #ffc72c 60%, #e9a916 100%);
+  left: 168px;
+  top: 20px;
+  width: 64px;
+  height: 54px;
+  border-radius: 0;
+  background: #ffe05a;
+  box-shadow:
+    -18px 18px 0 #ffd52e,
+    0 18px 0 #ffd52e,
+    18px 18px 0 #f6bd16,
+    -18px 36px 0 #f6bd16;
 }
 
 .eye {
   position: absolute;
-  left: 176px;
-  top: 43px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
+  left: 206px;
+  top: 40px;
+  width: 8px;
+  height: 8px;
+  border-radius: 0;
   background: #18202f;
-  box-shadow: 1px -1px 0 rgba(255, 255, 255, 0.55) inset;
+  box-shadow: 2px -2px 0 rgba(255, 255, 255, 0.6) inset;
 }
 
 .beak {
   position: absolute;
-  left: 192px;
-  top: 53px;
-  width: 38px;
+  left: 226px;
+  top: 52px;
+  width: 36px;
   height: 18px;
-  border-radius: 65% 35% 45% 55%;
-  background: linear-gradient(180deg, #ff9f1c 0%, #f97316 100%);
-  transform: rotate(5deg);
+  border-radius: 0;
+  background: #f97316;
+  box-shadow:
+    18px 0 0 #f97316,
+    36px 0 0 #f97316,
+    0 18px 0 #c94b0b;
 }
 
 .ripple {
   position: absolute;
-  bottom: 38px;
-  width: 220px;
-  height: 36px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(80, 180, 255, 0.22), transparent 68%);
-  transform: rotateX(68deg);
+  bottom: 20px;
+  width: 230px;
+  height: 18px;
+  border-radius: 0;
+  background: rgba(80, 180, 255, 0.16);
+  box-shadow:
+    -28px 0 0 rgba(80, 180, 255, 0.1),
+    28px 0 0 rgba(80, 180, 255, 0.1);
 }
 
 .speech {
-  margin: 0 24px 24px;
-  padding: 18px 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.075);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  position: relative;
+  width: 190px;
+  margin: -198px 0 0 286px;
+  padding: 12px 14px;
+  border: 2px solid #1f2937;
+  border-radius: 18px;
+  background: #ffffff;
+  color: #1f2937;
+  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.24);
 }
 
-.kicker {
-  margin: 0 0 6px;
-  color: #facc15;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.speech h2 {
-  margin: 0 0 8px;
-  font-size: 22px;
-  line-height: 1.15;
+.speech::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 44px;
+  width: 20px;
+  height: 20px;
+  background: inherit;
+  border-left: 2px solid #1f2937;
+  border-bottom: 2px solid #1f2937;
+  transform: rotate(45deg);
+  transform-origin: center;
+  box-shadow: none;
 }
 
 .speech p {
+  position: relative;
+  z-index: 1;
   margin: 0;
-  color: rgba(248, 250, 252, 0.74);
   font-size: 13px;
-  line-height: 1.55;
+  font-weight: 700;
+  line-height: 1.35;
 }
 
-@keyframes bob {
+@keyframes pixelBob {
   0%,
   100% {
-    transform: rotateX(8deg) rotateY(-12deg) translateY(0);
+    transform: translateX(-118px) translateY(0);
   }
   50% {
-    transform: rotateX(8deg) rotateY(-12deg) translateY(-8px);
+    transform: translateX(-118px) translateY(-6px);
   }
 }

@@ -45,14 +45,168 @@ const APP_COMPONENTS: Record<string, React.ComponentType<{ props?: Record<string
   // snake is rendered by NokiaWindow — NOT in this map
 };
 
+type SpacePhase = 'ready' | 'playing' | 'hit';
+type SpaceSprite = { x: number; y: number };
+
+function SpaceImpactMini({
+  onPushDir,
+  onFire,
+}: {
+  onPushDir?: (cb: (d: 'U' | 'D' | 'L' | 'R') => void) => void;
+  onFire?: (cb: () => void) => void;
+}) {
+  const [ship, setShip] = useState({ x: 2, y: 4 });
+  const [shots, setShots] = useState<SpaceSprite[]>([]);
+  const [rocks, setRocks] = useState<SpaceSprite[]>([
+    { x: 15, y: 2 },
+    { x: 18, y: 6 },
+  ]);
+  const [score, setScore] = useState(0);
+  const [phase, setPhase] = useState<SpacePhase>('ready');
+  const phaseRef = useRef<SpacePhase>('ready');
+  const shipRef = useRef(ship);
+  const shotsRef = useRef(shots);
+  const rocksRef = useRef(rocks);
+  const scoreRef = useRef(score);
+
+  useEffect(() => {
+    shipRef.current = ship;
+  }, [ship]);
+  useEffect(() => {
+    shotsRef.current = shots;
+  }, [shots]);
+  useEffect(() => {
+    rocksRef.current = rocks;
+  }, [rocks]);
+  useEffect(() => {
+    scoreRef.current = score;
+  }, [score]);
+
+  function syncPhase(next: SpacePhase) {
+    phaseRef.current = next;
+    setPhase(next);
+  }
+
+  function start() {
+    setShip({ x: 2, y: 4 });
+    setShots([]);
+    setRocks([
+      { x: 15, y: 2 },
+      { x: 18, y: 6 },
+    ]);
+    setScore(0);
+    scoreRef.current = 0;
+    syncPhase('playing');
+  }
+
+  function pushDir(d: 'U' | 'D' | 'L' | 'R') {
+    if (phaseRef.current !== 'playing') return;
+    setShip((prev) => ({
+      x: Math.max(1, Math.min(6, prev.x + (d === 'L' ? -1 : d === 'R' ? 1 : 0))),
+      y: Math.max(1, Math.min(8, prev.y + (d === 'U' ? -1 : d === 'D' ? 1 : 0))),
+    }));
+  }
+
+  function fire() {
+    if (phaseRef.current !== 'playing') {
+      start();
+      return;
+    }
+    const currentShip = shipRef.current;
+    setShots((prev) => [...prev, { x: currentShip.x + 2, y: currentShip.y }]);
+  }
+
+  useEffect(() => {
+    onPushDir?.(pushDir);
+    onFire?.(fire);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      if (phaseRef.current !== 'playing') return;
+
+      const nextShots = shotsRef.current
+        .map((shot) => ({ ...shot, x: shot.x + 1 }))
+        .filter((shot) => shot.x < 20);
+      let nextRocks = rocksRef.current.map((rock) => ({ ...rock, x: rock.x - 1 }));
+      let nextScore = scoreRef.current;
+
+      nextRocks = nextRocks.filter((rock) => {
+        const hit = nextShots.some((shot) => shot.x === rock.x && shot.y === rock.y);
+        if (hit) nextScore += 10;
+        return !hit;
+      });
+
+      if (nextRocks.length < 3) {
+        nextRocks.push({ x: 19, y: 1 + Math.floor(Math.random() * 8) });
+      }
+      nextRocks = nextRocks.map((rock) =>
+        rock.x < 0 ? { x: 19, y: 1 + Math.floor(Math.random() * 8) } : rock
+      );
+
+      const crashed = nextRocks.some(
+        (rock) => Math.abs(rock.x - shipRef.current.x) <= 1 && rock.y === shipRef.current.y
+      );
+      if (crashed) syncPhase('hit');
+
+      setShots(nextShots);
+      setRocks(nextRocks);
+      setScore(nextScore);
+      scoreRef.current = nextScore;
+    }, 160);
+
+    return () => window.clearInterval(id);
+  }, []);
+
+  return (
+    <div className={styles.spaceGame}>
+      <div className={styles.spaceHud}>
+        <span>SPACE IMPACT</span>
+        <span>{score}</span>
+      </div>
+      <div className={styles.spaceField}>
+        <div
+          className={styles.spaceShip}
+          style={{ left: `${ship.x * 5}%`, top: `${ship.y * 10}%` }}
+        />
+        {shots.map((shot, index) => (
+          <div
+            key={`shot-${index}-${shot.x}-${shot.y}`}
+            className={styles.spaceShot}
+            style={{ left: `${shot.x * 5}%`, top: `${shot.y * 10 + 2}%` }}
+          />
+        ))}
+        {rocks.map((rock, index) => (
+          <div
+            key={`rock-${index}-${rock.x}-${rock.y}`}
+            className={styles.spaceRock}
+            style={{ left: `${rock.x * 5}%`, top: `${rock.y * 10}%` }}
+          />
+        ))}
+        {phase !== 'playing' && (
+          <div className={styles.spaceOverlay}>
+            <strong>{phase === 'hit' ? 'SIGNAL LOST' : 'CODE 3310'}</strong>
+            <span>{phase === 'hit' ? 'OK to retry' : 'OK to start'}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── NokiaWindow ── custom Nokia phone frame for Snake ─────────────────────
 function NokiaWindow({ win }: { win: WindowInstance }) {
   const { closeWindow, focusWindow, moveWindow, focusedId } = useDesktop();
   const posRef = useRef({ x: win.x, y: win.y });
   const [pos, setPos] = useState({ x: win.x, y: win.y });
+  const [phoneMode, setPhoneMode] = useState<'snake' | 'space'>('snake');
 
   const pushDirRef = useRef<((d: 'U' | 'D' | 'L' | 'R') => void) | null>(null);
   const startGameRef = useRef<(() => void) | null>(null);
+  const spacePushDirRef = useRef<((d: 'U' | 'D' | 'L' | 'R') => void) | null>(null);
+  const spaceFireRef = useRef<(() => void) | null>(null);
+  const phoneCodeRef = useRef('');
 
   const handlePushDir = useCallback((cb: (d: 'U' | 'D' | 'L' | 'R') => void) => {
     pushDirRef.current = cb;
@@ -60,6 +214,32 @@ function NokiaWindow({ win }: { win: WindowInstance }) {
   const handleStartGame = useCallback((cb: () => void) => {
     startGameRef.current = cb;
   }, []);
+  const handleSpacePushDir = useCallback((cb: (d: 'U' | 'D' | 'L' | 'R') => void) => {
+    spacePushDirRef.current = cb;
+  }, []);
+  const handleSpaceFire = useCallback((cb: () => void) => {
+    spaceFireRef.current = cb;
+  }, []);
+
+  function pushPhoneDir(d: 'U' | 'D' | 'L' | 'R') {
+    if (phoneMode === 'space') spacePushDirRef.current?.(d);
+    else pushDirRef.current?.(d);
+  }
+
+  function pressPhoneOk() {
+    if (phoneMode === 'space') spaceFireRef.current?.();
+    else startGameRef.current?.();
+  }
+
+  function pressPhoneKey(k: string) {
+    phoneCodeRef.current = `${phoneCodeRef.current}${k}`.slice(-8);
+    if (phoneCodeRef.current.endsWith('3310')) {
+      setPhoneMode('space');
+      phoneCodeRef.current = '';
+    }
+    if (k === '*') setPhoneMode('snake');
+    if (phoneMode === 'space' && k === '#') spaceFireRef.current?.();
+  }
 
   // Keyboard: forward to game
   useEffect(() => {
@@ -81,13 +261,17 @@ function NokiaWindow({ win }: { win: WindowInstance }) {
       };
       if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
-        startGameRef.current?.();
+        pressPhoneOk();
         return;
       }
       const d = MAP[e.key];
       if (d) {
         e.preventDefault();
-        pushDirRef.current?.(d);
+        pushPhoneDir(d);
+      }
+      if (/^[0-9*#]$/.test(e.key)) {
+        e.preventDefault();
+        pressPhoneKey(e.key);
       }
     }
     window.addEventListener('keydown', onKey);
@@ -146,7 +330,11 @@ function NokiaWindow({ win }: { win: WindowInstance }) {
         {/* LCD screen bezel */}
         <div className={styles.nokiaBezel}>
           <div className={styles.nokiaScreen}>
-            <SnakeApp onPushDir={handlePushDir} onStartGame={handleStartGame} hideDpad={true} />
+            {phoneMode === 'space' ? (
+              <SpaceImpactMini onPushDir={handleSpacePushDir} onFire={handleSpaceFire} />
+            ) : (
+              <SnakeApp onPushDir={handlePushDir} onStartGame={handleStartGame} hideDpad={true} />
+            )}
           </div>
         </div>
 
@@ -159,7 +347,7 @@ function NokiaWindow({ win }: { win: WindowInstance }) {
             className={styles.navBtn}
             onPointerDown={(e) => {
               e.preventDefault();
-              pushDirRef.current?.('U');
+              pushPhoneDir('U');
             }}
           >
             ▲
@@ -169,7 +357,7 @@ function NokiaWindow({ win }: { win: WindowInstance }) {
               className={styles.navBtn}
               onPointerDown={(e) => {
                 e.preventDefault();
-                pushDirRef.current?.('L');
+                pushPhoneDir('L');
               }}
             >
               ◄
@@ -178,14 +366,14 @@ function NokiaWindow({ win }: { win: WindowInstance }) {
               className={styles.navCenterBtn}
               onPointerDown={(e) => {
                 e.preventDefault();
-                startGameRef.current?.();
+                pressPhoneOk();
               }}
             />
             <button
               className={styles.navBtn}
               onPointerDown={(e) => {
                 e.preventDefault();
-                pushDirRef.current?.('R');
+                pushPhoneDir('R');
               }}
             >
               ►
@@ -195,7 +383,7 @@ function NokiaWindow({ win }: { win: WindowInstance }) {
             className={styles.navBtn}
             onPointerDown={(e) => {
               e.preventDefault();
-              pushDirRef.current?.('D');
+              pushPhoneDir('D');
             }}
           >
             ▼
@@ -208,28 +396,90 @@ function NokiaWindow({ win }: { win: WindowInstance }) {
             className={styles.nokiaSoftKey}
             onPointerDown={(e) => {
               e.preventDefault();
-              startGameRef.current?.();
+              pressPhoneOk();
             }}
           >
-            Play
+            {phoneMode === 'space' ? 'Fire' : 'Play'}
           </button>
           <div className={styles.nokiaCallBtns}>
             <button className={styles.nokiaCallBtn} style={{ background: '#1e6b2e' }} />
             <button className={styles.nokiaCallBtn} style={{ background: '#6b1e1e' }} />
           </div>
-          <button className={styles.nokiaSoftKey}>Menu</button>
+          <button
+            className={styles.nokiaSoftKey}
+            onPointerDown={(e) => {
+              e.preventDefault();
+              setPhoneMode((mode) => (mode === 'space' ? 'snake' : mode));
+            }}
+          >
+            Menu
+          </button>
         </div>
 
         {/* Numpad */}
         <div className={styles.nokiaNumpad}>
           {['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'].map((k) => (
-            <button key={k} className={styles.nokiaNumKey}>
+            <button
+              key={k}
+              className={styles.nokiaNumKey}
+              onPointerDown={(e) => {
+                e.preventDefault();
+                pressPhoneKey(k);
+              }}
+            >
               {k}
             </button>
           ))}
         </div>
 
         <div className={styles.nokiaChin} />
+      </div>
+    </div>
+  );
+}
+
+function DuckWindow({ win }: { win: WindowInstance }) {
+  const { closeWindow, focusWindow, moveWindow } = useDesktop();
+  const posRef = useRef({ x: win.x, y: win.y });
+  const [pos, setPos] = useState({ x: win.x, y: win.y });
+
+  function onDuckMouseDown(e: React.MouseEvent) {
+    if ((e.target as HTMLElement).closest('button')) return;
+    e.preventDefault();
+    focusWindow(win.id);
+    const sx = e.clientX - posRef.current.x;
+    const sy = e.clientY - posRef.current.y;
+
+    function onMove(ev: MouseEvent) {
+      const nx = ev.clientX - sx;
+      const ny = Math.max(28, ev.clientY - sy);
+      posRef.current = { x: nx, y: ny };
+      setPos({ x: nx, y: ny });
+      moveWindow(win.id, nx, ny);
+    }
+
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    }
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  }
+
+  if (win.minimized) return null;
+
+  return (
+    <div
+      className={styles.duckWindow}
+      style={{ left: pos.x, top: pos.y, zIndex: win.zIndex }}
+      onMouseDown={(e) => {
+        e.stopPropagation();
+        focusWindow(win.id);
+      }}
+    >
+      <div onMouseDown={onDuckMouseDown}>
+        <RubberDuckApp frameless onClose={() => closeWindow(win.id)} />
       </div>
     </div>
   );
@@ -1581,6 +1831,7 @@ function DesktopSurface() {
       {/* Open windows */}
       {windows.map((win) => {
         if (win.appId === 'snake') return <NokiaWindow key={win.id} win={win} />;
+        if (win.appId === 'rubberduck') return <DuckWindow key={win.id} win={win} />;
         const Comp = APP_COMPONENTS[win.appId];
         if (!Comp) return null;
         return (

@@ -1,10 +1,30 @@
 import styles from './RubberDuckApp.module.css';
 
-export default function RubberDuckApp() {
+interface Props {
+  onClose?: () => void;
+  frameless?: boolean;
+  props?: Record<string, unknown>;
+}
+
+export default function RubberDuckApp({ onClose, frameless = false }: Props) {
   return (
-    <div className={styles.root}>
+    <div className={`${styles.root} ${frameless ? styles.frameless : ''}`}>
       <div className={styles.stage} aria-hidden="true">
         <div className={styles.duck}>
+          {onClose && (
+            <button
+              className={styles.closeButton}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
+              onMouseDown={(e) => e.stopPropagation()}
+              aria-label="Close Rubber Duck"
+              type="button"
+            >
+              ×
+            </button>
+          )}
           <div className={styles.body} />
           <div className={styles.wing} />
           <div className={styles.neck} />
@@ -16,12 +36,7 @@ export default function RubberDuckApp() {
       </div>
 
       <div className={styles.speech}>
-        <p className={styles.kicker}>Rubber Duck Debugger</p>
-        <h2>Have you tried explaining it out loud?</h2>
-        <p>
-          I am listening patiently. Start from what you expected, then tell me what actually
-          happened.
-        </p>
+        <p>Have you tried explaining it out loud?</p>
       </div>
     </div>
   );

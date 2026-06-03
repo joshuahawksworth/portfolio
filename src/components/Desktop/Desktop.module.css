@@ -4,11 +4,19 @@
   overflow: hidden;
 
   background:
-    radial-gradient(ellipse at 18% 25%, rgba(59,100,220,0.22) 0%, transparent 48%),
-    radial-gradient(ellipse at 80% 70%, rgba(120,60,200,0.15) 0%, transparent 45%),
-    radial-gradient(ellipse at 55% 5%,  rgba(30,60,140,0.25)  0%, transparent 40%),
-    radial-gradient(ellipse at 50% 100%,rgba(15,35,80,0.6)    0%, transparent 50%),
-    linear-gradient(175deg, #06090f 0%, #08101e 20%, #0d1628 45%, #101c32 65%, #0c1520 80%, #06090f 100%);
+    radial-gradient(ellipse at 18% 25%, rgba(59, 100, 220, 0.22) 0%, transparent 48%),
+    radial-gradient(ellipse at 80% 70%, rgba(120, 60, 200, 0.15) 0%, transparent 45%),
+    radial-gradient(ellipse at 55% 5%, rgba(30, 60, 140, 0.25) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 100%, rgba(15, 35, 80, 0.6) 0%, transparent 50%),
+    linear-gradient(
+      175deg,
+      #06090f 0%,
+      #08101e 20%,
+      #0d1628 45%,
+      #101c32 65%,
+      #0c1520 80%,
+      #06090f 100%
+    );
 }
 
 /* starfield */
@@ -18,17 +26,17 @@
   inset: 0;
   pointer-events: none;
   background-image:
-    radial-gradient(1px 1px at 8%  12%, rgba(255,255,255,0.55) 0%, transparent 100%),
-    radial-gradient(1px 1px at 22% 8%,  rgba(255,255,255,0.40) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 38% 5%,  rgba(255,255,255,0.65) 0%, transparent 100%),
-    radial-gradient(1px 1px at 55% 10%, rgba(255,255,255,0.35) 0%, transparent 100%),
-    radial-gradient(1px 1px at 70% 7%,  rgba(255,255,255,0.50) 0%, transparent 100%),
-    radial-gradient(1px 1px at 85% 15%, rgba(255,255,255,0.45) 0%, transparent 100%),
-    radial-gradient(1px 1px at 92% 9%,  rgba(255,255,255,0.30) 0%, transparent 100%),
-    radial-gradient(1px 1px at 14% 30%, rgba(255,255,255,0.35) 0%, transparent 100%),
-    radial-gradient(1px 1px at 46% 25%, rgba(255,255,255,0.40) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 72% 22%, rgba(255,255,255,0.30) 0%, transparent 100%),
-    radial-gradient(1px 1px at 95% 38%, rgba(255,255,255,0.35) 0%, transparent 100%);
+    radial-gradient(1px 1px at 8% 12%, rgba(255, 255, 255, 0.55) 0%, transparent 100%),
+    radial-gradient(1px 1px at 22% 8%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 38% 5%, rgba(255, 255, 255, 0.65) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 10%, rgba(255, 255, 255, 0.35) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 7%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 15%, rgba(255, 255, 255, 0.45) 0%, transparent 100%),
+    radial-gradient(1px 1px at 92% 9%, rgba(255, 255, 255, 0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 14% 30%, rgba(255, 255, 255, 0.35) 0%, transparent 100%),
+    radial-gradient(1px 1px at 46% 25%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 72% 22%, rgba(255, 255, 255, 0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 95% 38%, rgba(255, 255, 255, 0.35) 0%, transparent 100%);
 }
 
 /* mountain silhouettes */
@@ -42,10 +50,34 @@
   pointer-events: none;
   background: linear-gradient(to top, #07090e 0%, transparent 100%);
   clip-path: polygon(
-    0 100%, 0 72%, 4% 60%, 8% 68%, 12% 48%, 16% 62%, 20% 40%,
-    24% 56%, 28% 44%, 33% 58%, 37% 38%, 41% 52%, 45% 32%, 49% 50%,
-    53% 38%, 57% 54%, 61% 36%, 65% 52%, 69% 40%, 73% 58%, 77% 44%,
-    81% 60%, 85% 48%, 89% 64%, 93% 52%, 97% 68%, 100% 60%, 100% 100%
+    0 100%,
+    0 72%,
+    4% 60%,
+    8% 68%,
+    12% 48%,
+    16% 62%,
+    20% 40%,
+    24% 56%,
+    28% 44%,
+    33% 58%,
+    37% 38%,
+    41% 52%,
+    45% 32%,
+    49% 50%,
+    53% 38%,
+    57% 54%,
+    61% 36%,
+    65% 52%,
+    69% 40%,
+    73% 58%,
+    77% 44%,
+    81% 60%,
+    85% 48%,
+    89% 64%,
+    93% 52%,
+    97% 68%,
+    100% 60%,
+    100% 100%
   );
   opacity: 0.85;
 }
@@ -68,17 +100,31 @@
 }
 
 @keyframes iconFadeIn {
-  from { opacity: 0; transform: scale(0.88); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-.icon:hover   { background: rgba(255,255,255,0.1); }
-.iconSelected { background: rgba(59,130,246,0.25) !important; }
+.icon:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.iconSelected {
+  background: rgba(59, 130, 246, 0.25) !important;
+}
 /* Elevated during drag so the ghost appears above other windows */
-.iconDragging { z-index: 9000 !important; }
+.iconDragging {
+  z-index: 9000 !important;
+}
 /* Raise the whole icon when selected so its expanded label floats above neighbours,
    but keep it below any open window (windows start at z-index 101+) */
-.iconFocused  { z-index: 50 !important; }
+.iconFocused {
+  z-index: 50 !important;
+}
 /* Folder highlighted as drop target */
 .iconFolderTarget {
   background: rgba(74, 158, 255, 0.35) !important;
@@ -92,10 +138,10 @@
   height: 48px;
   border-radius: 10px;
   object-fit: contain;
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   padding: 4px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
   pointer-events: none;
 }
 
@@ -110,7 +156,7 @@
   font-size: 18px;
   font-weight: 700;
   color: white;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
   pointer-events: none;
 }
 
@@ -118,7 +164,7 @@
   font-size: 11px;
   color: white;
   text-align: center;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
   max-width: 72px;
   overflow: hidden;
@@ -140,14 +186,14 @@
   background: rgba(0, 80, 180, 0.72);
   border-radius: 3px;
   padding: 1px 3px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.6);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
 }
 
 /* ── Clean-up animation (applied only during cleanup) ────── */
 .iconCleaning {
   transition:
     left 460ms cubic-bezier(0.34, 1.1, 0.64, 1),
-    top  460ms cubic-bezier(0.34, 1.1, 0.64, 1) !important;
+    top 460ms cubic-bezier(0.34, 1.1, 0.64, 1) !important;
 }
 
 /* ── Rename input ─────────────────────────────────────────── */
@@ -155,8 +201,8 @@
   width: 72px;
   font-size: 11px;
   text-align: center;
-  background: rgba(30,60,180,0.55);
-  border: 1.5px solid rgba(80,140,255,0.85);
+  background: rgba(30, 60, 180, 0.55);
+  border: 1.5px solid rgba(80, 140, 255, 0.85);
   border-radius: 4px;
   color: white;
   padding: 2px 4px;
@@ -168,8 +214,8 @@
 /* ── Rubber-band selection rect ───────────────────────────── */
 .selRect {
   position: absolute;
-  border: 1.5px solid rgba(80,140,255,0.8);
-  background: rgba(80,140,255,0.1);
+  border: 1.5px solid rgba(80, 140, 255, 0.8);
+  background: rgba(80, 140, 255, 0.1);
   border-radius: 3px;
   pointer-events: none;
   z-index: 2;
@@ -182,10 +228,12 @@
   min-width: 200px;
   padding: 4px;
   border-radius: 9px;
-  background: rgba(26,28,38,0.94);
+  background: rgba(26, 28, 38, 0.94);
   /* solid fallback for browsers without backdrop-filter */
-  border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.65), 0 0 0 0.5px rgba(255,255,255,0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.65),
+    0 0 0 0.5px rgba(255, 255, 255, 0.04);
   -webkit-backdrop-filter: blur(22px) saturate(160%);
   backdrop-filter: blur(22px) saturate(160%);
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
@@ -193,8 +241,14 @@
 }
 
 @keyframes ctxIn {
-  from { opacity: 0; transform: scale(0.96) translateY(-4px); }
-  to   { opacity: 1; transform: scale(1)    translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .ctxItem {
@@ -202,7 +256,7 @@
   width: 100%;
   padding: 5px 12px;
   font-size: 13px;
-  color: rgba(255,255,255,0.92);
+  color: rgba(255, 255, 255, 0.92);
   background: none;
   border: none;
   border-radius: 6px;
@@ -212,13 +266,19 @@
   transition: background 80ms ease;
   -webkit-tap-highlight-color: transparent;
 }
-.ctxItem:hover  { background: rgba(255,255,255,0.1); }
-.ctxDanger      { color: #ff6b6b; }
-.ctxDanger:hover { background: rgba(255,59,48,0.15); }
+.ctxItem:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.ctxDanger {
+  color: #ff6b6b;
+}
+.ctxDanger:hover {
+  background: rgba(255, 59, 48, 0.15);
+}
 
 .ctxDivider {
   height: 1px;
-  background: rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.08);
   margin: 3px 6px;
 }
 
@@ -230,25 +290,31 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.35);
+  background: rgba(0, 0, 0, 0.35);
 }
 
 /* ── Get Info window ──────────────────────────────────────── */
 .getInfo {
   width: 270px;
   border-radius: 12px;
-  background: rgba(26,28,40,0.97);
-  border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.72);
+  background: rgba(26, 28, 40, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.72);
   overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
-  color: rgba(255,255,255,0.88);
+  color: rgba(255, 255, 255, 0.88);
   animation: modalIn 160ms ease;
 }
 
 @keyframes modalIn {
-  from { opacity: 0; transform: scale(0.96) translateY(6px); }
-  to   { opacity: 1; transform: scale(1)    translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .getInfoTitleBar {
@@ -256,8 +322,8 @@
   padding: 0 12px;
   display: flex;
   align-items: center;
-  background: rgba(255,255,255,0.03);
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .trafficClose {
@@ -269,15 +335,17 @@
   cursor: pointer;
   flex-shrink: 0;
 }
-.trafficClose:hover { background: #ff3b30; }
+.trafficClose:hover {
+  background: #ff3b30;
+}
 
 .getInfoHead {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 14px 16px 10px;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-  background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .getInfoName {
@@ -287,19 +355,19 @@
 }
 .getInfoMeta {
   font-size: 11px;
-  color: rgba(255,255,255,0.4);
+  color: rgba(255, 255, 255, 0.4);
   margin-top: 2px;
 }
 
 .getInfoSection {
   padding: 10px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .getInfoSectionTitle {
   font-size: 12px;
   font-weight: 600;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255, 255, 255, 0.5);
   margin-bottom: 6px;
 }
 
@@ -309,28 +377,32 @@
   font-size: 12px;
   line-height: 1.7;
 }
-.getInfoTable td { vertical-align: top; }
+.getInfoTable td {
+  vertical-align: top;
+}
 .getInfoTable td:first-child {
-  color: rgba(255,255,255,0.42);
+  color: rgba(255, 255, 255, 0.42);
   white-space: nowrap;
   padding-right: 10px;
   min-width: 76px;
 }
-.getInfoTable td:last-child { color: rgba(255,255,255,0.85); }
+.getInfoTable td:last-child {
+  color: rgba(255, 255, 255, 0.85);
+}
 
 .getInfoBody {
   font-size: 12px;
   line-height: 1.6;
-  color: rgba(255,255,255,0.58);
+  color: rgba(255, 255, 255, 0.58);
   margin: 0;
 }
 
 /* ── Wallpaper picker ─────────────────────────────────────── */
 .wallpaperPicker {
   border-radius: 12px;
-  background: rgba(26,28,40,0.97);
-  border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.72);
+  background: rgba(26, 28, 40, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.72);
   padding: 18px 20px 20px;
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
   animation: modalIn 160ms ease;
@@ -339,7 +411,7 @@
 .wallpaperTitle {
   font-size: 14px;
   font-weight: 600;
-  color: rgba(255,255,255,0.9);
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 14px;
   text-align: center;
 }
@@ -356,42 +428,44 @@
   border: 2px solid transparent;
   cursor: pointer;
   font-size: 10px;
-  color: rgba(255,255,255,0.75);
-  text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+  color: rgba(255, 255, 255, 0.75);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
   display: flex;
   align-items: flex-end;
   justify-content: center;
   padding-bottom: 5px;
   font-family: inherit;
-  transition: border-color 100ms ease, transform 100ms ease;
+  transition:
+    border-color 100ms ease,
+    transform 100ms ease;
 }
-.wallpaperSwatch:hover    { transform: scale(1.06); }
-.wallpaperActive          { border-color: rgba(80,140,255,0.9) !important; }
+.wallpaperSwatch:hover {
+  transform: scale(1.06);
+}
+.wallpaperActive {
+  border-color: rgba(80, 140, 255, 0.9) !important;
+}
 
 /* ── Nokia Phone Window — 8-bit chunky early-2000s brick ─────────────────── */
 
 /* Classic Nokia navy plastic — main body */
 .nokia {
   width: 290px;
-  background: #1c2d5e;   /* Nokia deep navy */
+  background: #1c2d5e; /* Nokia deep navy */
   border-radius: 18px 18px 30px 30px;
   border: 2px solid #2a3f80;
   /* 8-bit-style hard drop shadow gives the "brick" 3D thickness */
   box-shadow:
     /* Face highlight stripe */
-    inset 0 3px 0 rgba(255,255,255,0.18),
-    inset -3px 0 0 rgba(0,0,0,0.25),
-    /* Hard right edge — 8px "wall" depth */
-    3px 0 0 #0f1a40,
+    inset 0 3px 0 rgba(255, 255, 255, 0.18),
+    inset -3px 0 0 rgba(0, 0, 0, 0.25),
+    /* Hard right edge — 8px "wall" depth */ 3px 0 0 #0f1a40,
     6px 0 0 #0a1230,
     8px 0 0 #060d20,
-    /* Hard bottom edge */
-    0 4px 0 #0f1a40,
+    /* Hard bottom edge */ 0 4px 0 #0f1a40,
     0 7px 0 #060d20,
-    /* Corner */
-    8px 7px 0 #040a18,
-    /* Ambient drop */
-    8px 8px 30px rgba(0,0,0,0.85);
+    /* Corner */ 8px 7px 0 #040a18,
+    /* Ambient drop */ 8px 8px 30px rgba(0, 0, 0, 0.85);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -419,18 +493,16 @@
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #3a5090, #0a1430);
   border: 1px solid #0a1030;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.7), 0 1px 0 rgba(255,255,255,0.06);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.7),
+    0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 /* Speaker — pixel-art rows of dots */
 .nokiaSpeaker {
   width: 64px;
   height: 6px;
-  background: repeating-linear-gradient(
-    90deg,
-    #0d1830 0px, #0d1830 3px,
-    #1c2d5e 3px, #1c2d5e 5px
-  );
+  background: repeating-linear-gradient(90deg, #0d1830 0px, #0d1830 3px, #1c2d5e 3px, #1c2d5e 5px);
   border-radius: 2px;
   border: 1px solid #0a1430;
 }
@@ -442,7 +514,7 @@
   border-radius: 4px;
   background: #8b1a1a;
   border: 2px solid #500e0e;
-  color: rgba(255,255,255,0.95);
+  color: rgba(255, 255, 255, 0.95);
   font-size: 13px;
   font-weight: 900;
   line-height: 1;
@@ -452,10 +524,17 @@
   justify-content: center;
   padding: 0;
   transition: background 80ms;
-  box-shadow: 0 3px 0 #2a0505, inset 0 1px 0 rgba(255,255,255,0.1);
+  box-shadow:
+    0 3px 0 #2a0505,
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
-.nokiaClose:hover  { background: #c02020; }
-.nokiaClose:active { transform: translateY(2px); box-shadow: none; }
+.nokiaClose:hover {
+  background: #c02020;
+}
+.nokiaClose:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
 
 /* Screen bezel — chunky plastic frame around LCD */
 .nokiaBezel {
@@ -465,9 +544,9 @@
   border: 3px solid #080c16;
   padding: 5px;
   box-shadow:
-    inset 0 4px 12px rgba(0,0,0,1),
-    inset 2px 0 4px rgba(0,0,0,0.6),
-    0 2px 0 rgba(255,255,255,0.04);
+    inset 0 4px 12px rgba(0, 0, 0, 1),
+    inset 2px 0 4px rgba(0, 0, 0, 0.6),
+    0 2px 0 rgba(255, 255, 255, 0.04);
 }
 
 .nokiaScreen {
@@ -477,13 +556,97 @@
   aspect-ratio: 320 / 306;
 }
 
+.spaceGame {
+  width: 100%;
+  height: 100%;
+  background: #8bac0f;
+  color: #0f380f;
+  font-family: 'Courier New', Courier, monospace;
+  overflow: hidden;
+}
+
+.spaceHud {
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+  background: #9bbc0f;
+  color: #0f380f;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.spaceField {
+  position: relative;
+  height: calc(100% - 16px);
+  background:
+    linear-gradient(rgba(15, 56, 15, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 56, 15, 0.08) 1px, transparent 1px), #8bac0f;
+  background-size: 16px 16px;
+}
+
+.spaceShip,
+.spaceShot,
+.spaceRock {
+  position: absolute;
+  image-rendering: pixelated;
+}
+
+.spaceShip {
+  width: 20px;
+  height: 12px;
+  background: #0f380f;
+  clip-path: polygon(0 20%, 65% 20%, 100% 50%, 65% 80%, 0 80%, 18% 50%);
+}
+
+.spaceShot {
+  width: 8px;
+  height: 3px;
+  background: #0f380f;
+}
+
+.spaceRock {
+  width: 14px;
+  height: 14px;
+  background: #306230;
+  box-shadow:
+    4px 0 0 #0f380f,
+    0 4px 0 #0f380f,
+    8px 8px 0 #0f380f;
+}
+
+.spaceOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: rgba(139, 172, 15, 0.86);
+  color: #0f380f;
+  text-align: center;
+}
+
+.spaceOverlay strong {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+
+.spaceOverlay span {
+  font-size: 8px;
+  font-weight: 800;
+}
+
 /* NOKIA wordmark */
 .nokiaBrand {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 0.45em;
-  color: rgba(140,170,230,0.55);
+  color: rgba(140, 170, 230, 0.55);
   margin: 7px 0 2px;
   text-transform: uppercase;
 }
@@ -499,7 +662,9 @@
   border-radius: 50%;
   padding: 4px;
   border: 2px solid #0a1230;
-  box-shadow: 0 4px 0 #06091a, inset 0 2px 0 rgba(255,255,255,0.06);
+  box-shadow:
+    0 4px 0 #06091a,
+    inset 0 2px 0 rgba(255, 255, 255, 0.06);
 }
 
 .navRow {
@@ -513,8 +678,8 @@
   height: 24px;
   background: linear-gradient(180deg, #2c4490 0%, #1a2c6e 100%);
   border: 1.5px solid #0f1840;
-  border-radius: 10px 10px 8px 8px;   /* pill-ish top, slightly squarer bottom */
-  color: rgba(210,225,255,0.9);
+  border-radius: 10px 10px 8px 8px; /* pill-ish top, slightly squarer bottom */
+  color: rgba(210, 225, 255, 0.9);
   font-size: 10px;
   font-weight: 900;
   cursor: pointer;
@@ -522,7 +687,9 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  box-shadow: 0 4px 0 #09113a, inset 0 1px 0 rgba(255,255,255,0.14);
+  box-shadow:
+    0 4px 0 #09113a,
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
   transition: background 40ms;
 }
 /* Left / Right arms are taller, rotated pill */
@@ -531,8 +698,14 @@
   height: 36px;
   border-radius: 10px 8px 8px 10px;
 }
-.navBtn:hover  { background: linear-gradient(180deg, #3554b0 0%, #223888 100%); }
-.navBtn:active { background: #1a2040; box-shadow: none; transform: translateY(3px); }
+.navBtn:hover {
+  background: linear-gradient(180deg, #3554b0 0%, #223888 100%);
+}
+.navBtn:active {
+  background: #1a2040;
+  box-shadow: none;
+  transform: translateY(3px);
+}
 
 /* Centre OK button — large oval like the Nokia navigation disc */
 .navCenterBtn {
@@ -542,9 +715,14 @@
   background: radial-gradient(circle at 40% 35%, #344ea8, #111e50);
   border: 1.5px solid #0a1030;
   cursor: pointer;
-  box-shadow: 0 4px 0 #06091a, inset 0 1px 0 rgba(255,255,255,0.12);
+  box-shadow:
+    0 4px 0 #06091a,
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
-.navCenterBtn:active { transform: translateY(3px); box-shadow: none; }
+.navCenterBtn:active {
+  transform: translateY(3px);
+  box-shadow: none;
+}
 
 /* ── Soft keys — wide pill shape ────────────────────────────────────────── */
 .nokiaSoftRow {
@@ -562,28 +740,44 @@
   height: 24px;
   background: linear-gradient(180deg, #2c4490 0%, #1a2c6e 100%);
   border: 1.5px solid #0f1840;
-  border-radius: 12px;           /* full pill */
-  color: rgba(200,220,255,0.8);
+  border-radius: 12px; /* full pill */
+  color: rgba(200, 220, 255, 0.8);
   font-size: 8px;
   font-weight: 700;
   font-family: Arial, sans-serif;
   cursor: pointer;
-  box-shadow: 0 4px 0 #09113a, inset 0 1px 0 rgba(255,255,255,0.12);
+  box-shadow:
+    0 4px 0 #09113a,
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
-.nokiaSoftKey:hover  { background: linear-gradient(180deg, #3554b0 0%, #223888 100%); }
-.nokiaSoftKey:active { background: #1a2040; box-shadow: none; transform: translateY(3px); }
+.nokiaSoftKey:hover {
+  background: linear-gradient(180deg, #3554b0 0%, #223888 100%);
+}
+.nokiaSoftKey:active {
+  background: #1a2040;
+  box-shadow: none;
+  transform: translateY(3px);
+}
 
 /* Call keys — classic Nokia oval shape */
-.nokiaCallBtns { display: flex; gap: 6px; }
-.nokiaCallBtn  {
+.nokiaCallBtns {
+  display: flex;
+  gap: 6px;
+}
+.nokiaCallBtn {
   width: 28px;
   height: 24px;
   border-radius: 14px;
-  border: 1.5px solid rgba(0,0,0,0.45);
+  border: 1.5px solid rgba(0, 0, 0, 0.45);
   cursor: pointer;
-  box-shadow: 0 4px 0 rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+  box-shadow:
+    0 4px 0 rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
-.nokiaCallBtn:active { transform: translateY(3px); box-shadow: none; }
+.nokiaCallBtn:active {
+  transform: translateY(3px);
+  box-shadow: none;
+}
 
 /* ── Numpad — rounded rectangle keys like Nokia 3310 ───────────────────── */
 .nokiaNumpad {
@@ -599,16 +793,24 @@
   height: 24px;
   background: linear-gradient(180deg, #2c4490 0%, #1a2c6e 100%);
   border: 1.5px solid #0f1840;
-  border-radius: 8px;            /* gently rounded rectangle */
-  color: rgba(200,220,255,0.75);
+  border-radius: 8px; /* gently rounded rectangle */
+  color: rgba(200, 220, 255, 0.75);
   font-size: 10px;
   font-weight: 700;
   font-family: Arial, sans-serif;
   cursor: pointer;
-  box-shadow: 0 4px 0 #09113a, inset 0 1px 0 rgba(255,255,255,0.1);
+  box-shadow:
+    0 4px 0 #09113a,
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
-.nokiaNumKey:hover  { background: linear-gradient(180deg, #3554b0 0%, #223888 100%); }
-.nokiaNumKey:active { background: #1a2040; box-shadow: none; transform: translateY(3px); }
+.nokiaNumKey:hover {
+  background: linear-gradient(180deg, #3554b0 0%, #223888 100%);
+}
+.nokiaNumKey:active {
+  background: #1a2040;
+  box-shadow: none;
+  transform: translateY(3px);
+}
 
 /* Bottom chin of phone */
 .nokiaChin {
@@ -617,4 +819,14 @@
   background: #162348;
   border-radius: 0 0 28px 28px;
   border-top: 2px solid #0d1830;
+}
+
+.duckWindow {
+  position: fixed;
+  user-select: none;
+  cursor: grab;
+}
+
+.duckWindow:active {
+  cursor: grabbing;
 }

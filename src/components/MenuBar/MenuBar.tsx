@@ -82,10 +82,6 @@ export default function MenuBar() {
           openApp('skills');
         },
       },
-      {
-        label: 'Enable Retina Pixel Mode',
-        action: () => undefined,
-      },
     ],
     Window: [
       {
