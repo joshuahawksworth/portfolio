@@ -5,7 +5,6 @@ import styles from './MobileSnakeApp.module.css';
 export default function MobileSnakeApp() {
   const pushDirRef = useRef<((d: 'U' | 'D' | 'L' | 'R') => void) | null>(null);
   const startRef = useRef<(() => void) | null>(null);
-  const openBoardRef = useRef<(() => void) | null>(null);
   const confirmRef = useRef<(() => void) | null>(null);
   const skipRef = useRef<(() => void) | null>(null);
   const [phase, setPhase] = useState<SnakePhase>('idle');
@@ -15,9 +14,6 @@ export default function MobileSnakeApp() {
   }, []);
   const handleStartGame = useCallback((cb: () => void) => {
     startRef.current = cb;
-  }, []);
-  const handleOpenBoard = useCallback((cb: () => void) => {
-    openBoardRef.current = cb;
   }, []);
   const handleConfirm = useCallback((cb: () => void) => {
     confirmRef.current = cb;
@@ -51,7 +47,6 @@ export default function MobileSnakeApp() {
               className={styles.screenGame}
               onPushDir={handlePushDir}
               onStartGame={handleStartGame}
-              onOpenBoard={handleOpenBoard}
               onConfirm={handleConfirm}
               onSkipEntry={handleSkipEntry}
               onPhaseChange={setPhase}

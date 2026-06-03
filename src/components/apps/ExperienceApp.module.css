@@ -2,6 +2,8 @@
   display: flex;
   height: 100%;
   overflow: hidden;
+  background: #1c1e26;
+  color: #e5e7eb;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
 }
 

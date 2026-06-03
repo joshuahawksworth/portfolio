@@ -5,6 +5,8 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
+  background: #1c1e26;
+  color: #e5e7eb;
   scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,0.1) transparent;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;

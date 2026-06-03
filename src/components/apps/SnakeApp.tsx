@@ -130,7 +130,6 @@ function mergeBoard(remote: LeaderboardEntry[], pending: LeaderboardEntry[]): Le
 export interface SnakeAppProps {
   onPushDir?: (cb: (d: Dir) => void) => void;
   onStartGame?: (cb: () => void) => void;
-  onOpenBoard?: (cb: () => void) => void;
   onConfirm?: (cb: () => void) => void;
   onSkipEntry?: (cb: () => void) => void;
   onPhaseChange?: (phase: SnakePhase) => void;
@@ -138,12 +137,13 @@ export interface SnakeAppProps {
   mobileMode?: boolean;
   className?: string;
   props?: Record<string, unknown>;
+  /** Vitest-only: open name entry with this score without playing */
+  initialEntryScore?: number;
 }
 
 export default function SnakeApp({
   onPushDir,
   onStartGame,
-  onOpenBoard,
   onConfirm,
   onSkipEntry,
   onPhaseChange,
@@ -151,6 +151,7 @@ export default function SnakeApp({
   mobileMode,
   className,
   props: outerProps,
+  initialEntryScore,
 }: SnakeAppProps) {
   const shouldHideDpad = hideDpad ?? outerProps?.hideDpad === true;
   const isMobileMode = mobileMode ?? outerProps?.mobileMode === true;
@@ -181,6 +182,7 @@ export default function SnakeApp({
   const [board, setBoard] = useState<LeaderboardEntry[]>([]);
   const [boardStatus, setBoardStatus] = useState<'idle' | 'loading' | 'syncing' | 'done'>('idle');
   const pendingEntriesRef = useRef<LeaderboardEntry[]>([]);
+  const submitSessionRef = useRef(0);
 
   function syncPhase(p: Phase) {
     phaseRef.current = p;
@@ -203,6 +205,7 @@ export default function SnakeApp({
 
   const handleConfirm = useCallback(() => {
     if (phaseRef.current !== 'entry') return;
+    const session = submitSessionRef.current;
     const name = nameRef.current.join('');
     const submittedScore = scoreRef.current;
     const pendingEntry: LeaderboardEntry = { name, score: submittedScore, pending: true };
@@ -213,8 +216,14 @@ export default function SnakeApp({
     syncPhase('board');
 
     void (async () => {
+      if (session !== submitSessionRef.current) return;
+
       const ok = await submitLeaderboardScore(name, submittedScore);
+      if (session !== submitSessionRef.current) return;
+
       const entries = await fetchLeaderboard();
+      if (session !== submitSessionRef.current) return;
+
       const postedIsVisible = entries.some(
         (entry) => entry.name === name && entry.score === submittedScore
       );
@@ -235,8 +244,16 @@ export default function SnakeApp({
 
   const handleSkip = useCallback(() => {
     if (phaseRef.current !== 'entry') return;
-    void openBoard();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    submitSessionRef.current++;
+    pendingEntriesRef.current = pendingEntriesRef.current.filter(
+      (entry) => entry.score !== scoreRef.current
+    );
+    setBoardStatus('idle');
+    syncPhase('idle');
+    if (canvasRef.current) {
+      draw(canvasRef.current, snakeRef.current, foodRef.current, scoreRef.current);
+    }
+    wrapRef.current?.focus();
   }, []);
 
   async function openBoard() {
@@ -291,6 +308,8 @@ export default function SnakeApp({
     dirRef.current = 'R';
     queueRef.current = [];
     scoreRef.current = 0;
+    submitSessionRef.current++;
+    pendingEntriesRef.current = [];
     nameRef.current = ['A', 'A', 'A'];
     cursorRef.current = 0;
     setNameChars(['A', 'A', 'A']);
@@ -309,19 +328,14 @@ export default function SnakeApp({
   pushDirRef2.current = handlePhoneDir;
   triggerRef.current = triggerStart;
 
-  const openBoardRef = useRef(openBoard);
   const confirmRef = useRef(handleConfirm);
   const skipRef = useRef(handleSkip);
-  openBoardRef.current = openBoard;
   confirmRef.current = handleConfirm;
   skipRef.current = handleSkip;
 
   useEffect(() => {
     onPushDir?.((d) => pushDirRef2.current(d));
     onStartGame?.(() => triggerRef.current());
-    onOpenBoard?.(() => {
-      void openBoardRef.current();
-    });
     onConfirm?.(() => confirmRef.current());
     onSkipEntry?.(() => skipRef.current());
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -336,6 +350,18 @@ export default function SnakeApp({
       draw(canvasRef.current, snakeRef.current, foodRef.current, scoreRef.current);
     wrapRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    if (!import.meta.env.VITEST || initialEntryScore == null || initialEntryScore < 1) return;
+    submitSessionRef.current++;
+    scoreRef.current = initialEntryScore;
+    setScore(initialEntryScore);
+    nameRef.current = ['A', 'A', 'A'];
+    cursorRef.current = 0;
+    setNameChars(['A', 'A', 'A']);
+    setCursor(0);
+    syncPhase('entry');
+  }, [initialEntryScore]);
 
   // ── Game loop ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -357,6 +383,7 @@ export default function SnakeApp({
       ) {
         if (scoreRef.current > 0) {
           // Go straight to name entry — no delay
+          submitSessionRef.current++;
           nameRef.current = ['A', 'A', 'A'];
           cursorRef.current = 0;
           setNameChars(['A', 'A', 'A']);
@@ -599,15 +626,7 @@ export default function SnakeApp({
                 </ol>
               )}
               <div className={styles.boardActions}>
-                <button
-                  className={styles.boardBtn}
-                  onClick={() => {
-                    void openBoard();
-                  }}
-                >
-                  ↻ REFRESH
-                </button>
-                <button className={styles.playBtn} onClick={() => syncPhase('idle')}>
+                <button type="button" className={styles.playBtn} onClick={() => syncPhase('idle')}>
                   BACK
                 </button>
               </div>

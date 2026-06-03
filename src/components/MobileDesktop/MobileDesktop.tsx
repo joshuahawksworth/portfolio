@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTime } from '../../hooks/useTime';
 import AboutApp from '../apps/AboutApp';
 import ExperienceApp from '../apps/ExperienceApp';
@@ -7,7 +7,6 @@ import ContactApp from '../apps/ContactApp';
 import LocationApp from '../apps/LocationApp';
 import TerminalApp from '../apps/TerminalApp';
 import FinderApp from '../apps/FinderApp';
-import TrashApp from '../apps/TrashApp';
 import SafariApp from '../apps/SafariApp';
 import MobileSnakeApp from '../apps/MobileSnakeApp';
 import RubberDuckApp from '../apps/RubberDuckApp';
@@ -359,7 +358,6 @@ const APP_COMPONENTS: Record<string, React.ComponentType<{ props?: Record<string
   location: LocationApp,
   terminal: TerminalApp,
   finder: FinderApp,
-  trash: TrashApp,
   safari: SafariApp,
   snake: MobileSnakeApp,
   rubberduck: RubberDuckApp,
@@ -374,7 +372,6 @@ const APP_LABELS: Record<string, string> = {
   location: 'Location',
   terminal: 'Terminal',
   finder: 'Finder',
-  trash: 'Trash',
   cv: 'CV',
   github: 'GitHub',
   safari: 'Chrome',
@@ -395,7 +392,6 @@ const BASE_ITEMS = [
   'contact',
   'location',
   'terminal',
-  'trash',
   'github',
   'safari',
   'snake',
@@ -527,7 +523,14 @@ function MobileInner() {
               <span className={styles.panelTitle}>{activeWindow.title}</span>
               <div className={styles.headerSpacer} />
             </div>
-            <div className={styles.panelBody}>
+            <div
+              className={[
+                styles.panelBody,
+                activeWindow.appId === 'snake' ? styles.panelBodySnake : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+            >
               {(() => {
                 const Comp = APP_COMPONENTS[activeWindow.appId];
                 return Comp ? <Comp props={activeWindow.props} /> : null;
@@ -540,7 +543,19 @@ function MobileInner() {
   );
 }
 
+const DEFAULT_VIEWPORT = 'width=device-width, initial-scale=1.0, viewport-fit=cover';
+const MOBILE_VIEWPORT =
+  'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover';
+
 export default function MobileDesktop() {
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) return;
+    const previous = meta.getAttribute('content') ?? DEFAULT_VIEWPORT;
+    meta.setAttribute('content', MOBILE_VIEWPORT);
+    return () => meta.setAttribute('content', previous);
+  }, []);
+
   return (
     <DesktopProvider startWithAbout={false}>
       <MobileInner />

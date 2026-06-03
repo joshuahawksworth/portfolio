@@ -89,3 +89,11 @@
   animation: blink 1s step-end infinite;
   flex-shrink: 0;
 }
+
+/* iOS Safari zooms focused inputs below 16px */
+@media (max-width: 767px) {
+  .input,
+  .promptLabel {
+    font-size: 16px;
+  }
+}

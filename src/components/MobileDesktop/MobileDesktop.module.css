@@ -276,5 +276,20 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  background: #1c1e26;
+  color: #e5e7eb;
+  touch-action: manipulation;
+}
+
+/* Prevent iOS focus-zoom on inputs inside app sheets */
+.panelBody :global(input),
+.panelBody :global(textarea),
+.panelBody :global(select) {
+  font-size: 16px;
+}
+
+/* Snake keeps the Nokia shell backdrop; other apps use the dark sheet above */
+.panelBodySnake {
   background: #6f94b0;
+  color: inherit;
 }
