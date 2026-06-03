@@ -79,16 +79,38 @@
   z-index: 2;
   width: 20px;
   height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 2px solid #9a6a00;
   border-radius: 999px;
   background: rgba(255, 234, 117, 0.92);
   color: #6b3d00;
   cursor: pointer;
-  font-size: 13px;
-  font-weight: 900;
-  line-height: 12px;
+  font-size: 0;
   padding: 0;
   box-shadow: 2px 2px 0 #8a5a00;
+}
+
+.closeButton::before,
+.closeButton::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  transform-origin: center;
+}
+
+.closeButton::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.closeButton::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
 }
 
 .closeButton:hover {
