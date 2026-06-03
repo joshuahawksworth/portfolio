@@ -23,6 +23,23 @@ const DELTA: Record<Dir, Pt> = {
 };
 const ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
+const APPLES_PER_COLOR = 30;
+
+const APPLE_PALETTES = [
+  { body: '#cc2200', stem: '#5a3a10', leaf: '#2a7a18' },
+  { body: '#e8a020', stem: '#6b4a12', leaf: '#3d8c22' },
+  { body: '#9c27b0', stem: '#4a2048', leaf: '#2e6b30' },
+  { body: '#1565c0', stem: '#1a3350', leaf: '#2a7a18' },
+  { body: '#2e7d32', stem: '#3e2723', leaf: '#66bb6a' },
+  { body: '#f48fb1', stem: '#6d3a4a', leaf: '#388e3c' },
+  { body: '#ff6f00', stem: '#5a3a10', leaf: '#558b2f' },
+  { body: '#5d4037', stem: '#3e2723', leaf: '#33691e' },
+] as const;
+
+function applePaletteIndex(applesCollected: number) {
+  return Math.floor(applesCollected / APPLES_PER_COLOR) % APPLE_PALETTES.length;
+}
+
 function randPt(snake: Pt[]): Pt {
   let p: Pt;
   do {
@@ -32,20 +49,27 @@ function randPt(snake: Pt[]): Pt {
 }
 
 // Draw a vector apple — consistent on all platforms, no emoji
-function drawApple(ctx: CanvasRenderingContext2D, x: number, y: number, size: number) {
+function drawApple(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  size: number,
+  paletteIndex: number
+) {
+  const { body, stem, leaf } = APPLE_PALETTES[paletteIndex % APPLE_PALETTES.length];
   const cx = x + size / 2;
   const cy = y + size / 2 + 1;
   const r = size * 0.37;
   // Body
-  ctx.fillStyle = '#cc2200';
+  ctx.fillStyle = body;
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
   ctx.fill();
   // Stem
-  ctx.fillStyle = '#5a3a10';
+  ctx.fillStyle = stem;
   ctx.fillRect(cx - 1, cy - r - 3, 2, 5);
   // Leaf
-  ctx.fillStyle = '#2a7a18';
+  ctx.fillStyle = leaf;
   ctx.beginPath();
   ctx.ellipse(cx + 4, cy - r - 1, 4, 2, -0.5, 0, Math.PI * 2);
   ctx.fill();
@@ -56,7 +80,7 @@ function drawApple(ctx: CanvasRenderingContext2D, x: number, y: number, size: nu
   ctx.fill();
 }
 
-function draw(canvas: HTMLCanvasElement, snake: Pt[], food: Pt) {
+function draw(canvas: HTMLCanvasElement, snake: Pt[], food: Pt, applesCollected: number) {
   const ctx = canvas.getContext('2d')!;
   ctx.fillStyle = '#8bac0f';
   ctx.fillRect(0, 0, SNAKE_W, SNAKE_H);
@@ -79,11 +103,12 @@ function draw(canvas: HTMLCanvasElement, snake: Pt[], food: Pt) {
     ctx.fillRect(snake[i].x * CELL + 1, snake[i].y * CELL + 1, CELL - 2, CELL - 2);
   ctx.fillStyle = '#0f380f';
   ctx.fillRect(snake[0].x * CELL + 1, snake[0].y * CELL + 1, CELL - 2, CELL - 2);
-  drawApple(ctx, food.x * CELL, food.y * CELL, CELL);
+  drawApple(ctx, food.x * CELL, food.y * CELL, CELL, applePaletteIndex(applesCollected));
 }
 
 import {
   fetchLeaderboard,
+  LEADERBOARD_LIMIT,
   submitLeaderboardScore,
   type LeaderboardEntry,
 } from '../../lib/snakeLeaderboard';
@@ -98,7 +123,7 @@ function mergeBoard(remote: LeaderboardEntry[], pending: LeaderboardEntry[]): Le
     const key = `${name}:${entry.score}`;
     if (!byScore.has(key)) byScore.set(key, { ...entry, name });
   });
-  return [...byScore.values()].sort((a, b) => b.score - a.score).slice(0, 10);
+  return [...byScore.values()].sort((a, b) => b.score - a.score).slice(0, LEADERBOARD_LIMIT);
 }
 
 // ── Props ──────────────────────────────────────────────────────────────────
@@ -194,9 +219,10 @@ export default function SnakeApp({
         (entry) => entry.name === name && entry.score === submittedScore
       );
 
-      const remoteTopTenAlreadyBeatsScore =
-        entries.length >= 10 && entries[entries.length - 1].score >= submittedScore;
-      if (ok && (postedIsVisible || remoteTopTenAlreadyBeatsScore)) {
+      const remoteTopAlreadyFullAndBeatsScore =
+        entries.length >= LEADERBOARD_LIMIT &&
+        entries[entries.length - 1].score >= submittedScore;
+      if (ok && (postedIsVisible || remoteTopAlreadyFullAndBeatsScore)) {
         pendingEntriesRef.current = pendingEntriesRef.current.filter(
           (entry) => entry !== pendingEntry
         );
@@ -273,7 +299,7 @@ export default function SnakeApp({
     setBoardStatus('idle');
     syncPhase('playing');
     setScore(0);
-    if (canvasRef.current) draw(canvasRef.current, snake, food);
+    if (canvasRef.current) draw(canvasRef.current, snake, food, 0);
     wrapRef.current?.focus();
   }
 
@@ -306,7 +332,8 @@ export default function SnakeApp({
   }, [phase, onPhaseChange]);
 
   useEffect(() => {
-    if (canvasRef.current) draw(canvasRef.current, snakeRef.current, foodRef.current);
+    if (canvasRef.current)
+      draw(canvasRef.current, snakeRef.current, foodRef.current, scoreRef.current);
     wrapRef.current?.focus();
   }, []);
 
@@ -358,7 +385,8 @@ export default function SnakeApp({
         foodRef.current = randPt(next);
       }
 
-      if (canvasRef.current) draw(canvasRef.current, next, foodRef.current);
+      if (canvasRef.current)
+        draw(canvasRef.current, next, foodRef.current, scoreRef.current);
     }, TICK);
     return () => clearInterval(id);
   }, []);
@@ -538,7 +566,7 @@ export default function SnakeApp({
         {phase === 'board' && (
           <div className={styles.overlay}>
             <div className={styles.boardOverlay}>
-              <p className={styles.boardTitle}>🏆 TOP SCORES</p>
+              <p className={styles.boardTitle}>🏆 TOP 5</p>
               {(boardStatus === 'loading' || boardStatus === 'syncing') && board.length === 0 && (
                 <p className={styles.boardLoading}>
                   {boardStatus === 'syncing' ? 'Saving score…' : 'Loading…'}
@@ -549,7 +577,7 @@ export default function SnakeApp({
               )}
               {board.length > 0 && (
                 <ol className={styles.boardList}>
-                  {board.map((e, i) => (
+                  {board.slice(0, LEADERBOARD_LIMIT).map((e, i) => (
                     <li
                       key={`${e.name}-${e.score}-${i}-${e.pending ? 'pending' : 'saved'}`}
                       className={[

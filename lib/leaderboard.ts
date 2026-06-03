@@ -15,8 +15,10 @@ function fallbackRows() {
   return fallbackStore.__snakeLeaderboardFallback;
 }
 
-function topTen(rows: LeaderboardRow[]) {
-  return [...rows].sort((a, b) => b.score - a.score).slice(0, 10);
+const LEADERBOARD_LIMIT = 5;
+
+function topScores(rows: LeaderboardRow[]) {
+  return [...rows].sort((a, b) => b.score - a.score).slice(0, LEADERBOARD_LIMIT);
 }
 
 function supa(path: string, init?: RequestInit, env?: NodeJS.ProcessEnv) {
@@ -37,20 +39,20 @@ function supa(path: string, init?: RequestInit, env?: NodeJS.ProcessEnv) {
 
 export async function getLeaderboard(env?: NodeJS.ProcessEnv): Promise<LeaderboardRow[]> {
   const request = supa(
-    `${TABLE}?select=name,score,created_at&order=score.desc&limit=10`,
+    `${TABLE}?select=name,score,created_at&order=score.desc&limit=${LEADERBOARD_LIMIT}`,
     undefined,
     env
   );
-  if (!request) return topTen(fallbackRows());
+  if (!request) return topScores(fallbackRows());
 
   const r = await request;
   if (!r.ok) {
     console.error('leaderboard GET failed', r.status, await r.text());
-    return topTen(fallbackRows());
+    return topScores(fallbackRows());
   }
 
   const data = await r.json();
-  return Array.isArray(data) ? data : topTen(fallbackRows());
+  return Array.isArray(data) ? data.slice(0, LEADERBOARD_LIMIT) : topScores(fallbackRows());
 }
 
 export async function postLeaderboardScore(

@@ -4,6 +4,8 @@ export interface LeaderboardEntry {
   pending?: boolean;
 }
 
+export const LEADERBOARD_LIMIT = 5;
+
 const TABLE = 'snake_leaderboard';
 
 const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined)?.trim() ?? '';
@@ -43,12 +45,12 @@ function normalizeInitials(name: string) {
 async function fetchBoardDirect(): Promise<LeaderboardEntry[] | null> {
   if (!hasDirectSupabase()) return null;
   const r = await fetchWithTimeout(
-    `${SUPABASE_URL}/rest/v1/${TABLE}?select=name,score,created_at&order=score.desc&limit=10`,
+    `${SUPABASE_URL}/rest/v1/${TABLE}?select=name,score,created_at&order=score.desc&limit=${LEADERBOARD_LIMIT}`,
     { headers: supaHeaders() }
   );
   if (!r.ok) return null;
   const data = await r.json();
-  return Array.isArray(data) ? data : [];
+  return Array.isArray(data) ? data.slice(0, LEADERBOARD_LIMIT) : [];
 }
 
 async function fetchBoardDevApi(): Promise<LeaderboardEntry[]> {
@@ -59,8 +61,8 @@ async function fetchBoardDevApi(): Promise<LeaderboardEntry[]> {
 export async function fetchLeaderboard(): Promise<LeaderboardEntry[]> {
   try {
     const direct = await fetchBoardDirect();
-    if (direct) return direct;
-    if (import.meta.env.DEV) return await fetchBoardDevApi();
+    if (direct) return direct.slice(0, LEADERBOARD_LIMIT);
+    if (import.meta.env.DEV) return (await fetchBoardDevApi()).slice(0, LEADERBOARD_LIMIT);
     return [];
   } catch {
     return [];

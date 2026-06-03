@@ -16,6 +16,30 @@ describe('SnakeApp leaderboard', () => {
     );
   });
 
+  it('shows at most five leaderboard rows', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        Response.json(
+          Array.from({ length: 12 }, (_, i) => ({
+            name: `P${String(i).padStart(2, '0').slice(-2)}`,
+            score: 100 - i,
+          }))
+        )
+      )
+    );
+
+    const user = userEvent.setup();
+    render(<SnakeApp />);
+    await user.click(screen.getByRole('button', { name: /scores/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('#5')).toBeInTheDocument();
+    });
+    expect(screen.queryByText('#6')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('listitem')).toHaveLength(5);
+  });
+
   it('opens scores and returns to the start screen with a single Back button', async () => {
     const user = userEvent.setup();
     render(<SnakeApp />);

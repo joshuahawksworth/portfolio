@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const TABLE = 'snake_leaderboard';
+const LEADERBOARD_LIMIT = 5;
 
 type LeaderboardRow = {
   name: string;
@@ -36,7 +37,7 @@ async function getLeaderboard(): Promise<LeaderboardRow[]> {
   if (!url || !key) return [];
 
   const r = await fetch(
-    `${url}/rest/v1/${TABLE}?select=name,score,created_at&order=score.desc&limit=10`,
+    `${url}/rest/v1/${TABLE}?select=name,score,created_at&order=score.desc&limit=${LEADERBOARD_LIMIT}`,
     { headers: supaHeaders(key) }
   );
   if (!r.ok) {
@@ -44,7 +45,7 @@ async function getLeaderboard(): Promise<LeaderboardRow[]> {
     return [];
   }
   const data = await r.json();
-  return Array.isArray(data) ? data : [];
+  return Array.isArray(data) ? data.slice(0, LEADERBOARD_LIMIT) : [];
 }
 
 async function postScore(name: string, score: number): Promise<{ ok: boolean; error?: string }> {
