@@ -1,0 +1,319 @@
+.root {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: #050505;
+  color: #d9d9d9;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Menlo, monospace;
+  outline: none;
+  user-select: none;
+}
+
+.machine {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.title {
+  text-align: center;
+  color: white;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 8px;
+  text-shadow: 0 0 28px rgba(255, 255, 255, 0.35);
+}
+
+.titleIcon {
+  margin: 0 14px;
+  letter-spacing: 0;
+  color: white;
+  text-shadow: 0 0 18px rgba(255, 255, 255, 0.35);
+  -webkit-text-fill-color: initial;
+}
+
+.titleText {
+  background: linear-gradient(90deg, #ff2d95, #ffe600, #19ffd0, #b026ff, #ff2d95);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.task {
+  margin-top: -8px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 12px;
+}
+
+.marquee {
+  height: 18px;
+  display: flex;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 0 24px rgba(168, 85, 247, 0.25);
+}
+
+.marquee span {
+  flex: 1;
+  min-width: 6px;
+}
+
+.marqueeRainbow {
+  background: hsl(calc(var(--i) * 9deg) 100% 52%);
+  animation: marqueeRainbow 1.5s linear infinite;
+}
+
+.marqueeMood {
+  background: hsl(calc(var(--hue) * 1deg + var(--i) * 2deg) 100% 54%);
+  animation: marqueePulse 900ms ease-in-out infinite alternate;
+}
+
+.reels {
+  display: flex;
+  justify-content: center;
+  gap: 38px;
+  flex-shrink: 0;
+}
+
+.reel {
+  width: min(30%, 260px);
+  min-width: 190px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.reelTitle {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.reelActive .reelTitle,
+.reelStopped .reelTitle {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.reelBox {
+  position: relative;
+  border: 1px solid rgba(210, 255, 232, 0.72);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 13px 18px;
+  overflow: hidden;
+}
+
+.reelActive .reelBox {
+  border-color: #19ffd0;
+  box-shadow:
+    0 0 0 1px rgba(25, 255, 208, 0.25),
+    0 0 18px rgba(25, 255, 208, 0.28),
+    inset 0 0 18px rgba(25, 255, 208, 0.08);
+  animation: activeReelPulse 850ms ease-in-out infinite alternate;
+}
+
+.reelRow {
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.payline {
+  background: #a7c7b0;
+  color: #050505;
+  font-weight: 900;
+}
+
+.paylineStopping {
+  background: #f1c40f;
+}
+
+.result {
+  border-top: 1px solid rgba(255, 255, 255, 0.48);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.48);
+  padding: 14px 16px 12px;
+  background: rgba(0, 0, 0, 0.28);
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.resultTitleWin,
+.resultTitleMood {
+  color: white;
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: 10px;
+  margin-bottom: 6px;
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.7);
+}
+
+.resultTitleWin {
+  background: linear-gradient(90deg, #ff2d95, #ffe600, #19ffd0, #b026ff, #ff2d95);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.resultTitleMood {
+  color: #f39c12;
+  animation: moodFlash 1.2s ease-in-out infinite;
+}
+
+.resultSubtitle {
+  color: rgba(255, 255, 255, 0.54);
+  font-size: 15px;
+  margin-bottom: 28px;
+}
+
+.commandBox {
+  border: 1px solid #b026ff;
+  padding: 13px 16px;
+  color: white;
+  font-size: 16px;
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 0 24px rgba(176, 38, 255, 0.25);
+}
+
+.controls {
+  display: flex;
+  gap: 72px;
+  margin-top: 24px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+}
+
+.runPanel {
+  margin-top: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.runPrompt {
+  color: #fff;
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+.runStep {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.32);
+}
+
+.runStep span {
+  width: 18px;
+}
+
+.runActive {
+  color: #fde68a;
+}
+
+.runComplete {
+  color: #a7f3d0;
+}
+
+.instructions {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+}
+
+.instructions strong {
+  color: white;
+}
+
+.instructions span {
+  margin-left: 30px;
+  opacity: 0.5;
+}
+
+.confettiLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.confetti {
+  position: absolute;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 0 10px currentColor;
+  will-change: left, top, transform, opacity;
+}
+
+.shockwave {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  top: 44%;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #19ffd0;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  animation: shockwave 520ms ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes marqueeRainbow {
+  to {
+    filter: hue-rotate(360deg);
+  }
+}
+
+@keyframes marqueePulse {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes activeReelPulse {
+  from {
+    border-color: #19ffd0;
+  }
+  to {
+    border-color: #b026ff;
+  }
+}
+
+@keyframes moodFlash {
+  0%,
+  72%,
+  100% {
+    color: #f39c12;
+  }
+  78% {
+    color: white;
+  }
+}
+
+@keyframes shockwave {
+  to {
+    width: 420px;
+    height: 160px;
+    opacity: 0;
+  }
+}

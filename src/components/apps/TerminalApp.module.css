@@ -14,7 +14,7 @@
   overflow-y: auto;
   padding: 12px 14px 4px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.1) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }
 
 .line {
@@ -23,17 +23,25 @@
   word-break: break-all;
 }
 
-.prompt { color: #a3e635; }
-.out    { color: #e2e8f0; }
-.err    { color: #f87171; }
-.blank  { height: 4px; }
+.prompt {
+  color: #a3e635;
+}
+.out {
+  color: #e2e8f0;
+}
+.err {
+  color: #f87171;
+}
+.blank {
+  height: 4px;
+}
 
 .inputRow {
   display: flex;
   align-items: center;
   padding: 6px 14px 10px;
   flex-shrink: 0;
-  border-top: 1px solid rgba(255,255,255,0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .promptLabel {
@@ -56,7 +64,22 @@
   line-height: 1.65;
 }
 
-@keyframes blink { 50% { opacity: 0; } }
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes slotConfettiFloat {
+  from {
+    opacity: 0.55;
+    translate: 0 -2px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 10px;
+  }
+}
 
 .cursor {
   width: 7px;

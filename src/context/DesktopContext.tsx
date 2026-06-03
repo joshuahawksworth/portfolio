@@ -35,6 +35,7 @@ export const APP_DEFAULTS: Record<string, { title: string; width: number; height
   shortcuts: { title: 'Keyboard Shortcuts', width: 560, height: 500 },
   texteditor: { title: 'Text Editor', width: 780, height: 540 },
   imageviewer: { title: 'Image Viewer', width: 720, height: 560 },
+  slotslop: { title: 'Slotslop', width: 980, height: 700 },
 };
 
 // Minimum resize bounds per app
@@ -55,6 +56,7 @@ export const APP_MIN: Record<string, { width: number; height: number }> = {
   shortcuts: { width: 380, height: 360 },
   texteditor: { width: 480, height: 340 },
   imageviewer: { width: 400, height: 360 },
+  slotslop: { width: 760, height: 520 },
 };
 
 // Per-app "zoom" target (green button) — bounded by screen at runtime
@@ -73,6 +75,7 @@ export const APP_MAX: Record<string, { width: number; height: number }> = {
   shortcuts: { width: 760, height: 640 },
   texteditor: { width: 1060, height: 740 },
   imageviewer: { width: 1060, height: 760 },
+  slotslop: { width: 1120, height: 760 },
 };
 
 const CASCADE_STEPS = 8;
@@ -352,7 +355,9 @@ export function DesktopProvider({
     const idx = counter.current;
     const newZ = ++zTop;
     const id = `${appId}-${idx}`;
-    const { x, y } = cascadePosition(idx, defaults.width, defaults.height);
+    const width = typeof props?.width === 'number' ? props.width : defaults.width;
+    const height = typeof props?.height === 'number' ? props.height : defaults.height;
+    const { x, y } = cascadePosition(idx, width, height);
 
     setWindows((prev) => {
       const existing = props?.jobId
@@ -379,15 +384,15 @@ export function DesktopProvider({
           title: (props?.title as string) ?? defaults.title,
           x,
           y,
-          width: defaults.width,
-          height: defaults.height,
+          width,
+          height,
           zIndex: newZ,
           minimized: false,
           maximized: false,
           savedX: x,
           savedY: y,
-          savedW: defaults.width,
-          savedH: defaults.height,
+          savedW: width,
+          savedH: height,
           props,
         },
       ];
