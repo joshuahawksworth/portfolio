@@ -6,7 +6,6 @@ const ROWS = 18;
 const TICK = 82; // ms between moves - quick, but still readable on the small screen
 const CELL = 16;
 const INPUT_BUFFER_LIMIT = 4;
-const FETCH_TIMEOUT_MS = 6000;
 export const SNAKE_W = COLS * CELL;
 export const SNAKE_H = ROWS * CELL;
 
@@ -83,41 +82,13 @@ function draw(canvas: HTMLCanvasElement, snake: Pt[], food: Pt) {
   drawApple(ctx, food.x * CELL, food.y * CELL, CELL);
 }
 
-// ── API ────────────────────────────────────────────────────────────────────
-export interface LeaderboardEntry {
-  name: string;
-  score: number;
-  pending?: boolean;
-}
+import {
+  fetchLeaderboard,
+  submitLeaderboardScore,
+  type LeaderboardEntry,
+} from '../../lib/snakeLeaderboard';
 
-function fetchWithTimeout(url: string, init?: RequestInit): Promise<Response> {
-  const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  return fetch(url, { ...init, signal: controller.signal }).finally(() => {
-    window.clearTimeout(timeout);
-  });
-}
-
-async function fetchBoard(): Promise<LeaderboardEntry[]> {
-  try {
-    const r = await fetchWithTimeout('/api/leaderboard');
-    return r.ok ? r.json() : [];
-  } catch {
-    return [];
-  }
-}
-async function submitScore(name: string, score: number): Promise<boolean> {
-  try {
-    const r = await fetchWithTimeout('/api/leaderboard', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, score }),
-    });
-    return r.ok;
-  } catch {
-    return false;
-  }
-}
+export type { LeaderboardEntry };
 
 function mergeBoard(remote: LeaderboardEntry[], pending: LeaderboardEntry[]): LeaderboardEntry[] {
   const byScore = new Map<string, LeaderboardEntry>();
@@ -217,8 +188,8 @@ export default function SnakeApp({
     syncPhase('board');
 
     void (async () => {
-      const ok = await submitScore(name, submittedScore);
-      const entries = await fetchBoard();
+      const ok = await submitLeaderboardScore(name, submittedScore);
+      const entries = await fetchLeaderboard();
       const postedIsVisible = entries.some(
         (entry) => entry.name === name && entry.score === submittedScore
       );
@@ -246,7 +217,7 @@ export default function SnakeApp({
     syncPhase('board');
     setBoardStatus('loading');
     setBoard((entries) => mergeBoard(entries, pendingEntriesRef.current));
-    const entries = await fetchBoard();
+    const entries = await fetchLeaderboard();
     setBoard(mergeBoard(entries, pendingEntriesRef.current));
     setBoardStatus('done');
   }

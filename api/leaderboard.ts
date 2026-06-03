@@ -1,4 +1,4 @@
-export const config = { runtime: 'edge' };
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const TABLE = 'snake_leaderboard';
 
@@ -8,55 +8,46 @@ type LeaderboardRow = {
   created_at?: string;
 };
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Content-Type': 'application/json',
-};
-
-function json(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), { status, headers: CORS });
+function parseBody(req: VercelRequest): { name?: string; score?: number } {
+  const raw = req.body;
+  if (raw == null || raw === '') return {};
+  if (typeof raw === 'object' && !Buffer.isBuffer(raw)) return raw as { name?: string; score?: number };
+  const text = Buffer.isBuffer(raw) ? raw.toString('utf8') : String(raw);
+  try {
+    return JSON.parse(text) as { name?: string; score?: number };
+  } catch {
+    return {};
+  }
 }
 
-function topTen(rows: LeaderboardRow[]) {
-  return [...rows].sort((a, b) => b.score - a.score).slice(0, 10);
-}
-
-function supa(path: string, init?: RequestInit) {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
-  return fetch(`${url}/rest/v1/${path}`, {
-    ...init,
-    headers: {
-      apikey: key,
-      Authorization: `Bearer ${key}`,
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      ...(init?.headers ?? {}),
-    },
-  });
+function supaHeaders(key: string, extra?: Record<string, string>) {
+  return {
+    apikey: key,
+    Authorization: `Bearer ${key}`,
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    ...extra,
+  };
 }
 
 async function getLeaderboard(): Promise<LeaderboardRow[]> {
-  const request = supa(`${TABLE}?select=name,score,created_at&order=score.desc&limit=10`);
-  if (!request) return [];
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_ANON_KEY;
+  if (!url || !key) return [];
 
-  const r = await request;
+  const r = await fetch(
+    `${url}/rest/v1/${TABLE}?select=name,score,created_at&order=score.desc&limit=10`,
+    { headers: supaHeaders(key) }
+  );
   if (!r.ok) {
-    console.error('leaderboard GET failed', r.status, await r.text());
+    console.error('leaderboard GET', r.status, await r.text());
     return [];
   }
-
   const data = await r.json();
-  return Array.isArray(data) ? topTen(data) : [];
+  return Array.isArray(data) ? data : [];
 }
 
-async function postLeaderboardScore(
-  name: string,
-  score: number
-): Promise<{ ok: true } | { ok: false; error: string }> {
+async function postScore(name: string, score: number): Promise<{ ok: boolean; error?: string }> {
   const initials = String(name)
     .toUpperCase()
     .replace(/[^A-Z]/g, '')
@@ -66,40 +57,45 @@ async function postLeaderboardScore(
     return { ok: false, error: 'Score must be a positive integer' };
   }
 
-  const request = supa(TABLE, {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_ANON_KEY;
+  if (!url || !key) return { ok: false, error: 'Leaderboard not configured' };
+
+  const r = await fetch(`${url}/rest/v1/${TABLE}`, {
     method: 'POST',
-    headers: { Prefer: 'return=minimal' },
+    headers: supaHeaders(key, { Prefer: 'return=minimal' }),
     body: JSON.stringify({ name: initials, score }),
   });
-
-  if (!request) return { ok: true };
-
-  const r = await request;
-  if (!r.ok) console.error('leaderboard POST failed', r.status, await r.text());
+  if (!r.ok) {
+    console.error('leaderboard POST', r.status, await r.text());
+    return { ok: false, error: 'Failed to save score' };
+  }
   return { ok: true };
 }
 
-export default async function handler(request: Request) {
-  if (request.method === 'OPTIONS') {
-    return new Response(null, { status: 200, headers: CORS });
-  }
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    if (request.method === 'GET') {
-      return json(await getLeaderboard());
+    if (req.method === 'GET') {
+      return res.status(200).json(await getLeaderboard());
     }
 
-    if (request.method === 'POST') {
-      const body = (await request.json()) as { name?: string; score?: number };
-      const result = await postLeaderboardScore(String(body.name ?? ''), Number(body.score));
-      if (!result.ok) return json({ error: result.error }, 400);
-      return json(result);
+    if (req.method === 'POST') {
+      const body = parseBody(req);
+      const result = await postScore(String(body.name ?? ''), Number(body.score));
+      if (!result.ok) return res.status(400).json({ error: result.error });
+      return res.status(200).json({ ok: true });
     }
 
-    return json({ error: 'Method not allowed' }, 405);
+    return res.status(405).json({ error: 'Method not allowed' });
   } catch (err) {
-    console.error('leaderboard handler error', err);
-    if (request.method === 'GET') return json([]);
-    return json({ error: 'Leaderboard unavailable' }, 500);
+    console.error('leaderboard error', err);
+    if (req.method === 'GET') return res.status(200).json([]);
+    return res.status(500).json({ error: 'Leaderboard unavailable' });
   }
 }
