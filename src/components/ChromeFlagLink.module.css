@@ -1,0 +1,16 @@
+.link {
+  font-family: 'SF Mono', 'Menlo', monospace;
+  font-size: inherit;
+  color: rgba(120, 180, 255, 0.95);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 5px;
+  border-radius: 4px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.link:hover {
+  color: rgba(180, 210, 255, 1);
+  background: rgba(255, 255, 255, 0.14);
+  text-decoration: underline;
+}

@@ -1,0 +1,126 @@
+.root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.base,
+.blobA,
+.blobB,
+.blobC,
+.mountains {
+  position: absolute;
+  pointer-events: none;
+}
+
+.base {
+  inset: 0;
+  background: #06090f;
+}
+
+.blobA,
+.blobB,
+.blobC {
+  border-radius: 50%;
+  opacity: 0.85;
+}
+
+/* space (default) */
+[data-wallpaper='space'] .blobA {
+  width: 70vw;
+  height: 55vh;
+  left: -5%;
+  top: -5%;
+  background: rgba(59, 100, 220, 0.28);
+}
+
+[data-wallpaper='space'] .blobB {
+  width: 65vw;
+  height: 50vh;
+  right: -8%;
+  bottom: 10%;
+  background: rgba(120, 60, 200, 0.22);
+}
+
+[data-wallpaper='space'] .blobC {
+  width: 80vw;
+  height: 35vh;
+  left: 10%;
+  bottom: -5%;
+  background: rgba(15, 35, 80, 0.45);
+}
+
+[data-wallpaper='sunset'] .base { background: #0a0408; }
+[data-wallpaper='sunset'] .blobA {
+  width: 55vw; height: 50vh; left: 10%; top: 20%;
+  background: rgba(220, 80, 20, 0.55);
+}
+[data-wallpaper='sunset'] .blobB {
+  width: 48vw; height: 45vh; right: 8%; top: 8%;
+  background: rgba(180, 40, 100, 0.45);
+}
+
+[data-wallpaper='ocean'] .base { background: #020b12; }
+[data-wallpaper='ocean'] .blobA {
+  width: 52vw; height: 48vh; left: 8%; top: 18%;
+  background: rgba(0, 100, 200, 0.45);
+}
+[data-wallpaper='ocean'] .blobB {
+  width: 45vw; height: 40vh; right: 10%; top: 5%;
+  background: rgba(0, 180, 220, 0.32);
+}
+
+[data-wallpaper='aurora'] .base { background: #020812; }
+[data-wallpaper='aurora'] .blobA {
+  width: 50vw; height: 42vh; left: 20%; top: 10%;
+  background: rgba(0, 200, 100, 0.35);
+}
+[data-wallpaper='aurora'] .blobB {
+  width: 48vw; height: 40vh; right: 12%; bottom: 25%;
+  background: rgba(100, 0, 200, 0.28);
+}
+
+[data-wallpaper='midnight'] .base { background: #050008; }
+[data-wallpaper='midnight'] .blobA {
+  width: 60vw; height: 55vh; left: 20%; top: 18%;
+  background: rgba(60, 0, 120, 0.45);
+}
+
+.stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  transform: translate(-50%, -50%);
+}
+
+[data-wallpaper='sunset'] .stars,
+[data-wallpaper='ocean'] .stars,
+[data-wallpaper='aurora'] .stars,
+[data-wallpaper='midnight'] .stars {
+  opacity: 0.35;
+}
+
+.mountains {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 38%;
+  width: 100%;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+[data-wallpaper='sunset'] .mountains,
+[data-wallpaper='ocean'] .mountains {
+  opacity: 0.55;
+}

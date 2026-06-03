@@ -1,5 +1,6 @@
 import { useState, useId, useRef } from 'react';
 import { useDesktop, DesktopFolderItem } from '../../context/DesktopContext';
+import { useLiquidMode } from '../../context/LiquidModeContext';
 import { jobsData } from '../../data/experienceData';
 import { FINDER_FILE_CONTENTS } from './TextEditorApp';
 import styles from './FinderApp.module.css';
@@ -30,6 +31,7 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
     return [];
   });
   const { openApp, desktopFolders, desktopFiles, customFolderItems, moveFromFolderToDesktop, queueUploadedFile } = useDesktop();
+  const liquid = useLiquidMode();
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; itemId?: string } | null>(null);
@@ -252,7 +254,7 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
     : baseItems;
 
   return (
-    <div className={styles.root}>
+    <div className={`${styles.root} ${liquid ? styles.liquidRoot : ''}`}>
       {/* Sidebar */}
       <aside className={styles.sidebar}>
         <p className={styles.sidebarSection}>Favourites</p>
