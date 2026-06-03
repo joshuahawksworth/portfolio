@@ -251,14 +251,23 @@ export default function SnakeApp({
     setBoardStatus('done');
   }
 
-  // ── Game controls ─────────────────────────────────────────────────────────
-  // pushDir is ONLY for movement during gameplay; Nokia D-pad uses it
   function pushDir(d: Dir) {
     if (phaseRef.current !== 'playing') return;
     const q = queueRef.current;
     const last = q.length > 0 ? q[q.length - 1] : dirRef.current;
     if (d === last) return;
     if (d !== OPPOSITE[last] && q.length < INPUT_BUFFER_LIMIT) q.push(d);
+  }
+
+  function handlePhoneDir(d: Dir) {
+    if (phaseRef.current === 'entry') {
+      if (d === 'U') nudge(cursorRef.current, -1);
+      else if (d === 'D') nudge(cursorRef.current, 1);
+      else if (d === 'L' && cursorRef.current > 0) moveCursor(cursorRef.current - 1);
+      else if (d === 'R' && cursorRef.current < 2) moveCursor(cursorRef.current + 1);
+      return;
+    }
+    pushDir(d);
   }
 
   // startGame is called from the Nokia centre button / Play soft-key
@@ -298,9 +307,9 @@ export default function SnakeApp({
   }
 
   // Stable wrappers for NokiaWindow
-  const pushDirRef2 = useRef(pushDir);
+  const pushDirRef2 = useRef(handlePhoneDir);
   const triggerRef = useRef(triggerStart);
-  pushDirRef2.current = pushDir;
+  pushDirRef2.current = handlePhoneDir;
   triggerRef.current = triggerStart;
 
   const openBoardRef = useRef(openBoard);
@@ -505,12 +514,13 @@ export default function SnakeApp({
             <div className={styles.overlayInner}>
               <p className={styles.gameOver}>SCORE: {score}</p>
               <p className={styles.enterNameLabel}>Enter your name</p>
+              {isMobileMode && <p className={styles.entryPadHint}>↑↓ letter · ←→ slot · OK submit</p>}
 
-              {/* Letter slots with up/down arrows */}
               <div className={styles.nameEntry}>
                 {([0, 1, 2] as const).map((i) => (
                   <div key={i} className={styles.nameSlotGroup}>
                     <button
+                      type="button"
                       className={styles.letterArrow}
                       onClick={() => {
                         moveCursor(i);
@@ -526,6 +536,7 @@ export default function SnakeApp({
                       {nameChars[i]}
                     </div>
                     <button
+                      type="button"
                       className={styles.letterArrow}
                       onClick={() => {
                         moveCursor(i);
@@ -538,14 +549,16 @@ export default function SnakeApp({
                 ))}
               </div>
 
-              <div className={styles.nameActions}>
-                <button className={styles.confirmBtn} onClick={handleConfirm}>
-                  ✓ SUBMIT
-                </button>
-                <button className={styles.skipBtn} onClick={handleSkip}>
-                  SKIP
-                </button>
-              </div>
+              {!isMobileMode && (
+                <div className={styles.nameActions}>
+                  <button type="button" className={styles.confirmBtn} onClick={handleConfirm}>
+                    ✓ SUBMIT
+                  </button>
+                  <button type="button" className={styles.skipBtn} onClick={handleSkip}>
+                    SKIP
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}

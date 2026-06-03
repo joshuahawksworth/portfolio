@@ -1,6 +1,6 @@
-export const SNAKE_LEADERBOARD_TABLE = 'snake_leaderboard';
+const TABLE = 'snake_leaderboard';
 
-export type LeaderboardRow = {
+type LeaderboardRow = {
   name: string;
   score: number;
   created_at?: string;
@@ -15,7 +15,7 @@ function fallbackRows() {
   return fallbackStore.__snakeLeaderboardFallback;
 }
 
-export function topTen(rows: LeaderboardRow[]) {
+function topTen(rows: LeaderboardRow[]) {
   return [...rows].sort((a, b) => b.score - a.score).slice(0, 10);
 }
 
@@ -28,6 +28,7 @@ function supa(path: string, init?: RequestInit, env?: NodeJS.ProcessEnv) {
     headers: {
       apikey: key,
       Authorization: `Bearer ${key}`,
+      Accept: 'application/json',
       'Content-Type': 'application/json',
       ...(init?.headers ?? {}),
     },
@@ -36,14 +37,17 @@ function supa(path: string, init?: RequestInit, env?: NodeJS.ProcessEnv) {
 
 export async function getLeaderboard(env?: NodeJS.ProcessEnv): Promise<LeaderboardRow[]> {
   const request = supa(
-    `${SNAKE_LEADERBOARD_TABLE}?select=name,score,created_at&order=score.desc&limit=10`,
+    `${TABLE}?select=name,score,created_at&order=score.desc&limit=10`,
     undefined,
     env
   );
   if (!request) return topTen(fallbackRows());
 
   const r = await request;
-  if (!r.ok) return topTen(fallbackRows());
+  if (!r.ok) {
+    console.error('leaderboard GET failed', r.status, await r.text());
+    return topTen(fallbackRows());
+  }
 
   const data = await r.json();
   return Array.isArray(data) ? data : topTen(fallbackRows());
@@ -64,10 +68,10 @@ export async function postLeaderboardScore(
   }
 
   const localRow: LeaderboardRow = { name: initials, score, created_at: new Date().toISOString() };
-  const request = supa(SNAKE_LEADERBOARD_TABLE, {
+  const request = supa(TABLE, {
     method: 'POST',
     headers: { Prefer: 'return=minimal' },
-    body: JSON.stringify(localRow),
+    body: JSON.stringify({ name: initials, score }),
   }, env);
 
   if (!request) {
@@ -76,6 +80,9 @@ export async function postLeaderboardScore(
   }
 
   const r = await request;
-  if (!r.ok) fallbackRows().push(localRow);
+  if (!r.ok) {
+    console.error('leaderboard POST failed', r.status, await r.text());
+    fallbackRows().push(localRow);
+  }
   return { ok: true, fallback: !r.ok };
 }

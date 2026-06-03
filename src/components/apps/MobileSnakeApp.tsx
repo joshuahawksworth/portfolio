@@ -32,74 +32,66 @@ export default function MobileSnakeApp() {
 
   function pressOk() {
     if (phase === 'entry') confirmRef.current?.();
-    else if (phase === 'board') startRef.current?.();
     else startRef.current?.();
   }
-
-  function pressLeftSoft() {
-    if (phase === 'entry') skipRef.current?.();
-    else if (phase === 'board') openBoardRef.current?.();
-    else openBoardRef.current?.();
-  }
-
-  function pressRightSoft() {
-    pressOk();
-  }
-
-  const leftSoftLabel =
-    phase === 'entry' ? 'Skip' : phase === 'board' ? 'Refresh' : 'Scores';
-  const rightSoftLabel =
-    phase === 'entry' ? 'Submit' : phase === 'board' ? 'Play' : phase === 'dead' ? 'Retry' : 'Play';
 
   return (
     <div className={styles.phone}>
       <div className={styles.phoneTop}>
         <div className={styles.cameraDot} />
         <div className={styles.speaker} />
-        <span className={styles.modelBadge}>3310</span>
       </div>
 
-      <div className={styles.screenBezel}>
-        <div className={styles.screenGlass}>
-          <SnakeApp
-            hideDpad
-            mobileMode
-            className={styles.screenGame}
-            onPushDir={handlePushDir}
-            onStartGame={handleStartGame}
-            onOpenBoard={handleOpenBoard}
-            onConfirm={handleConfirm}
-            onSkipEntry={handleSkipEntry}
-            onPhaseChange={setPhase}
-          />
-          <div className={styles.screenScanlines} aria-hidden />
+      <div className={styles.screenSection}>
+        <div className={styles.screenBezel}>
+          <div className={styles.screenGlass}>
+            <SnakeApp
+              hideDpad
+              mobileMode
+              className={styles.screenGame}
+              onPushDir={handlePushDir}
+              onStartGame={handleStartGame}
+              onOpenBoard={handleOpenBoard}
+              onConfirm={handleConfirm}
+              onSkipEntry={handleSkipEntry}
+              onPhaseChange={setPhase}
+            />
+            <div className={styles.screenScanlines} aria-hidden />
+          </div>
         </div>
       </div>
 
       <p className={styles.brand}>NOKIA</p>
 
-      <div className={styles.softRow}>
-        <button
-          type="button"
-          className={styles.softKey}
-          onPointerDown={(e) => {
-            e.preventDefault();
-            pressLeftSoft();
-          }}
-        >
-          {leftSoftLabel}
-        </button>
-        <span className={styles.softDivider} />
-        <button
-          type="button"
-          className={styles.softKey}
-          onPointerDown={(e) => {
-            e.preventDefault();
-            pressRightSoft();
-          }}
-        >
-          {rightSoftLabel}
-        </button>
+      <div className={phase === 'entry' ? styles.softRow : styles.callRow}>
+        {phase === 'entry' && (
+          <button
+            type="button"
+            className={styles.softKey}
+            onPointerDown={(e) => {
+              e.preventDefault();
+              skipRef.current?.();
+            }}
+          >
+            Skip
+          </button>
+        )}
+        <div className={styles.callBtns}>
+          <button type="button" className={styles.callGreen} aria-label="Call" />
+          <button type="button" className={styles.callRed} aria-label="End" />
+        </div>
+        {phase === 'entry' && (
+          <button
+            type="button"
+            className={styles.softKey}
+            onPointerDown={(e) => {
+              e.preventDefault();
+              pressOk();
+            }}
+          >
+            Submit
+          </button>
+        )}
       </div>
 
       <div className={styles.bigDpad}>

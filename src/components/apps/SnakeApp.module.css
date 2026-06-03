@@ -68,17 +68,54 @@
   }
 }
 
+.gameAreaMobile {
+  min-height: 0;
+}
+
 .gameAreaMobile .statusBar {
   font-size: 10px;
   padding: 3px 8px;
+  flex-shrink: 0;
 }
 
 .gameAreaMobile .gameName {
   font-size: 11px;
 }
 
+.gameAreaMobile .canvasWrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 0;
+}
+
 .gameAreaMobile .canvas {
-  filter: saturate(1.06) contrast(1.04);
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.gameAreaMobile .letterArrow {
+  display: none;
+}
+
+.gameAreaMobile .nameSlotGroup {
+  gap: 4px;
+}
+
+.gameAreaMobile .entryPadHint {
+  margin: 0;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #306230;
+  font-family: 'Courier New', Courier, monospace;
+  text-transform: uppercase;
+  opacity: 0.85;
 }
 
 .gameAreaMobile .overlay {
@@ -115,12 +152,6 @@
 
 .gameAreaMobile .deathScore {
   font-size: 42px;
-}
-
-.gameAreaMobile .letterArrow {
-  width: 40px;
-  height: 28px;
-  font-size: 12px;
 }
 
 .gameAreaMobile .nameChar {
@@ -291,6 +322,16 @@
   font-weight: 700;
   letter-spacing: 0.12em;
   color: #0f380f;
+  font-family: 'Courier New', Courier, monospace;
+  text-transform: uppercase;
+}
+
+.entryPadHint {
+  margin: 0;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #306230;
   font-family: 'Courier New', Courier, monospace;
   text-transform: uppercase;
 }

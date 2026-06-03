@@ -1,77 +1,103 @@
 .phone {
-  display: flex;
-  flex-direction: column;
+  --nokia-face: #8eb0c8;
+  --nokia-face-mid: #6f94b0;
+  --nokia-face-dark: #4f728c;
+  --nokia-face-shadow: #3a5a72;
+  --nokia-top: #7aa3bc;
+  --nokia-pad-well: #4a6d84;
+  --nokia-key-top: #b8d4e8;
+  --nokia-key-mid: #8eb0c8;
+  --nokia-key-dark: #5f849c;
+  --nokia-key-edge: #3d6278;
+  --nokia-bezel: #141414;
+  --nokia-bezel-rim: #2a2a2a;
+  --nokia-logo: rgba(255, 255, 255, 0.72);
+
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto auto;
   height: 100%;
   min-height: 0;
-  background: #1c2d5e;
-  box-shadow:
-    inset 0 3px 0 rgba(255, 255, 255, 0.14),
-    inset -2px 0 0 rgba(0, 0, 0, 0.2);
   overflow: hidden;
   touch-action: manipulation;
+  background: linear-gradient(165deg, var(--nokia-face) 0%, var(--nokia-face-mid) 42%, var(--nokia-face-dark) 100%);
+  border-radius: 20px 20px 28px 28px;
+  box-shadow:
+    inset 0 4px 0 rgba(255, 255, 255, 0.35),
+    inset -3px 0 0 rgba(0, 0, 0, 0.12),
+    0 6px 0 var(--nokia-face-shadow),
+    0 10px 24px rgba(0, 0, 0, 0.35);
 }
 
 .phoneTop {
-  flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 10px 16px 8px;
-  background: #162348;
-  border-bottom: 2px solid #0d1830;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 18px 6px;
+  background: linear-gradient(180deg, var(--nokia-top) 0%, var(--nokia-face-mid) 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
 }
 
 .cameraDot {
-  width: 9px;
-  height: 9px;
+  position: absolute;
+  left: 16px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #3a5090, #0a1430);
-  border: 1px solid #0a1030;
-  flex-shrink: 0;
+  background: radial-gradient(circle at 35% 35%, #2a3540, #0a0e12);
+  border: 1px solid #1a2028;
+  opacity: 0.85;
+}
+
+.phoneTop {
+  position: relative;
 }
 
 .speaker {
-  flex: 1;
-  max-width: 88px;
-  height: 7px;
-  margin: 0 auto;
-  background: repeating-linear-gradient(90deg, #0d1830 0 3px, #1c2d5e 3px 5px);
+  width: 72px;
+  height: 6px;
+  background: repeating-linear-gradient(90deg, #2a3842 0 2px, #4a6272 2px 4px);
   border-radius: 2px;
-  border: 1px solid #0a1430;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-.modelBadge {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  color: rgba(180, 200, 255, 0.45);
+.screenSection {
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px 4px;
 }
 
 .screenBezel {
-  flex: 1;
-  min-height: 0;
-  margin: 0 10px;
-  padding: 5px;
-  background: #0a0f1a;
-  border-radius: 5px;
-  border: 3px solid #080c16;
+  width: 100%;
+  max-width: 420px;
+  max-height: 100%;
+  aspect-ratio: 320 / 288;
+  padding: 6px;
+  background: var(--nokia-bezel);
+  border: 2px solid var(--nokia-bezel-rim);
+  border-radius: 6px;
   box-shadow:
-    inset 0 5px 14px rgba(0, 0, 0, 0.95),
-    0 2px 0 rgba(255, 255, 255, 0.04);
+    inset 0 6px 16px rgba(0, 0, 0, 0.9),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 2px 0 rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
 }
 
 .screenGlass {
   position: relative;
+  width: 100%;
   height: 100%;
-  min-height: 0;
   border-radius: 3px;
   overflow: hidden;
-  background: #6b7c0a;
+  background: #8bac0f;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.35);
 }
 
 .screenGame {
+  width: 100%;
   height: 100%;
 }
 
@@ -83,134 +109,169 @@
     0deg,
     transparent 0,
     transparent 2px,
-    rgba(0, 0, 0, 0.04) 2px,
-    rgba(0, 0, 0, 0.04) 3px
+    rgba(0, 0, 0, 0.035) 2px,
+    rgba(0, 0, 0, 0.035) 3px
   );
-  opacity: 0.55;
 }
 
 .brand {
-  flex-shrink: 0;
-  margin: 6px 0 2px;
+  margin: 4px 0 0;
   text-align: center;
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 900;
-  letter-spacing: 0.42em;
-  color: rgba(140, 170, 230, 0.5);
+  letter-spacing: 0.38em;
+  color: var(--nokia-logo);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
 }
 
-.softRow {
-  flex-shrink: 0;
+.softRow,
+.callRow {
   display: flex;
-  align-items: stretch;
-  gap: 8px;
-  padding: 4px 14px 6px;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 12px 4px;
+}
+
+.callRow {
+  justify-content: center;
 }
 
 .softKey {
   flex: 1;
-  min-height: 36px;
+  min-height: 30px;
+  max-height: 34px;
   border-radius: 14px;
-  border: 1.5px solid #0f1840;
-  background: linear-gradient(180deg, #2c4490 0%, #1a2c6e 100%);
-  color: rgba(210, 225, 255, 0.92);
+  border: 1.5px solid var(--nokia-key-edge);
+  background: linear-gradient(180deg, var(--nokia-key-top) 0%, var(--nokia-key-mid) 55%, var(--nokia-key-dark) 100%);
+  color: rgba(20, 40, 55, 0.85);
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  cursor: pointer;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
   box-shadow:
-    0 4px 0 #09113a,
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    0 3px 0 var(--nokia-key-edge),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
 .softKey:active {
-  transform: translateY(3px);
+  transform: translateY(2px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.callBtns {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.callGreen,
+.callRed {
+  width: 34px;
+  height: 28px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(0, 0, 0, 0.35);
+  box-shadow:
+    0 3px 0 rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.callGreen {
+  background: linear-gradient(180deg, #6fcf7a 0%, #3d9f4a 100%);
+}
+
+.callRed {
+  background: linear-gradient(180deg, #e85a5a 0%, #b82828 100%);
+}
+
+.callGreen:active,
+.callRed:active {
+  transform: translateY(2px);
   box-shadow: none;
 }
 
-.softDivider {
-  width: 28px;
-  flex-shrink: 0;
-}
-
-/* Large touch D-pad — kept big for thumbs */
 .bigDpad {
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 6px 12px 10px;
-  margin: 0 8px 4px;
-  background: #141e3c;
+  gap: 3px;
+  padding: 4px 10px 8px;
+  margin: 0 10px;
+  background: var(--nokia-pad-well);
   border-radius: 999px;
-  border: 2px solid #0a1230;
+  border: 2px solid var(--nokia-face-shadow);
   box-shadow:
-    0 4px 0 #06091a,
-    inset 0 2px 0 rgba(255, 255, 255, 0.06);
+    inset 0 3px 8px rgba(0, 0, 0, 0.35),
+    0 2px 0 rgba(255, 255, 255, 0.12);
 }
 
 .dpadRow {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 }
 
 .dpadBtn {
-  width: 64px;
-  height: 64px;
-  border-radius: 14px;
-  border: 1.5px solid #0f1840;
-  background: linear-gradient(180deg, #3554b8 0%, #1e3478 100%);
-  color: rgba(220, 235, 255, 0.95);
-  font-size: 22px;
+  width: clamp(52px, 14vw, 62px);
+  height: clamp(52px, 14vw, 62px);
+  border-radius: 12px;
+  border: 1.5px solid var(--nokia-key-edge);
+  background: linear-gradient(180deg, var(--nokia-key-top) 0%, var(--nokia-key-mid) 50%, var(--nokia-key-dark) 100%);
+  color: rgba(25, 45, 60, 0.9);
+  font-size: clamp(18px, 5vw, 22px);
   font-weight: 900;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  cursor: pointer;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
   box-shadow:
-    0 5px 0 #09113a,
-    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    0 4px 0 var(--nokia-key-edge),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
+.dpadRow .dpadBtn {
+  width: clamp(48px, 12vw, 56px);
+  height: clamp(52px, 14vw, 62px);
+  border-radius: 10px;
+}
+
 .dpadBtn:active {
-  transform: translateY(4px);
-  box-shadow: none;
-  background: #1a2858;
+  transform: translateY(3px);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(180deg, var(--nokia-key-mid) 0%, var(--nokia-key-dark) 100%);
 }
 
 .dpadCenter {
-  width: 64px;
-  height: 64px;
+  width: clamp(52px, 14vw, 62px);
+  height: clamp(52px, 14vw, 62px);
   border-radius: 50%;
-  border: 1.5px solid #0a1030;
-  background: radial-gradient(circle at 38% 32%, #3d58b8, #121e50);
-  cursor: pointer;
+  border: 1.5px solid var(--nokia-key-edge);
+  background: radial-gradient(circle at 38% 30%, var(--nokia-key-top) 0%, var(--nokia-key-mid) 45%, var(--nokia-key-dark) 100%);
   box-shadow:
-    0 5px 0 #06091a,
-    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    0 4px 0 var(--nokia-key-edge),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
 .dpadCenter:active {
-  transform: translateY(4px);
-  box-shadow: none;
+  transform: translateY(3px);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
 .chin {
-  flex-shrink: 0;
-  height: 10px;
-  margin: 0 24px 8px;
-  border-radius: 0 0 18px 18px;
-  background: linear-gradient(180deg, #162348, #0f1a38);
+  height: 12px;
+  margin: 0 18px 6px;
+  border-radius: 0 0 22px 22px;
+  background: linear-gradient(180deg, var(--nokia-face-dark) 0%, var(--nokia-face-shadow) 100%);
+  border-top: 1px solid rgba(0, 0, 0, 0.2);
 }
