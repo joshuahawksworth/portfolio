@@ -1,6 +1,7 @@
 import { useId, useState, useRef, useEffect } from 'react';
 import { useDesktop, WindowInstance } from '../../context/DesktopContext';
 import { AboutLogoIcon } from '../icons/AboutLogoIcon';
+import { CalculatorLogoIcon } from '../icons/CalculatorLogoIcon';
 import styles from './Dock.module.css';
 
 /* ─── MacIcon ─────────────────────────────────────────────────────────────
@@ -363,6 +364,13 @@ const I = {
       <rect x="5" y="32" width="34" height="2" rx="1" fill="rgba(255,255,255,0.25)" />
     </svg>
   ),
+  calculator: (
+    <MacIcon top="#ff9f0a" bottom="#c93400">
+      <g transform="translate(3, 3)">
+        <CalculatorLogoIcon size={38} />
+      </g>
+    </MacIcon>
+  ),
   texteditor: (
     // Sublime Text-inspired icon — dark with coloured accent bar
     <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
@@ -402,6 +410,7 @@ const THUMB_GRAD: Record<string, [string, string]> = {
   contact: ['#0a1428', '#0f2045'],
   location: ['#001a10', '#002a1a'],
   terminal: ['#090909', '#141414'],
+  calculator: ['#2a1800', '#3d2400'],
   finder: ['#001030', '#001a50'],
   trash: ['#1a1a1e', '#2a2a2e'],
 };
@@ -433,6 +442,7 @@ function MinimizedSlot({ win }: { win: WindowInstance }) {
     contact: I.contact,
     location: I.location,
     terminal: I.terminal,
+    calculator: I.calculator,
     finder: I.finder,
     trash: I.trashEmpty,
     cv: I.cv,
@@ -466,6 +476,7 @@ const DEFAULT_ORDER = [
   'contact',
   'location',
   'terminal',
+  'calculator',
   'texteditor',
   'imageviewer',
   'cv',
@@ -481,6 +492,7 @@ const ALL_ITEMS_STATIC: Omit<Item, 'action'>[] = [
   { key: 'contact', label: 'Contact', icon: I.contact },
   { key: 'location', label: 'Location', icon: I.location },
   { key: 'terminal', label: 'Terminal', icon: I.terminal },
+  { key: 'calculator', label: 'Calculator', icon: I.calculator },
   { key: 'texteditor', label: 'Text Editor', icon: I.texteditor },
   { key: 'imageviewer', label: 'Image Viewer', icon: I.imageviewer },
   { key: 'cv', label: 'CV', icon: I.cv },

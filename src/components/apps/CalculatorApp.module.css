@@ -1,0 +1,230 @@
+.root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  user-select: none;
+  min-height: 0;
+}
+
+.display {
+  flex: 1;
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 12px 16px 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.displayValue {
+  font-size: clamp(1.75rem, 7vw, 3.25rem);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modeBadge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ff9f0a;
+  opacity: 0.85;
+  margin-top: 4px;
+}
+
+.scientificPad {
+  display: none;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: #000;
+  padding: 1px 1px 0;
+  flex-shrink: 0;
+}
+
+.root[data-scientific='true'] .scientificPad {
+  display: grid;
+}
+
+.scientificPad button,
+.pad button {
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-height: 44px;
+  font-size: 1.2rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: filter 0.08s ease;
+  font-family: inherit;
+}
+
+.root[data-scientific='true'] .scientificPad button {
+  min-height: 40px;
+}
+
+.scientificPad button.small {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.scientificPad button:active,
+.pad button:active {
+  filter: brightness(1.15);
+}
+
+.sciFn {
+  background: #505052;
+  color: #fff;
+}
+
+.sciFn:hover {
+  background: #636366;
+}
+
+.pad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: #000;
+  padding: 1px;
+  flex-shrink: 0;
+}
+
+.root[data-scientific='true'] .pad button {
+  min-height: 48px;
+}
+
+.fn {
+  background: #a5a5a5;
+  color: #000;
+}
+
+.fn:hover {
+  background: #c7c7c7;
+}
+
+.digit {
+  background: #333336;
+  color: #fff;
+}
+
+.digit:hover {
+  background: #4a4a4e;
+}
+
+.zero {
+  grid-column: span 2;
+}
+
+.op {
+  background: #ff9f0a;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+.op:hover {
+  background: #ffb340;
+}
+
+.opActive {
+  background: #fff;
+  color: #ff9f0a;
+}
+
+.opActive:hover {
+  background: #f5f5f5;
+  color: #ff9f0a;
+}
+
+.eq {
+  background: #ff9f0a;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+.eq:hover {
+  background: #ffb340;
+}
+
+/* ── Mobile: iOS Calculator layout ─────────────────────────────────────── */
+.root[data-mobile='true'] {
+  justify-content: flex-end;
+}
+
+.root[data-mobile='true'] .display {
+  flex: 0 0 auto;
+  height: 108px;
+  max-height: 22vh;
+  min-height: 80px;
+  padding: 0 20px 18px;
+  justify-content: flex-end;
+}
+
+.root[data-mobile='true'] .displayValue {
+  font-size: clamp(3rem, 16vw, 4.25rem);
+  font-weight: 200;
+}
+
+.root[data-mobile='true'] .scientificPad {
+  display: none !important;
+}
+
+.root[data-mobile='true'] .pad {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: min(72vh, 520px);
+  gap: clamp(10px, 2.8vw, 14px);
+  padding: 8px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+  align-content: stretch;
+}
+
+.root[data-mobile='true'] .pad button {
+  width: 100%;
+  max-width: 84px;
+  justify-self: center;
+  aspect-ratio: 1;
+  min-height: 0;
+  height: auto;
+  border-radius: 50%;
+  font-size: clamp(1.5rem, 6.5vw, 2rem);
+  font-weight: 400;
+}
+
+.root[data-mobile='true'] .fn {
+  background: #a5a5a5;
+  color: #000;
+  font-size: clamp(1.35rem, 5.5vw, 1.75rem);
+  font-weight: 500;
+}
+
+.root[data-mobile='true'] .digit {
+  background: #333336;
+}
+
+.root[data-mobile='true'] .op,
+.root[data-mobile='true'] .eq {
+  font-size: clamp(1.75rem, 7vw, 2.25rem);
+  font-weight: 500;
+}
+
+.root[data-mobile='true'] .zero {
+  grid-column: span 2;
+  max-width: none;
+  width: 100%;
+  aspect-ratio: auto;
+  border-radius: 999px;
+  justify-self: stretch;
+}

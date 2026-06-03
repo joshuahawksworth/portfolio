@@ -24,6 +24,7 @@ import KeyboardShortcutsApp from '../apps/KeyboardShortcutsApp';
 import TextEditorApp from '../apps/TextEditorApp';
 import ImageViewerApp from '../apps/ImageViewerApp';
 import SlotslopApp from '../apps/SlotslopApp';
+import CalculatorApp from '../apps/CalculatorApp';
 import { jobsData } from '../../data/experienceData';
 import styles from './Desktop.module.css';
 
@@ -44,6 +45,7 @@ const APP_COMPONENTS: Record<string, React.ComponentType<{ props?: Record<string
   texteditor: TextEditorApp,
   imageviewer: ImageViewerApp,
   slotslop: SlotslopApp,
+  calculator: CalculatorApp,
   // snake is rendered by NokiaWindow — NOT in this map
 };
 

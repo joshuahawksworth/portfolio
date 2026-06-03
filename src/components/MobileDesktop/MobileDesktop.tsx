@@ -11,6 +11,8 @@ import SafariApp from '../apps/SafariApp';
 import MobileSnakeApp from '../apps/MobileSnakeApp';
 import RubberDuckApp from '../apps/RubberDuckApp';
 import KeyboardShortcutsApp from '../apps/KeyboardShortcutsApp';
+import CalculatorApp from '../apps/CalculatorApp';
+import { CalculatorLogoIcon } from '../icons/CalculatorLogoIcon';
 import { AboutLogoIcon } from '../icons/AboutLogoIcon';
 import { ChromeLogoIcon } from '../icons/ChromeLogoIcon';
 import { DesktopProvider, useDesktop } from '../../context/DesktopContext';
@@ -29,6 +31,7 @@ const ICON_GRADS: Record<string, [string, string]> = {
   github: ['#1b1f24', '#1b1f24'],
   snake: ['#133d1e', '#0a2410'],
   trickster: ['#f59e0b', '#b45309'],
+  calculator: ['#ff9f0a', '#c93400'],
 };
 
 // ── App icon glyphs (28×28 viewBox) ────────────────────────────────────────
@@ -206,6 +209,22 @@ const ICON_GLYPHS: Record<string, React.ReactNode> = {
     </>
   ),
 
+  calculator: (
+    <>
+      <rect x="5" y="3" width="18" height="22" rx="3.5" fill="rgba(255,255,255,0.92)" />
+      <rect x="7" y="5" width="14" height="3.5" rx="1.5" fill="#3a3a3c" />
+      <rect x="7" y="11" width="4" height="3.25" rx="1" fill="#636366" />
+      <rect x="12" y="11" width="4" height="3.25" rx="1" fill="#636366" />
+      <rect x="17" y="11" width="4" height="3.25" rx="1" fill="#ff9f0a" />
+      <rect x="7" y="14.75" width="4" height="3.25" rx="1" fill="#636366" />
+      <rect x="12" y="14.75" width="4" height="3.25" rx="1" fill="#636366" />
+      <rect x="17" y="14.75" width="4" height="3.25" rx="1" fill="#ff9f0a" />
+      <rect x="7" y="18.5" width="4" height="3.25" rx="1" fill="#636366" />
+      <rect x="12" y="18.5" width="4" height="3.25" rx="1" fill="#636366" />
+      <rect x="17" y="18.5" width="4" height="3.25" rx="1" fill="#ff9f0a" />
+    </>
+  ),
+
   // Trickster — folder outline with a question mark
   trickster: (
     <>
@@ -258,6 +277,49 @@ function AppIcon({ appId, size = 60 }: { appId: string; size?: number }) {
         size={size}
         style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.45)' }}
       />
+    );
+  }
+
+  if (appId === 'calculator') {
+    const radius = Math.round(size * 0.23);
+    const glyphSize = Math.round(size * 0.72);
+    const [c1, c2] = ICON_GRADS.calculator;
+    return (
+      <div
+        style={{
+          width: size,
+          height: size,
+          borderRadius: radius,
+          background: `linear-gradient(155deg, ${c1} 0%, ${c2} 100%)`,
+          position: 'relative',
+          overflow: 'hidden',
+          flexShrink: 0,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.45)',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '50%',
+            background: 'linear-gradient(to bottom, rgba(255,255,255,0.22), rgba(255,255,255,0))',
+            borderRadius: `${radius}px ${radius}px 0 0`,
+            pointerEvents: 'none',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+          }}
+        >
+          <CalculatorLogoIcon size={glyphSize} />
+        </div>
+      </div>
     );
   }
 
@@ -321,6 +383,7 @@ const APP_COMPONENTS: Record<string, React.ComponentType<{ props?: Record<string
   snake: MobileSnakeApp,
   rubberduck: RubberDuckApp,
   shortcuts: KeyboardShortcutsApp,
+  calculator: CalculatorApp,
 };
 
 const APP_LABELS: Record<string, string> = {
@@ -335,6 +398,7 @@ const APP_LABELS: Record<string, string> = {
   github: 'GitHub',
   safari: 'Chrome',
   snake: 'Snake',
+  calculator: 'Calculator',
 };
 
 function StatusClock() {
@@ -351,6 +415,7 @@ const BASE_ITEMS = [
   'contact',
   'location',
   'terminal',
+  'calculator',
   'github',
   'safari',
   'snake',
@@ -498,6 +563,7 @@ function MobileInner() {
               className={[
                 styles.panelBody,
                 activeWindow.appId === 'snake' ? styles.panelBodySnake : '',
+                activeWindow.appId === 'calculator' ? styles.panelBodyCalculator : '',
               ]
                 .filter(Boolean)
                 .join(' ')}

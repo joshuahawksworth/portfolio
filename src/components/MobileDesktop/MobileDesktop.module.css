@@ -299,3 +299,9 @@
   background: #6f94b0;
   color: inherit;
 }
+
+.panelBodyCalculator {
+  padding: 0;
+  background: #000;
+  min-height: 0;
+}

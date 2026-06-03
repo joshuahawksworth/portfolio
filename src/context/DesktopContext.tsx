@@ -36,6 +36,7 @@ export const APP_DEFAULTS: Record<string, { title: string; width: number; height
   texteditor: { title: 'Text Editor', width: 780, height: 540 },
   imageviewer: { title: 'Image Viewer', width: 720, height: 560 },
   slotslop: { title: 'Slotslop', width: 980, height: 700 },
+  calculator: { title: 'Calculator', width: 280, height: 420 },
 };
 
 // Minimum resize bounds per app
@@ -57,6 +58,7 @@ export const APP_MIN: Record<string, { width: number; height: number }> = {
   texteditor: { width: 480, height: 340 },
   imageviewer: { width: 400, height: 360 },
   slotslop: { width: 760, height: 520 },
+  calculator: { width: 240, height: 360 },
 };
 
 // Per-app "zoom" target (green button) — bounded by screen at runtime
@@ -76,6 +78,7 @@ export const APP_MAX: Record<string, { width: number; height: number }> = {
   texteditor: { width: 1060, height: 740 },
   imageviewer: { width: 1060, height: 760 },
   slotslop: { width: 1120, height: 760 },
+  calculator: { width: 400, height: 620 },
 };
 
 const CASCADE_STEPS = 8;
