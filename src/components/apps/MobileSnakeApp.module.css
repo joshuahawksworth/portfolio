@@ -13,7 +13,7 @@
   --nokia-bezel-rim: #2a2a2a;
   --nokia-logo: rgba(255, 255, 255, 0.72);
 
-  --dpad-key: clamp(44px, 11vmin, 54px);
+  --dpad-key: clamp(50px, 13vmin, 60px);
 
   display: flex;
   flex-direction: column;
@@ -238,20 +238,18 @@
     0 2px 0 rgba(255, 255, 255, 0.12);
 }
 
-.dpadRow {
-  display: contents;
-}
-
 .dpadBtn,
 .dpadCenter {
-  width: var(--dpad-key);
-  height: var(--dpad-key);
-  min-width: var(--dpad-key);
-  min-height: var(--dpad-key);
-  flex-shrink: 0;
+  place-self: stretch;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .dpadBtn {
@@ -259,7 +257,7 @@
   border: 1.5px solid var(--nokia-key-edge);
   background: linear-gradient(180deg, var(--nokia-key-top) 0%, var(--nokia-key-mid) 50%, var(--nokia-key-dark) 100%);
   color: rgba(25, 45, 60, 0.9);
-  font-size: clamp(16px, 4.5vmin, 20px);
+  font-size: clamp(18px, 5vmin, 24px);
   font-weight: 900;
   line-height: 1;
   display: flex;
@@ -275,6 +273,12 @@
 .dpadUp {
   grid-column: 2;
   grid-row: 1;
+}
+
+.dpadLeft,
+.dpadRight {
+  font-size: clamp(22px, 6.5vmin, 28px);
+  letter-spacing: -0.05em;
 }
 
 .dpadLeft {

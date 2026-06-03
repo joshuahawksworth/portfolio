@@ -96,18 +96,17 @@ export default function MobileSnakeApp() {
         </div>
 
         <div className={styles.bigDpad}>
-        <button
-          type="button"
-          className={`${styles.dpadBtn} ${styles.dpadUp}`}
-          aria-label="Up"
-          onPointerDown={(e) => {
-            e.preventDefault();
-            pushDir('U');
-          }}
-        >
-          ▲
-        </button>
-        <div className={styles.dpadRow}>
+          <button
+            type="button"
+            className={`${styles.dpadBtn} ${styles.dpadUp}`}
+            aria-label="Up"
+            onPointerDown={(e) => {
+              e.preventDefault();
+              pushDir('U');
+            }}
+          >
+            ▲
+          </button>
           <button
             type="button"
             className={`${styles.dpadBtn} ${styles.dpadLeft}`}
@@ -117,7 +116,7 @@ export default function MobileSnakeApp() {
               pushDir('L');
             }}
           >
-            ◄
+            ◀
           </button>
           <button
             type="button"
@@ -137,20 +136,19 @@ export default function MobileSnakeApp() {
               pushDir('R');
             }}
           >
-            ►
+            ▶
           </button>
-        </div>
-        <button
-          type="button"
-          className={`${styles.dpadBtn} ${styles.dpadDown}`}
-          aria-label="Down"
-          onPointerDown={(e) => {
-            e.preventDefault();
-            pushDir('D');
-          }}
-        >
-          ▼
-        </button>
+          <button
+            type="button"
+            className={`${styles.dpadBtn} ${styles.dpadDown}`}
+            aria-label="Down"
+            onPointerDown={(e) => {
+              e.preventDefault();
+              pushDir('D');
+            }}
+          >
+            ▼
+          </button>
         </div>
 
         <div className={styles.chin} />
