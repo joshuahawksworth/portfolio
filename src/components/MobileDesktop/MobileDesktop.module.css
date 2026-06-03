@@ -7,23 +7,43 @@
   flex-direction: column;
 
   background:
-    radial-gradient(ellipse at 18% 25%, rgba(80,130,255,0.38) 0%, transparent 52%),
-    radial-gradient(ellipse at 82% 65%, rgba(140,70,220,0.28) 0%, transparent 48%),
-    radial-gradient(ellipse at 50% 100%, rgba(30,60,160,0.35) 0%, transparent 55%),
-    linear-gradient(175deg, #0e1830 0%, #192e50 45%, #0e1830 100%);
+    radial-gradient(ellipse at 18% 25%, rgba(90, 145, 255, 0.42) 0%, transparent 52%),
+    radial-gradient(ellipse at 82% 65%, rgba(155, 95, 230, 0.3) 0%, transparent 48%),
+    radial-gradient(ellipse at 50% 100%, rgba(55, 95, 190, 0.38) 0%, transparent 55%),
+    linear-gradient(175deg, #142142 0%, #243e6a 45%, #142142 100%);
 }
 
 .screen::after {
   content: '';
   position: absolute;
-  bottom: 0; left: 0; right: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   height: 30%;
   pointer-events: none;
-  background: linear-gradient(to top, #0b1428 0%, transparent 100%);
+  background: linear-gradient(to top, #101d38 0%, transparent 100%);
   clip-path: polygon(
-    0 100%, 0 72%, 5% 55%, 10% 68%, 15% 48%, 20% 62%, 26% 40%,
-    32% 55%, 37% 38%, 43% 52%, 48% 32%, 54% 50%, 59% 36%,
-    65% 53%, 70% 38%, 76% 55%, 81% 42%, 87% 60%, 93% 50%, 100% 60%, 100% 100%
+    0 100%,
+    0 72%,
+    5% 55%,
+    10% 68%,
+    15% 48%,
+    20% 62%,
+    26% 40%,
+    32% 55%,
+    37% 38%,
+    43% 52%,
+    48% 32%,
+    54% 50%,
+    59% 36%,
+    65% 53%,
+    70% 38%,
+    76% 55%,
+    81% 42%,
+    87% 60%,
+    93% 50%,
+    100% 60%,
+    100% 100%
   );
   opacity: 0.7;
 }
@@ -84,13 +104,15 @@
   border-radius: 16px;
   width: 100%;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 120ms ease, background 120ms ease;
+  transition:
+    transform 120ms ease,
+    background 120ms ease;
   touch-action: manipulation;
 }
 
 .iconItem:active {
   transform: scale(0.88);
-  background: rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .tricksterItem {
@@ -98,16 +120,25 @@
 }
 
 @keyframes tricksterPop {
-  0%   { transform: scale(0.65); opacity: 0.4; }
-  65%  { transform: scale(1.1);  opacity: 1;   }
-  100% { transform: scale(1);    opacity: 1;   }
+  0% {
+    transform: scale(0.65);
+    opacity: 0.4;
+  }
+  65% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .iconLabel {
   font-size: 11px;
   color: white;
   text-align: center;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
   font-weight: 500;
   white-space: nowrap;
@@ -124,10 +155,10 @@
   flex-shrink: 0;
   z-index: 10;
 
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.16);
   backdrop-filter: blur(24px) saturate(150%);
   -webkit-backdrop-filter: blur(24px) saturate(150%);
-  border-top: 1px solid rgba(255,255,255,0.12);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .dockItem {
@@ -141,7 +172,9 @@
   touch-action: manipulation;
 }
 
-.dockItem:active { transform: scale(0.86); }
+.dockItem:active {
+  transform: scale(0.86);
+}
 
 /* ── App panel (slides up from bottom, iOS sheet style) ─ */
 .panel {
@@ -150,7 +183,7 @@
   z-index: 100;
   display: flex;
   flex-direction: column;
-  background: #1a1c28;
+  background: #222738;
   transform: translateY(100%);
   transition: transform 340ms cubic-bezier(0.32, 0.72, 0, 1);
   will-change: transform;
@@ -169,14 +202,14 @@
   justify-content: center;
   padding: 10px 0 4px;
   flex-shrink: 0;
-  background: rgba(38,40,54,0.96);
+  background: rgba(46, 51, 70, 0.97);
 }
 
 .panelHandlePill {
   width: 36px;
   height: 4px;
   border-radius: 2px;
-  background: rgba(255,255,255,0.25);
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .panelHeader {
@@ -186,10 +219,10 @@
   justify-content: space-between;
   padding: 0 16px;
   flex-shrink: 0;
-  background: rgba(38,40,54,0.96);
+  background: rgba(46, 51, 70, 0.97);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 /* iOS-native circular close button */
@@ -197,12 +230,12 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.12);
+  background: rgba(255, 255, 255, 0.12);
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255,255,255,0.7);
+  color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -210,13 +243,18 @@
   flex-shrink: 0;
 }
 
-.closeBtn:active { background: rgba(255,255,255,0.22); }
-.closeBtn svg { width: 12px; height: 12px; }
+.closeBtn:active {
+  background: rgba(255, 255, 255, 0.22);
+}
+.closeBtn svg {
+  width: 12px;
+  height: 12px;
+}
 
 .panelTitle {
   font-size: 16px;
   font-weight: 600;
-  color: rgba(255,255,255,0.92);
+  color: rgba(255, 255, 255, 0.92);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
   white-space: nowrap;
   overflow: hidden;
@@ -227,7 +265,10 @@
 }
 
 /* Spacer to visually balance the close button */
-.headerSpacer { width: 30px; flex-shrink: 0; }
+.headerSpacer {
+  width: 30px;
+  flex-shrink: 0;
+}
 
 .panelBody {
   flex: 1;

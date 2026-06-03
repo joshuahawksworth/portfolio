@@ -10,6 +10,7 @@
 
   /* Prevent Samsung Internet / forced-dark-mode from recolouring anything */
   color-scheme: only light;
+  background: #06090f;
 }
 
 *,
@@ -26,6 +27,7 @@ body {
   height: 100%;
   overflow: hidden;
   min-width: 320px;
+  background: #06090f;
 }
 
 #root {
@@ -60,14 +62,39 @@ button {
 /* provides opacity — elements remain legible without the blur.           */
 @supports not (backdrop-filter: blur(1px)) {
   /* Dock */
-  [class*="panel_"] { background: rgba(20,20,28,0.96) !important; }
+  [class*='panel_'] {
+    background: rgba(20, 20, 28, 0.96) !important;
+  }
+  [class*='dock_'] {
+    background: rgba(24, 28, 40, 0.96) !important;
+  }
+  [class*='bar_'] {
+    background: rgba(18, 20, 30, 0.96) !important;
+  }
   /* App panel header */
-  [class*="panelHeader_"] { background: rgba(34,36,50,0.98) !important; }
+  [class*='panelHeader_'] {
+    background: rgba(34, 36, 50, 0.98) !important;
+  }
   /* Context menu */
-  [class*="ctxMenu_"] { background: rgba(22,24,34,0.98) !important; }
+  [class*='ctxMenu_'] {
+    background: rgba(22, 24, 34, 0.98) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
 }
 
 /* ── Prevent iOS Safari tap flash on interactive elements ─────────────── */
-a, button, [role="button"] {
+a,
+button,
+[role='button'] {
   -webkit-tap-highlight-color: transparent;
 }

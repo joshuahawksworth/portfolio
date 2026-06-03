@@ -21,10 +21,29 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const TABLE = 'snake_leaderboard';
 
+type LeaderboardRow = {
+  name: string;
+  score: number;
+  created_at?: string;
+};
+
+const fallbackStore = globalThis as typeof globalThis & {
+  __snakeLeaderboardFallback?: LeaderboardRow[];
+};
+
+function fallbackRows() {
+  if (!fallbackStore.__snakeLeaderboardFallback) fallbackStore.__snakeLeaderboardFallback = [];
+  return fallbackStore.__snakeLeaderboardFallback;
+}
+
+function topTen(rows: LeaderboardRow[]) {
+  return [...rows].sort((a, b) => b.score - a.score).slice(0, 10);
+}
+
 function supa(path: string, init?: RequestInit) {
-  const url  = process.env.SUPABASE_URL;
-  const key  = process.env.SUPABASE_ANON_KEY;
-  if (!url || !key) throw new Error('Leaderboard not configured (missing SUPABASE_URL / SUPABASE_ANON_KEY)');
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_ANON_KEY;
+  if (!url || !key) return null;
   return fetch(`${url}/rest/v1/${path}`, {
     ...init,
     headers: {
@@ -44,9 +63,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     if (req.method === 'GET') {
-      const r = await supa(`${TABLE}?select=name,score,created_at&order=score.desc&limit=10`);
+      const request = supa(`${TABLE}?select=name,score,created_at&order=score.desc&limit=10`);
+      if (!request) return res.status(200).json(topTen(fallbackRows()));
+
+      const r = await request;
+      if (!r.ok) return res.status(200).json(topTen(fallbackRows()));
+
       const data = await r.json();
-      return res.status(r.status).json(Array.isArray(data) ? data : []);
+      return res.status(200).json(Array.isArray(data) ? data : topTen(fallbackRows()));
     }
 
     if (req.method === 'POST') {
@@ -55,21 +79,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .toUpperCase()
         .replace(/[^A-Z]/g, '')
         .slice(0, 3);
-      if (initials.length < 3) return res.status(400).json({ error: 'Name must be 3 letters (A–Z)' });
+      if (initials.length < 3)
+        return res.status(400).json({ error: 'Name must be 3 letters (A–Z)' });
       if (typeof score !== 'number' || score < 1 || !Number.isInteger(score)) {
         return res.status(400).json({ error: 'Score must be a positive integer' });
       }
-      const r = await supa(TABLE, {
+
+      const localRow = { name: initials, score, created_at: new Date().toISOString() };
+      const request = supa(TABLE, {
         method: 'POST',
         headers: { Prefer: 'return=minimal' },
-        body: JSON.stringify({ name: initials, score }),
+        body: JSON.stringify(localRow),
       });
-      if (r.ok) return res.json({ ok: true });
-      return res.status(500).json({ error: await r.text() });
+
+      if (!request) {
+        fallbackRows().push(localRow);
+        return res.status(200).json({ ok: true, fallback: true });
+      }
+
+      const r = await request;
+      if (!r.ok) fallbackRows().push(localRow);
+      return res.status(200).json({ ok: true, fallback: !r.ok });
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
-  } catch (err) {
-    return res.status(503).json({ error: String(err) });
+  } catch {
+    return res.status(200).json(topTen(fallbackRows()));
   }
 }

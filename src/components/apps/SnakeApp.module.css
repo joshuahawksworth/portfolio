@@ -347,14 +347,6 @@
   font-family: 'Courier New', Courier, monospace;
 }
 
-.boardSubmitted {
-  margin: 0;
-  font-size: 8px;
-  color: #306230;
-  font-family: 'Courier New', Courier, monospace;
-  font-weight: 700;
-}
-
 .boardLoading,
 .boardEmpty {
   margin: 0;
@@ -390,10 +382,6 @@
 .boardRow:first-child {
   background: rgba(15, 56, 15, 0.08);
 }
-.boardRowPending {
-  color: #173f17;
-}
-
 .boardRank {
   width: 20px;
   opacity: 0.6;
@@ -405,11 +393,4 @@
 }
 .boardScore {
   font-weight: 700;
-}
-.boardPending {
-  font-size: 7px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  opacity: 0.65;
-  text-transform: uppercase;
 }

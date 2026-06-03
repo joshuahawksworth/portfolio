@@ -13,7 +13,7 @@
   gap: 20px;
   padding: 24px 24px 20px;
   background: linear-gradient(to bottom, #1a1c28, #1c1e26);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   flex-shrink: 0;
 }
 
@@ -32,7 +32,10 @@
   box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
 }
 
-.intro { flex: 1; min-width: 0; }
+.intro {
+  flex: 1;
+  min-width: 0;
+}
 
 .name {
   font-size: 22px;
@@ -50,9 +53,19 @@
 }
 
 .location {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 13px;
   color: #6b7280;
   margin: 0;
+}
+
+.location svg {
+  width: 13px;
+  height: 13px;
+  fill: currentColor;
+  flex-shrink: 0;
 }
 
 .body {
@@ -83,21 +96,28 @@
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   color: #d1d5db;
   font-size: 13px;
   font-family: inherit;
   cursor: pointer;
-  transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
 }
 
-.actionBtn svg { width: 14px; height: 14px; flex-shrink: 0; }
+.actionBtn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
 
 .actionBtn:hover {
-  background: rgba(59,130,246,0.15);
-  border-color: rgba(59,130,246,0.4);
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.4);
   color: #93c5fd;
 }
 
@@ -106,7 +126,7 @@
   flex-wrap: wrap;
   gap: 8px;
   padding-top: 4px;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   margin-top: auto;
 }
 
@@ -115,18 +135,20 @@
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   color: #9ca3af;
   font-size: 13px;
   font-family: inherit;
   cursor: pointer;
   text-decoration: none;
-  transition: background 150ms ease, color 150ms ease;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
 }
 
 .socialBtn:hover {
-  background: rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.08);
   color: #e5e7eb;
 }

@@ -10,6 +10,8 @@ import FinderApp from '../apps/FinderApp';
 import TrashApp from '../apps/TrashApp';
 import SafariApp from '../apps/SafariApp';
 import SnakeApp from '../apps/SnakeApp';
+import RubberDuckApp from '../apps/RubberDuckApp';
+import KeyboardShortcutsApp from '../apps/KeyboardShortcutsApp';
 import logoSvg from '../../assets/logo.svg';
 import { DesktopProvider, useDesktop } from '../../context/DesktopContext';
 import styles from './MobileDesktop.module.css';
@@ -374,6 +376,8 @@ const APP_COMPONENTS: Record<string, React.ComponentType<{ props?: Record<string
   trash: TrashApp,
   safari: SafariApp,
   snake: SnakeApp,
+  rubberduck: RubberDuckApp,
+  shortcuts: KeyboardShortcutsApp,
 };
 
 const APP_LABELS: Record<string, string> = {

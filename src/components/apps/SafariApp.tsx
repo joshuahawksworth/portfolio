@@ -1,33 +1,31 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import styles from './SafariApp.module.css';
 
-const HOME = 'https://www.google.com';
+const HOME = 'search://home';
+const SEARCH_PREFIX = 'search://query/';
+
+interface SearchResult {
+  title: string;
+  url: string;
+  displayUrl: string;
+  snippet: string;
+}
 
 function proxyUrl(url: string) {
   return `/api/browser-proxy?url=${encodeURIComponent(url)}`;
 }
 
-function googleSearchUrl(query: string) {
-  return `https://www.google.com/search?q=${encodeURIComponent(query.trim())}`;
+function searchEntry(query: string) {
+  return `${SEARCH_PREFIX}${encodeURIComponent(query.trim())}`;
 }
 
-function isGoogleUrl(url: string): boolean {
-  try {
-    const host = new URL(url).hostname.replace(/^www\./, '');
-    return host === 'google.com' || host.endsWith('.google.com');
-  } catch {
-    return false;
-  }
+function isSearchEntry(value: string) {
+  return value === HOME || value.startsWith(SEARCH_PREFIX);
 }
 
-function googleQueryFromUrl(url: string): string | null {
-  try {
-    if (!isGoogleUrl(url)) return null;
-    const q = new URL(url).searchParams.get('q')?.trim();
-    return q || null;
-  } catch {
-    return null;
-  }
+function searchQueryFromEntry(value: string): string {
+  if (!value.startsWith(SEARCH_PREFIX)) return '';
+  return decodeURIComponent(value.slice(SEARCH_PREFIX.length));
 }
 
 function isSearchQuery(input: string): boolean {
@@ -39,7 +37,14 @@ function isSearchQuery(input: string): boolean {
   return true;
 }
 
-function GoogleHome({ onSearch }: { onSearch: (query: string) => void }) {
+async function fetchSearch(query: string): Promise<SearchResult[]> {
+  const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+  if (!response.ok) return [];
+  const data = (await response.json()) as { results?: SearchResult[] };
+  return Array.isArray(data.results) ? data.results : [];
+}
+
+function SearchHome({ onSearch }: { onSearch: (query: string) => void }) {
   const [query, setQuery] = useState('');
 
   function handleSubmit(e: React.FormEvent) {
@@ -49,8 +54,8 @@ function GoogleHome({ onSearch }: { onSearch: (query: string) => void }) {
   }
 
   return (
-    <div className={styles.googleHome}>
-      <div className={styles.googleLogo} aria-label="Google">
+    <div className={styles.searchHome}>
+      <div className={styles.searchLogo} aria-label="Google Search">
         <span style={{ color: '#4285f4' }}>G</span>
         <span style={{ color: '#ea4335' }}>o</span>
         <span style={{ color: '#fbbc05' }}>o</span>
@@ -58,22 +63,81 @@ function GoogleHome({ onSearch }: { onSearch: (query: string) => void }) {
         <span style={{ color: '#34a853' }}>l</span>
         <span style={{ color: '#ea4335' }}>e</span>
       </div>
-      <form className={styles.googleSearchForm} onSubmit={handleSubmit}>
+      <form className={styles.searchHomeForm} onSubmit={handleSubmit}>
         <input
-          className={styles.googleSearchInput}
+          className={styles.searchHomeInput}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search Google"
           autoFocus
         />
-        <button className={styles.googleSearchButton} type="submit">
-          Google Search
+        <button className={styles.searchHomeButton} type="submit">
+          Search
         </button>
       </form>
-      <p className={styles.googleHint}>
-        Google blocks embedded result pages, so searches open through a clean external-results
-        handoff.
-      </p>
+      <p className={styles.searchHomeHint}>Type a search or enter a full website address above.</p>
+    </div>
+  );
+}
+
+function SearchResults({ query, onOpen }: { query: string; onOpen: (url: string) => void }) {
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading');
+
+  useEffect(() => {
+    let cancelled = false;
+    setStatus('loading');
+    setResults([]);
+
+    fetchSearch(query)
+      .then((nextResults) => {
+        if (cancelled) return;
+        setResults(nextResults);
+        setStatus('done');
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setStatus('error');
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [query]);
+
+  return (
+    <div className={styles.resultsPage}>
+      <div className={styles.resultsHeader}>
+        <div className={styles.resultsLogo} aria-hidden="true">
+          G
+        </div>
+        <div>
+          <h2>Search results</h2>
+          <p>Results for "{query}"</p>
+        </div>
+      </div>
+
+      {status === 'loading' && <p className={styles.resultsStatus}>Searching the web...</p>}
+      {status === 'error' && (
+        <p className={styles.resultsStatus}>Search failed. Try a different query or enter a URL.</p>
+      )}
+      {status === 'done' && results.length === 0 && (
+        <p className={styles.resultsStatus}>No results found. Try a more specific search.</p>
+      )}
+
+      {results.length > 0 && (
+        <ol className={styles.resultList}>
+          {results.map((result) => (
+            <li key={result.url} className={styles.resultItem}>
+              <button className={styles.resultTitle} onClick={() => onOpen(result.url)}>
+                {result.title}
+              </button>
+              <div className={styles.resultUrl}>{result.displayUrl}</div>
+              {result.snippet && <p className={styles.resultSnippet}>{result.snippet}</p>}
+            </li>
+          ))}
+        </ol>
+      )}
     </div>
   );
 }
@@ -97,24 +161,44 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
   }, [idx]);
 
   const currentUrl = stack[idx];
-  const showingGoogleFallback = isGoogleUrl(currentUrl);
-  const googleQuery = googleQueryFromUrl(currentUrl);
+  const showingSearch = isSearchEntry(currentUrl);
+  const searchQuery = searchQueryFromEntry(currentUrl);
+  const externalUrl = showingSearch
+    ? searchQuery
+      ? `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`
+      : 'https://www.google.com'
+    : currentUrl;
 
   useEffect(() => {
-    setInputUrl(currentUrl);
-  }, [currentUrl]);
+    setInputUrl(showingSearch ? searchQuery : currentUrl);
+  }, [currentUrl, searchQuery, showingSearch]);
   useEffect(() => {
-    if (showingGoogleFallback) setLoading(false);
-  }, [showingGoogleFallback, currentUrl]);
+    if (showingSearch) setLoading(false);
+  }, [showingSearch, currentUrl]);
 
-  const navigate = useCallback((raw: string) => {
-    let url = raw.trim();
-    if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+  const pushStack = useCallback((value: string) => {
     const cur = idxRef.current;
-    setStack((prev) => [...prev.slice(0, cur + 1), url]);
+    setStack((prev) => [...prev.slice(0, cur + 1), value]);
     setIdx(cur + 1);
-    setLoading(true);
   }, []);
+
+  const navigate = useCallback(
+    (raw: string) => {
+      let url = raw.trim();
+      if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+      pushStack(url);
+      setLoading(true);
+    },
+    [pushStack]
+  );
+
+  const search = useCallback(
+    (query: string) => {
+      pushStack(searchEntry(query));
+      setLoading(false);
+    },
+    [pushStack]
+  );
 
   // Register once; only handle messages from THIS instance's iframe
   useEffect(() => {
@@ -150,7 +234,7 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
     e.preventDefault();
     const input = inputUrl.trim();
     if (isSearchQuery(input)) {
-      navigate(googleSearchUrl(input));
+      search(input);
     } else {
       navigate(input);
     }
@@ -237,7 +321,7 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
         </form>
 
         <a
-          href={currentUrl}
+          href={externalUrl}
           target="_blank"
           rel="noopener noreferrer"
           className={styles.newTabBtn}
@@ -260,55 +344,17 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
         </a>
       </div>
 
-      {loading && !showingGoogleFallback && (
+      {loading && !showingSearch && (
         <div className={styles.loadingBar}>
           <div className={styles.loadingFill} />
         </div>
       )}
 
       <div className={styles.viewport}>
-        {showingGoogleFallback && googleQuery ? (
-          <div className={styles.searchNotice}>
-            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-              <circle
-                cx="24"
-                cy="24"
-                r="20"
-                fill="rgba(66,133,244,0.15)"
-                stroke="rgba(66,133,244,0.4)"
-                strokeWidth="1.5"
-              />
-              <path
-                d="M31 31L38 38"
-                stroke="rgba(66,133,244,0.6)"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-              <circle
-                cx="22"
-                cy="22"
-                r="9"
-                fill="none"
-                stroke="rgba(66,133,244,0.6)"
-                strokeWidth="2.5"
-              />
-            </svg>
-            <div className={styles.searchNoticeTitle}>Google results are ready</div>
-            <div className={styles.searchNoticeQuery}>"{googleQuery}"</div>
-            <p className={styles.searchNoticeHint}>
-              Google blocks embedded result pages, so open the results in a normal browser tab.
-            </p>
-            <a
-              href={googleSearchUrl(googleQuery)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.searchNoticeBtn}
-            >
-              Open results in new tab
-            </a>
-          </div>
-        ) : showingGoogleFallback ? (
-          <GoogleHome onSearch={(query) => navigate(googleSearchUrl(query))} />
+        {showingSearch && searchQuery ? (
+          <SearchResults query={searchQuery} onOpen={navigate} />
+        ) : showingSearch ? (
+          <SearchHome onSearch={search} />
         ) : (
           <iframe
             ref={iframeRef}

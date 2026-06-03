@@ -115,16 +115,6 @@
   white-space: nowrap;
 }
 
-.menuNotice {
-  max-width: min(440px, 42vw);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: rgba(255, 255, 255, 0.76);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
-  font-size: 12px;
-}
-
 .right {
   display: flex;
   align-items: center;
@@ -146,8 +136,7 @@
 }
 
 @media (max-width: 600px) {
-  .menuWrap,
-  .menuNotice {
+  .menuWrap {
     display: none;
   }
   .appName {

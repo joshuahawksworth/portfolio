@@ -1,5 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { DesktopProvider, useDesktop, WindowInstance, DesktopFolderItem } from '../../context/DesktopContext';
+import {
+  DesktopProvider,
+  useDesktop,
+  WindowInstance,
+  DesktopFolderItem,
+} from '../../context/DesktopContext';
 import MenuBar from '../MenuBar/MenuBar';
 import Dock from '../Dock/Dock';
 import Window from '../Window/Window';
@@ -14,6 +19,8 @@ import TrashApp from '../apps/TrashApp';
 import SafariApp from '../apps/SafariApp';
 import DoomApp from '../apps/DoomApp';
 import SnakeApp from '../apps/SnakeApp';
+import RubberDuckApp from '../apps/RubberDuckApp';
+import KeyboardShortcutsApp from '../apps/KeyboardShortcutsApp';
 import TextEditorApp from '../apps/TextEditorApp';
 import ImageViewerApp from '../apps/ImageViewerApp';
 import { jobsData } from '../../data/experienceData';
@@ -31,7 +38,9 @@ const APP_COMPONENTS: Record<string, React.ComponentType<{ props?: Record<string
   safari: SafariApp,
   githubapp: SafariApp,
   doom: DoomApp,
-  texteditor:  TextEditorApp,
+  rubberduck: RubberDuckApp,
+  shortcuts: KeyboardShortcutsApp,
+  texteditor: TextEditorApp,
   imageviewer: ImageViewerApp,
   // snake is rendered by NokiaWindow — NOT in this map
 };
@@ -239,7 +248,7 @@ interface DesktopItem {
   jobId?: string;
   appId?: string;
   content?: string;
-  dataUrl?: string;  // base64 data URL for uploaded images
+  dataUrl?: string; // base64 data URL for uploaded images
 }
 
 interface CtxMenu {
@@ -306,12 +315,12 @@ const BOUNCE_MS = 1850; // matches 1800ms animation + 50ms buffer
 // `taken` is a snapshot of current iconPos — mutate a local copy to reserve
 // cells for multiple items being placed in the same batch.
 function findEmptyGridCell(taken: Record<string, IconPos>): IconPos {
-  const startX  = 20;
-  const startY  = 54;
-  const colW    = ICON_W + ICON_GAP + 4;
-  const rowH    = ICON_H + ICON_GAP;
+  const startX = 20;
+  const startY = 54;
+  const colW = ICON_W + ICON_GAP + 4;
+  const rowH = ICON_H + ICON_GAP;
   const maxRows = Math.max(1, Math.floor((window.innerHeight - startY - 80) / rowH));
-  const maxCols = Math.max(1, Math.floor((window.innerWidth  - startX) / colW));
+  const maxCols = Math.max(1, Math.floor((window.innerWidth - startX) / colW));
 
   const occupied = Object.values(taken);
 
@@ -320,7 +329,7 @@ function findEmptyGridCell(taken: Record<string, IconPos>): IconPos {
       const gx = startX + col * colW;
       const gy = startY + row * rowH;
       const hit = occupied.some(
-        p => Math.abs(p.x - gx) < ICON_W * 0.7 && Math.abs(p.y - gy) < ICON_H * 0.7
+        (p) => Math.abs(p.x - gx) < ICON_W * 0.7 && Math.abs(p.y - gy) < ICON_H * 0.7
       );
       if (!hit) return { x: gx, y: gy };
     }
@@ -391,17 +400,39 @@ function ImageThumbIcon({ dataUrl, name }: { dataUrl?: string; name: string }) {
       <img
         src={dataUrl}
         alt={name}
-        style={{ width: 48, height: 48, borderRadius: 6, objectFit: 'cover', display: 'block', boxShadow: '0 2px 8px rgba(0,0,0,0.4)' }}
+        style={{
+          width: 48,
+          height: 48,
+          borderRadius: 6,
+          objectFit: 'cover',
+          display: 'block',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+        }}
       />
     );
   }
   // Fallback generic image icon
   return (
     <svg viewBox="0 0 48 48" fill="none" width="48" height="48">
-      <rect x="2" y="4" width="44" height="40" rx="5" fill="#1e3a4a" stroke="#06b6d4" strokeWidth="1.5"/>
-      <circle cx="16" cy="16" r="4" fill="#06b6d4" opacity="0.7"/>
-      <path d="M4 34 L14 22 L22 30 L32 18 L44 34Z" fill="#06b6d4" opacity="0.35"/>
-      <path d="M4 34 L14 22 L22 30 L32 18 L44 34" stroke="#06b6d4" strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
+      <rect
+        x="2"
+        y="4"
+        width="44"
+        height="40"
+        rx="5"
+        fill="#1e3a4a"
+        stroke="#06b6d4"
+        strokeWidth="1.5"
+      />
+      <circle cx="16" cy="16" r="4" fill="#06b6d4" opacity="0.7" />
+      <path d="M4 34 L14 22 L22 30 L32 18 L44 34Z" fill="#06b6d4" opacity="0.35" />
+      <path
+        d="M4 34 L14 22 L22 30 L32 18 L44 34"
+        stroke="#06b6d4"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+        fill="none"
+      />
     </svg>
   );
 }
@@ -593,11 +624,31 @@ function NokiaIcon() {
       <rect x="30" y="13" width="2" height="2" fill="#88ff44" />
       {/* Nokia logo — pixel-art rects, no font dependency */}
       <g fill="#5a78a0" opacity="0.9">
-        {/* N */}<rect x="11" y="29" width="1" height="4"/><rect x="12" y="30" width="1" height="1"/><rect x="13" y="31" width="1" height="1"/><rect x="14" y="29" width="1" height="4"/>
-        {/* O */}<rect x="16" y="29" width="3" height="1"/><rect x="16" y="32" width="3" height="1"/><rect x="16" y="30" width="1" height="2"/><rect x="18" y="30" width="1" height="2"/>
-        {/* K */}<rect x="20" y="29" width="1" height="4"/><rect x="21" y="30" width="1" height="1"/><rect x="22" y="29" width="1" height="1"/><rect x="22" y="31" width="1" height="1"/><rect x="23" y="32" width="1" height="1"/>
-        {/* I */}<rect x="25" y="29" width="3" height="1"/><rect x="26" y="30" width="1" height="2"/><rect x="25" y="32" width="3" height="1"/>
-        {/* A */}<rect x="29" y="30" width="3" height="1"/><rect x="29" y="29" width="1" height="4"/><rect x="31" y="29" width="1" height="4"/><rect x="30" y="31" width="1" height="1"/>
+        {/* N */}
+        <rect x="11" y="29" width="1" height="4" />
+        <rect x="12" y="30" width="1" height="1" />
+        <rect x="13" y="31" width="1" height="1" />
+        <rect x="14" y="29" width="1" height="4" />
+        {/* O */}
+        <rect x="16" y="29" width="3" height="1" />
+        <rect x="16" y="32" width="3" height="1" />
+        <rect x="16" y="30" width="1" height="2" />
+        <rect x="18" y="30" width="1" height="2" />
+        {/* K */}
+        <rect x="20" y="29" width="1" height="4" />
+        <rect x="21" y="30" width="1" height="1" />
+        <rect x="22" y="29" width="1" height="1" />
+        <rect x="22" y="31" width="1" height="1" />
+        <rect x="23" y="32" width="1" height="1" />
+        {/* I */}
+        <rect x="25" y="29" width="3" height="1" />
+        <rect x="26" y="30" width="1" height="2" />
+        <rect x="25" y="32" width="3" height="1" />
+        {/* A */}
+        <rect x="29" y="30" width="3" height="1" />
+        <rect x="29" y="29" width="1" height="4" />
+        <rect x="31" y="29" width="1" height="4" />
+        <rect x="30" y="31" width="1" height="1" />
       </g>
       {/* Navigation key (oval d-pad) */}
       <ellipse cx="24" cy="37.5" rx="5.5" ry="3.5" fill="#1a2535" />
@@ -924,11 +975,14 @@ function DesktopSurface() {
       const type: DesktopItem['type'] = uf.isImage ? 'image' : 'file';
       const pos = findEmptyGridCell(claimed);
       claimed[uf.id] = pos;
-      setItems(prev => {
-        if (prev.some(i => i.id === uf.id)) return prev;
-        return [...prev, { id: uf.id, type, label: uf.name, content: uf.content, dataUrl: uf.dataUrl }];
+      setItems((prev) => {
+        if (prev.some((i) => i.id === uf.id)) return prev;
+        return [
+          ...prev,
+          { id: uf.id, type, label: uf.name, content: uf.content, dataUrl: uf.dataUrl },
+        ];
       });
-      setIconPos(prev => ({ ...prev, [uf.id]: pos }));
+      setIconPos((prev) => ({ ...prev, [uf.id]: pos }));
       ackUploadedFile(uf.id);
     }
   }, [uploadedFileQueue, ackUploadedFile]);
@@ -939,20 +993,31 @@ function DesktopSurface() {
     const claimed = { ...iconPosRef.current };
     for (const fi of pendingFromFolder) {
       // Remove from local folderItems so the sync doesn't restore it back to context
-      setFolderItems(prev => {
+      setFolderItems((prev) => {
         const next = { ...prev };
         for (const folderId in next) {
-          next[folderId] = next[folderId].filter(item => item.id !== fi.id);
+          next[folderId] = next[folderId].filter((item) => item.id !== fi.id);
         }
         return next;
       });
       const pos = findEmptyGridCell(claimed);
       claimed[fi.id] = pos;
-      setItems(prev => {
-        if (prev.some(i => i.id === fi.id)) return prev;
-        return [...prev, { id: fi.id, type: fi.type, label: fi.label, jobId: fi.jobId, appId: fi.appId, content: fi.content, dataUrl: fi.dataUrl }];
+      setItems((prev) => {
+        if (prev.some((i) => i.id === fi.id)) return prev;
+        return [
+          ...prev,
+          {
+            id: fi.id,
+            type: fi.type,
+            label: fi.label,
+            jobId: fi.jobId,
+            appId: fi.appId,
+            content: fi.content,
+            dataUrl: fi.dataUrl,
+          },
+        ];
       });
-      setIconPos(prev => ({ ...prev, [fi.id]: pos }));
+      setIconPos((prev) => ({ ...prev, [fi.id]: pos }));
       ackFromFolder(fi.id);
     }
   }, [pendingFromFolder, ackFromFolder]);
@@ -962,16 +1027,15 @@ function DesktopSurface() {
     if (restoredItemQueue.length === 0) return;
     const claimed = { ...iconPosRef.current };
     for (const item of restoredItemQueue) {
-      const type: DesktopItem['type'] = item.dataUrl
-        ? 'image'
-        : item.isJoke
-          ? 'file'
-          : 'folder';
-      const pos  = findEmptyGridCell(claimed);
+      const type: DesktopItem['type'] = item.dataUrl ? 'image' : item.isJoke ? 'file' : 'folder';
+      const pos = findEmptyGridCell(claimed);
       claimed[item.id] = pos;
       setItems((prev) => {
         if (prev.some((i) => i.id === item.id)) return prev;
-        return [...prev, { id: item.id, type, label: item.name, content: item.content, dataUrl: item.dataUrl }];
+        return [
+          ...prev,
+          { id: item.id, type, label: item.name, content: item.content, dataUrl: item.dataUrl },
+        ];
       });
       setIconPos((prev) => ({ ...prev, [item.id]: pos }));
       ackRestoredItem(item.id);
@@ -990,7 +1054,9 @@ function DesktopSurface() {
     try {
       const { folderId, itemId } = JSON.parse(raw) as { folderId: string; itemId: string };
       if (folderId && itemId) moveFromFolderToDesktop(folderId, itemId);
-    } catch { /* bad payload */ }
+    } catch {
+      /* bad payload */
+    }
   }
 
   // ── Open with bounce animation (delay window until bounce done) ────────
@@ -1339,7 +1405,7 @@ function DesktopSurface() {
             className={[
               styles.icon,
               selected ? styles.iconSelected : '',
-              selected ? styles.iconFocused  : '',
+              selected ? styles.iconFocused : '',
               cleaning ? styles.iconCleaning : '',
               isDraggingMe ? styles.iconDragging : '',
               isFolderTarget ? styles.iconFolderTarget : '',
@@ -1352,12 +1418,12 @@ function DesktopSurface() {
             onMouseEnter={() => {
               if (item.id !== 'trickster') return;
               // Compute every valid grid cell, exclude occupied ones, pick randomly
-              const startX  = 20;
-              const startY  = 54;
-              const colW    = ICON_W + ICON_GAP + 4;
-              const rowH    = ICON_H + ICON_GAP;
+              const startX = 20;
+              const startY = 54;
+              const colW = ICON_W + ICON_GAP + 4;
+              const rowH = ICON_H + ICON_GAP;
               const maxRows = Math.max(1, Math.floor((window.innerHeight - startY - 80) / rowH));
-              const maxCols = Math.max(1, Math.floor((window.innerWidth  - startX)       / colW));
+              const maxCols = Math.max(1, Math.floor((window.innerWidth - startX) / colW));
 
               // Positions of all icons except the trickster itself
               const occupied = Object.entries(iconPosRef.current)
@@ -1371,7 +1437,7 @@ function DesktopSurface() {
                   const gy = startY + row * rowH;
                   // Skip if another icon is already close to this grid cell
                   const taken = occupied.some(
-                    p => Math.abs(p.x - gx) < ICON_W * 0.7 && Math.abs(p.y - gy) < ICON_H * 0.7
+                    (p) => Math.abs(p.x - gx) < ICON_W * 0.7 && Math.abs(p.y - gy) < ICON_H * 0.7
                   );
                   if (!taken) empty.push({ x: gx, y: gy });
                 }
@@ -1379,7 +1445,7 @@ function DesktopSurface() {
 
               if (empty.length === 0) return;
               const pick = empty[Math.floor(Math.random() * empty.length)];
-              setIconPos(prev => ({ ...prev, trickster: pick }));
+              setIconPos((prev) => ({ ...prev, trickster: pick }));
             }}
             onDoubleClick={() => {
               if (renaming) return;

@@ -170,7 +170,6 @@ export default function SnakeApp({
   // Leaderboard
   const [board, setBoard] = useState<LeaderboardEntry[]>([]);
   const [boardStatus, setBoardStatus] = useState<'idle' | 'loading' | 'syncing' | 'done'>('idle');
-  const [submitOk, setSubmitOk] = useState<boolean | null>(null);
   const pendingEntriesRef = useRef<LeaderboardEntry[]>([]);
 
   function syncPhase(p: Phase) {
@@ -199,7 +198,6 @@ export default function SnakeApp({
     const pendingEntry: LeaderboardEntry = { name, score: submittedScore, pending: true };
 
     pendingEntriesRef.current = [...pendingEntriesRef.current, pendingEntry];
-    setSubmitOk(null);
     setBoardStatus('syncing');
     setBoard((entries) => mergeBoard(entries, pendingEntriesRef.current));
     syncPhase('board');
@@ -221,7 +219,6 @@ export default function SnakeApp({
 
       setBoard(mergeBoard(entries, pendingEntriesRef.current));
       setBoardStatus('done');
-      if (phaseRef.current === 'board') setSubmitOk(ok);
     })();
   }, []);
 
@@ -279,7 +276,6 @@ export default function SnakeApp({
     cursorRef.current = 0;
     setNameChars(['A', 'A', 'A']);
     setCursor(0);
-    setSubmitOk(null);
     setBoard([]);
     setBoardStatus('idle');
     syncPhase('playing');
@@ -522,13 +518,6 @@ export default function SnakeApp({
           <div className={styles.overlay}>
             <div className={styles.boardOverlay}>
               <p className={styles.boardTitle}>🏆 TOP SCORES</p>
-              {submitOk === true && <p className={styles.boardSubmitted}>Score saved!</p>}
-              {submitOk === false && (
-                <p className={styles.boardSubmitted}>Saved locally - still queued.</p>
-              )}
-              {boardStatus === 'syncing' && (
-                <p className={styles.boardLoading}>Saving quietly in the background…</p>
-              )}
               {boardStatus === 'loading' && board.length === 0 && (
                 <p className={styles.boardLoading}>Loading…</p>
               )}
@@ -540,12 +529,11 @@ export default function SnakeApp({
                   {board.map((e, i) => (
                     <li
                       key={`${e.name}-${e.score}-${i}-${e.pending ? 'pending' : 'saved'}`}
-                      className={`${styles.boardRow} ${i === 0 ? styles.boardRowFirst : ''} ${e.pending ? styles.boardRowPending : ''}`}
+                      className={`${styles.boardRow} ${i === 0 ? styles.boardRowFirst : ''}`}
                     >
                       <span className={styles.boardRank}>#{i + 1}</span>
                       <span className={styles.boardName}>{e.name}</span>
                       <span className={styles.boardScore}>{e.score}</span>
-                      {e.pending && <span className={styles.boardPending}>queued</span>}
                     </li>
                   ))}
                 </ol>

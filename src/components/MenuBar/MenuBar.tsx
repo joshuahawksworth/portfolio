@@ -26,9 +26,7 @@ export default function MenuBar() {
   const focusedWindow = windows.find((w) => w.id === focusedId);
   const appName = focusedWindow?.title ?? 'Finder';
   const [activeMenu, setActiveMenu] = useState<MenuName | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
   const barRef = useRef<HTMLDivElement>(null);
-  const noticeTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     function closeMenus(e: PointerEvent) {
@@ -38,18 +36,6 @@ export default function MenuBar() {
     document.addEventListener('pointerdown', closeMenus);
     return () => document.removeEventListener('pointerdown', closeMenus);
   }, []);
-
-  useEffect(() => {
-    return () => {
-      if (noticeTimerRef.current) window.clearTimeout(noticeTimerRef.current);
-    };
-  }, []);
-
-  function showNotice(message: string) {
-    setNotice(message);
-    if (noticeTimerRef.current) window.clearTimeout(noticeTimerRef.current);
-    noticeTimerRef.current = window.setTimeout(() => setNotice(null), 3600);
-  }
 
   function runAction(item: MenuItem) {
     if (item.disabled) return;
@@ -65,21 +51,18 @@ export default function MenuBar() {
         shortcut: 'Cmd+N',
         action: () => {
           openApp('finder', { menuOpenedAt: Date.now() });
-          showNotice('Finder opened a fresh window.');
         },
       },
       {
         label: 'Open Google Chrome',
         action: () => {
           openApp('safari');
-          showNotice('Chrome is ready. Search results open safely outside the frame.');
         },
       },
       {
         label: 'Play Snake',
         action: () => {
           openApp('snake');
-          showNotice('Snake loaded. Quick turns are buffered now.');
         },
       },
     ],
@@ -91,19 +74,17 @@ export default function MenuBar() {
         action: () => {
           if (!focusedId) return;
           toggleMaximize(focusedId);
-          showNotice('Window zoom toggled.');
         },
       },
       {
         label: 'Show Skills',
         action: () => {
           openApp('skills');
-          showNotice('Skills panel opened.');
         },
       },
       {
         label: 'Enable Retina Pixel Mode',
-        action: () => showNotice('Retina Pixel Mode: placebo enabled. Pixels feel 12% sharper.'),
+        action: () => undefined,
       },
     ],
     Window: [
@@ -114,7 +95,6 @@ export default function MenuBar() {
         action: () => {
           if (!focusedId) return;
           minimizeWindow(focusedId);
-          showNotice('Window minimized.');
         },
       },
       {
@@ -124,32 +104,32 @@ export default function MenuBar() {
         action: () => {
           if (!focusedId) return;
           closeWindow(focusedId);
-          showNotice('Window closed.');
         },
       },
       {
         label: 'Bring About Josh Forward',
         action: () => {
           openApp('about');
-          showNotice('About Josh brought forward.');
         },
       },
     ],
     Help: [
       {
         label: 'Keyboard Shortcuts',
-        action: () =>
-          showNotice('Snake: arrows/WASD, Enter to start or retry. Menus: click and explore.'),
+        action: () => {
+          openApp('shortcuts');
+        },
       },
       {
         label: 'Ask The Rubber Duck',
-        action: () => showNotice('The duck says: have you tried explaining it out loud?'),
+        action: () => {
+          openApp('rubberduck');
+        },
       },
       {
         label: 'About This Portfolio',
         action: () => {
           openApp('about');
-          showNotice('This portfolio is definitely not running System 7. Probably.');
         },
       },
     ],
@@ -207,7 +187,6 @@ export default function MenuBar() {
             )}
           </div>
         ))}
-        {notice && <span className={styles.menuNotice}>{notice}</span>}
       </div>
       <div className={styles.right}>
         <svg className={styles.statusIcon} viewBox="0 0 16 16" fill="currentColor">
