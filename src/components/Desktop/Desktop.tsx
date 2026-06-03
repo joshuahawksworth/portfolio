@@ -187,7 +187,7 @@ function SpaceImpactMini({
         {phase !== 'playing' && (
           <div className={styles.spaceOverlay}>
             <strong>{phase === 'hit' ? 'SIGNAL LOST' : 'CODE 3310'}</strong>
-            <span>{phase === 'hit' ? 'OK to retry' : 'OK to start'}</span>
+            <span>{phase === 'hit' ? 'Center key to retry' : 'Center key to start'}</span>
           </div>
         )}
       </div>
@@ -201,12 +201,17 @@ function NokiaWindow({ win }: { win: WindowInstance }) {
   const posRef = useRef({ x: win.x, y: win.y });
   const [pos, setPos] = useState({ x: win.x, y: win.y });
   const [phoneMode, setPhoneMode] = useState<'snake' | 'space'>('snake');
+  const phoneModeRef = useRef(phoneMode);
 
   const pushDirRef = useRef<((d: 'U' | 'D' | 'L' | 'R') => void) | null>(null);
   const startGameRef = useRef<(() => void) | null>(null);
   const spacePushDirRef = useRef<((d: 'U' | 'D' | 'L' | 'R') => void) | null>(null);
   const spaceFireRef = useRef<(() => void) | null>(null);
   const phoneCodeRef = useRef('');
+
+  useEffect(() => {
+    phoneModeRef.current = phoneMode;
+  }, [phoneMode]);
 
   const handlePushDir = useCallback((cb: (d: 'U' | 'D' | 'L' | 'R') => void) => {
     pushDirRef.current = cb;
@@ -222,23 +227,34 @@ function NokiaWindow({ win }: { win: WindowInstance }) {
   }, []);
 
   function pushPhoneDir(d: 'U' | 'D' | 'L' | 'R') {
-    if (phoneMode === 'space') spacePushDirRef.current?.(d);
+    if (phoneModeRef.current === 'space') spacePushDirRef.current?.(d);
     else pushDirRef.current?.(d);
   }
 
   function pressPhoneOk() {
-    if (phoneMode === 'space') spaceFireRef.current?.();
+    if (phoneModeRef.current === 'space') spaceFireRef.current?.();
     else startGameRef.current?.();
   }
 
   function pressPhoneKey(k: string) {
     phoneCodeRef.current = `${phoneCodeRef.current}${k}`.slice(-8);
     if (phoneCodeRef.current.endsWith('3310')) {
+      phoneModeRef.current = 'space';
       setPhoneMode('space');
       phoneCodeRef.current = '';
     }
-    if (k === '*') setPhoneMode('snake');
-    if (phoneMode === 'space' && k === '#') spaceFireRef.current?.();
+    if (k === '*') {
+      phoneModeRef.current = 'snake';
+      setPhoneMode('snake');
+    }
+    if (phoneModeRef.current === 'space' && k === '#') spaceFireRef.current?.();
+  }
+
+  function getPhoneKeyboardKey(e: KeyboardEvent) {
+    if (/^[0-9*#]$/.test(e.key)) return e.key;
+    if (/^Numpad[0-9]$/.test(e.code)) return e.code.replace('Numpad', '');
+    if (e.code === 'NumpadMultiply') return '*';
+    return null;
   }
 
   // Keyboard: forward to game
@@ -264,14 +280,16 @@ function NokiaWindow({ win }: { win: WindowInstance }) {
         pressPhoneOk();
         return;
       }
+      const phoneKey = getPhoneKeyboardKey(e);
+      if (phoneKey) {
+        e.preventDefault();
+        pressPhoneKey(phoneKey);
+        return;
+      }
       const d = MAP[e.key];
       if (d) {
         e.preventDefault();
         pushPhoneDir(d);
-      }
-      if (/^[0-9*#]$/.test(e.key)) {
-        e.preventDefault();
-        pressPhoneKey(e.key);
       }
     }
     window.addEventListener('keydown', onKey);

@@ -187,6 +187,22 @@ const JOKE_TRASH: TrashedItem[] = [
     isJoke: true,
     content: `# TODO: Do This Later\n\nCreated: January 2024\n\n## High Priority\n- [ ] Refactor auth module\n- [ ] Write tests (lol)\n- [ ] Update dependencies\n\n## Medium Priority\n- [ ] Do the thing from last sprint\n- [ ] Reply to that Slack message\n\n## Low Priority (realistically: never)\n- [ ] Document everything\n- [ ] Remove all console.logs\n- [ ] Actually learn Docker properly\n\n---\n*Est. completion: Q3 2024*\n*Actual completion: ¯\\_(ツ)_/¯*`,
   },
+  {
+    id: 'secret-game-codes',
+    name: 'secret-codes.txt',
+    date: '2026',
+    isJoke: true,
+    content: `Things I definitely meant to delete:
+
+- Terminal: run "spaceinvaders"
+- Nokia phone: enter "3310" on the keypad
+
+Space Impact controls:
+- D-pad / WASD / arrows to move
+- Center key / Enter to start or fire
+- # also fires
+- * returns to Snake`,
+  },
 ];
 
 interface DesktopCtx {
