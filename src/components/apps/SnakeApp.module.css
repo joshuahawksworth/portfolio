@@ -135,3 +135,139 @@
 }
 .playBtn:hover  { background: #0f380f; }
 .playBtn:active { transform: scale(0.97); }
+
+/* ── Shared overlay inner wrapper ── */
+.overlayInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Scores button on idle screen ── */
+.boardBtn {
+  background: transparent;
+  color: #306230;
+  border: 1px solid #306230;
+  padding: 4px 12px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: 'Courier New', Courier, monospace;
+  transition: background 100ms, color 100ms;
+}
+.boardBtn:hover { background: #306230; color: #9bbc0f; }
+
+/* ── 3-letter name entry ── */
+.enterNameLabel {
+  margin: 0;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #0f380f;
+  font-family: 'Courier New', Courier, monospace;
+  text-transform: uppercase;
+}
+
+.nameEntry {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.nameChar {
+  width: 28px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #306230;
+  color: #9bbc0f;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 18px;
+  font-weight: 800;
+  border-radius: 3px;
+  border: 2px solid transparent;
+  transition: border-color 100ms, background 100ms;
+}
+
+.nameCharActive {
+  border-color: #0f380f;
+  background: #0f380f;
+  color: #9bbc0f;
+}
+
+.nameHint {
+  margin: 0;
+  font-size: 7px;
+  color: #306230;
+  font-family: 'Courier New', Courier, monospace;
+  letter-spacing: 0.04em;
+  opacity: 0.8;
+}
+
+/* ── Leaderboard overlay ── */
+.boardOverlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  gap: 4px;
+}
+
+.boardTitle {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #0f380f;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.boardSubmitted {
+  margin: 0;
+  font-size: 8px;
+  color: #306230;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 700;
+}
+
+.boardLoading,
+.boardEmpty {
+  margin: 0;
+  font-size: 9px;
+  color: #306230;
+  font-family: 'Courier New', Courier, monospace;
+  opacity: 0.75;
+}
+
+.boardList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-height: 160px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.boardList::-webkit-scrollbar { display: none; }
+
+.boardRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 9px;
+  color: #0f380f;
+  border-bottom: 1px solid rgba(15,56,15,0.15);
+}
+.boardRow:first-child { background: rgba(15,56,15,0.08); }
+
+.boardRank  { width: 20px; opacity: 0.6; }
+.boardName  { flex: 1; font-weight: 800; letter-spacing: 0.12em; }
+.boardScore { font-weight: 700; }

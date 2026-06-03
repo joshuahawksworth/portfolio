@@ -216,6 +216,47 @@ const I = {
       </text>
     </svg>
   ),
+  imageviewer: (
+    // Preview-inspired icon — teal/blue gradient with landscape
+    <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
+      <defs>
+        <linearGradient id="ivbg" x1="0" y1="0" x2="0" y2="44" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#5ac8fa"/>
+          <stop offset="1" stopColor="#007aff"/>
+        </linearGradient>
+        <linearGradient id="ivgl" x1="0" y1="0" x2="0" y2="22" gradientUnits="userSpaceOnUse">
+          <stop stopColor="rgba(255,255,255,0.22)"/>
+          <stop offset="1" stopColor="rgba(255,255,255,0)"/>
+        </linearGradient>
+      </defs>
+      <rect width="44" height="44" rx="11" fill="url(#ivbg)"/>
+      <rect width="44" height="22" rx="11" fill="url(#ivgl)"/>
+      {/* Sky */}
+      <rect x="5" y="10" width="34" height="24" rx="3" fill="rgba(0,40,100,0.35)"/>
+      {/* Sun */}
+      <circle cx="32" cy="17" r="4" fill="#ffd60a" opacity="0.9"/>
+      {/* Mountains */}
+      <path d="M5 34 L14 20 L22 30 L30 18 L39 34Z" fill="rgba(255,255,255,0.18)"/>
+      <path d="M5 34 L14 20 L22 30 L30 18 L39 34" stroke="rgba(255,255,255,0.5)" strokeWidth="1" strokeLinejoin="round" fill="none"/>
+      {/* Ground */}
+      <rect x="5" y="32" width="34" height="2" rx="1" fill="rgba(255,255,255,0.25)"/>
+    </svg>
+  ),
+  texteditor: (
+    // Sublime Text-inspired icon — dark with coloured accent bar
+    <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
+      <rect width="44" height="44" rx="11" fill="#272822"/>
+      <rect width="44" height="20" rx="11" fill="rgba(255,255,255,0.04)"/>
+      {/* Sublime accent stripe */}
+      <rect x="0" y="0" width="4" height="44" rx="2" fill="#4c96d7"/>
+      {/* Code lines */}
+      <rect x="9" y="12" width="22" height="2.5" rx="1.25" fill="#f92672" opacity="0.9"/>
+      <rect x="9" y="17" width="14" height="2.5" rx="1.25" fill="#a6e22e" opacity="0.85"/>
+      <rect x="9" y="22" width="18" height="2.5" rx="1.25" fill="#e6db74" opacity="0.85"/>
+      <rect x="9" y="27" width="10" height="2.5" rx="1.25" fill="#66d9e8" opacity="0.85"/>
+      <rect x="9" y="32" width="20" height="2.5" rx="1.25" fill="#ae81ff" opacity="0.85"/>
+    </svg>
+  ),
 };
 
 /* ─── Types ───────────────────────────────────────────────────────────── */
@@ -257,6 +298,7 @@ function MinimizedSlot({ win }: { win: WindowInstance }) {
     contact: I.contact, location: I.location, terminal: I.terminal,
     finder: I.finder, trash: I.trashEmpty, cv: I.cv,
     github: I.github, githubapp: I.github, safari: I.safari,
+    imageviewer: I.imageviewer,
   };
   return (
     <div className={styles.item}>
@@ -270,21 +312,23 @@ function MinimizedSlot({ win }: { win: WindowInstance }) {
 }
 
 /* ─── Default reorderable key order (Finder & Trash excluded) ────────── */
-const DEFAULT_ORDER = ['github','safari','about','experience','skills','contact','location','terminal','cv','slotslop'];
+const DEFAULT_ORDER = ['github','safari','about','experience','skills','contact','location','terminal','texteditor','imageviewer','cv','slotslop'];
 
 const ALL_ITEMS_STATIC: Omit<Item, 'action'>[] = [
-  { key: 'github',    label: 'GitHub',       icon: I.github },
-  { key: 'safari',    label: 'Google Chrome',icon: I.safari },
-  { key: 'about',     label: 'About',        icon: I.about },
-  { key: 'experience',label: 'Experience',   icon: I.experience },
-  { key: 'skills',    label: 'Skills',       icon: I.skills },
-  { key: 'contact',   label: 'Contact',      icon: I.contact },
-  { key: 'location',  label: 'Location',     icon: I.location },
-  { key: 'terminal',  label: 'Terminal',     icon: I.terminal },
-  { key: 'cv',        label: 'CV',           icon: I.cv },
-  { key: 'slotslop',  label: 'Slotslop',     icon: I.slotslop },
-  { key: 'doom',      label: 'DOOM',         icon: I.doom },
-  { key: 'snake',     label: 'Snake',        icon: I.snake },
+  { key: 'github',     label: 'GitHub',       icon: I.github },
+  { key: 'safari',     label: 'Google Chrome',icon: I.safari },
+  { key: 'about',      label: 'About',        icon: I.about },
+  { key: 'experience', label: 'Experience',   icon: I.experience },
+  { key: 'skills',     label: 'Skills',       icon: I.skills },
+  { key: 'contact',    label: 'Contact',      icon: I.contact },
+  { key: 'location',   label: 'Location',     icon: I.location },
+  { key: 'terminal',   label: 'Terminal',     icon: I.terminal },
+  { key: 'texteditor',  label: 'Text Editor',   icon: I.texteditor },
+  { key: 'imageviewer', label: 'Image Viewer',  icon: I.imageviewer },
+  { key: 'cv',         label: 'CV',           icon: I.cv },
+  { key: 'slotslop',   label: 'Slotslop',     icon: I.slotslop },
+  { key: 'doom',       label: 'DOOM',         icon: I.doom },
+  { key: 'snake',      label: 'Snake',        icon: I.snake },
 ];
 
 // Apps that live on the desktop as shortcuts — only appear in dock when running
@@ -336,11 +380,13 @@ export default function Dock({ bouncingKeys, onItemActivate, trashHighlighted }:
   // Build Item with action for each key
   function makeAction(key: string): () => void {
     switch (key) {
-      case 'github':   return () => openApp('githubapp', { url: 'https://github.com/joshuahawksworth' });
-      case 'safari':   return () => openApp('safari');
-      case 'cv':       return () => window.open('/JoshuaHawksworthCV.pdf', '_blank');
-      case 'slotslop': return () => openApp('terminal', { autoRun: 'slotslop' });
-      default:         return () => openApp(key);
+      case 'github':     return () => openApp('githubapp', { url: 'https://github.com/joshuahawksworth' });
+      case 'safari':     return () => openApp('safari');
+      case 'cv':         return () => window.open('/JoshuaHawksworthCV.pdf', '_blank');
+      case 'slotslop':   return () => openApp('terminal', { autoRun: 'slotslop' });
+      case 'texteditor':  return () => openApp('texteditor');
+      case 'imageviewer': return () => openApp('imageviewer');
+      default:           return () => openApp(key);
     }
   }
 

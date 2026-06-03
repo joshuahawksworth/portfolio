@@ -31,6 +31,8 @@ export const APP_DEFAULTS: Record<string, { title: string; width: number; height
   githubapp:  { title: 'GitHub',           width: 900,  height: 620 },
   doom:       { title: 'DOOM',             width: 800,  height: 640 },
   snake:      { title: 'Snake',            width: 480,  height: 560 },
+  texteditor:  { title: 'Text Editor',   width: 780,  height: 540 },
+  imageviewer: { title: 'Image Viewer',  width: 720,  height: 560 },
 };
 
 // Minimum resize bounds per app
@@ -47,6 +49,8 @@ export const APP_MIN: Record<string, { width: number; height: number }> = {
   githubapp:  { width: 600, height: 400 },
   doom:       { width: 540, height: 460 },
   snake:      { width: 380, height: 440 },
+  texteditor:  { width: 480, height: 340 },
+  imageviewer: { width: 400, height: 360 },
 };
 
 // Per-app "zoom" target (green button) — bounded by screen at runtime
@@ -61,6 +65,8 @@ export const APP_MAX: Record<string, { width: number; height: number }> = {
   trash:      { width: 580,  height: 440 },
   doom:       { width: 1060, height: 760 },
   snake:      { width: 640,  height: 680 },
+  texteditor:  { width: 1060, height: 740 },
+  imageviewer: { width: 1060, height: 760 },
 };
 
 const CASCADE_STEPS = 8;
@@ -85,7 +91,36 @@ function cascadePosition(idx: number, w: number, h: number) {
 /** Folder created by the user on the desktop, shared via context so Finder can see it */
 export interface DesktopFolder { id: string; label: string }
 
-export interface TrashedItem { id: string; name: string; date: string; isJoke?: boolean; content?: string }
+/** File or image on the desktop, shared via context so Finder can see it */
+export interface DesktopFileItem {
+  id: string;
+  label: string;
+  type: 'file' | 'image';
+  content?: string;
+  dataUrl?: string;
+}
+
+/** A file uploaded by the user — queued for placement on the desktop */
+export interface UploadedFileItem {
+  id: string;
+  name: string;
+  content: string;   // text content or empty string for binary
+  dataUrl?: string;  // base64 data URL for images
+  isImage: boolean;
+}
+
+/** An item that has been dragged into a desktop folder */
+export interface DesktopFolderItem {
+  id: string;
+  type: 'job' | 'folder' | 'app' | 'file' | 'image';
+  label: string;
+  jobId?: string;
+  appId?: string;
+  content?: string;
+  dataUrl?: string;
+}
+
+export interface TrashedItem { id: string; name: string; date: string; isJoke?: boolean; content?: string; dataUrl?: string }
 
 // Joke items live in context so restoreItem() can find and remove them
 const JOKE_TRASH: TrashedItem[] = [
@@ -115,6 +150,18 @@ interface DesktopCtx {
   toggleMaximize: (id: string) => void;
   desktopFolders: DesktopFolder[];
   syncDesktopFolders: (folders: DesktopFolder[]) => void;
+  desktopFiles: DesktopFileItem[];
+  syncDesktopFiles: (files: DesktopFileItem[]) => void;
+  customFolderItems: Record<string, DesktopFolderItem[]>;
+  syncCustomFolderItems: (items: Record<string, DesktopFolderItem[]>) => void;
+  /** Queue a newly-uploaded file to be placed as a desktop icon */
+  queueUploadedFile: (file: UploadedFileItem) => void;
+  uploadedFileQueue: UploadedFileItem[];
+  ackUploadedFile: (id: string) => void;
+  /** Remove an item from a folder and queue it to be placed back on the desktop */
+  moveFromFolderToDesktop: (folderId: string, itemId: string) => void;
+  pendingFromFolder: DesktopFolderItem[];
+  ackFromFolder: (id: string) => void;
   trashedItems: TrashedItem[];
   trashEmptied: boolean;
   trashItem: (item: TrashedItem) => void;
@@ -156,6 +203,29 @@ export function DesktopProvider({
   const [focusedId, setFocusedId] = useState<string | null>(() => startWithAbout ? 'about-0' : null);
   const [desktopFolders, setDesktopFolders] = useState<DesktopFolder[]>([]);
   const syncDesktopFolders = useCallback((folders: DesktopFolder[]) => setDesktopFolders(folders), []);
+  const [desktopFiles, setDesktopFiles] = useState<DesktopFileItem[]>([]);
+  const syncDesktopFiles = useCallback((files: DesktopFileItem[]) => setDesktopFiles(files), []);
+  const [customFolderItems, setCustomFolderItems] = useState<Record<string, DesktopFolderItem[]>>({});
+  const syncCustomFolderItems = useCallback((items: Record<string, DesktopFolderItem[]>) => setCustomFolderItems(items), []);
+  const [uploadedFileQueue, setUploadedFileQueue] = useState<UploadedFileItem[]>([]);
+  const queueUploadedFile = useCallback((file: UploadedFileItem) => {
+    setUploadedFileQueue(q => [...q, file]);
+  }, []);
+  const ackUploadedFile = useCallback((id: string) => {
+    setUploadedFileQueue(prev => prev.filter(f => f.id !== id));
+  }, []);
+  const [pendingFromFolder, setPendingFromFolder] = useState<DesktopFolderItem[]>([]);
+  const moveFromFolderToDesktop = useCallback((folderId: string, itemId: string) => {
+    setCustomFolderItems(prev => {
+      const folder = prev[folderId] ?? [];
+      const item   = folder.find(i => i.id === itemId);
+      if (item) setPendingFromFolder(q => [...q, item]);
+      return { ...prev, [folderId]: folder.filter(i => i.id !== itemId) };
+    });
+  }, []);
+  const ackFromFolder = useCallback((id: string) => {
+    setPendingFromFolder(prev => prev.filter(i => i.id !== id));
+  }, []);
   const [trashedItems,      setTrashedItems]      = useState<TrashedItem[]>(JOKE_TRASH);
   const [trashEmptied,     setTrashEmptied]     = useState(false);
   const [restoredItemQueue, setRestoredItemQueue] = useState<TrashedItem[]>([]);
@@ -276,6 +346,10 @@ export function DesktopProvider({
       windows, focusedId,
       openApp, closeWindow, minimizeWindow, focusWindow, moveWindow, resizeWindow, toggleMaximize,
       desktopFolders, syncDesktopFolders,
+      desktopFiles, syncDesktopFiles,
+      customFolderItems, syncCustomFolderItems,
+      queueUploadedFile, uploadedFileQueue, ackUploadedFile,
+      moveFromFolderToDesktop, pendingFromFolder, ackFromFolder,
       trashedItems, trashEmptied, trashItem, emptyTrash,
       restoreItem, restoredItemQueue, ackRestoredItem,
     }}>

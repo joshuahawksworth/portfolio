@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { DesktopProvider, useDesktop, WindowInstance } from '../../context/DesktopContext';
+import { DesktopProvider, useDesktop, WindowInstance, DesktopFolderItem } from '../../context/DesktopContext';
 import MenuBar from '../MenuBar/MenuBar';
 import Dock from '../Dock/Dock';
 import Window from '../Window/Window';
@@ -14,6 +14,8 @@ import TrashApp from '../apps/TrashApp';
 import SafariApp from '../apps/SafariApp';
 import DoomApp from '../apps/DoomApp';
 import SnakeApp from '../apps/SnakeApp';
+import TextEditorApp from '../apps/TextEditorApp';
+import ImageViewerApp from '../apps/ImageViewerApp';
 import { jobsData } from '../../data/experienceData';
 import styles from './Desktop.module.css';
 
@@ -29,6 +31,8 @@ const APP_COMPONENTS: Record<string, React.ComponentType<{ props?: Record<string
   safari: SafariApp,
   githubapp: SafariApp,
   doom: DoomApp,
+  texteditor:  TextEditorApp,
+  imageviewer: ImageViewerApp,
   // snake is rendered by NokiaWindow — NOT in this map
 };
 
@@ -228,10 +232,12 @@ interface IconPos {
 
 interface DesktopItem {
   id: string;
-  type: 'job' | 'folder' | 'app' | 'file';
+  type: 'job' | 'folder' | 'app' | 'file' | 'image';
   label: string;
   jobId?: string;
   appId?: string;
+  content?: string;
+  dataUrl?: string;  // base64 data URL for uploaded images
 }
 
 interface CtxMenu {
@@ -293,6 +299,38 @@ const ICON_H = 84;
 const ICON_GAP = 8;
 const BOUNCE_MS = 1850; // matches 1800ms animation + 50ms buffer
 
+// ── Grid helper ───────────────────────────────────────────────────────────
+// Returns the first grid cell not already occupied by any icon in `taken`.
+// `taken` is a snapshot of current iconPos — mutate a local copy to reserve
+// cells for multiple items being placed in the same batch.
+function findEmptyGridCell(taken: Record<string, IconPos>): IconPos {
+  const startX  = 20;
+  const startY  = 54;
+  const colW    = ICON_W + ICON_GAP + 4;
+  const rowH    = ICON_H + ICON_GAP;
+  const maxRows = Math.max(1, Math.floor((window.innerHeight - startY - 80) / rowH));
+  const maxCols = Math.max(1, Math.floor((window.innerWidth  - startX) / colW));
+
+  const occupied = Object.values(taken);
+
+  for (let col = 0; col < maxCols; col++) {
+    for (let row = 0; row < maxRows; row++) {
+      const gx = startX + col * colW;
+      const gy = startY + row * rowH;
+      const hit = occupied.some(
+        p => Math.abs(p.x - gx) < ICON_W * 0.7 && Math.abs(p.y - gy) < ICON_H * 0.7
+      );
+      if (!hit) return { x: gx, y: gy };
+    }
+  }
+  // All cells full — overflow below the grid
+  const n = Object.keys(taken).length;
+  return {
+    x: startX,
+    y: startY + (n % maxRows) * rowH + maxRows * rowH,
+  };
+}
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 // Desktop-level app shortcuts
 const APP_SHORTCUTS: DesktopItem[] = [
@@ -345,6 +383,27 @@ function computeCleanPositions(items: DesktopItem[], sortByName: boolean): Recor
 }
 
 // ── Sub-components ─────────────────────────────────────────────────────────
+function ImageThumbIcon({ dataUrl, name }: { dataUrl?: string; name: string }) {
+  if (dataUrl) {
+    return (
+      <img
+        src={dataUrl}
+        alt={name}
+        style={{ width: 48, height: 48, borderRadius: 6, objectFit: 'cover', display: 'block', boxShadow: '0 2px 8px rgba(0,0,0,0.4)' }}
+      />
+    );
+  }
+  // Fallback generic image icon
+  return (
+    <svg viewBox="0 0 48 48" fill="none" width="48" height="48">
+      <rect x="2" y="4" width="44" height="40" rx="5" fill="#1e3a4a" stroke="#06b6d4" strokeWidth="1.5"/>
+      <circle cx="16" cy="16" r="4" fill="#06b6d4" opacity="0.7"/>
+      <path d="M4 34 L14 22 L22 30 L32 18 L44 34Z" fill="#06b6d4" opacity="0.35"/>
+      <path d="M4 34 L14 22 L22 30 L32 18 L44 34" stroke="#06b6d4" strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
+    </svg>
+  );
+}
+
 function FileIcon({ name }: { name: string }) {
   const ext = name.split('.').pop()?.toLowerCase() ?? '';
   const color =
@@ -750,6 +809,13 @@ function DesktopSurface() {
     windows,
     openApp,
     syncDesktopFolders,
+    syncDesktopFiles,
+    syncCustomFolderItems,
+    uploadedFileQueue,
+    ackUploadedFile,
+    moveFromFolderToDesktop,
+    pendingFromFolder,
+    ackFromFolder,
     trashItem,
     restoredItemQueue,
     ackRestoredItem,
@@ -775,10 +841,14 @@ function DesktopSurface() {
   const [bouncingKeys, setBouncingKeys] = useState<Set<string>>(new Set());
   const [nearTrashTarget, setNearTrashTarget] = useState<'dock' | 'desktop' | null>(null);
   const [draggingIds, setDraggingIds] = useState<Set<string>>(new Set());
+  const [nearFolderTarget, setNearFolderTarget] = useState<string | null>(null);
+  // folderId → items inside that folder (persisted while app is open)
+  const [folderItems, setFolderItems] = useState<Record<string, DesktopFolderItem[]>>({});
 
   // Refs for always-fresh state inside event handler closures
   const selectedIconsRef = useRef<Set<string>>(new Set());
   const iconPosRef = useRef<Record<string, IconPos>>({});
+  const itemsRef = useRef<DesktopItem[]>([]);
   const multiDragRef = useRef<{
     ids: string[];
     sx: number;
@@ -793,6 +863,9 @@ function DesktopSurface() {
   useEffect(() => {
     iconPosRef.current = iconPos;
   }, [iconPos]);
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
 
   // Keep icons in viewport on resize
   useEffect(() => {
@@ -826,28 +899,111 @@ function DesktopSurface() {
     );
   }, [items, syncDesktopFolders]);
 
+  // Keep Finder in sync with desktop file/image items
+  useEffect(() => {
+    syncDesktopFiles(
+      items
+        .filter((i) => i.type === 'file' || i.type === 'image')
+        .map((i) => ({
+          id: i.id,
+          label: i.label,
+          type: i.type as 'file' | 'image',
+          content: i.content,
+          dataUrl: i.dataUrl,
+        }))
+    );
+  }, [items, syncDesktopFiles]);
+
+  // Keep Finder in sync with folder item contents
+  useEffect(() => {
+    syncCustomFolderItems(folderItems);
+  }, [folderItems, syncCustomFolderItems]);
+
+  // Process newly-uploaded files — add icon to desktop
+  useEffect(() => {
+    if (uploadedFileQueue.length === 0) return;
+    const claimed = { ...iconPosRef.current };
+    for (const uf of uploadedFileQueue) {
+      const type: DesktopItem['type'] = uf.isImage ? 'image' : 'file';
+      const pos = findEmptyGridCell(claimed);
+      claimed[uf.id] = pos;
+      setItems(prev => {
+        if (prev.some(i => i.id === uf.id)) return prev;
+        return [...prev, { id: uf.id, type, label: uf.name, content: uf.content, dataUrl: uf.dataUrl }];
+      });
+      setIconPos(prev => ({ ...prev, [uf.id]: pos }));
+      ackUploadedFile(uf.id);
+    }
+  }, [uploadedFileQueue, ackUploadedFile]);
+
+  // Process items moved back to desktop from a Finder folder
+  useEffect(() => {
+    if (pendingFromFolder.length === 0) return;
+    const claimed = { ...iconPosRef.current };
+    for (const fi of pendingFromFolder) {
+      // Remove from local folderItems so the sync doesn't restore it back to context
+      setFolderItems(prev => {
+        const next = { ...prev };
+        for (const folderId in next) {
+          next[folderId] = next[folderId].filter(item => item.id !== fi.id);
+        }
+        return next;
+      });
+      const pos = findEmptyGridCell(claimed);
+      claimed[fi.id] = pos;
+      setItems(prev => {
+        if (prev.some(i => i.id === fi.id)) return prev;
+        return [...prev, { id: fi.id, type: fi.type, label: fi.label, jobId: fi.jobId, appId: fi.appId, content: fi.content, dataUrl: fi.dataUrl }];
+      });
+      setIconPos(prev => ({ ...prev, [fi.id]: pos }));
+      ackFromFolder(fi.id);
+    }
+  }, [pendingFromFolder, ackFromFolder]);
+
   // Handle restored items from trash — add them back to desktop
   useEffect(() => {
     if (restoredItemQueue.length === 0) return;
+    const claimed = { ...iconPosRef.current };
     for (const item of restoredItemQueue) {
-      const type = item.isJoke ? ('file' as const) : ('folder' as const);
+      const type: DesktopItem['type'] = item.dataUrl
+        ? 'image'
+        : item.isJoke
+          ? 'file'
+          : 'folder';
+      const pos  = findEmptyGridCell(claimed);
+      claimed[item.id] = pos;
       setItems((prev) => {
         if (prev.some((i) => i.id === item.id)) return prev;
-        return [...prev, { id: item.id, type, label: item.name }];
+        return [...prev, { id: item.id, type, label: item.name, content: item.content, dataUrl: item.dataUrl }];
       });
-      setIconPos((prev) => ({
-        ...prev,
-        [item.id]: {
-          x: Math.min(80, window.innerWidth - ICON_W - 20),
-          y: 60 + Math.floor(Math.random() * 200),
-        },
-      }));
+      setIconPos((prev) => ({ ...prev, [item.id]: pos }));
       ackRestoredItem(item.id);
     }
   }, [restoredItemQueue, ackRestoredItem]);
 
+  // ── Finder → Desktop drag-and-drop ────────────────────────────────────
+  function onDesktopDragOver(e: React.DragEvent) {
+    if (!e.dataTransfer.types.includes('application/finder-item')) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  }
+  function onDesktopDrop(e: React.DragEvent) {
+    const raw = e.dataTransfer.getData('application/finder-item');
+    if (!raw) return;
+    try {
+      const { folderId, itemId } = JSON.parse(raw) as { folderId: string; itemId: string };
+      if (folderId && itemId) moveFromFolderToDesktop(folderId, itemId);
+    } catch { /* bad payload */ }
+  }
+
   // ── Open with bounce animation (delay window until bounce done) ────────
   function openWithBounce(dockKey: string, appId: string, props?: Record<string, unknown>) {
+    // Skip animation entirely when an instance of this app is already running
+    const alreadyRunning = windows.some((w) => w.appId === appId && !w.minimized);
+    if (alreadyRunning) {
+      openApp(appId, props);
+      return;
+    }
     setBouncingKeys((prev) => new Set([...prev, dockKey]));
     setTimeout(() => {
       setBouncingKeys((prev) => {
@@ -915,12 +1071,6 @@ function DesktopSurface() {
     multiDragRef.current = { ids: dragIds, sx: e.clientX, sy: e.clientY, origins };
     setDraggingIds(new Set(dragIds));
 
-    // Only folder items can be dragged to trash
-    const isDraggingFolder = dragIds.some((did) => {
-      const t = items.find((i) => i.id === did)?.type;
-      return t === 'folder' || t === 'file';
-    });
-
     // Returns which specific trash element the cursor is over, or null
     function getHoveredTrash(x: number, y: number): 'dock' | 'desktop' | null {
       const trashEls = document.querySelectorAll('[aria-label="Trash"]');
@@ -930,9 +1080,24 @@ function DesktopSurface() {
         const cx = r.left + r.width / 2;
         const cy = r.top + r.height / 2;
         if (Math.abs(x - cx) < 56 && Math.abs(y - cy) < 56) {
-          // Dock trash sits in the bottom bar (> 80% down the screen)
           return r.top > window.innerHeight * 0.75 ? 'dock' : 'desktop';
         }
+      }
+      return null;
+    }
+
+    // These items can never be moved into folders
+    const PROTECTED_IDS = new Set(['shortcut-trash', 'shortcut-mycomputer']);
+
+    // Returns a folder id if cursor is over a folder icon that isn't being dragged
+    function getHoveredFolder(x: number, y: number): string | null {
+      const allItems = itemsRef.current;
+      const pos = iconPosRef.current;
+      for (const item of allItems) {
+        if (item.type !== 'folder' || dragIds.includes(item.id)) continue;
+        const p = pos[item.id];
+        if (!p) continue;
+        if (x >= p.x && x <= p.x + ICON_W && y >= p.y && y <= p.y + ICON_H) return item.id;
       }
       return null;
     }
@@ -949,20 +1114,69 @@ function DesktopSurface() {
         }
         return next;
       });
-      if (isDraggingFolder) setNearTrashTarget(getHoveredTrash(ev.clientX, ev.clientY));
+      setNearTrashTarget(getHoveredTrash(ev.clientX, ev.clientY));
+      setNearFolderTarget(getHoveredFolder(ev.clientX, ev.clientY));
     }
     function onUp(ev: MouseEvent) {
       setNearTrashTarget(null);
+      setNearFolderTarget(null);
       setDraggingIds(new Set());
       multiDragRef.current = null;
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
-      if (!isDraggingFolder) return;
+
+      // Drop into folder?
+      const targetFolder = getHoveredFolder(ev.clientX, ev.clientY);
+      if (targetFolder) {
+        const movedItems: DesktopFolderItem[] = [];
+        for (const did of dragIds) {
+          const item = itemsRef.current.find((i) => i.id === did);
+          if (item && item.id !== targetFolder && !PROTECTED_IDS.has(item.id)) {
+            movedItems.push({
+              id: item.id,
+              type: item.type,
+              label: item.label,
+              jobId: item.jobId,
+              appId: item.appId,
+              content: item.content,
+              dataUrl: item.dataUrl,
+            });
+          }
+        }
+        if (movedItems.length > 0) {
+          setFolderItems((prev) => {
+            const existing = prev[targetFolder] ?? [];
+            const existingIds = new Set(existing.map((i) => i.id));
+            return {
+              ...prev,
+              [targetFolder]: [...existing, ...movedItems.filter((m) => !existingIds.has(m.id))],
+            };
+          });
+          const movedIds = new Set(movedItems.map((m) => m.id));
+          setItems((prev) => prev.filter((i) => !movedIds.has(i.id)));
+          setIconPos((prev) => {
+            const n = { ...prev };
+            for (const id of movedIds) delete n[id];
+            return n;
+          });
+          setSelectedIcons(new Set());
+        }
+        return;
+      }
+
+      // Drop into trash?
       if (getHoveredTrash(ev.clientX, ev.clientY) !== null) {
         for (const did of dragIds) {
-          const item = items.find((i) => i.id === did);
-          if (item && (item.type === 'folder' || item.type === 'file')) {
-            trashItem({ id: did, name: item.label, date: new Date().toLocaleDateString('en-GB') });
+          const item = itemsRef.current.find((i) => i.id === did);
+          if (item && (item.type === 'folder' || item.type === 'file' || item.type === 'image')) {
+            trashItem({
+              id: did,
+              name: item.label,
+              date: new Date().toLocaleDateString('en-GB'),
+              isJoke: item.type === 'file' || item.type === 'image',
+              content: item.content,
+              dataUrl: item.dataUrl,
+            });
             setItems((prev) => prev.filter((i) => i.id !== did));
             setIconPos((prev) => {
               const n = { ...prev };
@@ -1000,6 +1214,18 @@ function DesktopSurface() {
     setIconPos((prev) => ({ ...prev, [id]: pos }));
     setCtxMenu(null);
     setRenameVal('untitled folder');
+    setRenamingId(id);
+  }
+
+  function newTextFile() {
+    const id = `file-${Date.now()}`;
+    const pos = ctxMenu
+      ? { x: Math.max(0, ctxMenu.x - ICON_W / 2), y: Math.max(48, ctxMenu.y - 20) }
+      : { x: Math.round(window.innerWidth / 2), y: Math.round(window.innerHeight / 2) };
+    setItems((prev) => [...prev, { id, type: 'file', label: 'untitled', content: '' }]);
+    setIconPos((prev) => ({ ...prev, [id]: pos }));
+    setCtxMenu(null);
+    setRenameVal('untitled');
     setRenamingId(id);
   }
 
@@ -1078,6 +1304,8 @@ function DesktopSurface() {
         if (renamingId) commitRename();
         setCtxMenu(null);
       }}
+      onDragOver={onDesktopDragOver}
+      onDrop={onDesktopDrop}
     >
       <MenuBar />
 
@@ -1106,14 +1334,18 @@ function DesktopSurface() {
         const tricksterTransition =
           isTrickster && !isDraggingMe ? 'left 0.22s ease-out, top 0.22s ease-out' : undefined;
 
+        const isFolderTarget = nearFolderTarget === item.id;
+
         return (
           <div
             key={item.id}
             className={[
               styles.icon,
               selected ? styles.iconSelected : '',
+              selected ? styles.iconFocused  : '',
               cleaning ? styles.iconCleaning : '',
               isDraggingMe ? styles.iconDragging : '',
+              isFolderTarget ? styles.iconFolderTarget : '',
             ].join(' ')}
             style={{ left: pos.x, top: pos.y, transition: tricksterTransition }}
             onMouseDown={(e) => {
@@ -1164,6 +1396,17 @@ function DesktopSurface() {
                 });
               } else if (item.type === 'folder') {
                 openWithBounce('finder', 'finder', { folderId: item.id, folderName: item.label });
+              } else if (item.type === 'file') {
+                openWithBounce('texteditor', 'texteditor', {
+                  fileId: item.id,
+                  filename: item.label,
+                  content: item.content ?? `// ${item.label}\n`,
+                });
+              } else if (item.type === 'image') {
+                openWithBounce('imageviewer', 'imageviewer', {
+                  filename: item.label,
+                  dataUrl: item.dataUrl ?? '',
+                });
               }
             }}
             onClick={(e) => {
@@ -1195,6 +1438,17 @@ function DesktopSurface() {
                   });
                 else if (item.type === 'folder')
                   openWithBounce('finder', 'finder', { folderId: item.id, folderName: item.label });
+                else if (item.type === 'file')
+                  openWithBounce('texteditor', 'texteditor', {
+                    fileId: item.id,
+                    filename: item.label,
+                    content: item.content ?? `// ${item.label}\n`,
+                  });
+                else if (item.type === 'image')
+                  openWithBounce('imageviewer', 'imageviewer', {
+                    filename: item.label,
+                    dataUrl: item.dataUrl ?? '',
+                  });
               }
               if (item.type !== 'app') {
                 if (e.key === 'F2') startRename(item.id);
@@ -1217,6 +1471,8 @@ function DesktopSurface() {
               <NokiaIcon />
             ) : item.type === 'folder' ? (
               <FolderIcon />
+            ) : item.type === 'image' ? (
+              <ImageThumbIcon dataUrl={item.dataUrl} name={item.label} />
             ) : item.type === 'file' ? (
               <FileIcon name={item.label} />
             ) : job?.logo ? (
@@ -1242,7 +1498,7 @@ function DesktopSurface() {
               />
             ) : (
               <span
-                className={styles.iconLabel}
+                className={`${styles.iconLabel} ${selected ? styles.iconLabelFocused : ''}`}
                 onDoubleClick={(e) => {
                   e.stopPropagation();
                   startRename(item.id);
@@ -1343,6 +1599,9 @@ function DesktopSurface() {
             <>
               <button className={styles.ctxItem} onClick={newFolder}>
                 New Folder
+              </button>
+              <button className={styles.ctxItem} onClick={newTextFile}>
+                New Text File
               </button>
               <div className={styles.ctxDivider} />
               <button

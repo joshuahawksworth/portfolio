@@ -96,6 +96,53 @@
 }
 .toolBtn svg { width: 11px; height: 11px; }
 
+.uploadBtn {
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: color 120ms, background 120ms;
+}
+.uploadBtn:hover { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.08); }
+
+.hiddenInput { display: none; }
+
+/* ── Search bar ── */
+.searchWrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 0 8px;
+  height: 24px;
+  min-width: 120px;
+  max-width: 180px;
+  flex-shrink: 0;
+}
+.searchIcon { width: 11px; height: 11px; color: rgba(255,255,255,0.4); flex-shrink: 0; }
+.searchInput {
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 11px;
+  color: rgba(255,255,255,0.85);
+  font-family: inherit;
+  flex: 1;
+  min-width: 0;
+}
+.searchInput::placeholder { color: rgba(255,255,255,0.3); }
+.searchClear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255,255,255,0.4);
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  flex-shrink: 0;
+}
+.searchClear:hover { color: rgba(255,255,255,0.7); }
+
 .toolbarPath {
   flex: 1;
   font-size: 12px;

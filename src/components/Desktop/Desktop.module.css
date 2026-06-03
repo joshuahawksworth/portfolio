@@ -76,6 +76,16 @@
 .iconSelected { background: rgba(59,130,246,0.25) !important; }
 /* Elevated during drag so the ghost appears above other windows */
 .iconDragging { z-index: 9000 !important; }
+/* Raise the whole icon when selected so its expanded label floats above neighbours,
+   but keep it below any open window (windows start at z-index 101+) */
+.iconFocused  { z-index: 50 !important; }
+/* Folder highlighted as drop target */
+.iconFolderTarget {
+  background: rgba(74, 158, 255, 0.35) !important;
+  outline: 2px solid rgba(74, 158, 255, 0.8);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
 
 .iconImg {
   width: 48px;
@@ -116,6 +126,21 @@
   white-space: nowrap;
   font-weight: 500;
   pointer-events: none;
+  line-height: 1.35;
+}
+
+/* Full label shown when the icon is selected */
+.iconLabelFocused {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 84px;
+  background: rgba(0, 80, 180, 0.72);
+  border-radius: 3px;
+  padding: 1px 3px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.6);
 }
 
 /* ── Clean-up animation (applied only during cleanup) ────── */

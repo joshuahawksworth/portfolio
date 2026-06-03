@@ -7,12 +7,22 @@ function proxyUrl(url: string) {
   return `/api/browser-proxy?url=${encodeURIComponent(url)}`;
 }
 
+function isSearchQuery(input: string): boolean {
+  const t = input.trim();
+  if (!t) return false;
+  if (t.startsWith('http://') || t.startsWith('https://')) return false;
+  // Has a dot and no spaces — treat as URL
+  if (/^[^\s]+\.[^\s]{2,}(\/.*)? *$/.test(t)) return false;
+  return true;
+}
+
 export default function SafariApp({ props }: { props?: Record<string, unknown> }) {
   const start = (props?.url as string | undefined) ?? HOME;
   const [stack,    setStack]    = useState<string[]>([start]);
   const [idx,      setIdx]      = useState(0);
   const [inputUrl, setInputUrl] = useState(start);
   const [loading,  setLoading]  = useState(true);
+  const [searchNotice, setSearchNotice] = useState<string | null>(null);
 
   // Always-fresh refs so the message listener never has a stale closure
   const stackRef   = useRef(stack);
@@ -23,7 +33,7 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
 
   const currentUrl = stack[idx];
 
-  useEffect(() => { setInputUrl(currentUrl); }, [currentUrl]);
+  useEffect(() => { setInputUrl(currentUrl); setSearchNotice(null); }, [currentUrl]);
 
   const navigate = useCallback((raw: string) => {
     let url = raw.trim();
@@ -32,6 +42,7 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
     setStack(prev => [...prev.slice(0, cur + 1), url]);
     setIdx(cur + 1);
     setLoading(true);
+    setSearchNotice(null);
   }, []);
 
   // Register once; only handle messages from THIS instance's iframe
@@ -49,11 +60,18 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
 
   function goBack()    { if (idx > 0)                   { setIdx(i => i - 1); setLoading(true); } }
   function goForward() { if (idx < stack.length - 1)    { setIdx(i => i + 1); setLoading(true); } }
-  function reload()    { setLoading(true); setStack(s => [...s]); /* force iframe remount via key */ }
+  function reload()    { setLoading(true); setStack(s => [...s]); }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    navigate(inputUrl);
+    const input = inputUrl.trim();
+    if (isSearchQuery(input)) {
+      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(input)}`;
+      window.open(searchUrl, '_blank', 'noopener,noreferrer');
+      setSearchNotice(input);
+    } else {
+      navigate(input);
+    }
   }
 
   return (
@@ -68,7 +86,6 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M6 3L11 8L6 13"/></svg>
           </button>
           <button className={styles.navBtn} onClick={reload} aria-label="Reload">
-            {/* Feather-icons "refresh-cw" — recognisable circular arrow */}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={loading ? styles.spin : ''}>
               <polyline points="23 4 23 10 17 10"/>
               <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
@@ -87,7 +104,7 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
               onChange={e => setInputUrl(e.target.value)}
               onFocus={e => e.target.select()}
               spellCheck={false}
-              placeholder="Search or enter website name"
+              placeholder="Search Google or enter website name"
             />
           </div>
         </form>
@@ -99,20 +116,43 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
         </a>
       </div>
 
-      {loading && (
+      {loading && !searchNotice && (
         <div className={styles.loadingBar}><div className={styles.loadingFill}/></div>
       )}
 
       <div className={styles.viewport}>
-        <iframe
-          ref={iframeRef}
-          key={`${currentUrl}-${idx}`}
-          src={proxyUrl(currentUrl)}
-          className={styles.iframe}
-          title="Browser"
-          onLoad={() => setLoading(false)}
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-        />
+        {searchNotice ? (
+          <div className={styles.searchNotice}>
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <circle cx="24" cy="24" r="20" fill="rgba(66,133,244,0.15)" stroke="rgba(66,133,244,0.4)" strokeWidth="1.5"/>
+              <path d="M31 31L38 38" stroke="rgba(66,133,244,0.6)" strokeWidth="2.5" strokeLinecap="round"/>
+              <circle cx="22" cy="22" r="9" fill="none" stroke="rgba(66,133,244,0.6)" strokeWidth="2.5"/>
+            </svg>
+            <div className={styles.searchNoticeTitle}>Searching Google…</div>
+            <div className={styles.searchNoticeQuery}>"{searchNotice}"</div>
+            <p className={styles.searchNoticeHint}>
+              Results opened in a new tab. Websites can't be embedded here due to browser security restrictions.
+            </p>
+            <a
+              href={`https://www.google.com/search?q=${encodeURIComponent(searchNotice)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.searchNoticeBtn}
+            >
+              Open results in new tab →
+            </a>
+          </div>
+        ) : (
+          <iframe
+            ref={iframeRef}
+            key={`${currentUrl}-${idx}`}
+            src={proxyUrl(currentUrl)}
+            className={styles.iframe}
+            title="Browser"
+            onLoad={() => setLoading(false)}
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+          />
+        )}
       </div>
     </div>
   );

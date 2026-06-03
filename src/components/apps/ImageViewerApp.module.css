@@ -1,0 +1,122 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #111214;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+}
+
+.toolbar {
+  height: 38px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 8px;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.filename {
+  flex: 1;
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.toolBtn {
+  min-width: 32px;
+  height: 26px;
+  padding: 0 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 5px;
+  color: rgba(255,255,255,0.75);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  transition: background 100ms;
+}
+.toolBtn:hover { background: rgba(255,255,255,0.12); }
+
+.downloadBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 26px;
+  background: rgba(74,158,215,0.15);
+  border: 1px solid rgba(74,158,215,0.3);
+  border-radius: 5px;
+  color: #4a9eff;
+  margin-left: 4px;
+  transition: background 100ms;
+}
+.downloadBtn:hover { background: rgba(74,158,215,0.28); }
+
+.viewport {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    repeating-conic-gradient(rgba(255,255,255,0.04) 0% 25%, transparent 0% 50%) 0 0 / 20px 20px;
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+.img {
+  display: block;
+  user-select: none;
+  border-radius: 2px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: rgba(255,255,255,0.3);
+  font-size: 14px;
+}
+
+.statusBar {
+  height: 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 12px;
+  background: rgba(255,255,255,0.03);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+}
+
+.sep {
+  width: 1px;
+  height: 10px;
+  background: rgba(255,255,255,0.15);
+  margin: 0 8px;
+}
+
+.hint {
+  margin-left: auto;
+  opacity: 0.5;
+}
