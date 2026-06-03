@@ -10,6 +10,10 @@ const STRIP = new Set([
   'x-xss-protection',
   'transfer-encoding',
   'content-encoding',
+  'cross-origin-opener-policy',
+  'cross-origin-embedder-policy',
+  'cross-origin-resource-policy',
+  'origin-agent-cluster',
 ]);
 
 // Injected at the very top of <head> so it runs before any site script.
@@ -56,7 +60,7 @@ function processHtml(html: string, target: string): string {
   // Inject base + relay at the very top of <head>
   const inject = `<base href="${target}">${NAV_RELAY}`;
   if (/<head[^>]*>/i.test(html)) {
-    html = html.replace(/<head[^>]*>/i, m => `${m}${inject}`);
+    html = html.replace(/<head[^>]*>/i, (m) => `${m}${inject}`);
   } else {
     html = inject + html;
   }
@@ -71,14 +75,19 @@ function browserProxyPlugin(): Plugin {
         try {
           const qs = req.url?.split('?')[1] ?? '';
           const raw = new URLSearchParams(qs).get('url');
-          if (!raw) { res.statusCode = 400; res.end('Missing url'); return; }
+          if (!raw) {
+            res.statusCode = 400;
+            res.end('Missing url');
+            return;
+          }
 
           const target = decodeURIComponent(raw);
           new URL(target);
 
           const upstream = await fetch(target, {
             headers: {
-              'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+              'User-Agent':
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
               Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
               'Accept-Language': 'en-US,en;q=0.9',
             },
@@ -89,7 +98,11 @@ function browserProxyPlugin(): Plugin {
 
           upstream.headers.forEach((v, k) => {
             if (!STRIP.has(k.toLowerCase())) {
-              try { res.setHeader(k, v); } catch { /* skip */ }
+              try {
+                res.setHeader(k, v);
+              } catch {
+                /* skip */
+              }
             }
           });
           res.setHeader('Access-Control-Allow-Origin', '*');

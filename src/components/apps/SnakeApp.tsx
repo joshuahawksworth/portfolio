@@ -3,12 +3,14 @@ import styles from './SnakeApp.module.css';
 
 const COLS = 20;
 const ROWS = 18;
-const TICK = 95; // ms between moves — tighter than before for snappier feel
+const TICK = 82; // ms between moves - quick, but still readable on the small screen
 const CELL = 16;
+const INPUT_BUFFER_LIMIT = 4;
+const FETCH_TIMEOUT_MS = 6000;
 export const SNAKE_W = COLS * CELL;
 export const SNAKE_H = ROWS * CELL;
 
-type Phase = 'idle' | 'playing' | 'dead' | 'entry' | 'submitting' | 'board';
+type Phase = 'idle' | 'playing' | 'dead' | 'entry' | 'board';
 type Dir = 'U' | 'D' | 'L' | 'R';
 type Pt = { x: number; y: number };
 
@@ -84,11 +86,20 @@ function draw(canvas: HTMLCanvasElement, snake: Pt[], food: Pt) {
 export interface LeaderboardEntry {
   name: string;
   score: number;
+  pending?: boolean;
+}
+
+function fetchWithTimeout(url: string, init?: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  return fetch(url, { ...init, signal: controller.signal }).finally(() => {
+    window.clearTimeout(timeout);
+  });
 }
 
 async function fetchBoard(): Promise<LeaderboardEntry[]> {
   try {
-    const r = await fetch('/api/leaderboard');
+    const r = await fetchWithTimeout('/api/leaderboard');
     return r.ok ? r.json() : [];
   } catch {
     return [];
@@ -96,7 +107,7 @@ async function fetchBoard(): Promise<LeaderboardEntry[]> {
 }
 async function submitScore(name: string, score: number): Promise<boolean> {
   try {
-    const r = await fetch('/api/leaderboard', {
+    const r = await fetchWithTimeout('/api/leaderboard', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, score }),
@@ -105,6 +116,17 @@ async function submitScore(name: string, score: number): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+function mergeBoard(remote: LeaderboardEntry[], pending: LeaderboardEntry[]): LeaderboardEntry[] {
+  const byScore = new Map<string, LeaderboardEntry>();
+  [...pending, ...remote].forEach((entry) => {
+    const name = entry.name.toUpperCase().slice(0, 3);
+    if (!name || !Number.isInteger(entry.score) || entry.score < 1) return;
+    const key = `${name}:${entry.score}`;
+    if (!byScore.has(key)) byScore.set(key, { ...entry, name });
+  });
+  return [...byScore.values()].sort((a, b) => b.score - a.score).slice(0, 10);
 }
 
 // ── Props ──────────────────────────────────────────────────────────────────
@@ -147,8 +169,9 @@ export default function SnakeApp({
 
   // Leaderboard
   const [board, setBoard] = useState<LeaderboardEntry[]>([]);
-  const [boardStatus, setBoardStatus] = useState<'idle' | 'loading' | 'done'>('idle');
+  const [boardStatus, setBoardStatus] = useState<'idle' | 'loading' | 'syncing' | 'done'>('idle');
   const [submitOk, setSubmitOk] = useState<boolean | null>(null);
+  const pendingEntriesRef = useRef<LeaderboardEntry[]>([]);
 
   function syncPhase(p: Phase) {
     phaseRef.current = p;
@@ -170,16 +193,36 @@ export default function SnakeApp({
   }
 
   const handleConfirm = useCallback(() => {
+    if (phaseRef.current !== 'entry') return;
     const name = nameRef.current.join('');
-    syncPhase('submitting');
-    setBoardStatus('loading');
-    Promise.all([submitScore(name, scoreRef.current), fetchBoard()]).then(([ok, entries]) => {
-      setSubmitOk(ok);
-      setBoard(entries);
+    const submittedScore = scoreRef.current;
+    const pendingEntry: LeaderboardEntry = { name, score: submittedScore, pending: true };
+
+    pendingEntriesRef.current = [...pendingEntriesRef.current, pendingEntry];
+    setSubmitOk(null);
+    setBoardStatus('syncing');
+    setBoard((entries) => mergeBoard(entries, pendingEntriesRef.current));
+    syncPhase('board');
+
+    void (async () => {
+      const ok = await submitScore(name, submittedScore);
+      const entries = await fetchBoard();
+      const postedIsVisible = entries.some(
+        (entry) => entry.name === name && entry.score === submittedScore
+      );
+
+      const remoteTopTenAlreadyBeatsScore =
+        entries.length >= 10 && entries[entries.length - 1].score >= submittedScore;
+      if (ok && (postedIsVisible || remoteTopTenAlreadyBeatsScore)) {
+        pendingEntriesRef.current = pendingEntriesRef.current.filter(
+          (entry) => entry !== pendingEntry
+        );
+      }
+
+      setBoard(mergeBoard(entries, pendingEntriesRef.current));
       setBoardStatus('done');
-      syncPhase('board');
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      if (phaseRef.current === 'board') setSubmitOk(ok);
+    })();
   }, []);
 
   // const handleSkip = useCallback(() => {
@@ -192,8 +235,9 @@ export default function SnakeApp({
   async function openBoard() {
     syncPhase('board');
     setBoardStatus('loading');
+    setBoard((entries) => mergeBoard(entries, pendingEntriesRef.current));
     const entries = await fetchBoard();
-    setBoard(entries);
+    setBoard(mergeBoard(entries, pendingEntriesRef.current));
     setBoardStatus('done');
   }
 
@@ -203,13 +247,20 @@ export default function SnakeApp({
     if (phaseRef.current !== 'playing') return;
     const q = queueRef.current;
     const last = q.length > 0 ? q[q.length - 1] : dirRef.current;
-    if (d !== OPPOSITE[last] && q.length < 2) q.push(d);
+    if (d === last) return;
+    if (d !== OPPOSITE[last] && q.length < INPUT_BUFFER_LIMIT) q.push(d);
   }
 
   // startGame is called from the Nokia centre button / Play soft-key
   // — only restarts if we're genuinely on a restart screen
   function triggerStart() {
-    if (phaseRef.current === 'idle') startGame();
+    if (
+      phaseRef.current === 'idle' ||
+      phaseRef.current === 'dead' ||
+      phaseRef.current === 'board'
+    ) {
+      startGame();
+    }
   }
 
   function startGame() {
@@ -330,6 +381,17 @@ export default function SnakeApp({
       return;
     }
 
+    if (
+      (phaseRef.current === 'idle' ||
+        phaseRef.current === 'dead' ||
+        phaseRef.current === 'board') &&
+      (e.key === 'Enter' || e.key === ' ')
+    ) {
+      e.preventDefault();
+      startGame();
+      return;
+    }
+
     // Gameplay — arrow keys only
     if (phaseRef.current !== 'playing') return;
     const MAP: Record<string, Dir> = {
@@ -388,6 +450,9 @@ export default function SnakeApp({
               <button className={styles.playBtn} onClick={startGame}>
                 ▶ RETRY
               </button>
+              <button className={styles.boardBtn} onClick={openBoard}>
+                🏆 SCORES
+              </button>
             </div>
           </div>
         )}
@@ -406,7 +471,7 @@ export default function SnakeApp({
         )}
 
         {/* ── Name entry ── */}
-        {(phase === 'entry' || phase === 'submitting') && (
+        {phase === 'entry' && (
           <div className={styles.overlay}>
             <div className={styles.overlayInner}>
               <p className={styles.gameOver}>SCORE: {score}</p>
@@ -422,7 +487,6 @@ export default function SnakeApp({
                         moveCursor(i);
                         nudge(i, -1);
                       }}
-                      disabled={phase === 'submitting'}
                     >
                       ▲
                     </button>
@@ -438,7 +502,6 @@ export default function SnakeApp({
                         moveCursor(i);
                         nudge(i, 1);
                       }}
-                      disabled={phase === 'submitting'}
                     >
                       ▼
                     </button>
@@ -447,12 +510,8 @@ export default function SnakeApp({
               </div>
 
               {/* Confirm */}
-              <button
-                className={styles.confirmBtn}
-                onClick={handleConfirm}
-                disabled={phase === 'submitting'}
-              >
-                {phase === 'submitting' ? 'SAVING…' : '✓ SUBMIT'}
+              <button className={styles.confirmBtn} onClick={handleConfirm}>
+                ✓ SUBMIT
               </button>
             </div>
           </div>
@@ -464,26 +523,39 @@ export default function SnakeApp({
             <div className={styles.boardOverlay}>
               <p className={styles.boardTitle}>🏆 TOP SCORES</p>
               {submitOk === true && <p className={styles.boardSubmitted}>Score saved!</p>}
-              {boardStatus === 'loading' && <p className={styles.boardLoading}>Loading…</p>}
+              {submitOk === false && (
+                <p className={styles.boardSubmitted}>Saved locally - still queued.</p>
+              )}
+              {boardStatus === 'syncing' && (
+                <p className={styles.boardLoading}>Saving quietly in the background…</p>
+              )}
+              {boardStatus === 'loading' && board.length === 0 && (
+                <p className={styles.boardLoading}>Loading…</p>
+              )}
               {boardStatus === 'done' && board.length === 0 && (
                 <p className={styles.boardEmpty}>No scores yet — be first!</p>
               )}
-              {boardStatus === 'done' && board.length > 0 && (
+              {board.length > 0 && (
                 <ol className={styles.boardList}>
                   {board.map((e, i) => (
                     <li
-                      key={i}
-                      className={`${styles.boardRow} ${i === 0 ? styles.boardRowFirst : ''}`}
+                      key={`${e.name}-${e.score}-${i}-${e.pending ? 'pending' : 'saved'}`}
+                      className={`${styles.boardRow} ${i === 0 ? styles.boardRowFirst : ''} ${e.pending ? styles.boardRowPending : ''}`}
                     >
                       <span className={styles.boardRank}>#{i + 1}</span>
                       <span className={styles.boardName}>{e.name}</span>
                       <span className={styles.boardScore}>{e.score}</span>
+                      {e.pending && <span className={styles.boardPending}>queued</span>}
                     </li>
                   ))}
                 </ol>
               )}
-              <button className={styles.playBtn} style={{ marginTop: 6 }} onClick={startGame}>
-                PLAY AGAIN
+              <button
+                className={styles.playBtn}
+                style={{ marginTop: 6 }}
+                onClick={() => syncPhase('idle')}
+              >
+                BACK
               </button>
             </div>
           </div>

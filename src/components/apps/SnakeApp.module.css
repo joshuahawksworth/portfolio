@@ -39,14 +39,33 @@
   padding: 0;
   transition: background 80ms;
 }
-.dpadBtn:hover  { background: #243224; }
-.dpadBtn:active { background: #30d158; color: #000; }
+.dpadBtn:hover {
+  background: #243224;
+}
+.dpadBtn:active {
+  background: #30d158;
+  color: #000;
+}
 
 @media (max-width: 768px) {
-  .dpad { padding: 10px 0 14px; gap: 4px; }
-  .dpadRow { gap: 4px; }
-  .dpadBtn { width: 64px; height: 64px; border-radius: 12px; font-size: 20px; }
-  .dpadCenter { width: 64px; height: 64px; border-radius: 8px; }
+  .dpad {
+    padding: 10px 0 14px;
+    gap: 4px;
+  }
+  .dpadRow {
+    gap: 4px;
+  }
+  .dpadBtn {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    font-size: 20px;
+  }
+  .dpadCenter {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+  }
 }
 
 /* ── Game content area ────────────────────────────────────────────────────── */
@@ -83,12 +102,16 @@
   flex: 1;
   display: flex;
   align-items: stretch;
+  min-height: 0;
+  padding-bottom: 3px;
+  box-sizing: border-box;
+  background: #8bac0f;
 }
 
 .canvas {
   display: block;
   width: 100%;
-  height: 100%;
+  height: calc(100% - 3px);
   image-rendering: pixelated;
 }
 
@@ -133,8 +156,12 @@
   cursor: pointer;
   font-family: 'Courier New', Courier, monospace;
 }
-.playBtn:hover  { background: #0f380f; }
-.playBtn:active { transform: scale(0.97); }
+.playBtn:hover {
+  background: #0f380f;
+}
+.playBtn:active {
+  transform: scale(0.97);
+}
 
 /* ── Shared overlay inner wrapper ── */
 .overlayInner {
@@ -156,9 +183,14 @@
   border-radius: 3px;
   cursor: pointer;
   font-family: 'Courier New', Courier, monospace;
-  transition: background 100ms, color 100ms;
+  transition:
+    background 100ms,
+    color 100ms;
 }
-.boardBtn:hover { background: #306230; color: #9bbc0f; }
+.boardBtn:hover {
+  background: #306230;
+  color: #9bbc0f;
+}
 
 /* ── 3-letter name entry ── */
 .enterNameLabel {
@@ -203,9 +235,16 @@
   padding: 0;
   line-height: 1;
 }
-.letterArrow:hover  { background: #0f380f; }
-.letterArrow:active { transform: scale(0.95); }
-.letterArrow:disabled { opacity: 0.4; cursor: default; }
+.letterArrow:hover {
+  background: #0f380f;
+}
+.letterArrow:active {
+  transform: scale(0.95);
+}
+.letterArrow:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
 
 .nameChar {
   width: 28px;
@@ -221,10 +260,14 @@
   border-radius: 3px;
   border: 2px solid transparent;
   cursor: pointer;
-  transition: border-color 100ms, background 100ms;
+  transition:
+    border-color 100ms,
+    background 100ms;
   user-select: none;
 }
-.nameChar:hover { background: #3a6b3a; }
+.nameChar:hover {
+  background: #3a6b3a;
+}
 
 .nameCharActive {
   border-color: #0f380f;
@@ -252,8 +295,13 @@
   font-family: 'Courier New', Courier, monospace;
   transition: background 80ms;
 }
-.confirmBtn:hover    { background: #1a4a1a; }
-.confirmBtn:disabled { opacity: 0.5; cursor: default; }
+.confirmBtn:hover {
+  background: #1a4a1a;
+}
+.confirmBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
 
 .skipBtn {
   background: transparent;
@@ -266,10 +314,18 @@
   border-radius: 3px;
   cursor: pointer;
   font-family: 'Courier New', Courier, monospace;
-  transition: background 80ms, color 80ms;
+  transition:
+    background 80ms,
+    color 80ms;
 }
-.skipBtn:hover    { background: #4a7a4a; color: #9bbc0f; }
-.skipBtn:disabled { opacity: 0.4; cursor: default; }
+.skipBtn:hover {
+  background: #4a7a4a;
+  color: #9bbc0f;
+}
+.skipBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
 
 /* ── Leaderboard overlay ── */
 .boardOverlay {
@@ -317,7 +373,9 @@
   overflow-y: auto;
   scrollbar-width: none;
 }
-.boardList::-webkit-scrollbar { display: none; }
+.boardList::-webkit-scrollbar {
+  display: none;
+}
 
 .boardRow {
   display: flex;
@@ -327,10 +385,31 @@
   font-family: 'Courier New', Courier, monospace;
   font-size: 9px;
   color: #0f380f;
-  border-bottom: 1px solid rgba(15,56,15,0.15);
+  border-bottom: 1px solid rgba(15, 56, 15, 0.15);
 }
-.boardRow:first-child { background: rgba(15,56,15,0.08); }
+.boardRow:first-child {
+  background: rgba(15, 56, 15, 0.08);
+}
+.boardRowPending {
+  color: #173f17;
+}
 
-.boardRank  { width: 20px; opacity: 0.6; }
-.boardName  { flex: 1; font-weight: 800; letter-spacing: 0.12em; }
-.boardScore { font-weight: 700; }
+.boardRank {
+  width: 20px;
+  opacity: 0.6;
+}
+.boardName {
+  flex: 1;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+.boardScore {
+  font-weight: 700;
+}
+.boardPending {
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  opacity: 0.65;
+  text-transform: uppercase;
+}

@@ -38,7 +38,7 @@ const APP_COMPONENTS: Record<string, React.ComponentType<{ props?: Record<string
 
 // ── NokiaWindow ── custom Nokia phone frame for Snake ─────────────────────
 function NokiaWindow({ win }: { win: WindowInstance }) {
-  const { closeWindow, focusWindow, moveWindow } = useDesktop();
+  const { closeWindow, focusWindow, moveWindow, focusedId } = useDesktop();
   const posRef = useRef({ x: win.x, y: win.y });
   const [pos, setPos] = useState({ x: win.x, y: win.y });
 
@@ -55,6 +55,7 @@ function NokiaWindow({ win }: { win: WindowInstance }) {
   // Keyboard: forward to game
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      if (focusedId !== win.id || e.defaultPrevented) return;
       const MAP: Record<string, 'U' | 'D' | 'L' | 'R'> = {
         ArrowUp: 'U',
         w: 'U',
@@ -70,6 +71,7 @@ function NokiaWindow({ win }: { win: WindowInstance }) {
         D: 'R',
       };
       if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
         startGameRef.current?.();
         return;
       }
@@ -81,7 +83,7 @@ function NokiaWindow({ win }: { win: WindowInstance }) {
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  }, [focusedId, win.id]);
 
   // Dragging by the phone body
   function onPhoneMouseDown(e: React.MouseEvent) {
@@ -1410,7 +1412,11 @@ function DesktopSurface() {
                 // Shift+click toggles individual icon in selection
                 setSelectedIcons((prev) => {
                   const n = new Set(prev);
-                  n.has(item.id) ? n.delete(item.id) : n.add(item.id);
+                  if (n.has(item.id)) {
+                    n.delete(item.id);
+                  } else {
+                    n.add(item.id);
+                  }
                   return n;
                 });
               } else if (!selectedIconsRef.current.has(item.id)) {

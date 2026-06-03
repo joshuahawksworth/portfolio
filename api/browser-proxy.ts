@@ -8,6 +8,10 @@ const STRIP_HEADERS = new Set([
   'x-xss-protection',
   'transfer-encoding',
   'content-encoding',
+  'cross-origin-opener-policy',
+  'cross-origin-embedder-policy',
+  'cross-origin-resource-policy',
+  'origin-agent-cluster',
 ]);
 
 const NAV_RELAY = `<script>
@@ -43,7 +47,7 @@ function processHtml(html: string, target: string): string {
   html = html.replace(/<meta[^>]+http-equiv=["']?content-security-policy["']?[^>]*\/?>/gi, '');
   const inject = `<base href="${target}">${NAV_RELAY}`;
   return /<head[^>]*>/i.test(html)
-    ? html.replace(/<head[^>]*>/i, m => `${m}${inject}`)
+    ? html.replace(/<head[^>]*>/i, (m) => `${m}${inject}`)
     : inject + html;
 }
 
@@ -62,7 +66,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const upstream = await fetch(target, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'User-Agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
         Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.9',
       },
@@ -73,14 +78,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     upstream.headers.forEach((value, key) => {
       if (!STRIP_HEADERS.has(key.toLowerCase())) {
-        try { res.setHeader(key, value); } catch { /* skip */ }
+        try {
+          res.setHeader(key, value);
+        } catch {
+          /* skip */
+        }
       }
     });
     res.setHeader('Access-Control-Allow-Origin', '*');
 
     if (contentType.includes('text/html')) {
       const html = processHtml(await upstream.text(), target);
-      return res.status(upstream.status)
+      return res
+        .status(upstream.status)
         .setHeader('Content-Type', 'text/html; charset=utf-8')
         .send(html);
     }
