@@ -580,6 +580,16 @@ const ICON_H = 84;
 const ICON_GAP = 8;
 const BOUNCE_MS = 1850; // matches 1800ms animation + 50ms buffer
 
+/** Desktop icons that cannot be moved to Trash (drag or context menu). */
+const DESKTOP_TRASH_BLOCKLIST = new Set(['shortcut-trash', 'shortcut-mycomputer', 'trickster']);
+
+function canTrashDesktopItem(item: DesktopItem): boolean {
+  return (
+    (item.type === 'folder' || item.type === 'file' || item.type === 'image') &&
+    !DESKTOP_TRASH_BLOCKLIST.has(item.id)
+  );
+}
+
 // ── Grid helper ───────────────────────────────────────────────────────────
 // Returns the first grid cell not already occupied by any icon in `taken`.
 // `taken` is a snapshot of current iconPos — mutate a local copy to reserve
@@ -1501,7 +1511,7 @@ function DesktopSurface() {
       if (getHoveredTrash(ev.clientX, ev.clientY) !== null) {
         for (const did of dragIds) {
           const item = itemsRef.current.find((i) => i.id === did);
-          if (item && (item.type === 'folder' || item.type === 'file' || item.type === 'image')) {
+          if (item && canTrashDesktopItem(item)) {
             trashItem({
               id: did,
               name: item.label,
@@ -1576,7 +1586,17 @@ function DesktopSurface() {
     if (v) setItems((prev) => prev.map((i) => (i.id === renamingId ? { ...i, label: v } : i)));
     setRenamingId(null);
   }
-  function deleteItem(id: string) {
+  function trashDesktopItem(id: string) {
+    const item = items.find((i) => i.id === id);
+    if (!item || !canTrashDesktopItem(item)) return;
+    trashItem({
+      id,
+      name: item.label,
+      date: new Date().toLocaleDateString('en-GB'),
+      isJoke: item.type === 'file' || item.type === 'image',
+      content: item.content,
+      dataUrl: item.dataUrl,
+    });
     setItems((prev) => prev.filter((i) => i.id !== id));
     setIconPos((prev) => {
       const n = { ...prev };
@@ -1787,10 +1807,10 @@ function DesktopSurface() {
                     dataUrl: item.dataUrl ?? '',
                   });
               }
-              if (item.type !== 'app') {
+              if (item.type !== 'app' && item.type !== 'job') {
                 if (e.key === 'F2') startRename(item.id);
-                if (e.key === 'Delete') deleteItem(item.id);
               }
+              if (e.key === 'Delete' && canTrashDesktopItem(item)) trashDesktopItem(item.id);
             }}
           >
             {item.id === 'shortcut-mycomputer' ? (
@@ -1909,15 +1929,15 @@ function DesktopSurface() {
                   <div className={styles.ctxDivider} />
                 </>
               )}
-              {ctxTarget.type !== 'app' && (
+              {ctxTarget.type !== 'app' && ctxTarget.type !== 'job' && (
                 <button className={styles.ctxItem} onClick={() => startRename(ctxTarget.id)}>
                   Rename
                 </button>
               )}
-              {(ctxTarget.type === 'folder' || ctxTarget.type === 'file') && (
+              {canTrashDesktopItem(ctxTarget) && (
                 <button
                   className={`${styles.ctxItem} ${styles.ctxDanger}`}
-                  onClick={() => deleteItem(ctxTarget.id)}
+                  onClick={() => trashDesktopItem(ctxTarget.id)}
                 >
                   Delete
                 </button>

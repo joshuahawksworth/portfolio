@@ -1,6 +1,6 @@
 import { useId, useState, useRef, useEffect } from 'react';
 import { useDesktop, WindowInstance } from '../../context/DesktopContext';
-import logoSvg from '../../assets/logo.svg';
+import { AboutLogoIcon } from '../icons/AboutLogoIcon';
 import styles from './Dock.module.css';
 
 /* ─── MacIcon ─────────────────────────────────────────────────────────────
@@ -71,19 +71,9 @@ const I = {
     </svg>
   ),
   about: (
-    <img
-      src={logoSvg}
-      alt="About"
-      width="44"
-      height="44"
-      style={{
-        width: 44,
-        height: 44,
-        borderRadius: 11,
-        display: 'block',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
-        flexShrink: 0,
-      }}
+    <AboutLogoIcon
+      size={44}
+      style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.35)' }}
     />
   ),
   experience: (

@@ -1,0 +1,39 @@
+/** Yellow JH mark — inline SVG for reliable rendering on mobile Safari. */
+const JH_PATH =
+  'm 64.986601,198.54254 c 17.955449,0 30.263619,-9.55694 30.263619,-30.55323 V 98.773958 H 74.97794 v 68.925752 c 0,10.13614 -4.199258,12.74258 -10.860151,12.74258 -6.950496,0 -9.846536,-4.77847 -13.03218,-10.42575 l -16.507428,9.99134 c 4.778466,10.13614 14.190596,18.53466 30.40842,18.53466 z m 49.811939,-1.30322 h 20.27228 V 167.2653 h 42.13738 v 29.97402 h 20.27228 V 98.773958 H 177.2082 V 149.16505 H 135.07082 V 98.773958 h -20.27228 z';
+
+export interface AboutLogoIconProps {
+  size?: number;
+  alt?: string;
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export function AboutLogoIcon({
+  size = 44,
+  alt = 'About',
+  className,
+  style,
+}: AboutLogoIconProps) {
+  const radius = Math.round(size * 0.25);
+
+  return (
+    <svg
+      viewBox="0 0 211.66941 211.66732"
+      width={size}
+      height={size}
+      role="img"
+      aria-label={alt}
+      className={className}
+      style={{
+        display: 'block',
+        borderRadius: radius,
+        flexShrink: 0,
+        ...style,
+      }}
+    >
+      <rect width="211.6694" height="211.66731" fill="#f7df1e" />
+      <path fill="#1a1a1a" d={JH_PATH} />
+    </svg>
+  );
+}

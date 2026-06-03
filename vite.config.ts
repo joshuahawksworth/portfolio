@@ -1,6 +1,7 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import type { Plugin } from 'vite';
+import { getLeaderboard, postLeaderboardScore } from './api/leaderboard-store';
 import { searchWeb } from './api/search-utils';
 
 const STRIP = new Set([
@@ -16,16 +17,6 @@ const STRIP = new Set([
   'cross-origin-resource-policy',
   'origin-agent-cluster',
 ]);
-
-interface DevLeaderboardRow {
-  name: string;
-  score: number;
-  created_at: string;
-}
-
-function topDevScores(rows: DevLeaderboardRow[]) {
-  return [...rows].sort((a, b) => b.score - a.score).slice(0, 10);
-}
 
 function readJsonBody(req: import('http').IncomingMessage): Promise<unknown> {
   return new Promise((resolve) => {
@@ -95,9 +86,7 @@ function processHtml(html: string, target: string): string {
   return html;
 }
 
-function browserProxyPlugin(): Plugin {
-  const devLeaderboardRows: DevLeaderboardRow[] = [];
-
+function browserProxyPlugin(env: Record<string, string>): Plugin {
   return {
     name: 'browser-proxy-dev',
     configureServer(server) {
@@ -112,33 +101,35 @@ function browserProxyPlugin(): Plugin {
           return;
         }
 
-        if (req.method === 'GET') {
-          res.statusCode = 200;
-          res.setHeader('Content-Type', 'application/json; charset=utf-8');
-          res.end(JSON.stringify(topDevScores(devLeaderboardRows)));
-          return;
-        }
-
-        if (req.method === 'POST') {
-          const body = (await readJsonBody(req)) as { name?: unknown; score?: unknown };
-          const name = String(body.name ?? '')
-            .toUpperCase()
-            .replace(/[^A-Z]/g, '')
-            .slice(0, 3);
-          const score = Number(body.score);
-
-          if (name.length < 3 || !Number.isInteger(score) || score < 1) {
-            res.statusCode = 400;
+        try {
+          if (req.method === 'GET') {
+            const rows = await getLeaderboard(env);
+            res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json; charset=utf-8');
-            res.end(JSON.stringify({ error: 'Invalid score submission' }));
+            res.end(JSON.stringify(rows));
             return;
           }
 
-          devLeaderboardRows.push({ name, score, created_at: new Date().toISOString() });
-          res.statusCode = 200;
-          res.setHeader('Content-Type', 'application/json; charset=utf-8');
-          res.end(JSON.stringify({ ok: true }));
-          return;
+          if (req.method === 'POST') {
+            const body = (await readJsonBody(req)) as { name?: unknown; score?: unknown };
+            const result = await postLeaderboardScore(String(body.name ?? ''), Number(body.score), env);
+            res.setHeader('Content-Type', 'application/json; charset=utf-8');
+            if (!result.ok) {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: result.error }));
+              return;
+            }
+            res.statusCode = 200;
+            res.end(JSON.stringify(result));
+            return;
+          }
+        } catch {
+          if (req.method === 'GET') {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json; charset=utf-8');
+            res.end(JSON.stringify(await getLeaderboard(env)));
+            return;
+          }
         }
 
         res.statusCode = 405;
@@ -222,6 +213,9 @@ function browserProxyPlugin(): Plugin {
   };
 }
 
-export default defineConfig({
-  plugins: [react(), browserProxyPlugin()],
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  return {
+    plugins: [react(), browserProxyPlugin(env)],
+  };
 });

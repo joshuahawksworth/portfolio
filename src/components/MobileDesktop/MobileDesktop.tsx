@@ -12,7 +12,7 @@ import SafariApp from '../apps/SafariApp';
 import SnakeApp from '../apps/SnakeApp';
 import RubberDuckApp from '../apps/RubberDuckApp';
 import KeyboardShortcutsApp from '../apps/KeyboardShortcutsApp';
-import logoSvg from '../../assets/logo.svg';
+import { AboutLogoIcon } from '../icons/AboutLogoIcon';
 import { DesktopProvider, useDesktop } from '../../context/DesktopContext';
 import styles from './MobileDesktop.module.css';
 
@@ -293,24 +293,10 @@ function AppIcon({ appId, size = 60 }: { appId: string; size?: number }) {
 
   if (appId === 'about') {
     return (
-      <div
-        style={{
-          width: size,
-          height: size,
-          borderRadius: radius,
-          overflow: 'hidden',
-          flexShrink: 0,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.45)',
-        }}
-      >
-        <img
-          src={logoSvg}
-          alt="About"
-          width={size}
-          height={size}
-          style={{ display: 'block', borderRadius: radius }}
-        />
-      </div>
+      <AboutLogoIcon
+        size={size}
+        style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.45)' }}
+      />
     );
   }
 

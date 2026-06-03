@@ -13,7 +13,7 @@ import LocationApp from '../apps/LocationApp';
 import TerminalApp from '../apps/TerminalApp';
 import FinderApp from '../apps/FinderApp';
 import TrashApp from '../apps/TrashApp';
-import logoSvg from '../../assets/logo.svg';
+import { AboutLogoIcon } from '../icons/AboutLogoIcon';
 import styles from './LiquidDesktop.module.css';
 
 const APP_COMPONENTS: Record<string, React.ComponentType<{ props?: Record<string, unknown> }>> = {
@@ -76,7 +76,7 @@ function MacIcon({ top, bottom, children }: { top: string; bottom: string; child
 const DOCK_ICONS: Record<string, React.ReactNode> = {
   finder: <MacIcon top="#5ecfff" bottom="#1a7aff"><ellipse cx="22" cy="21" rx="11" ry="10" fill="white" opacity="0.95"/><circle cx="17" cy="19" r="2.2" fill="#1a7aff"/><circle cx="27" cy="19" r="2.2" fill="#1a7aff"/><circle cx="17.8" cy="18.3" r="0.8" fill="white"/><circle cx="27.8" cy="18.3" r="0.8" fill="white"/><path d="M16 24 Q22 29 28 24" stroke="#1a7aff" strokeWidth="1.6" strokeLinecap="round" fill="none"/></MacIcon>,
   github: <svg viewBox="0 0 44 44" width="44" height="44" fill="none"><rect width="44" height="44" rx="11" fill="#1b1f24"/><rect width="44" height="20" rx="11" fill="rgba(255,255,255,0.07)"/><g transform="translate(6,6) scale(1.333)"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="white" opacity="0.92"/></g></svg>,
-  about: <img src={logoSvg} alt="About" width="44" height="44" style={{ borderRadius: 11, display: 'block', boxShadow: '0 2px 8px rgba(0,0,0,0.35)' }} />,
+  about: <AboutLogoIcon size={44} style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.35)' }} />,
   experience: <MacIcon top="#ffa030" bottom="#c25c00"><rect x="8" y="17" width="28" height="18" rx="3" fill="rgba(255,255,255,0.92)"/><path d="M16 17v-3a2 2 0 012-2h8a2 2 0 012 2v3" stroke="rgba(255,255,255,0.92)" strokeWidth="2" fill="none"/><rect x="18.5" y="23" width="7" height="4" rx="1.5" fill="#c25c00"/></MacIcon>,
   skills: <MacIcon top="#d070ff" bottom="#7928ca"><path d="M16 16L9 22L16 28" stroke="rgba(255,255,255,0.9)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/><path d="M28 16L35 22L28 28" stroke="rgba(255,255,255,0.9)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/><path d="M25 14L19 30" stroke="rgba(255,255,255,0.55)" strokeWidth="2" strokeLinecap="round"/></MacIcon>,
   contact: <MacIcon top="#3a9fff" bottom="#0060df"><rect x="7" y="12" width="30" height="21" rx="3.5" fill="rgba(255,255,255,0.92)"/><path d="M7 15L22 24L37 15" stroke="#0060df" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/></MacIcon>,
