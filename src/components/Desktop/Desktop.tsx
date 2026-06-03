@@ -589,19 +589,14 @@ function NokiaIcon() {
       <rect x="22" y="18" width="3" height="3" fill="#2aaa2a" />
       {/* Food */}
       <rect x="30" y="13" width="2" height="2" fill="#88ff44" />
-      {/* Nokia logo text */}
-      <text
-        x="24"
-        y="32"
-        textAnchor="middle"
-        fontFamily="Arial, Helvetica, sans-serif"
-        fontSize="4.5"
-        fontWeight="700"
-        letterSpacing="1.2"
-        fill="#5a78a0"
-      >
-        NOKIA
-      </text>
+      {/* Nokia logo — pixel-art rects, no font dependency */}
+      <g fill="#5a78a0" opacity="0.9">
+        {/* N */}<rect x="11" y="29" width="1" height="4"/><rect x="12" y="30" width="1" height="1"/><rect x="13" y="31" width="1" height="1"/><rect x="14" y="29" width="1" height="4"/>
+        {/* O */}<rect x="16" y="29" width="3" height="1"/><rect x="16" y="32" width="3" height="1"/><rect x="16" y="30" width="1" height="2"/><rect x="18" y="30" width="1" height="2"/>
+        {/* K */}<rect x="20" y="29" width="1" height="4"/><rect x="21" y="30" width="1" height="1"/><rect x="22" y="29" width="1" height="1"/><rect x="22" y="31" width="1" height="1"/><rect x="23" y="32" width="1" height="1"/>
+        {/* I */}<rect x="25" y="29" width="3" height="1"/><rect x="26" y="30" width="1" height="2"/><rect x="25" y="32" width="3" height="1"/>
+        {/* A */}<rect x="29" y="30" width="3" height="1"/><rect x="29" y="29" width="1" height="4"/><rect x="31" y="29" width="1" height="4"/><rect x="30" y="31" width="1" height="1"/>
+      </g>
       {/* Navigation key (oval d-pad) */}
       <ellipse cx="24" cy="37.5" rx="5.5" ry="3.5" fill="#1a2535" />
       <circle cx="24" cy="37.5" r="2.5" fill="#141d28" />

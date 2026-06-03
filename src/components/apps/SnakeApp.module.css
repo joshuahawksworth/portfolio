@@ -173,13 +173,43 @@
 
 .nameEntry {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
 }
 
+/* One column per letter: ▲ / letter box / ▼ */
+.nameSlotGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.letterArrow {
+  width: 28px;
+  height: 18px;
+  background: #3a6b3a;
+  color: #9bbc0f;
+  border: none;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Courier New', Courier, monospace;
+  transition: background 80ms;
+  padding: 0;
+  line-height: 1;
+}
+.letterArrow:hover  { background: #0f380f; }
+.letterArrow:active { transform: scale(0.95); }
+.letterArrow:disabled { opacity: 0.4; cursor: default; }
+
 .nameChar {
   width: 28px;
-  height: 32px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -190,8 +220,11 @@
   font-weight: 800;
   border-radius: 3px;
   border: 2px solid transparent;
+  cursor: pointer;
   transition: border-color 100ms, background 100ms;
+  user-select: none;
 }
+.nameChar:hover { background: #3a6b3a; }
 
 .nameCharActive {
   border-color: #0f380f;
@@ -199,14 +232,44 @@
   color: #9bbc0f;
 }
 
-.nameHint {
-  margin: 0;
-  font-size: 7px;
-  color: #306230;
-  font-family: 'Courier New', Courier, monospace;
-  letter-spacing: 0.04em;
-  opacity: 0.8;
+/* ── Confirm / Skip row ── */
+.nameActions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
+
+.confirmBtn {
+  background: #0f380f;
+  color: #9bbc0f;
+  border: none;
+  padding: 5px 12px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: 'Courier New', Courier, monospace;
+  transition: background 80ms;
+}
+.confirmBtn:hover    { background: #1a4a1a; }
+.confirmBtn:disabled { opacity: 0.5; cursor: default; }
+
+.skipBtn {
+  background: transparent;
+  color: #4a7a4a;
+  border: 1px solid #4a7a4a;
+  padding: 4px 10px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: 'Courier New', Courier, monospace;
+  transition: background 80ms, color 80ms;
+}
+.skipBtn:hover    { background: #4a7a4a; color: #9bbc0f; }
+.skipBtn:disabled { opacity: 0.4; cursor: default; }
 
 /* ── Leaderboard overlay ── */
 .boardOverlay {

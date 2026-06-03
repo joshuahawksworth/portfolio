@@ -191,8 +191,10 @@ const I = {
       {/* Tongue */}
       <path d="M40 11 L43 10 M43 10 L43 8.5 M43 10 L43 11.5"
         stroke="#ff453a" strokeWidth="0.9" strokeLinecap="round"/>
-      {/* Apple food */}
-      <text x="10" y="40" fontSize="11" textAnchor="middle">🍎</text>
+      {/* Apple food — drawn, no emoji */}
+      <circle cx="10" cy="37" r="4" fill="#cc2200"/>
+      <rect x="9.5" y="32" width="1" height="3" fill="#5a3a10"/>
+      <ellipse cx="12" cy="33" rx="2.5" ry="1.2" transform="rotate(-20 12 33)" fill="#2a7a18"/>
     </svg>
   ),
   slotslop: (
@@ -208,7 +210,6 @@ const I = {
           <stop offset="100%" stopColor="#a855f7"/>
         </linearGradient>
       </defs>
-      {/* T3 wordmark — bold T and 3 */}
       <text x="22" y="32" textAnchor="middle" fill="url(#t3rainbow)"
         fontSize="26" fontWeight="900"
         fontFamily="'Helvetica Neue', Arial, Helvetica, sans-serif">
