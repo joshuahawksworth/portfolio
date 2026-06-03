@@ -253,20 +253,11 @@ function AppIcon({ appId, size = 60 }: { appId: string; size?: number }) {
   }
 
   if (appId === 'safari') {
-    const chromeSize = Math.round(size * 0.72);
     return (
-      <div
-        style={{
-          width: size,
-          height: size,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-        }}
-      >
-        <ChromeLogoIcon size={chromeSize} />
-      </div>
+      <ChromeLogoIcon
+        size={size}
+        style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.45)' }}
+      />
     );
   }
 

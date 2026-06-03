@@ -31,15 +31,17 @@ export function ChromeLogoIcon({
       }}
     >
       <rect width="44" height="44" rx="11" fill="white" />
-      <path d="M22 22 L5.55 12.5 A19 19 0 0 1 38.45 12.5 Z" fill="#EA4335" />
-      <path d="M22 22 L38.45 12.5 A19 19 0 0 1 22 41 Z" fill="#FBBC05" />
-      <path d="M22 22 L22 41 A19 19 0 0 1 5.55 12.5 Z" fill="#34A853" />
-      <circle cx="22" cy="22" r="13" fill="white" />
-      <line x1="10.74" y1="15.5" x2="5.55" y2="12.5" stroke="white" strokeWidth="2" />
-      <line x1="33.26" y1="15.5" x2="38.45" y2="12.5" stroke="white" strokeWidth="2" />
-      <line x1="22" y1="35" x2="22" y2="41" stroke="white" strokeWidth="2" />
-      <circle cx="22" cy="22" r="10.5" fill="#4285F4" />
-      <circle cx="22" cy="22" r="13" fill="none" stroke="white" strokeWidth="1.5" />
+      <g transform="translate(22 22) scale(0.72) translate(-22 -22)">
+        <path d="M22 22 L5.55 12.5 A19 19 0 0 1 38.45 12.5 Z" fill="#EA4335" />
+        <path d="M22 22 L38.45 12.5 A19 19 0 0 1 22 41 Z" fill="#FBBC05" />
+        <path d="M22 22 L22 41 A19 19 0 0 1 5.55 12.5 Z" fill="#34A853" />
+        <circle cx="22" cy="22" r="13" fill="white" />
+        <line x1="10.74" y1="15.5" x2="5.55" y2="12.5" stroke="white" strokeWidth="2" />
+        <line x1="33.26" y1="15.5" x2="38.45" y2="12.5" stroke="white" strokeWidth="2" />
+        <line x1="22" y1="35" x2="22" y2="41" stroke="white" strokeWidth="2" />
+        <circle cx="22" cy="22" r="10.5" fill="#4285F4" />
+        <circle cx="22" cy="22" r="13" fill="none" stroke="white" strokeWidth="1.5" />
+      </g>
     </svg>
   );
 }
