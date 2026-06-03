@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import styles from './SafariApp.module.css';
 
 const HOME = 'search://home';
@@ -45,6 +46,7 @@ async function fetchSearch(query: string): Promise<SearchResult[]> {
 }
 
 function SearchHome({ onSearch }: { onSearch: (query: string) => void }) {
+  const isMobile = useIsMobile();
   const [query, setQuery] = useState('');
 
   function handleSubmit(e: React.FormEvent) {
@@ -69,7 +71,7 @@ function SearchHome({ onSearch }: { onSearch: (query: string) => void }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search Google"
-          autoFocus
+          autoFocus={!isMobile}
         />
         <button className={styles.searchHomeButton} type="submit">
           Search

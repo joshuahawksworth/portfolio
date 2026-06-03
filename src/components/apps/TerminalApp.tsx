@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback, KeyboardEvent } from 'react';
 import { useDesktop } from '../../context/DesktopContext';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import styles from './TerminalApp.module.css';
 
 interface Line {
@@ -1500,6 +1501,7 @@ function resolvePath(cwd: string, target: string): string {
 // ── Main component ─────────────────────────────────────────────────────────
 export default function TerminalApp({ props }: { props?: Record<string, unknown> }) {
   const { openApp } = useDesktop();
+  const isMobile = useIsMobile();
   const [cwd, setCwd] = useState(INIT_CWD);
   const [lines, setLines] = useState<Line[]>([
     { type: 'out', text: 'Last login: ' + new Date().toDateString() + ' on ttys001' },
@@ -1887,7 +1889,7 @@ export default function TerminalApp({ props }: { props?: Record<string, unknown>
           onKeyDown={handleKey}
           spellCheck={false}
           autoComplete="off"
-          autoFocus
+          autoFocus={!isMobile}
         />
         <span className={styles.cursor} />
       </div>

@@ -12,6 +12,7 @@ import MobileSnakeApp from '../apps/MobileSnakeApp';
 import RubberDuckApp from '../apps/RubberDuckApp';
 import KeyboardShortcutsApp from '../apps/KeyboardShortcutsApp';
 import { AboutLogoIcon } from '../icons/AboutLogoIcon';
+import { ChromeLogoIcon } from '../icons/ChromeLogoIcon';
 import { DesktopProvider, useDesktop } from '../../context/DesktopContext';
 import styles from './MobileDesktop.module.css';
 
@@ -24,10 +25,8 @@ const ICON_GRADS: Record<string, [string, string]> = {
   location: ['#34d870', '#1a8f3f'],
   terminal: ['#2a2a35', '#1c1c1e'],
   finder: ['#5ecfff', '#1a7aff'],
-  trash: ['#aeaeb2', '#6c6c70'],
   cv: ['#ff5257', '#c0292e'],
   github: ['#1b1f24', '#1b1f24'],
-  safari: ['#ffffff', '#f0f0f5'],
   snake: ['#133d1e', '#0a2410'],
   trickster: ['#f59e0b', '#b45309'],
 };
@@ -135,36 +134,6 @@ const ICON_GLYPHS: Record<string, React.ReactNode> = {
       />
     </>
   ),
-  trash: (
-    <>
-      <path
-        d="M7.5 11H20.5M11 11V8.5Q11 7.5 12 7.5H16Q17 7.5 17 8.5V11"
-        stroke="white"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        fill="none"
-        opacity="0.92"
-      />
-      <rect
-        x="9"
-        y="12"
-        width="10"
-        height="12"
-        rx="1.5"
-        stroke="white"
-        strokeWidth="1.6"
-        fill="none"
-        opacity="0.92"
-      />
-      <path
-        d="M13 15V21M15 15V21"
-        stroke="white"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        opacity="0.6"
-      />
-    </>
-  ),
   cv: (
     <>
       <rect
@@ -193,21 +162,6 @@ const ICON_GLYPHS: Record<string, React.ReactNode> = {
       fill="white"
       opacity="0.92"
     />
-  ),
-
-  // Google Chrome — polygon fan sectors (no arc commands, cross-browser safe)
-  // Arc points every 30° clockwise from top on r=10 circle centred at (14,14):
-  //  0°→(14,4)  30°→(19,5.34)  60°→(22.66,9)  90°→(24,14)  120°→(22.66,19)
-  // 150°→(19,22.66) 180°→(14,24) 210°→(9,22.66) 240°→(5.34,19)
-  // 270°→(4,14)  300°→(5.34,9)  330°→(9,5.34)
-  safari: (
-    <>
-      <polygon points="14,14 14,4 19,5.34 22.66,9 24,14 22.66,19" fill="#EA4335" />
-      <polygon points="14,14 22.66,19 19,22.66 14,24 9,22.66 5.34,19" fill="#FBBC05" />
-      <polygon points="14,14 5.34,19 4,14 5.34,9 9,5.34 14,4" fill="#34A853" />
-      <circle cx="14" cy="14" r="7" fill="white" />
-      <circle cx="14" cy="14" r="5.2" fill="#4285F4" />
-    </>
   ),
 
   // Snake — sinuous S-curve body + triangular head + tongue + apple (SVG circle, no emoji)
@@ -281,7 +235,6 @@ const ICON_OFFSETS: Record<string, number> = {
   terminal: -4.5,
   finder: 2,
   about: -1.75,
-  trash: -1.75,
   experience: -1.5,
   location: -1,
   contact: -0.5,
@@ -296,6 +249,24 @@ function AppIcon({ appId, size = 60 }: { appId: string; size?: number }) {
         size={size}
         style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.45)' }}
       />
+    );
+  }
+
+  if (appId === 'safari') {
+    const chromeSize = Math.round(size * 0.72);
+    return (
+      <div
+        style={{
+          width: size,
+          height: size,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}
+      >
+        <ChromeLogoIcon size={chromeSize} />
+      </div>
     );
   }
 
@@ -316,21 +287,18 @@ function AppIcon({ appId, size = 60 }: { appId: string; size?: number }) {
         boxShadow: '0 4px 12px rgba(0,0,0,0.45)',
       }}
     >
-      {/* Top shimmer — skip for chrome (white bg) */}
-      {appId !== 'safari' && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '50%',
-            background: 'linear-gradient(to bottom, rgba(255,255,255,0.22), rgba(255,255,255,0))',
-            borderRadius: `${radius}px ${radius}px 0 0`,
-            pointerEvents: 'none',
-          }}
-        />
-      )}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '50%',
+          background: 'linear-gradient(to bottom, rgba(255,255,255,0.22), rgba(255,255,255,0))',
+          borderRadius: `${radius}px ${radius}px 0 0`,
+          pointerEvents: 'none',
+        }}
+      />
       <svg
         viewBox="0 0 28 28"
         fill="none"
