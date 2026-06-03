@@ -75,6 +75,7 @@
   max-height: 100%;
   max-width: 100%;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .gameAreaMobile .statusBar {
@@ -203,8 +204,10 @@
   flex-direction: column;
   width: 100%;
   height: 100%;
+  max-width: 100%;
   background: #8bac0f;
   outline: none;
+  box-sizing: border-box;
 }
 
 .statusBar {

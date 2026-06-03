@@ -61,43 +61,44 @@ export default function MobileSnakeApp() {
         </div>
       </div>
 
-      <p className={styles.brand}>NOKIA</p>
+      <div className={styles.phoneBottom}>
+        <p className={styles.brand}>NOKIA</p>
 
-      <div className={phase === 'entry' ? styles.softRow : styles.callRow}>
-        {phase === 'entry' && (
-          <button
-            type="button"
-            className={styles.softKey}
-            onPointerDown={(e) => {
-              e.preventDefault();
-              skipRef.current?.();
-            }}
-          >
-            Skip
-          </button>
-        )}
-        <div className={styles.callBtns}>
-          <button type="button" className={styles.callGreen} aria-label="Call" />
-          <button type="button" className={styles.callRed} aria-label="End" />
+        <div className={phase === 'entry' ? styles.softRow : styles.callRow}>
+          {phase === 'entry' && (
+            <button
+              type="button"
+              className={styles.softKey}
+              onPointerDown={(e) => {
+                e.preventDefault();
+                skipRef.current?.();
+              }}
+            >
+              Skip
+            </button>
+          )}
+          <div className={styles.callBtns}>
+            <button type="button" className={styles.callGreen} aria-label="Call" />
+            <button type="button" className={styles.callRed} aria-label="End" />
+          </div>
+          {phase === 'entry' && (
+            <button
+              type="button"
+              className={styles.softKey}
+              onPointerDown={(e) => {
+                e.preventDefault();
+                pressOk();
+              }}
+            >
+              Submit
+            </button>
+          )}
         </div>
-        {phase === 'entry' && (
-          <button
-            type="button"
-            className={styles.softKey}
-            onPointerDown={(e) => {
-              e.preventDefault();
-              pressOk();
-            }}
-          >
-            Submit
-          </button>
-        )}
-      </div>
 
-      <div className={styles.bigDpad}>
+        <div className={styles.bigDpad}>
         <button
           type="button"
-          className={styles.dpadBtn}
+          className={`${styles.dpadBtn} ${styles.dpadUp}`}
           aria-label="Up"
           onPointerDown={(e) => {
             e.preventDefault();
@@ -109,7 +110,7 @@ export default function MobileSnakeApp() {
         <div className={styles.dpadRow}>
           <button
             type="button"
-            className={styles.dpadBtn}
+            className={`${styles.dpadBtn} ${styles.dpadLeft}`}
             aria-label="Left"
             onPointerDown={(e) => {
               e.preventDefault();
@@ -129,7 +130,7 @@ export default function MobileSnakeApp() {
           />
           <button
             type="button"
-            className={styles.dpadBtn}
+            className={`${styles.dpadBtn} ${styles.dpadRight}`}
             aria-label="Right"
             onPointerDown={(e) => {
               e.preventDefault();
@@ -141,7 +142,7 @@ export default function MobileSnakeApp() {
         </div>
         <button
           type="button"
-          className={styles.dpadBtn}
+          className={`${styles.dpadBtn} ${styles.dpadDown}`}
           aria-label="Down"
           onPointerDown={(e) => {
             e.preventDefault();
@@ -150,9 +151,10 @@ export default function MobileSnakeApp() {
         >
           ▼
         </button>
-      </div>
+        </div>
 
-      <div className={styles.chin} />
+        <div className={styles.chin} />
+      </div>
     </div>
   );
 }
