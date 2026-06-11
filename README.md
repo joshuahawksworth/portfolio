@@ -1,49 +1,80 @@
-# Joshua Hawksworth - Portfolio
+# Joshua Hawksworth Portfolio
 
-A personal portfolio website showcasing my work experience and technical skills. Built with React and TypeScript.
+An interactive macOS-style portfolio built with React, TypeScript, Vite, and CSS Modules.
 
-🔗 **[Live Site](https://hawksworth.dev/)**
+[Live site](https://hawksworth.dev/)
 
-![Portfolio Demo](./demo.gif)
+![Portfolio demo](./demo.gif)
 
 ## Overview
 
-Single-page portfolio featuring my professional experience across my previous companies, the tech stack I worked with, and a contact form to get in touvh! Includes some animations and interactive elements for visual interest.
+This portfolio presents my experience, projects, and technical skills as a desktop environment. Visitors boot into a login screen, open apps from the dock or desktop, move and resize windows, explore Finder-style content, and use a mobile-specific home screen on smaller devices.
 
-## Features
+The goal is to make the portfolio feel memorable while still keeping the codebase readable for reviewers: app metadata is centralized, shared UI is componentized, and interactive features are covered by unit and smoke tests.
 
-- Hero section with animated background elements
-- Tech stack icons grid
-- Contact form with serverless email (using Resend's Free API)
-- Responsive layout for mobile/tablet/desktop
+## Highlights
+
+- macOS-inspired desktop with boot, login, menu bar, dock, draggable windows, desktop icons, Finder, and Trash.
+- Portfolio apps for About, Experience, Skills, Contact, Location, CV, GitHub, and browser-style project views.
+- Playful extras including Terminal commands, a Nokia-style Snake window, DOOM via js-dos, Calculator, Rubber Duck, and Slotslop.
+- Responsive mobile desktop with touch-friendly app launching and mobile-specific layouts.
+- Experimental Liquid DOM desktop mode for browsers with Chrome's Canvas Draw Element flag enabled.
+- Vercel serverless API routes for contact, search proxying, and leaderboard data.
 
 ## Tech Stack
 
-- **Frontend**: React 18, TypeScript
-- **Styling**: CSS Modules
-- **Deployment**: Vercel
-- **API**: Vercel serverless functions
-- **Email**: Resend
-- **Code Quality**: ESLint, Prettier
+- React 19 and TypeScript
+- Vite
+- CSS Modules
+- Vitest and Testing Library
+- Playwright
+- Vercel serverless functions
+- js-dos, Mapbox GL, Liquid DOM
+
+## Project Structure
+
+```text
+src/
+  components/
+    apps/              Desktop apps and app registry
+    Desktop/           Standard desktop shell
+    Dock/              Shared dock configuration and icons
+    LiquidDesktop/     Experimental liquid-glass desktop
+    MobileDesktop/     Mobile home-screen experience
+    Window/            Shared macOS-style window chrome
+  context/             Desktop window, file, folder, and trash state
+  data/                Portfolio content
+  hooks/               Shared browser and UI hooks
+tests/
+  unit/                Vitest coverage for app logic
+  e2e/                 Playwright smoke coverage
+api/                   Vercel serverless endpoints
+```
 
 ## Running Locally
 
 ```bash
-# Install dependencies
 npm install
-
-# Add environment variables
-# Create .env with RESEND_API_KEY
-
-# Start dev server
 npm run dev
-
-# Build for production
-npm run build
 ```
+
+Create `.env` from `.env.example` before testing API-backed features such as the contact form.
+
+## Quality Checks
+
+```bash
+npm run lint
+npm run test:run
+npm run build
+npm run test:e2e
+```
+
+## Deployment
+
+The site is configured for Vercel. Production builds run TypeScript project references first, then Vite.
 
 ## Contact
 
 Joshua Hawksworth - joshuahawksworth@me.com
 
-[LinkedIn](https://www.linkedin.com/in/joshua-hawksworth-9741aa209/) • [GitHub](https://github.com/joshuahawksworth)
+[LinkedIn](https://www.linkedin.com/in/joshua-hawksworth-9741aa209/) | [GitHub](https://github.com/joshuahawksworth)

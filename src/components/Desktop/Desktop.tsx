@@ -8,46 +8,11 @@ import {
 import MenuBar from '../MenuBar/MenuBar';
 import Dock from '../Dock/Dock';
 import Window from '../Window/Window';
-import AboutApp from '../apps/AboutApp';
-import ExperienceApp from '../apps/ExperienceApp';
-import SkillsApp from '../apps/SkillsApp';
-import ContactApp from '../apps/ContactApp';
-import LocationApp from '../apps/LocationApp';
-import TerminalApp from '../apps/TerminalApp';
-import FinderApp from '../apps/FinderApp';
-import TrashApp from '../apps/TrashApp';
-import SafariApp from '../apps/SafariApp';
-import DoomApp from '../apps/DoomApp';
 import SnakeApp from '../apps/SnakeApp';
 import RubberDuckApp from '../apps/RubberDuckApp';
-import KeyboardShortcutsApp from '../apps/KeyboardShortcutsApp';
-import TextEditorApp from '../apps/TextEditorApp';
-import ImageViewerApp from '../apps/ImageViewerApp';
-import SlotslopApp from '../apps/SlotslopApp';
-import CalculatorApp from '../apps/CalculatorApp';
+import { APP_COMPONENTS } from '../apps/appRegistry';
 import { jobsData } from '../../data/experienceData';
 import styles from './Desktop.module.css';
-
-const APP_COMPONENTS: Record<string, React.ComponentType<{ props?: Record<string, unknown> }>> = {
-  about: AboutApp,
-  experience: ExperienceApp,
-  skills: SkillsApp,
-  contact: ContactApp,
-  location: LocationApp,
-  terminal: TerminalApp,
-  finder: FinderApp,
-  trash: TrashApp,
-  safari: SafariApp,
-  githubapp: SafariApp,
-  doom: DoomApp,
-  rubberduck: RubberDuckApp,
-  shortcuts: KeyboardShortcutsApp,
-  texteditor: TextEditorApp,
-  imageviewer: ImageViewerApp,
-  slotslop: SlotslopApp,
-  calculator: CalculatorApp,
-  // snake is rendered by NokiaWindow — NOT in this map
-};
 
 type SpacePhase = 'ready' | 'playing' | 'hit';
 type SpaceSprite = { x: number; y: number };

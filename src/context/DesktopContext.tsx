@@ -1,4 +1,5 @@
 import { createContext, use, useState, useCallback, useRef } from 'react';
+import { APP_DEFAULTS, APP_MAX, APP_MIN } from '../components/apps/appRegistry';
 
 export interface WindowInstance {
   id: string;
@@ -17,69 +18,6 @@ export interface WindowInstance {
   savedH: number;
   props?: Record<string, unknown>;
 }
-
-export const APP_DEFAULTS: Record<string, { title: string; width: number; height: number }> = {
-  about: { title: 'About Josh', width: 600, height: 500 },
-  experience: { title: 'Work Experience', width: 820, height: 580 },
-  skills: { title: 'Skills & Tech', width: 560, height: 460 },
-  contact: { title: 'New Message', width: 520, height: 480 },
-  location: { title: 'Manchester, UK', width: 700, height: 520 },
-  terminal: { title: 'Terminal', width: 680, height: 460 },
-  finder: { title: 'Finder', width: 780, height: 520 },
-  trash: { title: 'Trash', width: 480, height: 360 },
-  safari: { title: 'Google Chrome', width: 900, height: 620 },
-  githubapp: { title: 'GitHub', width: 900, height: 620 },
-  doom: { title: 'DOOM', width: 800, height: 640 },
-  snake: { title: 'Snake', width: 480, height: 560 },
-  rubberduck: { title: 'Rubber Duck', width: 460, height: 460 },
-  shortcuts: { title: 'Keyboard Shortcuts', width: 560, height: 500 },
-  texteditor: { title: 'Text Editor', width: 780, height: 540 },
-  imageviewer: { title: 'Image Viewer', width: 720, height: 560 },
-  slotslop: { title: 'Slotslop', width: 980, height: 700 },
-  calculator: { title: 'Calculator', width: 280, height: 420 },
-};
-
-// Minimum resize bounds per app
-export const APP_MIN: Record<string, { width: number; height: number }> = {
-  about: { width: 400, height: 300 },
-  experience: { width: 500, height: 380 },
-  skills: { width: 360, height: 280 },
-  contact: { width: 360, height: 300 },
-  location: { width: 380, height: 280 },
-  terminal: { width: 380, height: 240 },
-  finder: { width: 460, height: 320 },
-  trash: { width: 320, height: 240 },
-  safari: { width: 600, height: 400 },
-  githubapp: { width: 600, height: 400 },
-  doom: { width: 540, height: 460 },
-  snake: { width: 380, height: 440 },
-  rubberduck: { width: 360, height: 360 },
-  shortcuts: { width: 380, height: 360 },
-  texteditor: { width: 480, height: 340 },
-  imageviewer: { width: 400, height: 360 },
-  slotslop: { width: 760, height: 520 },
-  calculator: { width: 240, height: 360 },
-};
-
-// Per-app "zoom" target (green button) — bounded by screen at runtime
-export const APP_MAX: Record<string, { width: number; height: number }> = {
-  about: { width: 720, height: 600 },
-  experience: { width: 1060, height: 700 },
-  skills: { width: 820, height: 620 },
-  contact: { width: 680, height: 560 },
-  location: { width: 960, height: 700 },
-  terminal: { width: 960, height: 640 },
-  finder: { width: 1060, height: 720 },
-  trash: { width: 580, height: 440 },
-  doom: { width: 1060, height: 760 },
-  snake: { width: 640, height: 680 },
-  rubberduck: { width: 620, height: 560 },
-  shortcuts: { width: 760, height: 640 },
-  texteditor: { width: 1060, height: 740 },
-  imageviewer: { width: 1060, height: 760 },
-  slotslop: { width: 1120, height: 760 },
-  calculator: { width: 400, height: 620 },
-};
 
 const CASCADE_STEPS = 8;
 function cascadePosition(idx: number, w: number, h: number) {
