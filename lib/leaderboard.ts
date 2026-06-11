@@ -45,13 +45,20 @@ export async function getLeaderboard(env?: NodeJS.ProcessEnv): Promise<Leaderboa
   );
   if (!request) return topScores(fallbackRows());
 
-  const r = await request;
-  if (!r.ok) {
-    console.error('leaderboard GET failed', r.status, await r.text());
+  let response: Response;
+  try {
+    response = await request;
+  } catch (err) {
+    console.error('leaderboard GET failed', err);
     return topScores(fallbackRows());
   }
 
-  const data = await r.json();
+  if (!response.ok) {
+    console.error('leaderboard GET failed', response.status, await response.text());
+    return topScores(fallbackRows());
+  }
+
+  const data = await response.json();
   return Array.isArray(data) ? data.slice(0, LEADERBOARD_LIMIT) : topScores(fallbackRows());
 }
 
@@ -70,21 +77,33 @@ export async function postLeaderboardScore(
   }
 
   const localRow: LeaderboardRow = { name: initials, score, created_at: new Date().toISOString() };
-  const request = supa(TABLE, {
-    method: 'POST',
-    headers: { Prefer: 'return=minimal' },
-    body: JSON.stringify({ name: initials, score }),
-  }, env);
+  const request = supa(
+    TABLE,
+    {
+      method: 'POST',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify({ name: initials, score }),
+    },
+    env
+  );
 
   if (!request) {
     fallbackRows().push(localRow);
     return { ok: true, fallback: true };
   }
 
-  const r = await request;
-  if (!r.ok) {
-    console.error('leaderboard POST failed', r.status, await r.text());
+  let response: Response;
+  try {
+    response = await request;
+  } catch (err) {
+    console.error('leaderboard POST failed', err);
+    fallbackRows().push(localRow);
+    return { ok: true, fallback: true };
+  }
+
+  if (!response.ok) {
+    console.error('leaderboard POST failed', response.status, await response.text());
     fallbackRows().push(localRow);
   }
-  return { ok: true, fallback: !r.ok };
+  return { ok: true, fallback: !response.ok };
 }

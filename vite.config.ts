@@ -112,7 +112,11 @@ function browserProxyPlugin(env: Record<string, string>): Plugin {
 
           if (req.method === 'POST') {
             const body = (await readJsonBody(req)) as { name?: unknown; score?: unknown };
-            const result = await postLeaderboardScore(String(body.name ?? ''), Number(body.score), env);
+            const result = await postLeaderboardScore(
+              String(body.name ?? ''),
+              Number(body.score),
+              env
+            );
             res.setHeader('Content-Type', 'application/json; charset=utf-8');
             if (!result.ok) {
               res.statusCode = 400;
@@ -215,24 +219,8 @@ function browserProxyPlugin(env: Record<string, string>): Plugin {
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const supabaseUrl =
-    env.VITE_SUPABASE_URL ??
-    env.SUPABASE_URL ??
-    process.env.VITE_SUPABASE_URL ??
-    process.env.SUPABASE_URL ??
-    '';
-  const supabaseKey =
-    env.VITE_SUPABASE_ANON_KEY ??
-    env.SUPABASE_ANON_KEY ??
-    process.env.VITE_SUPABASE_ANON_KEY ??
-    process.env.SUPABASE_ANON_KEY ??
-    '';
 
   return {
-    define: {
-      'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(supabaseUrl),
-      'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(supabaseKey),
-    },
     plugins: [react(), browserProxyPlugin(env)],
   };
 });
