@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getLeaderboard, postLeaderboardScore } from '../lib/leaderboard';
+import { getLeaderboard, postLeaderboardScore } from '../lib/leaderboard.js';
 
 function parseBody(req: VercelRequest): { name?: string; score?: number } {
   const raw = req.body;
@@ -29,7 +29,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method === 'POST') {
       const body = parseBody(req);
       const result = await postLeaderboardScore(String(body.name ?? ''), Number(body.score));
-      if (!result.ok) return res.status(400).json({ error: result.error });
+      if (!result.ok && 'error' in result) return res.status(400).json({ error: result.error });
       return res.status(200).json(result);
     }
 
