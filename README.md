@@ -66,12 +66,15 @@ API-backed features are handled by Vercel serverless routes under `api/`. Set th
 
 ```bash
 RESEND_API_KEY="your_resend_api_key_here"
-SUPABASE_URL="https://your-project.supabase.co"
-SUPABASE_ANON_KEY="your_supabase_anon_key"
+DATABASE_URL="postgres://portfolio:portfolio@localhost:5433/portfolio"
 VITE_MAPBOX_TOKEN="your_mapbox_access_token"
 ```
 
-The Snake leaderboard stores scores in a Supabase Postgres table exposed through the server route at `/api/leaderboard`; the browser client does not need direct Supabase credentials.
+The Snake leaderboard stores scores in Postgres through the server route at `/api/leaderboard`; the browser client does not need direct database credentials. For local development, start the Docker Postgres service first:
+
+```bash
+docker compose up -d postgres
+```
 
 ```sql
 create table if not exists snake_leaderboard (

@@ -1,4 +1,9 @@
+import pg from 'pg';
+
+const { Pool } = pg;
 const TABLE = 'snake_leaderboard';
+const DEFAULT_LOCAL_DATABASE_URL = 'postgres://portfolio:portfolio@localhost:5433/portfolio';
+const LEADERBOARD_LIMIT = 5;
 
 type LeaderboardRow = {
   name: string;
@@ -8,6 +13,7 @@ type LeaderboardRow = {
 
 const fallbackStore = globalThis as typeof globalThis & {
   __snakeLeaderboardFallback?: LeaderboardRow[];
+  __snakeLeaderboardPools?: Map<string, pg.Pool>;
 };
 
 function fallbackRows() {
@@ -15,51 +21,50 @@ function fallbackRows() {
   return fallbackStore.__snakeLeaderboardFallback;
 }
 
-const LEADERBOARD_LIMIT = 5;
-
 function topScores(rows: LeaderboardRow[]) {
   return [...rows].sort((a, b) => b.score - a.score).slice(0, LEADERBOARD_LIMIT);
 }
 
-function supa(path: string, init?: RequestInit, env?: NodeJS.ProcessEnv) {
-  const url = env?.SUPABASE_URL ?? process.env.SUPABASE_URL;
-  const key = env?.SUPABASE_ANON_KEY ?? process.env.SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
-  return fetch(`${url}/rest/v1/${path}`, {
-    ...init,
-    headers: {
-      apikey: key,
-      Authorization: `Bearer ${key}`,
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      ...(init?.headers ?? {}),
-    },
+function getDatabaseUrl(env?: NodeJS.ProcessEnv) {
+  return env?.DATABASE_URL ?? process.env.DATABASE_URL ?? DEFAULT_LOCAL_DATABASE_URL;
+}
+
+function getPool(env?: NodeJS.ProcessEnv) {
+  const connectionString = getDatabaseUrl(env);
+  if (!connectionString) return null;
+
+  if (!fallbackStore.__snakeLeaderboardPools) fallbackStore.__snakeLeaderboardPools = new Map();
+  const existing = fallbackStore.__snakeLeaderboardPools.get(connectionString);
+  if (existing) return existing;
+
+  const pool = new Pool({
+    connectionString,
+    max: 3,
+    idleTimeoutMillis: 30_000,
   });
+  fallbackStore.__snakeLeaderboardPools.set(connectionString, pool);
+  return pool;
 }
 
 export async function getLeaderboard(env?: NodeJS.ProcessEnv): Promise<LeaderboardRow[]> {
-  const request = supa(
-    `${TABLE}?select=name,score,created_at&order=score.desc&limit=${LEADERBOARD_LIMIT}`,
-    undefined,
-    env
-  );
-  if (!request) return topScores(fallbackRows());
+  const pool = getPool(env);
+  if (!pool) return topScores(fallbackRows());
 
-  let response: Response;
   try {
-    response = await request;
+    const result = await pool.query<LeaderboardRow>(
+      `
+        select name, score, created_at
+        from ${TABLE}
+        order by score desc, created_at asc
+        limit $1
+      `,
+      [LEADERBOARD_LIMIT]
+    );
+    return result.rows;
   } catch (err) {
     console.error('leaderboard GET failed', err);
     return topScores(fallbackRows());
   }
-
-  if (!response.ok) {
-    console.error('leaderboard GET failed', response.status, await response.text());
-    return topScores(fallbackRows());
-  }
-
-  const data = await response.json();
-  return Array.isArray(data) ? data.slice(0, LEADERBOARD_LIMIT) : topScores(fallbackRows());
 }
 
 export async function postLeaderboardScore(
@@ -77,33 +82,25 @@ export async function postLeaderboardScore(
   }
 
   const localRow: LeaderboardRow = { name: initials, score, created_at: new Date().toISOString() };
-  const request = supa(
-    TABLE,
-    {
-      method: 'POST',
-      headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({ name: initials, score }),
-    },
-    env
-  );
+  const pool = getPool(env);
 
-  if (!request) {
+  if (!pool) {
     fallbackRows().push(localRow);
     return { ok: true, fallback: true };
   }
 
-  let response: Response;
   try {
-    response = await request;
+    await pool.query(
+      `
+        insert into ${TABLE} (name, score)
+        values ($1, $2)
+      `,
+      [initials, score]
+    );
+    return { ok: true };
   } catch (err) {
     console.error('leaderboard POST failed', err);
     fallbackRows().push(localRow);
     return { ok: true, fallback: true };
   }
-
-  if (!response.ok) {
-    console.error('leaderboard POST failed', response.status, await response.text());
-    fallbackRows().push(localRow);
-  }
-  return { ok: true, fallback: !response.ok };
 }
