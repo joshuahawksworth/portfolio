@@ -493,8 +493,8 @@ const BASE_ITEMS = [
   'calculator',
   'github',
   'safari',
-  'snake',
   'cv',
+  'snake',
 ] as const;
 
 const DOCK_APPS = ['about', 'experience', 'contact', 'github'];
