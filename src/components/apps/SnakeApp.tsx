@@ -229,8 +229,7 @@ export default function SnakeApp({
       );
 
       const remoteTopAlreadyFullAndBeatsScore =
-        entries.length >= LEADERBOARD_LIMIT &&
-        entries[entries.length - 1].score >= submittedScore;
+        entries.length >= LEADERBOARD_LIMIT && entries[entries.length - 1].score >= submittedScore;
       if (ok && (postedIsVisible || remoteTopAlreadyFullAndBeatsScore)) {
         pendingEntriesRef.current = pendingEntriesRef.current.filter(
           (entry) => entry !== pendingEntry
@@ -412,8 +411,7 @@ export default function SnakeApp({
         foodRef.current = randPt(next);
       }
 
-      if (canvasRef.current)
-        draw(canvasRef.current, next, foodRef.current, scoreRef.current);
+      if (canvasRef.current) draw(canvasRef.current, next, foodRef.current, scoreRef.current);
     }, TICK);
     return () => clearInterval(id);
   }, []);
@@ -540,7 +538,9 @@ export default function SnakeApp({
             <div className={styles.overlayInner}>
               <p className={styles.gameOver}>SCORE: {score}</p>
               <p className={styles.enterNameLabel}>Enter your name</p>
-              {isMobileMode && <p className={styles.entryPadHint}>↑↓ letter · ←→ slot · OK submit</p>}
+              {isMobileMode && (
+                <p className={styles.entryPadHint}>↑↓ letter · ←→ slot · OK submit</p>
+              )}
 
               <div className={styles.nameEntry}>
                 {([0, 1, 2] as const).map((i) => (
@@ -593,14 +593,14 @@ export default function SnakeApp({
         {phase === 'board' && (
           <div className={styles.overlay}>
             <div className={styles.boardOverlay}>
-              <p className={styles.boardTitle}>🏆 TOP 5</p>
+              <p className={styles.boardTitle}>🏆 YOUR TOP 5</p>
               {(boardStatus === 'loading' || boardStatus === 'syncing') && board.length === 0 && (
                 <p className={styles.boardLoading}>
                   {boardStatus === 'syncing' ? 'Saving score…' : 'Loading…'}
                 </p>
               )}
               {boardStatus === 'done' && board.length === 0 && (
-                <p className={styles.boardEmpty}>No scores yet — be first!</p>
+                <p className={styles.boardEmpty}>No scores yet — play a round!</p>
               )}
               {board.length > 0 && (
                 <ol className={styles.boardList}>
