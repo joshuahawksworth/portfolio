@@ -240,32 +240,6 @@ const DRAWN_ICONS = {
       <ellipse cx="12" cy="33" rx="2.5" ry="1.2" transform="rotate(-20 12 33)" fill="#2a7a18" />
     </svg>
   ),
-  slotslop: (
-    <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
-      <rect width="44" height="44" rx="11" fill="#000" />
-      <rect width="44" height="20" rx="11" fill="rgba(255,255,255,0.04)" />
-      <defs>
-        <linearGradient id="t3rainbow" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#ff0080" />
-          <stop offset="25%" stopColor="#ff8c00" />
-          <stop offset="50%" stopColor="#ffe000" />
-          <stop offset="75%" stopColor="#00d4ff" />
-          <stop offset="100%" stopColor="#a855f7" />
-        </linearGradient>
-      </defs>
-      <text
-        x="22"
-        y="32"
-        textAnchor="middle"
-        fill="url(#t3rainbow)"
-        fontSize="26"
-        fontWeight="900"
-        fontFamily="'Helvetica Neue', Arial, Helvetica, sans-serif"
-      >
-        T3
-      </text>
-    </svg>
-  ),
   imageviewer: (
     // Preview-inspired icon — teal/blue gradient with landscape
     <svg viewBox="0 0 44 44" fill="none" width="44" height="44">

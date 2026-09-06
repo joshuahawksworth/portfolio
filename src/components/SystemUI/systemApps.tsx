@@ -59,7 +59,6 @@ const ENTRIES: Entry[] = [
   { id: 'calculator', dockKey: 'calculator' },
   { id: 'texteditor', dockKey: 'texteditor' },
   { id: 'imageviewer', dockKey: 'imageviewer' },
-  { id: 'slotslop', dockKey: 'slotslop' },
   { id: 'doom', dockKey: 'doom' },
   { id: 'snake', dockKey: 'snake' },
   { id: 'rubberduck' },

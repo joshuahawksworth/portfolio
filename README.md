@@ -32,7 +32,7 @@ the Finder behaves like the real one rather than a list of links.
 - **Ask Claude**: a chat assistant behind a mock "Sign in to Claude" sheet. Guests get answers built from the portfolio
   data in the browser (free, offline); with `ANTHROPIC_API_KEY` set, signed-in visitors are answered by Claude.
 - **Toys**: Apple-style Calculator (with a scientific pad on wide windows), Terminal, a Nokia 3310 running Snake with a
-  personal high-score table (and a hidden Space Impact), DOOM via js-dos, Rubber Duck and Slotslop.
+  personal high-score table (and a hidden Space Impact), DOOM via js-dos and Rubber Duck.
 - **iOS home screen**: blurred wallpaper, 2×2 clock widget, 4×4 pages with scroll-snap swiping and page dots, iOS-style
   search pill and dock, app sheets with a macOS close light.
 

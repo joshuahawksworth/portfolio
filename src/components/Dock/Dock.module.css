@@ -20,7 +20,7 @@
   gap: 6px;
   height: auto;
   padding: 7px 9px 9px;
-  max-width: 96vw;
+  max-width: calc(100vw - 16px);
 
   background: rgba(255, 246, 225, 0.47);
   backdrop-filter: blur(38px) saturate(1.6);
@@ -64,10 +64,18 @@
 /* Icon button */
 .iconBtn {
   /* macOS default dock size: 60px slots; real icon PNGs carry their own ~10% margin,
-     so a full-bleed drawn tile is sized to ~84% to read the same */
-  --app-icon-size: 60px;
-  width: 60px;
-  height: 60px;
+     so a full-bleed drawn tile is sized to ~84% to read the same. When the screen is
+     too narrow for every item at 60px (iPad portrait, small laptops) the slots shrink
+     together, like macOS does, instead of spilling out of the panel. --dock-count is
+     set by the Dock from its item count. */
+  --slot: clamp(
+    34px,
+    calc((100vw - 64px - 10px * var(--dock-count, 16)) / var(--dock-count, 16)),
+    60px
+  );
+  --app-icon-size: var(--slot);
+  width: var(--slot);
+  height: var(--slot);
   background: none;
   border: none;
   padding: 0;
@@ -95,8 +103,8 @@
 /* Drawn icons are full-bleed tiles: size them like the body of a real macOS icon */
 .iconBtn > svg,
 .iconBtn > img {
-  width: 50px;
-  height: 50px;
+  width: calc(var(--slot) * 0.84);
+  height: calc(var(--slot) * 0.84);
 }
 .iconBtn:hover svg,
 .iconBtn:hover img {
@@ -316,46 +324,4 @@
 
 .itemSpring {
   animation: dockSpring 480ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-@media (max-width: 1100px) {
-  .panel {
-    gap: 6px;
-    padding-left: 8px;
-    padding-right: 8px;
-    height: 71px;
-  }
-  .iconBtn {
-    width: 44px;
-    height: 44px;
-    --app-icon-size: 44px;
-  }
-  .iconBtn > svg,
-  .iconBtn > img {
-    width: 36px;
-    height: 36px;
-  }
-  .sep {
-    height: 40px;
-  }
-}
-@media (max-width: 820px) {
-  .panel {
-    gap: 4px;
-    height: 63px;
-    border-radius: 18px;
-  }
-  .iconBtn {
-    width: 36px;
-    height: 36px;
-    --app-icon-size: 36px;
-  }
-  .iconBtn > svg,
-  .iconBtn > img {
-    width: 30px;
-    height: 30px;
-  }
-  .sep {
-    height: 32px;
-  }
 }

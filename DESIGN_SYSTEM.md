@@ -58,7 +58,7 @@ translucent nav bars). The full token list and reference measurements live in
 - Windows: radius `--radius-window` (14px), 46px title bar, 12px traffic lights, warm drop shadow
   `0 24px 65px var(--warm-shadow)`.
 - Do not reintroduce the old dark navy palette (`#1a1c28`, `#06090f`, etc.). Highly themed apps such as
-  Terminal, Snake, DOOM and Slotslop keep their own self-contained palettes.
+  Terminal, Snake and DOOM keep their own self-contained palettes.
 - Wallpapers are JPEGs in `public/wallpapers/` (Golden Gate, Catalina, Tahoe, Sequoia). Desktop defaults to Golden
   Gate; mobile uses the dark Catalina image so iOS-style white labels read well.
 - Keep border radius modest inside apps: controls and rows use `--radius-control` (7px); large panels use 12-16px.
@@ -110,7 +110,7 @@ translucent nav bars). The full token list and reference measurements live in
 ## Assets And Icons
 
 - Reuse existing assets in `src/assets/` and `public/` when possible.
-- App icons are real artwork in `public/icons/` (renders of the official macOS/iOS icons from Wikimedia Commons), mapped in `src/components/Dock/dockIcons.tsx` (`REAL_ICONS`) and the mobile `ICON_IMAGES` map. Only apps with no real counterpart (Snake, Slotslop, Trash, Rubber Duck) keep drawn icons.
+- App icons are real artwork in `public/icons/` (renders of the official macOS/iOS icons from Wikimedia Commons), mapped in `src/components/Dock/dockIcons.tsx` (`REAL_ICONS`) and the mobile `ICON_IMAGES` map. Only apps with no real counterpart (Snake, Trash, Rubber Duck) keep drawn icons.
 - Use existing icon components in `src/components/icons/` for branded desktop icons.
 - Images should have stable dimensions and `object-fit` rules.
 - Do not add large assets without checking bundle impact.
@@ -147,7 +147,7 @@ Use Playwright or the in-app Browser for visual/interaction changes:
 
 - Desktop boot/login/desktop smoke.
 - Mobile home-screen smoke for mobile-facing changes.
-- Canvas/game checks for Snake, DOOM, Slotslop, and similar apps.
+- Canvas/game checks for Snake, DOOM, and similar apps.
 - API route checks with `curl` for server changes.
 
 Before deploying Vercel API changes, run:

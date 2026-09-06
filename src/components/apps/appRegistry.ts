@@ -12,7 +12,6 @@ import LocationApp from './LocationApp';
 import RubberDuckApp from './RubberDuckApp';
 import SafariApp from './SafariApp';
 import SkillsApp from './SkillsApp';
-import SlotslopApp from './SlotslopApp';
 import TerminalApp from './TerminalApp';
 import TextEditorApp from './TextEditorApp';
 import TrashApp from './TrashApp';
@@ -36,7 +35,6 @@ export type PortfolioAppId =
   | 'shortcuts'
   | 'texteditor'
   | 'imageviewer'
-  | 'slotslop'
   | 'calculator'
   | 'askjosh';
 
@@ -179,14 +177,6 @@ export const PORTFOLIO_APPS = {
     defaultSize: { width: 720, height: 560 },
     minSize: { width: 400, height: 360 },
     maxSize: { width: 1060, height: 760 },
-  },
-  slotslop: {
-    id: 'slotslop',
-    title: 'Slotslop',
-    component: SlotslopApp,
-    defaultSize: { width: 980, height: 700 },
-    minSize: { width: 760, height: 520 },
-    maxSize: { width: 1120, height: 760 },
   },
   calculator: {
     id: 'calculator',

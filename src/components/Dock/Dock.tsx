@@ -231,9 +231,12 @@ export default function Dock({ bouncingKeys, onItemActivate, trashHighlighted }:
     );
   }
 
+  // Every slot the dock is showing right now, so the CSS can shrink icons to fit.
+  const dockCount = 2 + order.length + runningDesktopKeys.length + minimizedWindows.length;
+
   return (
     <div className={styles.wrapper}>
-      <div className={styles.panel}>
+      <div className={styles.panel} style={{ '--dock-count': dockCount } as React.CSSProperties}>
         {/* Fixed — Finder */}
         {renderItem('finder', 'Finder', DOCK_ICONS.finder, false)}
 

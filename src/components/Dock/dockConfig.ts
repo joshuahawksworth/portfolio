@@ -15,7 +15,6 @@ export const DOCK_DEFAULT_ORDER = [
   'texteditor',
   'imageviewer',
   'cv',
-  'slotslop',
 ] as const;
 
 export type DockKey =
@@ -41,7 +40,6 @@ export const DOCK_LABELS: Record<string, string> = {
   texteditor: 'Text Editor',
   imageviewer: 'Image Viewer',
   cv: 'CV',
-  slotslop: 'Slotslop',
   doom: 'DOOM',
   snake: 'Snake',
   trash: 'Trash',
@@ -68,8 +66,6 @@ export function getDockAction(
       return () => openApp('safari');
     case 'cv':
       return () => window.open('/JoshuaHawksworthCV.pdf', '_blank');
-    case 'slotslop':
-      return () => openApp('slotslop');
     case 'texteditor':
       return () => openApp('texteditor');
     case 'imageviewer':

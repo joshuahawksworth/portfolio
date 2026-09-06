@@ -62,7 +62,7 @@ All shell tokens live on `:root` in `src/index.css`. Use them instead of hard-co
 
 - App interiors sit inside a `--panel` window. Use sidebars, toolbars, lists and sections; no cards inside cards.
 - Keep contrast: body text `--text` on `--panel`; never white text on light surfaces.
-- Highly themed apps keep their own palette: Terminal (dark), Snake/Nokia, DOOM, Slotslop, MobileSnake.
+- Highly themed apps keep their own palette: Terminal (dark), Snake/Nokia, DOOM, MobileSnake.
 - Do not use hard-coded dark navy (`#1a1c28`, `#1c1e26`, `#171921`, `#06090f`) anywhere in normal apps.
 - Prefer `var(--font-ui)` over repeating font stacks.
 - Keep the class names and component structure; this is a restyle, not a rewrite.
