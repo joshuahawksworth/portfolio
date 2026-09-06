@@ -3,7 +3,9 @@
   position: absolute;
   /* No overflow hidden — resize handles extend outside */
   /* transform-origin is set inline to the dock's position (used when minimising) */
-  animation: windowIn 200ms ease-out both;
+  /* No fill mode: a persisting opacity animation would make this element a backdrop
+     root, so the window's backdrop-filter would stop blurring the windows behind it. */
+  animation: windowIn 200ms ease-out;
 }
 
 @keyframes dockZoomIn {
@@ -60,23 +62,36 @@
   flex-direction: column;
   border-radius: var(--radius-window);
   overflow: hidden;
-  background: var(--panel);
-  backdrop-filter: blur(28px) saturate(1.5);
-  -webkit-backdrop-filter: blur(28px) saturate(1.5);
-  border: 1px solid rgba(255, 255, 255, 0.42);
-  outline: 1px solid rgba(58, 39, 9, 0.17);
+  /* Liquid Glass: the wallpaper shows through a heavily blurred, lightly tinted
+     pane with a bright refracted rim. Apps only tint this; they never paint over it. */
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.34) 0%,
+      rgba(255, 255, 255, 0.1) 26%,
+      rgba(255, 255, 255, 0) 60%
+    ),
+    rgba(252, 248, 240, 0.4);
+  backdrop-filter: blur(44px) saturate(1.9);
+  -webkit-backdrop-filter: blur(44px) saturate(1.9);
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  outline: 1px solid rgba(58, 39, 9, 0.16);
   transition: box-shadow 200ms ease;
   color: var(--text);
 }
 
 .focused {
   box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.22),
     0 24px 65px var(--warm-shadow),
     0 3px 14px rgba(0, 0, 0, 0.13);
 }
 
 .blurred {
   box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
     0 10px 30px rgba(75, 53, 25, 0.2),
     0 1px 6px rgba(0, 0, 0, 0.06);
 }
@@ -111,10 +126,8 @@
   cursor: default;
   user-select: none;
   background: var(--glass);
-  backdrop-filter: blur(35px) saturate(1.7);
-  -webkit-backdrop-filter: blur(35px) saturate(1.7);
   border-bottom: 1px solid var(--line);
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.47);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.5);
   position: relative;
 }
 
@@ -249,5 +262,6 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  background: var(--panel);
+  /* Transparent: the app root tints the window's glass */
+  background: transparent;
 }

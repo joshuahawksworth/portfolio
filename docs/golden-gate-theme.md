@@ -16,11 +16,11 @@ All shell tokens live on `:root` in `src/index.css`. Use them instead of hard-co
 | `--text-strong` | `#1c1a18` | headings |
 | `--muted` | `#827c76` | secondary text, section labels, icons at rest |
 | `--muted-2` | `#a8a29b` | placeholders, disabled |
-| `--panel` | `#fcfaf7` | window body / main content background |
-| `--panel-2` | `#f6f2ea` | inset areas, code blocks, table headers |
+| `--panel` | `rgba(252,250,247,0.36)` | app root tint inside a window (the window shell supplies the glass) |
+| `--panel-2` | `rgba(246,242,234,0.5)` | inset areas, code blocks, table headers |
 | `--line` | `rgba(0,0,0,0.063)` | dividers, borders |
 | `--line-strong` | `rgba(0,0,0,0.11)` | input borders, card borders |
-| `--glass` | `rgba(248,242,230,0.79)` | sidebars, toolbars, title bars (pair with `backdrop-filter: blur(36px) saturate(1.6)`) |
+| `--glass` | `rgba(248,242,230,0.44)` | sidebars, toolbars, title bars (tints; the window shell already blurs) |
 | `--glass-strong` | `rgba(252,250,247,0.92)` | popovers, menus |
 | `--hover` | `rgba(0,0,0,0.045)` | hover fill |
 | `--selected` | `rgba(0,0,0,0.075)` | selected fill (neutral) |
@@ -33,6 +33,11 @@ All shell tokens live on `:root` in `src/index.css`. Use them instead of hard-co
 ## Reference measurements (from the macOS Golden Gate site)
 
 - Menu bar: 29px tall, `rgba(255,227,165,0.15)` + `blur(30px)`, text `#282624` 13px, app name weight 650.
+- Window (Liquid Glass): the `.window` shell is the only blurred layer — `rgba(252,248,240,0.4)` + top sheen gradient,
+  `backdrop-filter: blur(44px) saturate(1.9)`, `1px solid rgba(255,255,255,0.58)` border, inset white rim. App roots
+  only tint it with `--panel`; never give an app root an opaque background or a second backdrop-filter.
+  Keep the intro animation without a fill mode: a persisting opacity animation turns the outer element into a
+  backdrop root and the blur stops seeing the windows behind.
 - Window: radius 14px, `1px solid rgba(255,255,255,0.42)` border, outline `1px solid rgba(58,39,9,0.17)`,
   shadow `0 24px 65px rgba(87,52,10,0.3), 0 3px 14px rgba(0,0,0,0.13)`. Inactive: `0 10px 30px rgba(75,53,25,0.2)`.
 - Title bar: 46px tall, background `--glass`, `border-bottom: 1px solid --line`, inset top highlight

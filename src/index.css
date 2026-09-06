@@ -6,12 +6,13 @@
   --text-strong: #1c1a18;
   --muted: #827c76;
   --muted-2: #a8a29b;
-  --panel: rgba(252, 250, 247, 0.84);
+  /* Window interiors are tints over the window's own glass, so keep them light */
+  --panel: rgba(252, 250, 247, 0.36);
   --panel-solid: #fcfaf7;
-  --panel-2: rgba(246, 242, 234, 0.9);
+  --panel-2: rgba(246, 242, 234, 0.5);
   --line: rgba(0, 0, 0, 0.063);
   --line-strong: rgba(0, 0, 0, 0.11);
-  --glass: rgba(248, 242, 230, 0.79);
+  --glass: rgba(248, 242, 230, 0.44);
   --glass-strong: rgba(252, 250, 247, 0.92);
   --glass-menu: rgba(252, 248, 240, 0.86);
   --hover: rgba(0, 0, 0, 0.045);
