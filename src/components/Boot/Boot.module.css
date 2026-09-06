@@ -1,6 +1,9 @@
 .screen {
   position: fixed;
   inset: 0;
+  /* iOS Safari can leave a stale layout viewport after a background reload;
+     the measured height wins over bottom: 0 */
+  height: var(--app-height, 100dvh);
   background: #000;
   display: flex;
   flex-direction: column;

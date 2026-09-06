@@ -1,7 +1,9 @@
 /* ── Ask Josh — macOS Golden Gate (light, warm) ─────────────────────────── */
 .root {
   display: grid;
-  grid-template-columns: 200px minmax(0, 1fr);
+  /* `auto` collapses to nothing when the sidebar is display: none — a container query
+     cannot restyle the container itself, so the column count can't change there */
+  grid-template-columns: auto minmax(0, 1fr);
   height: 100%;
   min-height: 0;
   background: var(--panel);
@@ -15,6 +17,7 @@
 .sidebar {
   display: flex;
   flex-direction: column;
+  width: 200px;
   min-height: 0;
   padding: 13px 9px;
   background: var(--glass);
@@ -466,9 +469,6 @@
 
 /* ── Narrow windows / mobile: collapse the sidebar ── */
 @container (max-width: 639px) {
-  .root {
-    grid-template-columns: minmax(0, 1fr);
-  }
   .sidebar {
     display: none;
   }

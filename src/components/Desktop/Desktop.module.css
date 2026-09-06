@@ -1,6 +1,9 @@
 .desktop {
   position: fixed;
   inset: 0;
+  /* iOS Safari can leave a stale layout viewport after a background reload;
+     the measured height wins over bottom: 0 */
+  height: var(--app-height, 100dvh);
   overflow: hidden;
   background: #f1c367;
   color: var(--text);
