@@ -155,24 +155,6 @@
   background: #fff;
 }
 
-.plusMinus {
-  display: inline-flex;
-  align-items: baseline;
-  font-size: 0.95em;
-  line-height: 1;
-}
-.plusMinus sup,
-.plusMinus sub {
-  font-size: 0.72em;
-  line-height: 0;
-}
-.plusMinus sup {
-  vertical-align: 0.45em;
-}
-.plusMinus sub {
-  vertical-align: -0.25em;
-}
-
 /* ── Mac: dark rounded window, gentle keys ── */
 .root[data-mobile='false'] {
   --calc-bg: #1c1c1e;

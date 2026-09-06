@@ -32,6 +32,33 @@ const ERROR_TEXT: Record<ErrorKind, string> = {
   generic: 'Something went wrong reaching the assistant. Please try again in a moment.',
 };
 
+const SIGN_IN_KEY = 'portfolio.askclaude.account';
+
+type Provider = 'apple' | 'google' | 'guest';
+
+interface Account {
+  name: string;
+  provider: Provider;
+}
+
+function loadAccount(): Account | null {
+  try {
+    const raw = localStorage.getItem(SIGN_IN_KEY);
+    return raw ? (JSON.parse(raw) as Account) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveAccount(account: Account | null) {
+  try {
+    if (account) localStorage.setItem(SIGN_IN_KEY, JSON.stringify(account));
+    else localStorage.removeItem(SIGN_IN_KEY);
+  } catch {
+    /* private mode */
+  }
+}
+
 let idCounter = 0;
 const nextId = () => `${Date.now().toString(36)}-${(idCounter += 1)}`;
 const newChat = (): Chat => ({ id: nextId(), messages: [] });
@@ -200,8 +227,107 @@ function SendIcon() {
   );
 }
 
+function AppleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M16.6 12.7c0-2.5 2-3.7 2.1-3.8-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.7.9-.8 0-2-.9-3.2-.8-1.7 0-3.2 1-4.1 2.4-1.7 3-.4 7.5 1.3 9.9.8 1.2 1.8 2.5 3.1 2.5 1.2 0 1.7-.8 3.2-.8s1.9.8 3.2.8c1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8 0 0-2.6-1-2.6-3.9zM14.2 5.3c.7-.8 1.1-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4z" />
+    </svg>
+  );
+}
+
+function GoogleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        fill="#4285F4"
+        d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.7-2.4 3.6v3h3.9c2.3-2.1 3.5-5.2 3.5-8.8z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 24c3.2 0 6-1.1 8-2.9l-3.9-3c-1.1.7-2.5 1.2-4.1 1.2-3.1 0-5.8-2.1-6.7-5H1.2v3.1C3.2 21.3 7.3 24 12 24z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.3 14.3c-.2-.7-.4-1.5-.4-2.3s.1-1.6.4-2.3V6.6H1.2C.4 8.2 0 10 0 12s.4 3.8 1.2 5.4l4.1-3.1z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4C18 1.2 15.2 0 12 0 7.3 0 3.2 2.7 1.2 6.6l4.1 3.1c.9-2.9 3.6-4.9 6.7-4.9z"
+      />
+    </svg>
+  );
+}
+
+/** The sign-in sheet shown over the app until the visitor "signs in" (a local mock). */
+function SignInGate({ onSignIn }: { onSignIn: (account: Account) => void }) {
+  const [busy, setBusy] = useState<Provider | null>(null);
+
+  function go(provider: Provider) {
+    if (busy) return;
+    setBusy(provider);
+    // A short beat so it feels like a real hand-off, then straight back in.
+    window.setTimeout(() => {
+      const name =
+        provider === 'apple' ? 'Apple ID' : provider === 'google' ? 'Google account' : 'Guest';
+      onSignIn({ name, provider });
+    }, 700);
+  }
+
+  return (
+    <div className={styles.gate} role="dialog" aria-modal="true" aria-labelledby="askclaude-signin">
+      <div className={styles.gateCard}>
+        <img className={styles.gateIcon} src="/icons/claude.png" alt="" draggable={false} />
+        <h2 id="askclaude-signin" className={styles.gateTitle}>
+          Sign in to Claude
+        </h2>
+        <p className={styles.gateText}>
+          Sign in to chat with Claude about Josh's work, experience and projects.
+        </p>
+        <button
+          type="button"
+          className={`${styles.gateBtn} ${styles.gateBtnPrimary}`}
+          onClick={() => go('apple')}
+          disabled={busy !== null}
+        >
+          {busy === 'apple' ? <span className={styles.gateBusy} /> : <AppleIcon />}
+          Continue with Apple
+        </button>
+        <button
+          type="button"
+          className={styles.gateBtn}
+          onClick={() => go('google')}
+          disabled={busy !== null}
+        >
+          {busy === 'google' ? <span className={styles.gateBusy} /> : <GoogleIcon />}
+          Continue with Google
+        </button>
+        <button
+          type="button"
+          className={styles.gateBtn}
+          onClick={() => go('guest')}
+          disabled={busy !== null}
+        >
+          Continue as guest
+        </button>
+        <p className={styles.gateFoot}>
+          This is a portfolio demo: nothing is sent anywhere and no account is created.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ── App ────────────────────────────────────────────────────────────────────────
 export default function AskJoshApp() {
+  const [account, setAccount] = useState<Account | null>(loadAccount);
+  function signIn(next: Account) {
+    saveAccount(next);
+    setAccount(next);
+  }
+  function signOut() {
+    saveAccount(null);
+    setAccount(null);
+  }
   const [chats, setChats] = useState<Chat[]>(() => [newChat()]);
   const [activeId, setActiveId] = useState(() => chats[0].id);
   const [input, setInput] = useState('');
@@ -364,6 +490,7 @@ export default function AskJoshApp() {
 
   return (
     <div className={styles.root}>
+      {!account && <SignInGate onSignIn={signIn} />}
       <aside className={styles.sidebar}>
         <button type="button" className={styles.newChat} onClick={startNewChat}>
           <span className={styles.rowIcon}>
@@ -403,6 +530,17 @@ export default function AskJoshApp() {
             ))
           )}
         </div>
+        {account && (
+          <div className={styles.account}>
+            <span className={styles.accountAvatar} aria-hidden="true">
+              {account.provider === 'guest' ? 'G' : 'JH'}
+            </span>
+            <span className={styles.accountName}>{account.name}</span>
+            <button type="button" className={styles.signOut} onClick={signOut}>
+              Sign out
+            </button>
+          </div>
+        )}
       </aside>
 
       <section className={styles.main}>

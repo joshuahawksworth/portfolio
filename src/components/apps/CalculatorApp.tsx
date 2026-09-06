@@ -41,6 +41,22 @@ function BackspaceIcon() {
   );
 }
 
+/** The ⁺/₋ key glyph: small plus, slash, small minus — like the SF Symbol. */
+function PlusMinusIcon() {
+  return (
+    <svg viewBox="0 0 30 30" width="1.05em" height="1.05em" fill="none" aria-hidden="true">
+      <path
+        d="M8 5.5V13.5M4 9.5H12"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
+      <path d="M20 4L10 26" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M18 21.5H26" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 /**
  * Apple Calculator: black canvas, thin white result, grey expression line above it,
  * dark-grey digit keys, light-grey function keys and orange operators. Round keys
@@ -278,9 +294,7 @@ export default function CalculatorApp() {
           </Btn>
 
           <Btn className={styles.digit} onClick={calc.toggleSign} label="Toggle sign">
-            <span className={styles.plusMinus}>
-              <sup>+</sup>⁄<sub>−</sub>
-            </span>
+            <PlusMinusIcon />
           </Btn>
           <Btn className={styles.digit} onClick={() => calc.inputDigit('0')}>
             0

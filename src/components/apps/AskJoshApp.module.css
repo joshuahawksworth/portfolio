@@ -1,5 +1,6 @@
 /* ── Ask Josh — macOS Golden Gate (light, warm) ─────────────────────────── */
 .root {
+  position: relative;
   display: grid;
   /* `auto` collapses to nothing when the sidebar is display: none — a container query
      cannot restyle the container itself, so the column count can't change there */
@@ -483,4 +484,181 @@
   .heroTitle {
     font-size: 22px;
   }
+}
+
+/* Phones: single column regardless of container support */
+@media (max-width: 599px) {
+  .root {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sidebar {
+    display: none;
+  }
+  .headerNewChat {
+    display: flex;
+  }
+}
+
+/* ── Sign-in gate (like the reference's ChatGPT app) ── */
+.gate {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(252, 248, 240, 0.55);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+}
+
+.gateCard {
+  width: min(360px, 100%);
+  padding: 28px 24px 22px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 24px 60px rgba(87, 52, 10, 0.22),
+    0 2px 10px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: gateIn 220ms ease-out;
+}
+
+@keyframes gateIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.gateIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 15px;
+  box-shadow: 0 8px 22px rgba(217, 119, 87, 0.35);
+}
+
+.gateTitle {
+  margin: 16px 0 6px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-strong);
+}
+
+.gateText {
+  margin: 0 0 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.gateBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  height: 42px;
+  margin-top: 8px;
+  border-radius: 11px;
+  border: 1px solid var(--line-strong);
+  background: #fff;
+  color: var(--text-strong);
+  font: 600 14px var(--font-ui);
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    transform 120ms ease;
+}
+.gateBtn:hover {
+  background: #f6f4f0;
+}
+.gateBtn:active {
+  transform: scale(0.98);
+}
+.gateBtnPrimary {
+  background: #1c1a18;
+  border-color: #1c1a18;
+  color: #fff;
+}
+.gateBtnPrimary:hover {
+  background: #2c2a27;
+}
+.gateBtn svg,
+.gateBtn img {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.gateFoot {
+  margin: 16px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted-2);
+}
+
+.gateBusy {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  animation: gateSpin 0.8s linear infinite;
+}
+@keyframes gateSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.account {
+  margin-top: auto;
+  padding: 10px 6px 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+}
+.accountAvatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f7df1e, #f0b62e);
+  color: #1c1a18;
+  font-size: 10px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.accountName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+.signOut {
+  border: none;
+  background: none;
+  padding: 2px 4px;
+  font: inherit;
+  color: var(--accent);
+  cursor: pointer;
 }
