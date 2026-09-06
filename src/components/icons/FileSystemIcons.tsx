@@ -250,7 +250,7 @@ export function MacintoshHDIcon({ size = 50, style, className }: IconProps) {
   );
 }
 
-/** Frosted wire-mesh bin, wider at the top; shows crumpled paper when full. */
+/** macOS Trash: a translucent wire-mesh cylinder seen slightly from above, open at the top. */
 export function TrashBinIcon({
   size = 50,
   full = false,
@@ -260,16 +260,20 @@ export function TrashBinIcon({
 }: IconProps & { full?: boolean; glow?: boolean }) {
   const uid = useId().replace(/:/g, '');
   const body = `${uid}b`;
+  const shade = `${uid}s`;
   const rim = `${uid}r`;
+  const inner = `${uid}i`;
   const mesh = `${uid}m`;
   const clip = `${uid}c`;
-  const paper = `${uid}p`;
   const glowStyle: CSSProperties | undefined = glow
     ? {
         filter:
           'drop-shadow(0 0 8px rgba(0,122,255,0.7)) drop-shadow(0 0 16px rgba(0,122,255,0.4))',
       }
     : undefined;
+
+  // Cylinder: rim ellipse at y=13, base ellipse at y=49, tapering slightly.
+  const bodyPath = 'M5 13 L9.5 49 A16.5 4.6 0 0 0 42.5 49 L47 13 Z';
 
   return (
     <svg
@@ -282,44 +286,53 @@ export function TrashBinIcon({
       aria-hidden="true"
     >
       <defs>
-        <linearGradient id={body} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#f7f6f3" stopOpacity="0.95" />
-          <stop offset="0.45" stopColor="#dedbd5" stopOpacity="0.9" />
-          <stop offset="1" stopColor="#c6c2bb" stopOpacity="0.95" />
+        <linearGradient id={body} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#ecebe8" stopOpacity="0.9" />
+          <stop offset="1" stopColor="#c3c0ba" stopOpacity="0.92" />
+        </linearGradient>
+        {/* Left-to-right shading that makes it read as a cylinder */}
+        <linearGradient id={shade} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#000" stopOpacity="0.1" />
+          <stop offset="0.18" stopColor="#fff" stopOpacity="0.45" />
+          <stop offset="0.5" stopColor="#fff" stopOpacity="0" />
+          <stop offset="1" stopColor="#000" stopOpacity="0.16" />
         </linearGradient>
         <linearGradient id={rim} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#ffffff" />
-          <stop offset="1" stopColor="#cfcbc4" />
+          <stop offset="1" stopColor="#d9d6d0" />
         </linearGradient>
-        <linearGradient id={paper} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#ffffff" />
-          <stop offset="1" stopColor="#e2dfd8" />
-        </linearGradient>
-        <pattern id={mesh} width="3.2" height="3.2" patternUnits="userSpaceOnUse">
-          <circle cx="1.6" cy="1.6" r="0.75" fill="rgba(0,0,0,0.13)" />
+        <radialGradient id={inner} cx="0.5" cy="0.35" r="0.7">
+          <stop offset="0" stopColor="#8f8b85" />
+          <stop offset="1" stopColor="#5f5b56" />
+        </radialGradient>
+        <pattern id={mesh} width="3" height="3" patternUnits="userSpaceOnUse">
+          <path d="M1.5 0V3M0 1.5H3" stroke="rgba(0,0,0,0.16)" strokeWidth="0.55" />
         </pattern>
         <clipPath id={clip}>
-          <path d="M9.5 19H42.5L39.2 49.5Q38.8 52.5 35.8 52.5H16.2Q13.2 52.5 12.8 49.5Z" />
+          <path d={bodyPath} />
         </clipPath>
       </defs>
+
+      {/* Inside of the bin, visible through the open top */}
+      <ellipse cx="26" cy="13" rx="21" ry="6.2" fill={`url(#${inner})`} />
 
       {full && (
         <g>
           <path
-            d="M15 19L17 8L24 7.5L22 19Z"
-            fill={`url(#${paper})`}
+            d="M12 12.5L15 3.5L23 4.5L21.5 12.5Z"
+            fill="#fbfaf7"
             stroke="rgba(0,0,0,0.14)"
             strokeLinejoin="round"
           />
           <path
-            d="M23 19L26.5 6L33.5 9L31 19Z"
-            fill="#fff5c9"
+            d="M21 12L26 2.5L34.5 6.5L32 12.5Z"
+            fill="#fff3c4"
             stroke="rgba(0,0,0,0.14)"
             strokeLinejoin="round"
           />
           <path
-            d="M31 19L34 10L40 13.5L37.5 19Z"
-            fill="#d8ecff"
+            d="M31 12.5L36 6L42.5 10.5L40.5 13Z"
+            fill="#dcedff"
             stroke="rgba(0,0,0,0.14)"
             strokeLinejoin="round"
           />
@@ -327,48 +340,35 @@ export function TrashBinIcon({
       )}
 
       {/* Body */}
-      <path
-        d="M9.5 19H42.5L39.2 49.5Q38.8 52.5 35.8 52.5H16.2Q13.2 52.5 12.8 49.5Z"
-        fill={`url(#${body})`}
-      />
+      <path d={bodyPath} fill={`url(#${body})`} />
       <rect x="0" y="0" width="52" height="56" fill={`url(#${mesh})`} clipPath={`url(#${clip})`} />
-      <path
-        d="M9.5 19H42.5L39.2 49.5Q38.8 52.5 35.8 52.5H16.2Q13.2 52.5 12.8 49.5Z"
-        stroke="rgba(0,0,0,0.16)"
-        strokeWidth="0.9"
-        strokeLinejoin="round"
-      />
+      <path d={bodyPath} fill={`url(#${shade})`} />
       {/* Vertical ribs */}
       <path
-        d="M17.5 23L18.8 48M26 23V48M34.5 23L33.2 48"
+        d="M13.5 15.5L16.5 48M26 16V49.5M38.5 15.5L35.5 48"
         stroke="rgba(0,0,0,0.12)"
-        strokeWidth="1.4"
+        strokeWidth="1.3"
         strokeLinecap="round"
       />
-      {/* Rim */}
-      <rect x="7" y="15.5" width="38" height="5" rx="2.5" fill={`url(#${rim})`} />
-      <rect
-        x="7"
-        y="15.5"
-        width="38"
-        height="5"
-        rx="2.5"
-        stroke="rgba(0,0,0,0.18)"
-        strokeWidth="0.9"
+      <path d={bodyPath} stroke="rgba(0,0,0,0.2)" strokeWidth="0.8" strokeLinejoin="round" />
+
+      {/* Front rim: a thicker ring around the open top */}
+      <path
+        d="M5 13 A21 6.2 0 0 0 47 13 A21 6.2 0 0 0 5 13 Z"
+        fill="none"
+        stroke={`url(#${rim})`}
+        strokeWidth="3"
       />
-      {/* Lid handle */}
-      {!full && (
-        <rect
-          x="21"
-          y="12"
-          width="10"
-          height="4"
-          rx="2"
-          fill="#ebe8e2"
-          stroke="rgba(0,0,0,0.18)"
-          strokeWidth="0.9"
-        />
-      )}
+      <path d="M5 13 A21 6.2 0 0 0 47 13" fill="none" stroke="rgba(0,0,0,0.22)" strokeWidth="0.8" />
+      <ellipse
+        cx="26"
+        cy="13"
+        rx="21"
+        ry="6.2"
+        fill="none"
+        stroke="rgba(0,0,0,0.18)"
+        strokeWidth="0.8"
+      />
     </svg>
   );
 }

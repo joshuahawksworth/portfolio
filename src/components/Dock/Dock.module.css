@@ -39,7 +39,7 @@
   width: 1px;
   height: 46px;
   background: rgba(95, 74, 49, 0.2);
-  margin: 0 5px;
+  margin: 0 1px;
   align-self: center;
   flex-shrink: 0;
 }
