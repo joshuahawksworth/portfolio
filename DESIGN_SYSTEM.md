@@ -11,7 +11,7 @@ This project is an interactive macOS-style portfolio. Future work should feel li
 
 ## Architecture
 
-- `src/App.tsx` controls the phase flow: boot, login, desktop, optional Liquid Desktop, or mobile desktop.
+- `src/App.tsx` controls the phase flow: boot, login, then desktop or mobile desktop.
 - `src/components/Desktop/Desktop.tsx` owns the standard desktop shell, icons, selection, menus, and special windows.
 - `src/context/DesktopContext.tsx` owns window state, desktop files/folders, trash state, restored items, and app opening.
 - `src/components/apps/appRegistry.ts` is the source of truth for app IDs, titles, components, default sizes, min sizes, and max sizes.
@@ -19,7 +19,6 @@ This project is an interactive macOS-style portfolio. Future work should feel li
 - `src/components/SystemUI/` owns Spotlight, Control Center, Notification Center and Launchpad; they are driven by `src/context/SystemUIContext.tsx`.
 - `src/components/Window/` owns standard window chrome and resizing behavior.
 - `src/components/MobileDesktop/` owns the mobile home screen, dock, and full-screen app panels.
-- `src/components/LiquidDesktop/` is experimental and should stay isolated from the standard desktop path.
 - `api/` contains Vercel serverless routes. Shared server helpers live in root `lib/`.
 
 ## Adding Or Changing Apps
@@ -111,7 +110,7 @@ translucent nav bars). The full token list and reference measurements live in
 ## Assets And Icons
 
 - Reuse existing assets in `src/assets/` and `public/` when possible.
-- App/dock icons should be centralized in `src/components/Dock/dockIcons.tsx` or the relevant mobile icon map.
+- App icons are real artwork in `public/icons/` (renders of the official macOS/iOS icons from Wikimedia Commons), mapped in `src/components/Dock/dockIcons.tsx` (`REAL_ICONS`) and the mobile `ICON_IMAGES` map. Only apps with no real counterpart (Snake, Slotslop, Trash, Rubber Duck) keep drawn icons.
 - Use existing icon components in `src/components/icons/` for branded desktop icons.
 - Images should have stable dimensions and `object-fit` rules.
 - Do not add large assets without checking bundle impact.

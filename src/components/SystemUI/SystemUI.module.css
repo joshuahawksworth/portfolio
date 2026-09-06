@@ -170,6 +170,9 @@
   justify-content: center;
 }
 
+.resultIcon {
+  --app-icon-size: 28px;
+}
 .resultIcon > svg,
 .resultIcon > img {
   width: 28px;
@@ -673,6 +676,9 @@
   filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.28));
 }
 
+.launchpadIcon {
+  --app-icon-size: 64px;
+}
 .launchpadIcon > svg,
 .launchpadIcon > img {
   width: 64px;

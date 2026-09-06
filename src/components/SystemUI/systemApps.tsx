@@ -25,18 +25,7 @@ const LOCAL_ICONS: Partial<Record<PortfolioAppId, ReactNode>> = {
       <path d="M10 19.5 Q6.5 20.5 8.5 22.5 Q11 23 12.5 21.5 Z" fill="#ff7a1a" />
     </MacIcon>
   ),
-  shortcuts: (
-    <MacIcon top="#8e8e93" bottom="#48484a">
-      <rect x="8" y="12" width="28" height="20" rx="4" fill="rgba(255,255,255,0.92)" />
-      {[11, 16, 21, 26].map((x) => (
-        <rect key={`a${x}`} x={x} y="15.5" width="3.5" height="3.5" rx="1" fill="#48484a" />
-      ))}
-      {[13, 18, 23].map((x) => (
-        <rect key={`b${x}`} x={x} y="20.5" width="3.5" height="3.5" rx="1" fill="#48484a" />
-      ))}
-      <rect x="14" y="25.5" width="16" height="3.5" rx="1" fill="#48484a" />
-    </MacIcon>
-  ),
+  shortcuts: DOCK_ICONS.shortcuts,
   trash: (
     <MacIcon top="#e9e2d6" bottom="#b8afa3">
       <path

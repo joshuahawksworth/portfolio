@@ -2,8 +2,8 @@
 .outer {
   position: absolute;
   /* No overflow hidden — resize handles extend outside */
-  /* transform-origin is set inline to the dock's position so windows zoom out of it */
-  animation: dockZoomIn 340ms cubic-bezier(0.2, 0.85, 0.25, 1) both;
+  /* transform-origin is set inline to the dock's position (used when minimising) */
+  animation: windowIn 200ms ease-out both;
 }
 
 @keyframes dockZoomIn {
@@ -23,7 +23,7 @@
 @keyframes windowIn {
   from {
     opacity: 0;
-    transform: scale(0.97) translateY(6px);
+    transform: scale(0.97);
   }
   to {
     opacity: 1;
@@ -61,6 +61,8 @@
   border-radius: var(--radius-window);
   overflow: hidden;
   background: var(--panel);
+  backdrop-filter: blur(28px) saturate(1.5);
+  -webkit-backdrop-filter: blur(28px) saturate(1.5);
   border: 1px solid rgba(255, 255, 255, 0.42);
   outline: 1px solid rgba(58, 39, 9, 0.17);
   transition: box-shadow 200ms ease;

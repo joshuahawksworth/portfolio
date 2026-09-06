@@ -20,6 +20,7 @@ import { ChromeLogoIcon } from '../icons/ChromeLogoIcon';
 import { DesktopProvider, useDesktop } from '../../context/DesktopContext';
 import StatusBar from './StatusBar';
 import styles from './MobileDesktop.module.css';
+import { DARK_WALLPAPERS, WALLPAPERS, loadWallpaper } from '../../data/wallpapers';
 
 // ── App icon gradients (iOS-style flat two-stop, light top → deep bottom) ──
 const ICON_GRADS: Record<string, [string, string]> = {
@@ -287,8 +288,49 @@ function IconFrame({
   );
 }
 
+// Real app artwork (see public/icons). macOS-style icons carry their own margin,
+// so they're scaled up to fill the iOS squircle; iOS-style ones fit as-is.
+const ICON_IMAGES: Record<string, { src: string; scale?: number; bg?: string }> = {
+  finder: { src: '/icons/finder.png', scale: 1.28 },
+  terminal: { src: '/icons/terminal.png', scale: 1.28 },
+  texteditor: { src: '/icons/textedit.png', scale: 1.28 },
+  imageviewer: { src: '/icons/preview.png', scale: 1.28 },
+  contact: { src: '/icons/mail.png' },
+  location: { src: '/icons/maps.png' },
+  calculator: { src: '/icons/calculator.png' },
+  cv: { src: '/icons/pages.png' },
+  askjosh: { src: '/icons/claude.png' },
+  skills: { src: '/icons/settings.png' },
+  experience: { src: '/icons/reminders.png' },
+  shortcuts: { src: '/icons/shortcuts.png' },
+  safari: { src: '/icons/chrome.png', scale: 0.72, bg: '#ffffff' },
+  github: { src: '/icons/github-mark-white.png', scale: 0.62, bg: '#0d1117' },
+};
+
 function AppIcon({ appId, size = 60 }: { appId: string; size?: number }) {
   const glyphSize = Math.round(size * 0.72);
+  const real = ICON_IMAGES[appId];
+  if (real) {
+    return (
+      <div
+        className={styles.appIcon}
+        style={
+          {
+            '--icon-size': `${size}px`,
+            background: real.bg ?? 'transparent',
+          } as CSSProperties
+        }
+      >
+        <img
+          src={real.src}
+          alt=""
+          draggable={false}
+          className={styles.appIconImg}
+          style={real.scale ? { transform: `scale(${real.scale})` } : undefined}
+        />
+      </div>
+    );
+  }
   const flatLogo: CSSProperties = { borderRadius: 0, boxShadow: 'none' };
 
   if (appId === 'about') {
@@ -364,7 +406,7 @@ const APP_LABELS: Record<string, string> = {
   safari: 'Chrome',
   snake: 'Snake',
   calculator: 'Calculator',
-  askjosh: 'Ask Josh',
+  askjosh: 'Ask Claude',
 };
 
 const TRICKSTER_LABEL = 'My Flaws';
@@ -427,6 +469,7 @@ const DOCK_APPS = ['about', 'experience', 'contact', 'github'];
 
 function MobileInner() {
   const { windows, openApp, closeWindow } = useDesktop();
+  const wallpaper = loadWallpaper();
   const activeWindow = windows.length > 0 ? windows[windows.length - 1] : null;
 
   // Which trailing slot (0–3) the trickster occupies. Others are genuinely empty.
@@ -458,7 +501,7 @@ function MobileInner() {
   }
 
   return (
-    <div className={styles.screen}>
+    <div className={styles.screen} style={{ backgroundImage: `url(${WALLPAPERS[wallpaper]})` }}>
       <StatusBar />
 
       <div className={styles.homeScreen}>
@@ -542,11 +585,15 @@ function MobileInner() {
               onClick={() => handleOpen(id)}
               aria-label={APP_LABELS[id] ?? id}
             >
-              <AppIcon appId={id} size={58} />
+              <AppIcon appId={id} size={60} />
             </button>
           ))}
         </div>
       </div>
+      <div
+        className={`${styles.homeIndicator} ${DARK_WALLPAPERS.has(wallpaper) ? styles.homeIndicatorLight : ''}`}
+        aria-hidden="true"
+      />
 
       <div className={`${styles.panel} ${activeWindow ? styles.panelOpen : ''}`}>
         {activeWindow && (

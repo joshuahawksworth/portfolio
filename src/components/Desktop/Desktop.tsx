@@ -8,6 +8,17 @@ import {
 import MenuBar from '../MenuBar/MenuBar';
 import SystemPanels from '../SystemUI/SystemPanels';
 import { SystemUIProvider } from '../../context/SystemUIContext';
+import DesktopWidgets from './DesktopWidgets';
+import {
+  DARK_WALLPAPERS,
+  WALLPAPERS,
+  WALLPAPER_KEYS,
+  WALLPAPER_LABELS,
+  loadWallpaper,
+  preloadWallpapers,
+  saveWallpaper,
+  type WallpaperKey,
+} from '../../data/wallpapers';
 import Dock from '../Dock/Dock';
 import Window from '../Window/Window';
 import SnakeApp from '../apps/SnakeApp';
@@ -496,30 +507,11 @@ interface CtxMenu {
   targetId?: string;
 }
 
-// ── Wallpapers ─────────────────────────────────────────────────────────────
-const WALLPAPERS = {
-  gold: '/wallpapers/golden-gate.jpg',
-  catalina: '/wallpapers/catalina-night.jpg',
-  tahoe: '/wallpapers/tahoe-day.jpg',
-  wave: '/wallpapers/blue-wave.jpg',
-} as const;
-type WallpaperKey = keyof typeof WALLPAPERS;
-
-/** Wallpapers dark enough that the menu bar should flip to white text (like macOS). */
-const DARK_WALLPAPERS: ReadonlySet<WallpaperKey> = new Set<WallpaperKey>(['catalina', 'wave']);
-
-const WALLPAPER_LABELS: Record<WallpaperKey, string> = {
-  gold: 'Golden Gate',
-  catalina: 'Catalina',
-  tahoe: 'Tahoe',
-  wave: 'Sequoia',
-};
-
 // ── Constants ──────────────────────────────────────────────────────────────
 const ICON_W = 76;
 const ICON_H = 84;
 const ICON_GAP = 8;
-const BOUNCE_MS = 1850; // matches 1800ms animation + 50ms buffer
+const BOUNCE_MS = 700; // short decorative bounce; windows open immediately
 
 const DESKTOP_TRASH_BLOCKLIST = new Set(['shortcut-trash', 'shortcut-mycomputer', 'trickster']);
 
@@ -1078,7 +1070,7 @@ function WallpaperPicker({
       <div className={styles.wallpaperPicker} onClick={(e) => e.stopPropagation()}>
         <div className={styles.wallpaperTitle}>Change Background</div>
         <div className={styles.wallpaperSwatches}>
-          {(Object.keys(WALLPAPERS) as WallpaperKey[]).map((key) => (
+          {WALLPAPER_KEYS.map((key) => (
             <button
               key={key}
               className={`${styles.wallpaperSwatch} ${current === key ? styles.wallpaperActive : ''}`}
@@ -1130,21 +1122,11 @@ function DesktopSurface() {
   const [renameVal, setRenameVal] = useState('');
   const [getInfoTarget, setGetInfoTarget] = useState<'desktop' | DesktopItem | null>(null);
   const [showWallpaper, setShowWallpaper] = useState(false);
-  const [wallpaper, setWallpaperState] = useState<WallpaperKey>(() => {
-    try {
-      const saved = localStorage.getItem('portfolio.wallpaper');
-      return saved && saved in WALLPAPERS ? (saved as WallpaperKey) : 'gold';
-    } catch {
-      return 'gold';
-    }
-  });
+  const [wallpaper, setWallpaperState] = useState<WallpaperKey>(loadWallpaper);
+  useEffect(preloadWallpapers, []);
   const setWallpaper = useCallback((k: WallpaperKey) => {
     setWallpaperState(k);
-    try {
-      localStorage.setItem('portfolio.wallpaper', k);
-    } catch {
-      /* private mode */
-    }
+    saveWallpaper(k);
   }, []);
   const [cleaning, setCleaning] = useState(false);
   const [bouncingKeys, setBouncingKeys] = useState<Set<string>>(new Set());
@@ -1328,6 +1310,7 @@ function DesktopSurface() {
       openApp(appId, props);
       return;
     }
+    openApp(appId, props);
     setBouncingKeys((prev) => new Set([...prev, dockKey]));
     setTimeout(() => {
       setBouncingKeys((prev) => {
@@ -1335,7 +1318,6 @@ function DesktopSurface() {
         n.delete(dockKey);
         return n;
       });
-      openApp(appId, props);
     }, BOUNCE_MS);
   }
 
@@ -1612,6 +1594,7 @@ function DesktopSurface() {
       action();
       return;
     }
+    action();
     setBouncingKeys((prev) => new Set([...prev, key]));
     setTimeout(() => {
       setBouncingKeys((prev) => {
@@ -1619,7 +1602,6 @@ function DesktopSurface() {
         n.delete(key);
         return n;
       });
-      action();
     }, BOUNCE_MS);
   }
 
@@ -1640,11 +1622,16 @@ function DesktopSurface() {
       onDragOver={onDesktopDragOver}
       onDrop={onDesktopDrop}
     >
-      <div
-        className={styles.wallpaper}
-        style={{ backgroundImage: `url(${WALLPAPERS[wallpaper]})` }}
-        aria-hidden
-      />
+      {/* Every wallpaper stays mounted so switching is instant */}
+      {WALLPAPER_KEYS.map((key) => (
+        <div
+          key={key}
+          className={`${styles.wallpaper} ${key === wallpaper ? styles.wallpaperActive : ''}`}
+          style={{ backgroundImage: `url(${WALLPAPERS[key]})` }}
+          aria-hidden
+        />
+      ))}
+      <DesktopWidgets />
       <MenuBar />
 
       {/* Rubber-band rect */}

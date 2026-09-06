@@ -1,0 +1,82 @@
+.widgets {
+  position: absolute;
+  top: 57px;
+  left: 27px;
+  z-index: 1;
+  display: flex;
+  gap: 16px;
+}
+
+.widget {
+  width: 150px;
+  height: 155px;
+  padding: 15px 14px;
+  border-radius: 23px;
+  border: 1px solid rgba(255, 255, 255, 0.27);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  font-family: var(--font-ui);
+  cursor: default;
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  box-shadow: 0 8px 30px rgba(88, 54, 11, 0.1);
+  transition: transform 160ms ease;
+}
+.widget:active {
+  transform: scale(0.98);
+}
+
+.widget small {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.widget strong {
+  margin: 6px 0 auto;
+  font-size: 47px;
+  font-weight: 300;
+  line-height: 1.1;
+  font-family: var(--font-display);
+}
+.widget span {
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+.sub {
+  font-weight: 600;
+}
+
+.weather {
+  color: #fff;
+  background: linear-gradient(180deg, rgba(96, 148, 208, 0.92), rgba(72, 118, 176, 0.92));
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.calendar {
+  color: var(--text);
+  background: rgba(252, 246, 232, 0.82);
+}
+.calDay {
+  color: #d0281e;
+}
+.calNum {
+  font-weight: 400;
+}
+
+@media (max-width: 1100px) {
+  .widgets {
+    top: 45px;
+    left: 15px;
+  }
+  .widget {
+    width: 130px;
+    height: 135px;
+  }
+}
+@media (max-width: 900px) {
+  .widgets {
+    display: none;
+  }
+}

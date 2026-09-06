@@ -128,21 +128,6 @@ function renderMarkdown(text: string): ReactNode[] {
 }
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
-function SparkIcon({ size = 16 }: { size?: number }) {
-  return (
-    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" fill="currentColor">
-      {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => (
-        <path
-          key={angle}
-          d="M12 2.2 L13.4 10.6 L12 12 L10.6 10.6 Z"
-          transform={`rotate(${angle} 12 12)`}
-        />
-      ))}
-      <circle cx="12" cy="12" r="1.7" />
-    </svg>
-  );
-}
-
 function PencilIcon() {
   return (
     <svg
@@ -424,7 +409,7 @@ export default function AskJoshApp() {
         <header className={styles.header}>
           <span className={styles.modelChip} title="Powered by Claude">
             <span className={styles.modelChipIcon}>
-              <SparkIcon size={12} />
+              <img src="/icons/claude-symbol.png" alt="" width={12} height={12} draggable={false} />
             </span>
             Claude
             <svg
@@ -454,9 +439,7 @@ export default function AskJoshApp() {
         <div className={styles.messages} ref={listRef}>
           {isEmpty ? (
             <div className={styles.hero}>
-              <div className={styles.heroIcon}>
-                <SparkIcon size={22} />
-              </div>
+              <img className={styles.heroIcon} src="/icons/claude.png" alt="" draggable={false} />
               <h1 className={styles.heroTitle}>Where should we begin?</h1>
               <div className={styles.suggestions}>
                 {SUGGESTIONS.map((s) => (
@@ -481,9 +464,12 @@ export default function AskJoshApp() {
                   </div>
                 ) : (
                   <div key={m.id} className={styles.assistantRow}>
-                    <div className={styles.avatar}>
-                      <SparkIcon size={12} />
-                    </div>
+                    <img
+                      className={styles.avatar}
+                      src="/icons/claude-symbol.png"
+                      alt=""
+                      draggable={false}
+                    />
                     <div className={styles.assistantBody}>
                       {m.error ? (
                         <div className={styles.note} role="status">

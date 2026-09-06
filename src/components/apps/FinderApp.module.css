@@ -9,19 +9,6 @@
 }
 
 /* Liquid Desktop variant: transparent-ish light glass, never dark */
-.liquidRoot {
-  background: transparent;
-}
-
-.liquidRoot .sidebar {
-  background: rgba(255, 250, 240, 0.42);
-  border-right-color: var(--line);
-}
-
-.liquidRoot .toolbar {
-  background: rgba(255, 250, 240, 0.3);
-}
-
 /* ── Sidebar ─────────────────────────── */
 .sidebar {
   width: 185px;

@@ -198,7 +198,7 @@ export const PORTFOLIO_APPS = {
   },
   askjosh: {
     id: 'askjosh',
-    title: 'Ask Josh',
+    title: 'Ask Claude',
     component: AskJoshApp,
     defaultSize: { width: 860, height: 600 },
     minSize: { width: 560, height: 420 },

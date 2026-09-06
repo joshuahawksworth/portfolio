@@ -21,7 +21,10 @@
   z-index: 0;
   pointer-events: none;
   background: #f1c367 center / cover no-repeat;
-  transition: background-image 300ms ease;
+  opacity: 0;
+}
+.wallpaperActive {
+  opacity: 1;
 }
 
 /* ── Desktop icons ──────────────────────── */

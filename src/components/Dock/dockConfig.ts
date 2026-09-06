@@ -30,7 +30,7 @@ export const DOCK_LABELS: Record<string, string> = {
   finder: 'Finder',
   github: 'GitHub',
   safari: 'Google Chrome',
-  askjosh: 'Ask Josh',
+  askjosh: 'Ask Claude',
   about: 'About',
   experience: 'Experience',
   skills: 'Skills',

@@ -42,7 +42,7 @@ export function MacIcon({
   );
 }
 
-export const DOCK_ICONS = {
+const DRAWN_ICONS = {
   finder: (
     <MacIcon top="#5ecfff" bottom="#1a7aff">
       <ellipse cx="22" cy="21" rx="11" ry="10" fill="white" opacity="0.95" />
@@ -400,3 +400,102 @@ export const DOCK_ICONS = {
 };
 
 export type DockIconKey = keyof typeof DOCK_ICONS;
+
+/**
+ * Real app artwork (renders of the official icons from Wikimedia Commons).
+ * `rounded` images are full-bleed iOS-style squares that need the squircle
+ * radius applied; macOS-style icons already carry their own margin and shape.
+ * Size follows `--app-icon-size` so the dock, Spotlight and Launchpad can scale it.
+ */
+export function RealIcon({
+  src,
+  rounded = false,
+  scale = rounded ? 0.82 : 1,
+}: {
+  src: string;
+  rounded?: boolean;
+  scale?: number;
+}) {
+  const size = `calc(var(--app-icon-size, 50px) * ${scale})`;
+  return (
+    <span
+      className="realIcon"
+      style={{
+        width: 'var(--app-icon-size, 50px)',
+        height: 'var(--app-icon-size, 50px)',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+      }}
+    >
+      <img
+        src={src}
+        alt=""
+        draggable={false}
+        style={{
+          width: size,
+          height: size,
+          objectFit: 'contain',
+          borderRadius: rounded ? '22.5%' : 0,
+          display: 'block',
+        }}
+      />
+    </span>
+  );
+}
+
+function GitHubAppIcon() {
+  // The GitHub app icon: the official white Invertocat on GitHub's dark tile
+  return (
+    <span
+      style={{
+        width: 'var(--app-icon-size, 50px)',
+        height: 'var(--app-icon-size, 50px)',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+      }}
+    >
+      <span
+        style={{
+          width: 'calc(var(--app-icon-size, 50px) * 0.82)',
+          height: 'calc(var(--app-icon-size, 50px) * 0.82)',
+          borderRadius: '22.5%',
+          background: '#0d1117',
+          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <img
+          src="/icons/github-mark-white.png"
+          alt=""
+          draggable={false}
+          style={{ width: '68%', height: '68%', display: 'block' }}
+        />
+      </span>
+    </span>
+  );
+}
+
+const REAL_ICONS = {
+  finder: <RealIcon src="/icons/finder.png" />,
+  safari: <RealIcon src="/icons/chrome.png" scale={0.82} />,
+  github: <GitHubAppIcon />,
+  askjosh: <RealIcon src="/icons/claude.png" rounded />,
+  contact: <RealIcon src="/icons/mail.png" rounded />,
+  location: <RealIcon src="/icons/maps.png" rounded />,
+  terminal: <RealIcon src="/icons/terminal.png" />,
+  calculator: <RealIcon src="/icons/calculator.png" rounded />,
+  cv: <RealIcon src="/icons/pages.png" rounded />,
+  texteditor: <RealIcon src="/icons/textedit.png" />,
+  imageviewer: <RealIcon src="/icons/preview.png" />,
+  skills: <RealIcon src="/icons/settings.png" rounded />,
+  experience: <RealIcon src="/icons/reminders.png" rounded />,
+  shortcuts: <RealIcon src="/icons/shortcuts.png" rounded />,
+};
+
+export const DOCK_ICONS = { ...DRAWN_ICONS, ...REAL_ICONS };

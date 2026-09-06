@@ -6,8 +6,9 @@
   --text-strong: #1c1a18;
   --muted: #827c76;
   --muted-2: #a8a29b;
-  --panel: #fcfaf7;
-  --panel-2: #f6f2ea;
+  --panel: rgba(252, 250, 247, 0.84);
+  --panel-solid: #fcfaf7;
+  --panel-2: rgba(246, 242, 234, 0.9);
   --line: rgba(0, 0, 0, 0.063);
   --line-strong: rgba(0, 0, 0, 0.11);
   --glass: rgba(248, 242, 230, 0.79);

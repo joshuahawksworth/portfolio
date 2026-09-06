@@ -210,13 +210,12 @@
   text-align: center;
 }
 .heroIcon {
-  display: flex;
-  width: 40px;
-  height: 40px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  background: linear-gradient(180deg, #ffd39a, #e0862c);
+  display: block;
+  width: 44px;
+  height: 44px;
+  border-radius: 22.5%;
+  object-fit: cover;
+  background: transparent;
   color: #fff;
   box-shadow:
     0 6px 16px rgba(224, 134, 44, 0.32),
@@ -289,11 +288,10 @@
   gap: 10px;
 }
 .avatar {
-  display: flex;
+  display: block;
   width: 22px;
   height: 22px;
-  align-items: center;
-  justify-content: center;
+  object-fit: contain;
   flex-shrink: 0;
   margin-top: 1px;
   border-radius: 50%;
