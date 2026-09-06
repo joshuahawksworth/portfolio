@@ -61,7 +61,7 @@ src/
   context/             Window management and the virtual file system
   data/                Portfolio content, wallpapers, file-system seed
   hooks/               Shared browser and UI hooks
-  lib/                 Small helpers (opening nodes, leaderboard client)
+  lib/                 Small helpers (opening nodes, offline answers, local high scores)
 tests/
   unit/                Vitest coverage for app logic
   e2e/                 Playwright smoke coverage
@@ -86,7 +86,6 @@ local `.env` when needed:
 ```bash
 RESEND_API_KEY="your_resend_api_key_here"
 ANTHROPIC_API_KEY="your_anthropic_api_key"
-DATABASE_URL="postgres://portfolio:portfolio@localhost:5433/portfolio"
 VITE_MAPBOX_TOKEN="your_mapbox_access_token"
 ```
 
@@ -94,9 +93,7 @@ Ask Claude answers guests from the portfolio data in the browser, so it works wi
 is set, visitors who pick Apple or Google on the (mock) sign-in sheet are answered by Claude through `/api/ask`; when it
 isn't set, everyone gets the offline answers and no error is shown.
 
-The Snake high-score table is personal: it keeps the visitor's own best runs in `localStorage`, so there is nothing to
-host. (A Postgres-backed `/api/leaderboard` route and its Docker setup remain in the repo as a reference; the game no
-longer calls it.)
+The Snake high-score table is personal: it keeps the visitor's own best runs in `localStorage`, so there is no database.
 
 ## Quality Checks
 

@@ -1,7 +1,6 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import type { Plugin } from 'vite';
-import { getLeaderboard, postLeaderboardScore } from './lib/leaderboard.ts';
 import { searchWeb } from './api/search-utils';
 
 const STRIP = new Set([
@@ -17,23 +16,6 @@ const STRIP = new Set([
   'cross-origin-resource-policy',
   'origin-agent-cluster',
 ]);
-
-function readJsonBody(req: import('http').IncomingMessage): Promise<unknown> {
-  return new Promise((resolve) => {
-    let raw = '';
-    req.on('data', (chunk) => {
-      raw += String(chunk);
-    });
-    req.on('end', () => {
-      try {
-        resolve(raw ? JSON.parse(raw) : {});
-      } catch {
-        resolve({});
-      }
-    });
-    req.on('error', () => resolve({}));
-  });
-}
 
 // Injected at the very top of <head> so it runs before any site script.
 // Intercepts link clicks AND form submissions AND history.pushState/replaceState
@@ -86,61 +68,10 @@ function processHtml(html: string, target: string): string {
   return html;
 }
 
-function browserProxyPlugin(env: Record<string, string>): Plugin {
+function browserProxyPlugin(): Plugin {
   return {
     name: 'browser-proxy-dev',
     configureServer(server) {
-      server.middlewares.use('/api/leaderboard', async (req, res) => {
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-        if (req.method === 'OPTIONS') {
-          res.statusCode = 200;
-          res.end();
-          return;
-        }
-
-        try {
-          if (req.method === 'GET') {
-            const rows = await getLeaderboard(env);
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json; charset=utf-8');
-            res.end(JSON.stringify(rows));
-            return;
-          }
-
-          if (req.method === 'POST') {
-            const body = (await readJsonBody(req)) as { name?: unknown; score?: unknown };
-            const result = await postLeaderboardScore(
-              String(body.name ?? ''),
-              Number(body.score),
-              env
-            );
-            res.setHeader('Content-Type', 'application/json; charset=utf-8');
-            if (!result.ok) {
-              res.statusCode = 400;
-              res.end(JSON.stringify({ error: result.error }));
-              return;
-            }
-            res.statusCode = 200;
-            res.end(JSON.stringify(result));
-            return;
-          }
-        } catch {
-          if (req.method === 'GET') {
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json; charset=utf-8');
-            res.end(JSON.stringify(await getLeaderboard(env)));
-            return;
-          }
-        }
-
-        res.statusCode = 405;
-        res.setHeader('Content-Type', 'application/json; charset=utf-8');
-        res.end(JSON.stringify({ error: 'Method not allowed' }));
-      });
-
       server.middlewares.use('/api/browser-proxy', async (req, res) => {
         try {
           const qs = req.url?.split('?')[1] ?? '';
@@ -221,6 +152,6 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
-    plugins: [react(), browserProxyPlugin(env)],
+    plugins: [react(), browserProxyPlugin()],
   };
 });

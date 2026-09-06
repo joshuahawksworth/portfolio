@@ -6,8 +6,7 @@ This is a practical checklist for adding backend/database skills to this portfol
 
 - Frontend: React, TypeScript, Vite.
 - Hosting shape: Vercel with serverless routes in `api/`.
-- Current database feature: Snake leaderboard.
-- Current database provider expected by code: Postgres via `DATABASE_URL`.
+- Current database feature: none (the Snake high scores are kept in the browser).
 - Current contact mail provider expected by code: Resend via `RESEND_API_KEY`.
 
 ## Tool Status
@@ -21,8 +20,8 @@ This is a practical checklist for adding backend/database skills to this portfol
 
 1. Install Docker Desktop.
 2. Learn Docker by running Postgres locally in a container.
-3. Add a `docker-compose.yml` for local Postgres.
-4. Connect the existing leaderboard code to local Postgres.
+3. Add a `docker-compose.yml` for local Postgres when a feature needs one.
+4. Pick a first feature that genuinely needs persistence (a shared leaderboard is a good candidate).
 5. Decide whether the production database should stay on Supabase or move to Azure Database for PostgreSQL.
 6. Install Azure CLI and learn the Azure portal/CLI basics.
 7. Add a .NET backend only if there is a real reason to move away from Vercel serverless routes.
@@ -51,7 +50,7 @@ services:
   postgres:
     image: postgres:16
     ports:
-      - "5433:5432"
+      - '5433:5432'
     environment:
       POSTGRES_DB: portfolio
       POSTGRES_USER: portfolio
@@ -94,13 +93,13 @@ For this project, data updates should happen through backend API routes. Databas
 
 ## App Integration
 
-The leaderboard API now reads and writes directly to Postgres using `DATABASE_URL`.
+There is no database-backed feature in the app at the moment: the Snake high scores live in the browser's `localStorage`.
+When one is added, keep the same boundary the old leaderboard used: the frontend calls a route under `/api/`, and the
+database URL only ever exists server-side.
 
 ```bash
 DATABASE_URL="postgres://portfolio:portfolio@localhost:5433/portfolio"
 ```
-
-The frontend still calls `/api/leaderboard`, so React does not know anything about the database connection. That is the right boundary: database credentials stay server-side.
 
 ## Azure
 

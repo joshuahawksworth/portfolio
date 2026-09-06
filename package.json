@@ -18,7 +18,6 @@
     "@anthropic-ai/sdk": "^0.124.0",
     "js-dos": "^8.3.20",
     "mapbox-gl": "^3.15.0",
-    "pg": "^8.21.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },
@@ -30,7 +29,6 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/mapbox-gl": "^3.4.1",
     "@types/node": "^25.9.1",
-    "@types/pg": "^8.20.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vercel/node": "^5.3.26",

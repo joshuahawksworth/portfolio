@@ -117,11 +117,11 @@ translucent nav bars). The full token list and reference measurements live in
 
 ## Backend And External Services
 
-- Browser code should call local API routes such as `/api/leaderboard`; do not expose server credentials through `VITE_*` variables.
+- Browser code should call local API routes such as `/api/ask` or `/api/contact`; do not expose server credentials through `VITE_*` variables.
 - Vercel API route code can use root `lib/` helpers, but ESM imports must be runtime-valid. In TypeScript source, use `.js` specifiers for server helpers that Vercel will emit as JavaScript:
 
 ```ts
-import { getLeaderboard } from '../lib/leaderboard.js';
+import { searchWeb } from './search-utils.js';
 ```
 
 - Public frontend env vars must be intentionally public. Server-only env vars stay unprefixed.
