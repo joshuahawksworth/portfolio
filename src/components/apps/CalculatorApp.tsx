@@ -44,15 +44,13 @@ function BackspaceIcon() {
 /** The ⁺/₋ key glyph: small plus, slash, small minus — like the SF Symbol. */
 function PlusMinusIcon() {
   return (
-    <svg viewBox="0 0 30 30" width="1.05em" height="1.05em" fill="none" aria-hidden="true">
-      <path
-        d="M8 5.5V13.5M4 9.5H12"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-      />
-      <path d="M20 4L10 26" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-      <path d="M18 21.5H26" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+    <svg viewBox="0 0 32 32" width="1.4em" height="1.4em" fill="none" aria-hidden="true">
+      {/* small plus, top-left */}
+      <path d="M8.5 6V14M4.5 10H12.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      {/* long thin slash */}
+      <path d="M22.5 3L9.5 29" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      {/* small minus, bottom-right */}
+      <path d="M19.5 22.5H27.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
