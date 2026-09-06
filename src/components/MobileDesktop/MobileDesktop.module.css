@@ -8,7 +8,19 @@
   color: var(--text);
   font-family: var(--font-ui);
 
+  background: #f1c367;
+}
+
+/* Wallpaper lives on its own layer so it can be blurred; it bleeds past the edges
+   so the blur never reveals a transparent border. */
+.wallpaper {
+  position: absolute;
+  inset: -32px;
+  z-index: 0;
   background: #f1c367 center / cover no-repeat;
+  filter: blur(22px) saturate(1.08);
+  transform: translateZ(0);
+  pointer-events: none;
 }
 
 /* ── Status bar ─────────────────────────────────────── */
@@ -44,26 +56,39 @@
   flex-shrink: 0;
 }
 
-/* ── Home screen ─────────────────────────────────────── */
-.homeScreen {
+/* ── Home screen: horizontally paged, 4 × 4 per page ─── */
+.pager {
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
-  padding: 10px 16px 0;
-  z-index: 5;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  z-index: 5;
 }
 
-.homeScreen::-webkit-scrollbar {
+.pager::-webkit-scrollbar {
   display: none;
+}
+
+.page {
+  flex: 0 0 100%;
+  width: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  padding: 10px 16px 0;
+  overflow: hidden;
 }
 
 .iconGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px 8px;
-  padding-bottom: 16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(4, auto);
+  gap: 22px 8px;
+  align-content: start;
 }
 
 .iconItem {
@@ -170,32 +195,29 @@
   display: block;
 }
 
-/* ── "Now" widget (2×2) ──────────────────────────────── */
+/* ── "Now" widget (2×2, first page) ─────────────────── */
 .widgetItem {
-  grid-column: 1 / 3;
-  grid-row: 1 / 3;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
   padding: 4px 2px;
   min-width: 0;
+  min-height: 0;
 }
 
 .widget {
   flex: 1;
   width: 100%;
-  min-height: 140px;
-  padding: 13px 14px 12px;
+  height: 100%;
+  min-height: 0;
+  padding: 14px 15px 13px;
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.34);
-  backdrop-filter: blur(24px) saturate(1.2);
-  -webkit-backdrop-filter: blur(24px) saturate(1.4);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(253, 248, 238, 0.72);
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.35),
-    0 6px 14px rgba(0, 0, 0, 0.25);
-  color: #fff;
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 8px 18px rgba(80, 45, 5, 0.18);
+  color: var(--text-strong);
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -206,10 +228,10 @@
   align-items: center;
   gap: 4px;
   font-size: 11px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.72);
+  font-weight: 700;
+  color: rgba(60, 40, 10, 0.62);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -222,43 +244,46 @@
 
 .widgetTime {
   font-family: var(--font-display);
-  font-size: 34px;
+  font-size: 38px;
   font-weight: 600;
   line-height: 1.05;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
-  margin-top: 4px;
+  margin-top: 5px;
+  color: var(--text-strong);
 }
 
 .widgetDate {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text);
-  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(40, 30, 10, 0.78);
+  margin-top: 3px;
 }
 
 .widgetRule {
   height: 1px;
-  background: var(--line-strong);
-  margin: auto 0 8px;
+  background: rgba(60, 40, 10, 0.16);
+  margin: auto 0 9px;
   min-height: 1px;
   flex-shrink: 0;
-  padding-top: 0;
 }
 
 .widgetName {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
   line-height: 1.2;
+  color: var(--text-strong);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .widgetRole {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.72);
+  font-size: 11.5px;
+  font-weight: 500;
+  color: rgba(60, 40, 10, 0.7);
   line-height: 1.25;
+  margin-top: 1px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -266,11 +291,70 @@
 
 /* ── Search pill (iOS 18+ style, sits above the dock) ── */
 .searchRow {
+  position: relative;
   display: flex;
   justify-content: center;
+  align-items: center;
   flex-shrink: 0;
-  padding: 6px 16px 10px;
+  height: 46px;
+  padding: 0 16px;
   z-index: 10;
+}
+
+.searchRow .searchPill,
+.pageDots {
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+/* While swiping, the pill fades out and the page dots take its place (iOS 18) */
+.pageDots {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.34);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pageDot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.25);
+  transition: background 160ms ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pageDotActive {
+  background: #fff;
+}
+
+.searchRowSwiping .searchPill {
+  opacity: 0;
+  transform: scale(0.9);
+  pointer-events: none;
+}
+
+.searchRowSwiping .pageDots {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: auto;
 }
 
 .searchPill {
@@ -509,4 +593,22 @@
   overflow: hidden;
   background: #000;
   color: #fff;
+}
+
+/* Apps that only exist on the desktop build */
+.unavailable {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+.unavailable strong {
+  color: var(--text-strong);
+  font-size: 17px;
 }

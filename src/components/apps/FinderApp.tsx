@@ -1,494 +1,584 @@
-import { useState, useId, useRef } from 'react';
-import { useDesktop, DesktopFolderItem } from '../../context/DesktopContext';
-import { jobsData } from '../../data/experienceData';
-import { FINDER_FILE_CONTENTS } from './TextEditorApp';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import {
+  useDesktop,
+  canMoveNode,
+  canRenameNode,
+  canTrashNode,
+  isInTrash,
+  isWritableFolder,
+  type FsNode,
+} from '../../context/DesktopContext';
+import { FINDER_ROOTS, ROOT_IDS, type RootId } from '../../data/fileSystemSeed';
+import { openTargetFor } from '../../lib/openNode';
+import { NodeIcon, nodeKind } from '../icons/NodeIcon';
+import { FolderIcon } from '../icons/FileSystemIcons';
 import styles from './FinderApp.module.css';
 
-type Section = 'desktop' | 'documents' | 'downloads' | 'applications';
+/** Drag payload shared with the desktop (a JSON list of node ids). */
+export const FINDER_DRAG_TYPE = 'application/finder-items';
 
-interface FileItem {
-  id: string;
-  name: string;
-  type: 'folder' | 'file' | 'app' | 'image';
-  action?: () => void;
-  deletable?: boolean;
-  logo?: string; // company logo URL for job items
-  appId?: string; // for special per-app icon rendering (doom, snake…)
-  dataUrl?: string; // for image thumbnails
+type ViewMode = 'icon' | 'list';
+type SortKey = 'name' | 'modifiedAt' | 'kind';
+
+interface CtxMenu {
+  x: number;
+  y: number;
+  itemId?: string;
 }
 
-// ── Uploaded file store (module-level so it survives re-mounts) ────────────
-interface UploadedFile {
-  id: string;
-  name: string;
-  content: string;
-  dataUrl?: string;
+const TEXT_EXT =
+  /\.(txt|md|js|ts|tsx|jsx|json|html|css|csv|xml|yaml|yml|sh|py|rb|go|rs|php|java|c|cpp|h|swift)$/i;
+
+const ROOT_LABELS: Record<RootId, string> = {
+  desktop: 'Desktop',
+  documents: 'Documents',
+  downloads: 'Downloads',
+  applications: 'Applications',
+  trash: 'Trash',
+};
+
+function formatDate(ts: number): string {
+  return new Date(ts).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
 }
-const uploadedFiles: UploadedFile[] = [];
 
 export default function FinderApp({ props }: { props?: Record<string, unknown> }) {
-  const [section, setSection] = useState<Section>('desktop');
-  const [folderStack, setFolderStack] = useState<Array<{ id: string; name: string }>>(() => {
-    if (props?.folderId && props?.folderName) {
-      return [{ id: props.folderId as string, name: props.folderName as string }];
-    }
-    return [];
-  });
   const {
+    fs,
+    childrenOf,
     openApp,
-    desktopFolders,
-    desktopFiles,
-    customFolderItems,
-    moveFromFolderToDesktop,
-    queueUploadedFile,
+    createFolder,
+    createFile,
+    addFile,
+    renameNode,
+    moveNodes,
+    trashNodes,
+    trashCount,
   } = useDesktop();
 
+  // ── Navigation ───────────────────────────────────────────────────────
+  const [currentId, setCurrentId] = useState<string>(() => {
+    const wanted = props?.folderId as string | undefined;
+    return wanted && fs[wanted]?.type === 'folder' ? wanted : ROOT_IDS.desktop;
+  });
+  const [history, setHistory] = useState<{ back: string[]; forward: string[] }>({
+    back: [],
+    forward: [],
+  });
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; itemId?: string } | null>(null);
-  const [docFolders, setDocFolders] = useState<Array<{ id: string; name: string }>>([]);
+  const [ctxMenu, setCtxMenu] = useState<CtxMenu | null>(null);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameVal, setRenameVal] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [uploads, setUploads] = useState<UploadedFile[]>(uploadedFiles);
+  const [view, setView] = useState<ViewMode>('icon');
+  const [sortKey, setSortKey] = useState<SortKey>('name');
+  const [sortAsc, setSortAsc] = useState(true);
+  const [dropTarget, setDropTarget] = useState<string | null>(null);
+  const [draggingIds, setDraggingIds] = useState<Set<string>>(new Set());
+
   const uploadRef = useRef<HTMLInputElement>(null);
+  const renameRef = useRef<HTMLInputElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const anchorRef = useRef<string | null>(null);
+  const renameTimer = useRef<number | undefined>(undefined);
 
-  function enterFolder(id: string, name: string) {
-    setFolderStack((prev) => [...prev, { id, name }]);
+  // Touch devices open with a single tap (no double-click, no modifier keys).
+  const coarsePointer = useMemo(
+    () => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches,
+    []
+  );
+
+  const current = fs[currentId];
+  const writable = isWritableFolder(current);
+
+  // If the folder we're looking at disappears (trashed from the desktop), climb out.
+  useEffect(() => {
+    if (current && !isInTrash(fs, currentId)) return;
+    let cur = current;
+    while (cur?.parentId && (!fs[cur.parentId] || isInTrash(fs, cur.parentId)))
+      cur = fs[cur.parentId];
+    setCurrentId(cur?.parentId && fs[cur.parentId] ? cur.parentId : ROOT_IDS.desktop);
     setSelected(new Set());
-    setCtxMenu(null);
-    setSearchQuery('');
-  }
+  }, [fs, current, currentId]);
 
-  function handleSectionChange(s: Section) {
-    setSection(s);
-    setFolderStack([]);
-    setSelected(new Set());
-    setCtxMenu(null);
-    setSearchQuery('');
-  }
+  const navigate = useCallback(
+    (id: string) => {
+      if (id === currentId || !fs[id]) return;
+      setHistory((h) => ({ back: [...h.back, currentId], forward: [] }));
+      setCurrentId(id);
+      setSelected(new Set());
+      setCtxMenu(null);
+      setSearchQuery('');
+      setRenamingId(null);
+    },
+    [currentId, fs]
+  );
 
-  const inFolder = folderStack.length > 0;
-  const currentFolder = inFolder ? folderStack[folderStack.length - 1] : null;
-
-  // Open a file in the appropriate viewer
-  function openFile(id: string, name: string) {
-    // Check uploaded files first — may be image or text
-    const up = uploads.find(
-      (u) => u.id === id || `upload-${u.id}` === id || u.id === `upload-${id}`
-    );
-    if (up) {
-      if (up.dataUrl) {
-        openApp('imageviewer', { filename: up.name, dataUrl: up.dataUrl });
-      } else {
-        openApp('texteditor', { fileId: up.id, filename: up.name, content: up.content });
-      }
-      return;
-    }
-    // Known static Finder files
-    const known = FINDER_FILE_CONTENTS[id];
-    if (known) {
-      openApp('texteditor', { fileId: id, filename: known.filename, content: known.content });
-      return;
-    }
-    openApp('texteditor', { fileId: id, filename: name, content: `// ${name}\n` });
-  }
-
-  // Contents of built-in navigable folders
-  const FOLDER_CONTENTS: Record<string, FileItem[]> = {
-    'doc-proj': [
-      {
-        id: 'proj-cmap',
-        name: 'cmap-mail',
-        type: 'folder',
-        action: () => enterFolder('proj-cmap', 'cmap-mail'),
-      },
-      {
-        id: 'proj-kwando',
-        name: 'kwando',
-        type: 'folder',
-        action: () => enterFolder('proj-kwando', 'kwando'),
-      },
-      {
-        id: 'proj-orderbee',
-        name: 'orderbee',
-        type: 'folder',
-        action: () => enterFolder('proj-orderbee', 'orderbee'),
-      },
-      {
-        id: 'proj-tofs',
-        name: 'tofs-app',
-        type: 'folder',
-        action: () => enterFolder('proj-tofs', 'tofs-app'),
-      },
-      {
-        id: 'proj-ciclo',
-        name: 'ciclozone',
-        type: 'folder',
-        action: () => enterFolder('proj-ciclo', 'ciclozone'),
-      },
-      {
-        id: 'proj-web',
-        name: 'webmaster',
-        type: 'folder',
-        action: () => enterFolder('proj-web', 'webmaster'),
-      },
-    ],
-    'proj-cmap': [
-      {
-        id: 'cmap-readme',
-        name: 'README.md',
-        type: 'file',
-        action: () => openFile('cmap-readme', 'README.md'),
-      },
-      {
-        id: 'cmap-pkg',
-        name: 'package.json',
-        type: 'file',
-        action: () => openFile('cmap-pkg', 'package.json'),
-      },
-      { id: 'cmap-src', name: 'src', type: 'folder', action: () => enterFolder('cmap-src', 'src') },
-    ],
-    'cmap-src': [
-      {
-        id: 'cmap-src-dir',
-        name: 'src/',
-        type: 'file',
-        action: () => openFile('cmap-src', 'src/'),
-      },
-    ],
-    'proj-kwando': [
-      {
-        id: 'kwa-readme',
-        name: 'README.md',
-        type: 'file',
-        action: () => openFile('kwa-readme', 'README.md'),
-      },
-      {
-        id: 'kwa-app',
-        name: 'App.tsx',
-        type: 'file',
-        action: () => openFile('kwa-app', 'App.tsx'),
-      },
-    ],
-    'proj-orderbee': [
-      {
-        id: 'ord-readme',
-        name: 'README.md',
-        type: 'file',
-        action: () => openFile('ord-readme', 'README.md'),
-      },
-      {
-        id: 'ord-index',
-        name: 'index.js',
-        type: 'file',
-        action: () => openFile('ord-index', 'index.js'),
-      },
-    ],
-    'proj-tofs': [
-      {
-        id: 'tofs-readme',
-        name: 'README.md',
-        type: 'file',
-        action: () => openFile('tofs-readme', 'README.md'),
-      },
-      { id: 'tofs-src', name: 'src', type: 'folder', action: () => enterFolder('tofs-src', 'src') },
-    ],
-    'tofs-src': [
-      {
-        id: 'tofs-src-dir',
-        name: 'src/',
-        type: 'file',
-        action: () => openFile('tofs-src', 'src/'),
-      },
-    ],
-    'proj-ciclo': [
-      {
-        id: 'ciclo-readme',
-        name: 'README.md',
-        type: 'file',
-        action: () => openFile('ciclo-readme', 'README.md'),
-      },
-    ],
-    'proj-web': [
-      {
-        id: 'web-readme',
-        name: 'README.md',
-        type: 'file',
-        action: () => openFile('web-readme', 'README.md'),
-      },
-      {
-        id: 'web-index',
-        name: 'index.html',
-        type: 'file',
-        action: () => openFile('web-index', 'index.html'),
-      },
-    ],
-  };
-
-  // Build items for custom desktop folders (drag-and-dropped icons)
-  function buildCustomFolderItems(folderId: string): FileItem[] {
-    const items: DesktopFolderItem[] = customFolderItems[folderId] ?? [];
-    return items.map((item): FileItem => {
-      const job = item.jobId ? jobsData.find((j) => j.id === item.jobId) : undefined;
-      return {
-        id: item.id,
-        name: item.label,
-        type: item.type === 'job' ? 'app' : item.type === 'app' ? 'app' : item.type,
-        logo: job?.logo,
-        appId: item.appId,
-        action:
-          item.type === 'job' && item.jobId
-            ? () => openApp('experience', { jobId: item.jobId, title: item.label })
-            : item.type === 'app' && item.appId
-              ? () => openApp(item.appId!)
-              : item.type === 'file'
-                ? () =>
-                    openApp('texteditor', {
-                      fileId: item.id,
-                      filename: item.label,
-                      content: item.content ?? '',
-                    })
-                : item.type === 'image'
-                  ? () =>
-                      openApp('imageviewer', { filename: item.label, dataUrl: item.dataUrl ?? '' })
-                  : undefined,
-      };
+  function goBack() {
+    setHistory((h) => {
+      if (h.back.length === 0) return h;
+      const target = h.back[h.back.length - 1];
+      setCurrentId(target);
+      setSelected(new Set());
+      return { back: h.back.slice(0, -1), forward: [currentId, ...h.forward] };
     });
   }
 
-  const SECTIONS: Record<Section, FileItem[]> = {
-    desktop: [
-      ...jobsData.map((j) => ({
-        id: `job-${j.id}`,
-        name: j.company,
-        type: 'app' as const,
-        logo: j.logo,
-        appId: undefined as string | undefined,
-        action: () => openApp('experience', { jobId: j.id, title: j.company }),
-      })),
-      ...desktopFolders.map((f) => ({
-        id: `folder-${f.id}`,
-        name: f.label,
-        type: 'folder' as const,
-        action: () => enterFolder(f.id, f.label),
-      })),
-      ...desktopFiles.map((f) => ({
-        id: f.id,
-        name: f.label,
-        type: f.type as 'file' | 'image',
-        dataUrl: f.dataUrl,
-        action:
-          f.type === 'image'
-            ? () => openApp('imageviewer', { filename: f.label, dataUrl: f.dataUrl ?? '' })
-            : () =>
-                openApp('texteditor', {
-                  fileId: f.id,
-                  filename: f.label,
-                  content: f.content ?? '',
-                }),
-      })),
-    ],
-    documents: [
-      {
-        id: 'doc-readme',
-        name: 'README.md',
-        type: 'file' as const,
-        action: () => openFile('doc-readme', 'README.md'),
-      },
-      {
-        id: 'doc-cv',
-        name: 'CV.pdf',
-        type: 'file' as const,
-        action: () => window.open('/JoshuaHawksworthCV.pdf', '_blank'),
-      },
-      {
-        id: 'doc-proj',
-        name: 'Projects',
-        type: 'folder' as const,
-        action: () => enterFolder('doc-proj', 'Projects'),
-      },
-      {
-        id: 'doc-notes',
-        name: 'Notes.txt',
-        type: 'file' as const,
-        action: () => openFile('doc-notes', 'Notes.txt'),
-      },
-      ...docFolders.map((f) => ({
-        id: `userfolder-${f.id}`,
-        name: f.name,
-        type: 'folder' as const,
-        action: () => enterFolder(`userfolder-${f.id}`, f.name),
-      })),
-      ...uploads.map((u) => ({
-        id: u.id,
-        name: u.name,
-        type: (u.dataUrl ? 'image' : 'file') as 'image' | 'file',
-        dataUrl: u.dataUrl,
-        action: () => openFile(u.id, u.name),
-      })),
-    ],
-    downloads: [
-      {
-        id: 'dl-blazor',
-        name: 'dotnet-blazor.pdf',
-        type: 'file' as const,
-        action: () => openFile('dl-blazor', 'dotnet-blazor.pdf'),
-      },
-      {
-        id: 'dl-react',
-        name: 'react-19-guide.pdf',
-        type: 'file' as const,
-        action: () => openFile('dl-react', 'react-19-guide.pdf'),
-      },
-    ],
-    applications: [
-      { id: 'app-about', name: 'About.app', type: 'app' as const, action: () => openApp('about') },
-      {
-        id: 'app-exp',
-        name: 'Experience.app',
-        type: 'app' as const,
-        action: () => openApp('experience'),
-      },
-      {
-        id: 'app-skills',
-        name: 'Skills.app',
-        type: 'app' as const,
-        action: () => openApp('skills'),
-      },
-      {
-        id: 'app-contact',
-        name: 'Contact.app',
-        type: 'app' as const,
-        action: () => openApp('contact'),
-      },
-      {
-        id: 'app-loc',
-        name: 'Location.app',
-        type: 'app' as const,
-        action: () => openApp('location'),
-      },
-      {
-        id: 'app-term',
-        name: 'Terminal.app',
-        type: 'app' as const,
-        action: () => openApp('terminal'),
-      },
-      {
-        id: 'app-editor',
-        name: 'TextEditor.app',
-        type: 'app' as const,
-        action: () => openApp('texteditor'),
-      },
-      {
-        id: 'app-safari',
-        name: 'Safari.app',
-        type: 'app' as const,
-        action: () => openApp('safari'),
-      },
-      { id: 'app-finder', name: 'Finder.app', type: 'app' as const },
-      { id: 'app-trash', name: 'Trash.app', type: 'app' as const, action: () => openApp('trash') },
-    ],
-  };
+  function goForward() {
+    setHistory((h) => {
+      if (h.forward.length === 0) return h;
+      const target = h.forward[0];
+      setCurrentId(target);
+      setSelected(new Set());
+      return { back: [...h.back, currentId], forward: h.forward.slice(1) };
+    });
+  }
 
-  function createNewFolder() {
-    const id = `${Date.now()}`;
-    setDocFolders((prev) => [...prev, { id, name: 'New Folder' }]);
+  function goUp() {
+    if (current?.parentId) navigate(current.parentId);
+  }
+
+  // ── Items in view ────────────────────────────────────────────────────
+  const q = searchQuery.trim().toLowerCase();
+  const items = useMemo(() => {
+    let list: FsNode[];
+    if (q) {
+      // Search the whole subtree, like Finder's "Search: This folder".
+      list = [];
+      const walk = (id: string) => {
+        for (const n of childrenOf(id)) {
+          if (n.name.toLowerCase().includes(q)) list.push(n);
+          if (n.type === 'folder') walk(n.id);
+        }
+      };
+      walk(currentId);
+    } else {
+      list = childrenOf(currentId);
+    }
+    if (view === 'list' || q) {
+      const dir = sortAsc ? 1 : -1;
+      list = [...list].sort((a, b) => {
+        if (sortKey === 'modifiedAt') return (a.modifiedAt - b.modifiedAt) * dir;
+        if (sortKey === 'kind') {
+          const k = nodeKind(a).localeCompare(nodeKind(b));
+          return (k || a.name.localeCompare(b.name)) * dir;
+        }
+        return a.name.localeCompare(b.name, undefined, { numeric: true }) * dir;
+      });
+    }
+    return list;
+  }, [childrenOf, currentId, q, view, sortKey, sortAsc]);
+
+  const selectedNodes = items.filter((n) => selected.has(n.id));
+  const trashableSelection = selectedNodes.filter(canTrashNode);
+  const movableSelection = selectedNodes.filter(canMoveNode);
+
+  // ── Opening ──────────────────────────────────────────────────────────
+  function openNode(node: FsNode) {
+    const target = openTargetFor(node);
+    if (target.kind === 'folder') navigate(target.id);
+    else if (target.kind === 'url') window.open(target.url, '_blank');
+    else if (target.appId === 'finder') openApp('finder', { menuOpenedAt: Date.now() });
+    else openApp(target.appId, target.props);
+  }
+
+  function openSelection() {
+    selectedNodes.forEach(openNode);
+  }
+
+  // ── Selection ────────────────────────────────────────────────────────
+  function selectWithModifiers(e: React.MouseEvent, id: string) {
+    if (e.shiftKey && anchorRef.current) {
+      const ids = items.map((n) => n.id);
+      const a = ids.indexOf(anchorRef.current);
+      const b = ids.indexOf(id);
+      if (a !== -1 && b !== -1) {
+        const [lo, hi] = a < b ? [a, b] : [b, a];
+        setSelected(new Set(ids.slice(lo, hi + 1)));
+        return;
+      }
+    }
+    if (e.metaKey || e.ctrlKey) {
+      setSelected((prev) => {
+        const n = new Set(prev);
+        if (n.has(id)) n.delete(id);
+        else n.add(id);
+        return n;
+      });
+    } else {
+      setSelected(new Set([id]));
+    }
+    anchorRef.current = id;
+  }
+
+  function selectAll() {
+    setSelected(new Set(items.map((n) => n.id)));
     setCtxMenu(null);
   }
 
-  // File upload handler — adds icon to desktop AND to local Finder list
-  function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []);
-    files.forEach((file) => {
-      const id = `upload-${file.name}-${Date.now()}`;
-      const isText =
-        /\.(txt|md|js|ts|tsx|jsx|json|html|css|csv|xml|yaml|yml|sh|py|rb|go|rs|php|java|c|cpp|h|swift)$/i.test(
-          file.name
-        );
+  // ── Create / rename / trash ──────────────────────────────────────────
+  useEffect(() => {
+    if (renamingId) {
+      renameRef.current?.focus();
+      const dot = renameVal.lastIndexOf('.');
+      // Select the stem only, like Finder does for "name.ext"
+      renameRef.current?.setSelectionRange(0, dot > 0 ? dot : renameVal.length);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [renamingId]);
+
+  function startRename(id: string) {
+    const node = fs[id];
+    if (!node || !canRenameNode(node)) return;
+    setRenameVal(node.name);
+    setRenamingId(id);
+    setCtxMenu(null);
+  }
+
+  function commitRename() {
+    if (renamingId) renameNode(renamingId, renameVal);
+    setRenamingId(null);
+  }
+
+  function newFolder() {
+    if (!writable) return;
+    const id = createFolder(currentId);
+    setSelected(new Set([id]));
+    setCtxMenu(null);
+    setSearchQuery('');
+    setRenameVal('untitled folder');
+    setRenamingId(id);
+  }
+
+  function newTextFile() {
+    if (!writable) return;
+    const id = createFile(currentId);
+    setSelected(new Set([id]));
+    setCtxMenu(null);
+    setSearchQuery('');
+    setRenameVal('untitled.txt');
+    setRenamingId(id);
+  }
+
+  function trashSelection() {
+    const ids = trashableSelection.map((n) => n.id);
+    if (ids.length === 0) return;
+    trashNodes(ids);
+    setSelected(new Set());
+    setCtxMenu(null);
+  }
+
+  function moveSelectionTo(folderId: string) {
+    const ids = movableSelection.map((n) => n.id);
+    if (ids.length === 0) return;
+    moveNodes(ids, folderId);
+    setSelected(new Set());
+    setCtxMenu(null);
+  }
+
+  // ── Uploads (button, context menu, or files dropped from the OS) ─────
+  function ingestFiles(files: File[]) {
+    if (!writable) return;
+    for (const file of files) {
+      const isText = TEXT_EXT.test(file.name);
       const isImage = file.type.startsWith('image/');
       const reader = new FileReader();
-
       if (isText) {
-        reader.onload = (ev) => {
-          const content = (ev.target?.result as string) ?? '';
-          const entry: UploadedFile = { id, name: file.name, content };
-          uploadedFiles.push(entry);
-          setUploads([...uploadedFiles]);
-          queueUploadedFile({ id, name: file.name, content, isImage: false });
-        };
+        reader.onload = (ev) =>
+          addFile(currentId, { name: file.name, content: (ev.target?.result as string) ?? '' });
         reader.readAsText(file);
       } else if (isImage) {
-        reader.onload = (ev) => {
-          const dataUrl = (ev.target?.result as string) ?? '';
-          const entry: UploadedFile = { id, name: file.name, content: '', dataUrl };
-          uploadedFiles.push(entry);
-          setUploads([...uploadedFiles]);
-          queueUploadedFile({ id, name: file.name, content: '', dataUrl, isImage: true });
-        };
+        reader.onload = (ev) =>
+          addFile(currentId, {
+            name: file.name,
+            type: 'image',
+            content: '',
+            dataUrl: (ev.target?.result as string) ?? '',
+          });
         reader.readAsDataURL(file);
       } else {
-        const content = `[Binary file: ${file.name}]\nSize: ${(file.size / 1024).toFixed(1)} KB\nType: ${file.type || 'unknown'}`;
-        const entry: UploadedFile = { id, name: file.name, content };
-        uploadedFiles.push(entry);
-        setUploads([...uploadedFiles]);
-        queueUploadedFile({ id, name: file.name, content, isImage: false });
+        addFile(currentId, {
+          name: file.name,
+          content: `[Binary file: ${file.name}]\nSize: ${(file.size / 1024).toFixed(1)} KB\nType: ${file.type || 'unknown'}`,
+        });
       }
-    });
+    }
+  }
+
+  function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    ingestFiles(Array.from(e.target.files ?? []));
     if (uploadRef.current) uploadRef.current.value = '';
   }
 
-  const SIDEBAR: { label: string; key: Section; icon: React.ReactNode }[] = [
-    { label: 'Desktop', key: 'desktop', icon: <MonitorIcon /> },
-    { label: 'Documents', key: 'documents', icon: <DocIcon /> },
-    { label: 'Downloads', key: 'downloads', icon: <DownloadIcon /> },
-    { label: 'Applications', key: 'applications', icon: <AppsIcon /> },
-  ];
-
-  const sectionRoot =
-    section === 'desktop'
-      ? '~/Desktop'
-      : section === 'documents'
-        ? '~/Documents'
-        : section === 'downloads'
-          ? '~/Downloads'
-          : '/Applications';
-  const pathLabel = inFolder
-    ? sectionRoot + '/' + folderStack.map((f) => f.name).join('/')
-    : sectionRoot;
-
-  // Determine items for the current view
-  let baseItems: FileItem[];
-  if (inFolder) {
-    const cid = currentFolder?.id ?? '';
-    // Check custom desktop folder items first (drag-and-dropped)
-    const customItems = buildCustomFolderItems(cid);
-    if (customItems.length > 0) {
-      baseItems = customItems;
-    } else if (FOLDER_CONTENTS[cid]) {
-      baseItems = FOLDER_CONTENTS[cid];
-    } else {
-      baseItems = [];
+  // ── Drag and drop ────────────────────────────────────────────────────
+  function onItemDragStart(e: React.DragEvent, node: FsNode) {
+    if (!canMoveNode(node)) {
+      e.preventDefault();
+      return;
     }
-  } else {
-    baseItems = SECTIONS[section];
+    const ids = selected.has(node.id)
+      ? Array.from(selected).filter((id) => canMoveNode(fs[id]))
+      : [node.id];
+    if (!selected.has(node.id)) setSelected(new Set([node.id]));
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData(FINDER_DRAG_TYPE, JSON.stringify({ ids }));
+    setDraggingIds(new Set(ids));
   }
 
-  // Apply search filter
-  const displayItems = searchQuery.trim()
-    ? baseItems.filter((i) => i.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    : baseItems;
+  function acceptsDrop(e: React.DragEvent, folderId: string): boolean {
+    const types = Array.from(e.dataTransfer.types);
+    if (types.includes('Files')) return isWritableFolder(fs[folderId]);
+    if (!types.includes(FINDER_DRAG_TYPE)) return false;
+    if (draggingIds.has(folderId)) return false;
+    const folder = fs[folderId];
+    return !!folder && folder.type === 'folder' && folderId !== ROOT_IDS.applications;
+  }
+
+  function onFolderDragOver(e: React.DragEvent, folderId: string) {
+    if (!acceptsDrop(e, folderId)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'move';
+    if (dropTarget !== folderId) setDropTarget(folderId);
+  }
+
+  function onFolderDrop(e: React.DragEvent, folderId: string) {
+    if (!acceptsDrop(e, folderId)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setDropTarget(null);
+    setDraggingIds(new Set());
+    const files = Array.from(e.dataTransfer.files ?? []);
+    if (files.length > 0) {
+      if (folderId === currentId) ingestFiles(files);
+      return;
+    }
+    try {
+      const { ids } = JSON.parse(e.dataTransfer.getData(FINDER_DRAG_TYPE)) as { ids: string[] };
+      moveNodes(ids, folderId);
+      setSelected(new Set());
+    } catch {
+      /* not ours */
+    }
+  }
+
+  // ── Keyboard (only while the Finder window has focus) ────────────────
+  function onKeyDown(e: React.KeyboardEvent) {
+    if (renamingId) return;
+    const tag = (e.target as HTMLElement).tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    const cmd = e.metaKey || e.ctrlKey;
+
+    if (cmd && e.key.toLowerCase() === 'a') {
+      e.preventDefault();
+      selectAll();
+    } else if ((cmd && e.key === 'Backspace') || e.key === 'Delete' || e.key === 'Backspace') {
+      if (trashableSelection.length > 0) {
+        e.preventDefault();
+        trashSelection();
+      }
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (selectedNodes.length === 1 && canRenameNode(selectedNodes[0]))
+        startRename(selectedNodes[0].id);
+      else openSelection();
+    } else if (cmd && (e.key.toLowerCase() === 'o' || e.key === 'ArrowDown')) {
+      e.preventDefault();
+      openSelection();
+    } else if (cmd && e.key === 'ArrowUp') {
+      e.preventDefault();
+      goUp();
+    } else if (cmd && e.key === '[') {
+      e.preventDefault();
+      goBack();
+    } else if (cmd && e.key === ']') {
+      e.preventDefault();
+      goForward();
+    } else if (cmd && e.shiftKey && e.key.toLowerCase() === 'n') {
+      e.preventDefault();
+      newFolder();
+    } else if (e.key === 'Escape') {
+      setSelected(new Set());
+      setCtxMenu(null);
+    }
+  }
+
+  // ── Derived UI bits ──────────────────────────────────────────────────
+  const breadcrumb = useMemo(() => {
+    const chain: FsNode[] = [];
+    let cur: FsNode | undefined = current;
+    while (cur) {
+      chain.unshift(cur);
+      cur = cur.parentId ? fs[cur.parentId] : undefined;
+    }
+    return chain;
+  }, [fs, current]);
+
+  const rootId = breadcrumb[0]?.id as RootId | undefined;
+  const title = current?.name ?? 'Finder';
+  const ctxTarget = ctxMenu?.itemId ? fs[ctxMenu.itemId] : null;
+  const trashLabel =
+    trashableSelection.length > 1
+      ? `Move ${trashableSelection.length} Items to Trash`
+      : 'Move to Trash';
+  const kindHeader = (key: SortKey, label: string) => (
+    <button
+      type="button"
+      className={`${styles.listHeadBtn} ${sortKey === key ? styles.listHeadActive : ''}`}
+      onClick={() => {
+        if (sortKey === key) setSortAsc((v) => !v);
+        else {
+          setSortKey(key);
+          setSortAsc(true);
+        }
+      }}
+    >
+      {label}
+      {sortKey === key && <span className={styles.sortArrow}>{sortAsc ? '▲' : '▼'}</span>}
+    </button>
+  );
+
+  function itemHandlers(node: FsNode) {
+    const isFolder = node.type === 'folder';
+    return {
+      draggable: canMoveNode(node),
+      onDragStart: (e: React.DragEvent) => onItemDragStart(e, node),
+      onDragEnd: () => {
+        setDraggingIds(new Set());
+        setDropTarget(null);
+      },
+      onDragOver: isFolder ? (e: React.DragEvent) => onFolderDragOver(e, node.id) : undefined,
+      onDragLeave: isFolder ? () => setDropTarget((t) => (t === node.id ? null : t)) : undefined,
+      onDrop: isFolder ? (e: React.DragEvent) => onFolderDrop(e, node.id) : undefined,
+      onClick: (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setCtxMenu(null);
+        if (renamingId && renamingId !== node.id) commitRename();
+        if (coarsePointer) {
+          openNode(node);
+          return;
+        }
+        selectWithModifiers(e, node.id);
+      },
+      onDoubleClick: (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (renamingId === node.id) return;
+        openNode(node);
+      },
+      onContextMenu: (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!selected.has(node.id)) {
+          setSelected(new Set([node.id]));
+          anchorRef.current = node.id;
+        }
+        setCtxMenu({ x: e.clientX, y: e.clientY, itemId: node.id });
+      },
+    };
+  }
+
+  function renderName(node: FsNode) {
+    if (renamingId === node.id) {
+      return (
+        <input
+          ref={renameRef}
+          className={styles.renameInput}
+          value={renameVal}
+          onChange={(e) => setRenameVal(e.target.value)}
+          onBlur={commitRename}
+          onKeyDown={(e) => {
+            e.stopPropagation();
+            if (e.key === 'Enter') commitRename();
+            if (e.key === 'Escape') setRenamingId(null);
+          }}
+          onClick={(e) => e.stopPropagation()}
+          onDoubleClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          aria-label="Rename"
+        />
+      );
+    }
+    return (
+      <span
+        className={styles.itemName}
+        onClick={() => {
+          // Clicking the name of an already-selected item starts a rename, like Finder.
+          // It waits long enough to tell a slow second click from a double-click.
+          if (
+            !coarsePointer &&
+            selected.size === 1 &&
+            selected.has(node.id) &&
+            canRenameNode(node)
+          ) {
+            window.clearTimeout(renameTimer.current);
+            renameTimer.current = window.setTimeout(() => startRename(node.id), 420);
+          }
+        }}
+        onDoubleClick={() => window.clearTimeout(renameTimer.current)}
+      >
+        {node.name}
+      </span>
+    );
+  }
+
+  const emptyState =
+    items.length === 0 ? (
+      <div className={styles.emptyFolder}>
+        {!q && <FolderIcon size={64} style={{ opacity: 0.35 }} />}
+        <span className={styles.emptyFolderLabel}>
+          {q ? `No results for “${searchQuery}”` : `${title} is empty`}
+        </span>
+      </div>
+    ) : null;
+
+  const surfaceProps = {
+    onClick: () => {
+      if (renamingId) commitRename();
+      setSelected(new Set());
+      setCtxMenu(null);
+    },
+    onContextMenu: (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setCtxMenu({ x: e.clientX, y: e.clientY });
+    },
+    onDragOver: (e: React.DragEvent) => onFolderDragOver(e, currentId),
+    onDragLeave: () => setDropTarget((t) => (t === currentId ? null : t)),
+    onDrop: (e: React.DragEvent) => onFolderDrop(e, currentId),
+  };
 
   return (
-    <div className={styles.root}>
+    <div
+      ref={rootRef}
+      className={styles.root}
+      tabIndex={-1}
+      onKeyDown={onKeyDown}
+      onMouseDown={(e) => {
+        const tag = (e.target as HTMLElement).tagName;
+        if (tag !== 'INPUT' && tag !== 'TEXTAREA') rootRef.current?.focus({ preventScroll: true });
+      }}
+    >
       {/* Sidebar */}
       <aside className={styles.sidebar}>
         <p className={styles.sidebarSection}>Favourites</p>
-        {SIDEBAR.map((s) => (
+        {FINDER_ROOTS.map((id) => (
           <button
-            key={s.key}
-            className={`${styles.sidebarBtn} ${section === s.key ? styles.active : ''}`}
-            onClick={() => handleSectionChange(s.key)}
+            key={id}
+            className={[
+              styles.sidebarBtn,
+              rootId === id ? styles.active : '',
+              dropTarget === id ? styles.sidebarDrop : '',
+            ].join(' ')}
+            onClick={() => navigate(id)}
+            onDragOver={(e) => onFolderDragOver(e, id)}
+            onDragLeave={() => setDropTarget((t) => (t === id ? null : t))}
+            onDrop={(e) => onFolderDrop(e, id)}
           >
-            <span className={styles.sidebarIcon}>{s.icon}</span>
-            {s.label}
+            <span className={styles.sidebarIcon}>{SIDEBAR_ICONS[id]}</span>
+            {ROOT_LABELS[id]}
           </button>
         ))}
       </aside>
@@ -499,12 +589,10 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
         <div className={styles.toolbar}>
           <button
             className={styles.toolBtn}
-            disabled={!inFolder}
-            onClick={() => {
-              setFolderStack((prev) => prev.slice(0, -1));
-              setSearchQuery('');
-            }}
+            disabled={history.back.length === 0}
+            onClick={goBack}
             title="Back"
+            aria-label="Back"
           >
             <svg
               viewBox="0 0 12 12"
@@ -516,7 +604,13 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
               <path d="M8 2L4 6l4 4" />
             </svg>
           </button>
-          <button className={styles.toolBtn} disabled>
+          <button
+            className={styles.toolBtn}
+            disabled={history.forward.length === 0}
+            onClick={goForward}
+            title="Forward"
+            aria-label="Forward"
+          >
             <svg
               viewBox="0 0 12 12"
               fill="none"
@@ -527,7 +621,9 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
               <path d="M4 2l4 4-4 4" />
             </svg>
           </button>
-          <span className={styles.toolbarPath}>{pathLabel}</span>
+          <span className={styles.toolbarPath} title={title}>
+            {title}
+          </span>
 
           {/* Search */}
           <div className={styles.searchWrap}>
@@ -550,16 +646,43 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             {searchQuery && (
-              <button className={styles.searchClear} onClick={() => setSearchQuery('')}>
+              <button
+                className={styles.searchClear}
+                onClick={() => setSearchQuery('')}
+                aria-label="Clear search"
+              >
                 ×
               </button>
             )}
           </div>
 
-          {/* Upload button */}
+          {/* New folder */}
+          <button
+            className={styles.toolBtn}
+            title="New Folder (⇧⌘N)"
+            aria-label="New Folder"
+            disabled={!writable}
+            onClick={newFolder}
+          >
+            <svg
+              viewBox="0 0 14 12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M1 3.2Q1 2 2.2 2H5l1.2 1.3H11.8Q13 3.3 13 4.5V9.8Q13 11 11.8 11H2.2Q1 11 1 9.8Z" />
+              <path d="M7 5.6v3.2M5.4 7.2h3.2" />
+            </svg>
+          </button>
+
+          {/* Upload */}
           <button
             className={`${styles.toolBtn} ${styles.uploadBtn}`}
             title="Upload file"
+            aria-label="Upload file"
+            disabled={!writable}
             onClick={() => uploadRef.current?.click()}
           >
             <svg
@@ -583,8 +706,14 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
             accept=".txt,.md,.js,.ts,.tsx,.jsx,.json,.html,.css,.csv,.xml,.yaml,.yml,.sh,.py,.rb,.go,.rs,.php,.java,.c,.cpp,.h,.swift,.pdf,.png,.jpg,.jpeg,.gif,.webp"
           />
 
-          <div className={styles.viewToggle}>
-            <button className={`${styles.viewBtn} ${styles.viewActive}`}>
+          <div className={styles.viewToggle} role="group" aria-label="View">
+            <button
+              className={`${styles.viewBtn} ${view === 'icon' ? styles.viewActive : ''}`}
+              onClick={() => setView('icon')}
+              title="Icon view"
+              aria-label="Icon view"
+              aria-pressed={view === 'icon'}
+            >
               <svg viewBox="0 0 12 12" fill="currentColor">
                 <rect x="0" y="0" width="5" height="5" rx="1" />
                 <rect x="7" y="0" width="5" height="5" rx="1" />
@@ -592,7 +721,13 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
                 <rect x="7" y="7" width="5" height="5" rx="1" />
               </svg>
             </button>
-            <button className={styles.viewBtn}>
+            <button
+              className={`${styles.viewBtn} ${view === 'list' ? styles.viewActive : ''}`}
+              onClick={() => setView('list')}
+              title="List view"
+              aria-label="List view"
+              aria-pressed={view === 'list'}
+            >
               <svg
                 viewBox="0 0 12 12"
                 fill="none"
@@ -606,253 +741,227 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
           </div>
         </div>
 
-        {/* Files grid — or empty state */}
-        {inFolder && displayItems.length === 0 ? (
-          <div className={styles.emptyFolder}>
-            <svg viewBox="0 0 52 44" fill="none" width="52" height="44" style={{ opacity: 0.3 }}>
-              <path
-                d="M2 9Q2 5 6 5L20 5L24 9L47 9Q49 9 49 11L49 38Q49 40 47 40L5 40Q3 40 3 38Z"
-                fill="#4a9eff"
-              />
-              <path
-                d="M2 9Q2 5 6 5L20 5L24 9L47 9Q49 9 49 11L49 14L2 14Z"
-                fill="#5aabff"
-                opacity="0.5"
-              />
-            </svg>
-            <span className={styles.emptyFolderLabel}>
-              {searchQuery
-                ? `No results for "${searchQuery}"`
-                : (currentFolder?.name ?? 'Folder') + ' is empty'}
-            </span>
-          </div>
-        ) : !inFolder && displayItems.length === 0 && searchQuery ? (
-          <div className={styles.emptyFolder}>
-            <span className={styles.emptyFolderLabel}>No results for "{searchQuery}"</span>
+        {/* Contents */}
+        {view === 'icon' ? (
+          <div
+            className={`${styles.grid} ${dropTarget === currentId ? styles.surfaceDrop : ''}`}
+            {...surfaceProps}
+          >
+            {emptyState}
+            {items.map((node) => {
+              const isSelected = selected.has(node.id);
+              return (
+                <div
+                  key={node.id}
+                  className={[
+                    styles.item,
+                    isSelected ? styles.itemSelected : '',
+                    dropTarget === node.id ? styles.itemDrop : '',
+                    draggingIds.has(node.id) ? styles.itemDragging : '',
+                  ].join(' ')}
+                  title={node.name}
+                  {...itemHandlers(node)}
+                >
+                  <div className={styles.itemIcon}>
+                    <NodeIcon node={node} size={58} trashFull={trashCount > 0} />
+                  </div>
+                  {renderName(node)}
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div
-            className={styles.grid}
-            onClick={() => {
-              setSelected(new Set());
-              setCtxMenu(null);
-            }}
-            onContextMenu={(e) => {
-              e.stopPropagation();
-              if (e.target === e.currentTarget) {
-                e.preventDefault();
-                setCtxMenu({ x: e.clientX, y: e.clientY });
-              }
-            }}
+            className={`${styles.list} ${dropTarget === currentId ? styles.surfaceDrop : ''}`}
+            {...surfaceProps}
           >
-            {displayItems.map((item) => {
-              const isSelected = selected.has(item.id);
-              // Items inside a custom desktop folder can be dragged back to the desktop
-              const isDraggableToDesktop = section === 'desktop' && inFolder && !!currentFolder;
+            <div className={styles.listHead} onClick={(e) => e.stopPropagation()}>
+              <span className={styles.colName}>{kindHeader('name', 'Name')}</span>
+              <span className={styles.colDate}>{kindHeader('modifiedAt', 'Date Modified')}</span>
+              <span className={styles.colKind}>{kindHeader('kind', 'Kind')}</span>
+            </div>
+            {emptyState}
+            {items.map((node, i) => {
+              const isSelected = selected.has(node.id);
               return (
                 <div
-                  key={item.id}
+                  key={node.id}
                   className={[
-                    styles.item,
-                    item.action ? styles.itemClickable : '',
-                    isSelected ? styles.itemSelected : '',
+                    styles.row,
+                    i % 2 === 1 ? styles.rowAlt : '',
+                    isSelected ? styles.rowSelected : '',
+                    dropTarget === node.id ? styles.itemDrop : '',
+                    draggingIds.has(node.id) ? styles.itemDragging : '',
                   ].join(' ')}
-                  draggable={isDraggableToDesktop}
-                  onDragStart={
-                    isDraggableToDesktop
-                      ? (e) => {
-                          e.dataTransfer.effectAllowed = 'move';
-                          e.dataTransfer.setData(
-                            'application/finder-item',
-                            JSON.stringify({ folderId: currentFolder!.id, itemId: item.id })
-                          );
-                          setSelected(new Set([item.id]));
-                        }
-                      : undefined
-                  }
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (e.shiftKey || e.metaKey || e.ctrlKey) {
-                      setSelected((prev) => {
-                        const n = new Set(prev);
-                        n.has(item.id) ? n.delete(item.id) : n.add(item.id);
-                        return n;
-                      });
-                    } else {
-                      setSelected(new Set([item.id]));
-                      if (item.type === 'folder') item.action?.();
-                    }
-                  }}
-                  onDoubleClick={(e) => {
-                    e.stopPropagation();
-                    if (item.type !== 'folder') item.action?.();
-                  }}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (!selected.has(item.id)) setSelected(new Set([item.id]));
-                    setCtxMenu({ x: e.clientX, y: e.clientY, itemId: item.id });
-                  }}
-                  title={item.name}
+                  title={node.name}
+                  {...itemHandlers(node)}
                 >
-                  <div className={styles.itemIcon}>
-                    {item.type === 'folder' ? (
-                      <FolderIcon />
-                    ) : item.type === 'app' && item.logo ? (
-                      <img
-                        src={item.logo}
-                        alt={item.name}
-                        width="44"
-                        height="44"
-                        style={{
-                          width: 44,
-                          height: 44,
-                          borderRadius: 10,
-                          objectFit: 'contain',
-                          background: 'rgba(255,255,255,0.08)',
-                          padding: 3,
-                          boxSizing: 'border-box',
-                        }}
-                      />
-                    ) : item.type === 'app' && item.appId === 'doom' ? (
-                      <img
-                        src="/doom-icon.png"
-                        alt="DOOM"
-                        width="44"
-                        height="44"
-                        style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'cover' }}
-                      />
-                    ) : item.type === 'app' && item.appId === 'snake' ? (
-                      <NokiaFinderIcon />
-                    ) : item.type === 'image' && item.dataUrl ? (
-                      <img
-                        src={item.dataUrl}
-                        alt={item.name}
-                        style={{
-                          width: 44,
-                          height: 44,
-                          borderRadius: 6,
-                          objectFit: 'cover',
-                          display: 'block',
-                        }}
-                      />
-                    ) : item.type === 'image' ? (
-                      <FileIcon name={item.name} />
-                    ) : item.type === 'app' ? (
-                      <AppIcon name={item.name} />
-                    ) : (
-                      <FileIcon name={item.name} />
-                    )}
-                  </div>
-                  <span className={styles.itemName}>{item.name}</span>
+                  <span className={`${styles.colName} ${styles.rowName}`}>
+                    <span className={styles.rowIcon}>
+                      <NodeIcon node={node} size={18} trashFull={trashCount > 0} />
+                    </span>
+                    {renderName(node)}
+                  </span>
+                  <span className={styles.colDate}>{formatDate(node.modifiedAt)}</span>
+                  <span className={styles.colKind}>{nodeKind(node)}</span>
                 </div>
               );
             })}
           </div>
         )}
 
-        {/* Finder context menu */}
-        {ctxMenu &&
-          (() => {
-            const targetItem = ctxMenu.itemId
-              ? displayItems.find((i) => i.id === ctxMenu.itemId)
-              : null;
-            return (
-              <div
-                className={styles.ctxMenu}
-                style={{
-                  left: Math.min(ctxMenu.x, window.innerWidth - 180),
-                  top: Math.min(ctxMenu.y, window.innerHeight - 150),
-                }}
-                onClick={(e) => e.stopPropagation()}
-                onMouseDown={(e) => e.stopPropagation()}
-                onContextMenu={(e) => e.preventDefault()}
-              >
-                {targetItem ? (
+        {/* Status / path bar */}
+        <div className={styles.statusBar}>
+          <span className={styles.itemCount}>
+            {selected.size > 0
+              ? `${selected.size} of ${items.length} selected`
+              : `${items.length} item${items.length === 1 ? '' : 's'}`}
+          </span>
+          <nav className={styles.pathBar} aria-label="Path">
+            <span className={styles.pathSeg}>josh</span>
+            {breadcrumb.map((n, i) => (
+              <span key={n.id} className={styles.pathSegWrap}>
+                <span className={styles.pathSep}>›</span>
+                <button
+                  type="button"
+                  className={`${styles.pathSeg} ${styles.pathBtn} ${i === breadcrumb.length - 1 ? styles.pathCurrent : ''}`}
+                  onClick={() => navigate(n.id)}
+                  onDragOver={(e) => onFolderDragOver(e, n.id)}
+                  onDragLeave={() => setDropTarget((t) => (t === n.id ? null : t))}
+                  onDrop={(e) => onFolderDrop(e, n.id)}
+                >
+                  {n.name}
+                </button>
+              </span>
+            ))}
+          </nav>
+        </div>
+
+        {/* Context menu */}
+        {ctxMenu && (
+          <div
+            className={styles.ctxMenu}
+            style={{
+              left: Math.min(ctxMenu.x, window.innerWidth - 230),
+              top: Math.min(ctxMenu.y, window.innerHeight - 260),
+            }}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onContextMenu={(e) => e.preventDefault()}
+          >
+            {ctxTarget ? (
+              <>
+                <button
+                  className={styles.ctxItem}
+                  onClick={() => {
+                    openSelection();
+                    setCtxMenu(null);
+                  }}
+                >
+                  {selectedNodes.length > 1 ? `Open ${selectedNodes.length} Items` : 'Open'}
+                </button>
+                <div className={styles.ctxSep} />
+                {selectedNodes.length === 1 && canRenameNode(ctxTarget) && (
+                  <button className={styles.ctxItem} onClick={() => startRename(ctxTarget.id)}>
+                    Rename
+                  </button>
+                )}
+                {trashableSelection.length > 0 && (
+                  <button className={styles.ctxItem} onClick={trashSelection}>
+                    {trashLabel}
+                  </button>
+                )}
+                {currentId !== ROOT_IDS.desktop && movableSelection.length > 0 && (
+                  <button
+                    className={styles.ctxItem}
+                    onClick={() => moveSelectionTo(ROOT_IDS.desktop)}
+                  >
+                    Move to Desktop
+                  </button>
+                )}
+                {(selectedNodes.length === 1 && canRenameNode(ctxTarget)) ||
+                trashableSelection.length > 0 ||
+                (currentId !== ROOT_IDS.desktop && movableSelection.length > 0) ? (
+                  <div className={styles.ctxSep} />
+                ) : null}
+                <button className={styles.ctxItem} onClick={selectAll}>
+                  Select All
+                </button>
+              </>
+            ) : (
+              <>
+                {writable && (
                   <>
-                    {targetItem.action && (
-                      <>
-                        <button
-                          className={styles.ctxItem}
-                          onClick={() => {
-                            targetItem.action?.();
-                            setCtxMenu(null);
-                          }}
-                        >
-                          Open
-                        </button>
-                        <div className={styles.ctxSep} />
-                      </>
-                    )}
-                    {/* Move back to desktop when inside a custom desktop folder */}
-                    {section === 'desktop' && inFolder && currentFolder && (
-                      <>
-                        <button
-                          className={styles.ctxItem}
-                          onClick={() => {
-                            moveFromFolderToDesktop(currentFolder.id, targetItem.id);
-                            setCtxMenu(null);
-                          }}
-                        >
-                          Move to Desktop
-                        </button>
-                        <div className={styles.ctxSep} />
-                      </>
-                    )}
-                    <button
-                      className={styles.ctxItem}
-                      onClick={() => {
-                        setSelected(
-                          new Set(
-                            Array.from(selected).filter((id) =>
-                              displayItems.some((i) => i.id === id)
-                            )
-                          )
-                        );
-                        setCtxMenu(null);
-                      }}
-                    >
-                      {selected.size > 1 ? `Select All (${selected.size})` : 'Select'}
+                    <button className={styles.ctxItem} onClick={newFolder}>
+                      New Folder
                     </button>
-                  </>
-                ) : (
-                  <>
-                    {section === 'documents' && !inFolder && (
-                      <>
-                        <button className={styles.ctxItem} onClick={createNewFolder}>
-                          New Folder
-                        </button>
-                        <button
-                          className={styles.ctxItem}
-                          onClick={() => uploadRef.current?.click()}
-                        >
-                          Upload File…
-                        </button>
-                        <div className={styles.ctxSep} />
-                      </>
-                    )}
+                    <button className={styles.ctxItem} onClick={newTextFile}>
+                      New Text File
+                    </button>
                     <button
                       className={styles.ctxItem}
                       onClick={() => {
-                        setSelected(new Set(displayItems.map((i) => i.id)));
+                        setCtxMenu(null);
+                        uploadRef.current?.click();
+                      }}
+                    >
+                      Upload File…
+                    </button>
+                    <div className={styles.ctxSep} />
+                  </>
+                )}
+                <button
+                  className={styles.ctxItem}
+                  onClick={selectAll}
+                  disabled={items.length === 0}
+                >
+                  Select All
+                </button>
+                <div className={styles.ctxSep} />
+                <button
+                  className={styles.ctxItem}
+                  onClick={() => {
+                    setView('icon');
+                    setCtxMenu(null);
+                  }}
+                >
+                  {view === 'icon' ? '✓ ' : ''}View as Icons
+                </button>
+                <button
+                  className={styles.ctxItem}
+                  onClick={() => {
+                    setView('list');
+                    setCtxMenu(null);
+                  }}
+                >
+                  {view === 'list' ? '✓ ' : ''}View as List
+                </button>
+                {current?.parentId && (
+                  <>
+                    <div className={styles.ctxSep} />
+                    <button
+                      className={styles.ctxItem}
+                      onClick={() => {
+                        goUp();
                         setCtxMenu(null);
                       }}
                     >
-                      Select All
+                      Enclosing Folder
                     </button>
                   </>
                 )}
-              </div>
-            );
-          })()}
+              </>
+            )}
+          </div>
+        )}
       </main>
     </div>
   );
 }
 
 /* ── Sidebar icons ─────────────────────────────────────────────────── */
-function MonitorIcon() {
-  return (
+const SIDEBAR_ICONS: Record<RootId, React.ReactNode> = {
+  desktop: (
     <svg
       viewBox="0 0 14 14"
       fill="none"
@@ -864,10 +973,8 @@ function MonitorIcon() {
       <rect x="1" y="2" width="12" height="9" rx="1.5" />
       <path d="M5 13h4M7 11v2" />
     </svg>
-  );
-}
-function DocIcon() {
-  return (
+  ),
+  documents: (
     <svg
       viewBox="0 0 14 14"
       fill="none"
@@ -878,10 +985,8 @@ function DocIcon() {
       <rect x="2" y="1" width="10" height="12" rx="1.5" />
       <path d="M5 5h4M5 8h4M5 11h2" />
     </svg>
-  );
-}
-function DownloadIcon() {
-  return (
+  ),
+  downloads: (
     <svg
       viewBox="0 0 14 14"
       fill="none"
@@ -893,10 +998,8 @@ function DownloadIcon() {
       <path d="M7 2v7M4 6l3 3 3-3" />
       <path d="M2 11h10" />
     </svg>
-  );
-}
-function AppsIcon() {
-  return (
+  ),
+  applications: (
     <svg
       viewBox="0 0 14 14"
       fill="none"
@@ -909,169 +1012,6 @@ function AppsIcon() {
       <rect x="1" y="8" width="5" height="5" rx="1" />
       <rect x="8" y="8" width="5" height="5" rx="1" />
     </svg>
-  );
-}
-
-/* ── File icons ──────────────────────────────────────────────────────── */
-function FolderIcon() {
-  return (
-    <svg viewBox="0 0 52 44" fill="none" width="44" height="44">
-      <path
-        d="M2 9Q2 5 6 5L20 5L24 9L47 9Q49 9 49 11L49 38Q49 40 47 40L5 40Q3 40 3 38Z"
-        fill="#4a9eff"
-        opacity="0.9"
-      />
-      <path d="M2 9Q2 5 6 5L20 5L24 9L47 9Q49 9 49 11L49 14L2 14Z" fill="#5aabff" opacity="0.5" />
-    </svg>
-  );
-}
-
-const EXT_COLORS: Record<string, string> = {
-  PDF: '#ef4444',
-  MD: '#10b981',
-  TXT: '#6b7280',
-  JS: '#f59e0b',
-  TS: '#3b82f6',
-  TSX: '#3b82f6',
-  JSX: '#f59e0b',
-  JSON: '#8b5cf6',
-  HTML: '#e44d26',
-  CSS: '#2563eb',
-  PNG: '#06b6d4',
-  JPG: '#06b6d4',
-  JPEG: '#06b6d4',
-  GIF: '#06b6d4',
-  WEBP: '#06b6d4',
+  ),
+  trash: null,
 };
-
-function FileIcon({ name }: { name: string }) {
-  const ext = name.split('.').pop()?.toUpperCase() ?? 'TXT';
-  const color = EXT_COLORS[ext] ?? '#6b7280';
-  return (
-    <svg viewBox="0 0 44 52" fill="none" width="44" height="44">
-      <rect
-        x="2"
-        y="2"
-        width="40"
-        height="48"
-        rx="4"
-        fill="#1e2030"
-        stroke={color}
-        strokeWidth="1.5"
-      />
-      <path d="M28 2L42 16" stroke={color} strokeWidth="1.5" />
-      <path d="M28 2L28 16L42 16" fill={color} opacity="0.25" />
-      <text
-        x="22"
-        y="36"
-        textAnchor="middle"
-        fill={color}
-        fontSize="9"
-        fontWeight="700"
-        fontFamily="-apple-system, 'SF Mono', monospace"
-      >
-        {ext.slice(0, 4)}
-      </text>
-    </svg>
-  );
-}
-
-const APP_GRADS: Record<string, [string, string]> = {
-  About: ['#4f8ef7', '#1e4fc4'],
-  Experience: ['#f59e0b', '#b45309'],
-  Skills: ['#a855f7', '#6d28d9'],
-  Contact: ['#3b82f6', '#1d4ed8'],
-  Location: ['#10b981', '#047857'],
-  Terminal: ['#1c1c22', '#2a2a35'],
-  TextEditor: ['#272822', '#4c96d7'],
-  Finder: ['#5ac8fa', '#007aff'],
-  Trash: ['#6b7280', '#374151'],
-  'CMap Software': ['#2563eb', '#1e40af'],
-  '17 Oranges': ['#ea580c', '#c2410c'],
-  'The Access Group': ['#7c3aed', '#5b21b6'],
-  'The Drawing Room Creative': ['#0d9488', '#0f766e'],
-  'Langley Foxall': ['#0ea5e9', '#0284c7'],
-  eDynamix: ['#dc2626', '#b91c1c'],
-};
-
-function AppIcon({ name }: { name: string }) {
-  const uid = useId().replace(/:/g, '');
-  const cleanName = name.replace('.app', '');
-  const [c1, c2] = APP_GRADS[cleanName] ?? ['#3b82f6', '#1d4ed8'];
-  const initials = cleanName
-    .split(' ')
-    .filter(Boolean)
-    .map((w) => w[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
-  const gId = `${uid}g`;
-  const ggId = `${uid}gg`;
-  return (
-    <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
-      <defs>
-        <linearGradient id={gId} x1="0" y1="0" x2="44" y2="44">
-          <stop stopColor={c1} />
-          <stop offset="1" stopColor={c2} />
-        </linearGradient>
-        <linearGradient id={ggId} x1="0" y1="0" x2="0" y2="22">
-          <stop stopColor="rgba(255,255,255,0.18)" />
-          <stop offset="1" stopColor="transparent" />
-        </linearGradient>
-      </defs>
-      <rect width="44" height="44" rx="11" fill={`url(#${gId})`} />
-      <rect width="44" height="22" rx="11" fill={`url(#${ggId})`} />
-      <text
-        x="22"
-        y="29"
-        textAnchor="middle"
-        fill="white"
-        fontSize="16"
-        fontWeight="700"
-        fontFamily="'Helvetica Neue', Arial, Helvetica, sans-serif"
-        opacity="0.92"
-      >
-        {initials}
-      </text>
-    </svg>
-  );
-}
-
-function NokiaFinderIcon() {
-  return (
-    <svg viewBox="0 0 48 48" width="44" height="44" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="9" y="1" width="30" height="46" rx="7" fill="#1c2233" />
-      <rect x="10" y="2" width="28" height="44" rx="6" fill="#243044" />
-      <rect x="18" y="5" width="12" height="2" rx="1" fill="#161f2e" />
-      <rect x="12" y="9" width="24" height="18" rx="2.5" fill="#0d0f0d" />
-      <rect x="13" y="10" width="22" height="16" rx="1.5" fill="#1c2c10" />
-      <rect x="22" y="12" width="3" height="3" fill="#4ddd4d" />
-      <rect x="19" y="12" width="3" height="3" fill="#35bb35" />
-      <rect x="16" y="12" width="3" height="3" fill="#2aaa2a" />
-      <rect x="16" y="15" width="3" height="3" fill="#2aaa2a" />
-      <rect x="16" y="18" width="3" height="3" fill="#2aaa2a" />
-      <rect x="19" y="18" width="3" height="3" fill="#2aaa2a" />
-      <rect x="22" y="18" width="3" height="3" fill="#2aaa2a" />
-      <rect x="30" y="13" width="2" height="2" fill="#88ff44" />
-      <text
-        x="24"
-        y="32"
-        textAnchor="middle"
-        fontFamily="Arial,Helvetica,sans-serif"
-        fontSize="4.5"
-        fontWeight="700"
-        letterSpacing="1.2"
-        fill="#5a78a0"
-      >
-        NOKIA
-      </text>
-      <ellipse cx="24" cy="37.5" rx="5.5" ry="3.5" fill="#1a2535" />
-      <circle cx="24" cy="37.5" r="2.5" fill="#141d28" />
-      <rect x="12" y="34" width="7" height="4" rx="2" fill="#1a2535" />
-      <rect x="29" y="34" width="7" height="4" rx="2" fill="#1a2535" />
-      <rect x="12" y="40" width="6" height="3" rx="1.5" fill="#1a2535" />
-      <rect x="21" y="40" width="6" height="3" rx="1.5" fill="#1a2535" />
-      <rect x="30" y="40" width="6" height="3" rx="1.5" fill="#1a2535" />
-    </svg>
-  );
-}

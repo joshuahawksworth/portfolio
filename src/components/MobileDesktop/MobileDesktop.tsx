@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useTime } from '../../hooks/useTime';
 import AboutApp from '../apps/AboutApp';
@@ -14,6 +14,9 @@ import RubberDuckApp from '../apps/RubberDuckApp';
 import KeyboardShortcutsApp from '../apps/KeyboardShortcutsApp';
 import CalculatorApp from '../apps/CalculatorApp';
 import AskJoshApp from '../apps/AskJoshApp';
+import TextEditorApp from '../apps/TextEditorApp';
+import ImageViewerApp from '../apps/ImageViewerApp';
+import TrashApp from '../apps/TrashApp';
 import { CalculatorLogoIcon } from '../icons/CalculatorLogoIcon';
 import { AboutLogoIcon } from '../icons/AboutLogoIcon';
 import { ChromeLogoIcon } from '../icons/ChromeLogoIcon';
@@ -391,6 +394,9 @@ const APP_COMPONENTS: Record<string, React.ComponentType<{ props?: Record<string
   shortcuts: KeyboardShortcutsApp,
   calculator: CalculatorApp,
   askjosh: AskJoshApp,
+  texteditor: TextEditorApp,
+  imageviewer: ImageViewerApp,
+  trash: TrashApp,
 };
 
 const APP_LABELS: Record<string, string> = {
@@ -411,7 +417,7 @@ const APP_LABELS: Record<string, string> = {
 
 const TRICKSTER_LABEL = 'My Flaws';
 
-// ── "Now" widget (2×2 glass card, top-left of the home screen) ──────────────
+// ── "Now" widget (2×2 glass card, top-left of the first page) ───────────────
 function NowWidget() {
   const now = useTime();
   const time = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
@@ -422,7 +428,7 @@ function NowWidget() {
   });
 
   return (
-    <div className={styles.widgetItem}>
+    <div className={styles.widgetItem} style={{ gridColumn: '1 / 3', gridRow: '1 / 3' }}>
       <div className={styles.widget}>
         <div className={styles.widgetPlace}>
           <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
@@ -440,12 +446,18 @@ function NowWidget() {
         <div className={styles.widgetName}>Joshua Hawksworth</div>
         <div className={styles.widgetRole}>Senior Full Stack Developer</div>
       </div>
-      <span className={styles.iconLabel}>Now</span>
     </div>
   );
 }
 
-// Fixed base items — these never move (slots 0–11 in the 4-column grid)
+// ── Home-screen layout: 4 columns × 4 rows per page, like iOS ───────────────
+const COLS = 4;
+const ROWS = 4;
+const PAGE_SLOTS = COLS * ROWS;
+/** Cells the 2×2 widget covers on the first page. */
+const WIDGET_SLOTS = new Set([0, 1, 4, 5]);
+
+// App order. Anything that doesn't fit on a page spills onto the next one.
 const BASE_ITEMS = [
   'finder',
   'about',
@@ -462,18 +474,87 @@ const BASE_ITEMS = [
   'cv',
 ] as const;
 
-// Trailing zone: slots 12–15 (last row). Trickster lives here; the other 3 stay empty.
-const TRAILING_SLOTS = 4;
-
 const DOCK_APPS = ['about', 'experience', 'contact', 'github'];
+
+type Page = Array<string | null>;
+
+/** Lay the icons out page by page; returns pages of 16 slots (null = empty). */
+function buildPages(ids: readonly string[]): Page[] {
+  const pages: Page[] = [];
+  let page: Page = Array(PAGE_SLOTS).fill(null);
+  let slot = 0;
+  for (const id of ids) {
+    while (pages.length === 0 && WIDGET_SLOTS.has(slot)) slot += 1;
+    if (slot >= PAGE_SLOTS) {
+      pages.push(page);
+      page = Array(PAGE_SLOTS).fill(null);
+      slot = 0;
+    }
+    page[slot] = id;
+    slot += 1;
+  }
+  pages.push(page);
+  return pages;
+}
+
+function slotStyle(slot: number): CSSProperties {
+  return { gridColumn: (slot % COLS) + 1, gridRow: Math.floor(slot / COLS) + 1 };
+}
 
 function MobileInner() {
   const { windows, openApp, closeWindow } = useDesktop();
   const wallpaper = loadWallpaper();
   const activeWindow = windows.length > 0 ? windows[windows.length - 1] : null;
 
-  // Which trailing slot (0–3) the trickster occupies. Others are genuinely empty.
-  const [tricksterSlot, setTricksterSlot] = useState(0);
+  // Pages of icons. The trickster lives in one of the empty slots of the last page
+  // (or on a fresh page if the last one is full) and hops whenever it's touched.
+  const basePages = useMemo(() => buildPages(BASE_ITEMS), []);
+  const pages = useMemo(() => {
+    const last = basePages[basePages.length - 1];
+    const hasRoom = last.some(
+      (id, s) => id === null && !(basePages.length === 1 && WIDGET_SLOTS.has(s))
+    );
+    return hasRoom ? basePages : [...basePages, Array<string | null>(PAGE_SLOTS).fill(null)];
+  }, [basePages]);
+  const lastPage = pages.length - 1;
+  const emptySlots = useMemo(
+    () =>
+      pages[lastPage]
+        .map((id, s) => (id === null && !(lastPage === 0 && WIDGET_SLOTS.has(s)) ? s : -1))
+        .filter((s) => s >= 0),
+    [pages, lastPage]
+  );
+  const [tricksterSlot, setTricksterSlot] = useState(() => emptySlots[0] ?? 0);
+
+  function moveTrickster() {
+    const options = emptySlots.filter((s) => s !== tricksterSlot);
+    if (options.length === 0) return;
+    setTricksterSlot(options[Math.floor(Math.random() * options.length)]);
+  }
+
+  // ── Paging (native scroll-snap so it feels like the real thing) ────────
+  const pagerRef = useRef<HTMLDivElement>(null);
+  const [page, setPage] = useState(0);
+  const [swiping, setSwiping] = useState(false);
+  const swipeTimer = useRef<number | undefined>(undefined);
+
+  function onPagerScroll() {
+    const el = pagerRef.current;
+    if (!el) return;
+    const next = Math.round(el.scrollLeft / Math.max(1, el.clientWidth));
+    if (next !== page) setPage(next);
+    setSwiping(true);
+    window.clearTimeout(swipeTimer.current);
+    swipeTimer.current = window.setTimeout(() => setSwiping(false), 650);
+  }
+
+  function goToPage(p: number) {
+    const el = pagerRef.current;
+    if (!el) return;
+    el.scrollTo({ left: p * el.clientWidth, behavior: 'smooth' });
+  }
+
+  useEffect(() => () => window.clearTimeout(swipeTimer.current), []);
 
   // Search pill: non-empty query dims every icon whose label doesn't match.
   const [query, setQuery] = useState('');
@@ -483,15 +564,11 @@ function MobileInner() {
   function handleOpen(id: string) {
     if (id === 'github') {
       openApp('safari', { url: 'https://github.com/joshuahawksworth' });
-    } else if (id !== 'cv') {
+    } else if (id === 'cv') {
+      window.open('/JoshuaHawksworthCV.pdf', '_blank');
+    } else {
       openApp(id);
     }
-  }
-
-  function moveTrickster() {
-    // Only pick from the other 3 empty trailing slots — never touches base items
-    const empties = [0, 1, 2, 3].filter((i) => i !== tricksterSlot);
-    setTricksterSlot(empties[Math.floor(Math.random() * empties.length)]);
   }
 
   function iconClass(label: string, extra?: string) {
@@ -500,56 +577,76 @@ function MobileInner() {
       .join(' ');
   }
 
+  const ActiveComp = activeWindow ? APP_COMPONENTS[activeWindow.appId] : null;
+
   return (
-    <div className={styles.screen} style={{ backgroundImage: `url(${WALLPAPERS[wallpaper]})` }}>
+    <div className={styles.screen}>
+      {/* Wallpaper sits in its own layer so it can be blurred without blurring the UI */}
+      <div
+        className={styles.wallpaper}
+        style={{ backgroundImage: `url(${WALLPAPERS[wallpaper]})` }}
+        aria-hidden="true"
+      />
       <StatusBar />
 
-      <div className={styles.homeScreen}>
-        <div className={styles.iconGrid}>
-          <NowWidget />
-
-          {/* Fixed base items — positions never change */}
-          {BASE_ITEMS.map((id) => {
-            const label = APP_LABELS[id] ?? id;
-            return (
-              <button
-                key={id}
-                className={iconClass(label)}
-                onClick={() =>
-                  id === 'cv' ? window.open('/JoshuaHawksworthCV.pdf', '_blank') : handleOpen(id)
+      <div className={styles.pager} ref={pagerRef} onScroll={onPagerScroll}>
+        {pages.map((slots, p) => (
+          <div className={styles.page} key={p} aria-label={`Page ${p + 1} of ${pages.length}`}>
+            <div className={styles.iconGrid}>
+              {p === 0 && <NowWidget />}
+              {slots.map((id, s) => {
+                if (p === 0 && WIDGET_SLOTS.has(s)) return null;
+                if (id) {
+                  const label = APP_LABELS[id] ?? id;
+                  return (
+                    <button
+                      key={id}
+                      className={iconClass(label)}
+                      style={slotStyle(s)}
+                      onClick={() => handleOpen(id)}
+                    >
+                      <AppIcon appId={id} size={60} />
+                      <span className={styles.iconLabel}>{label}</span>
+                    </button>
+                  );
                 }
-              >
-                <AppIcon appId={id} size={60} />
-                <span className={styles.iconLabel}>{label}</span>
-              </button>
-            );
-          })}
-
-          {/* Trailing zone: 4 cells, only tricksterSlot is filled */}
-          {Array.from({ length: TRAILING_SLOTS }, (_, i) =>
-            i === tricksterSlot ? (
-              <button
-                key={`trickster-${tricksterSlot}`}
-                className={iconClass(TRICKSTER_LABEL, styles.tricksterItem)}
-                onPointerEnter={moveTrickster}
-                onClick={(e) => e.preventDefault()}
-              >
-                <AppIcon appId="trickster" size={60} />
-                <span className={styles.iconLabel}>{TRICKSTER_LABEL}</span>
-              </button>
-            ) : (
-              <div
-                key={`empty-${i}`}
-                aria-hidden="true"
-                style={{ visibility: 'hidden', pointerEvents: 'none' }}
-                className={styles.iconItem}
-              />
-            )
-          )}
-        </div>
+                if (p === lastPage && s === tricksterSlot) {
+                  return (
+                    <button
+                      key={`trickster-${s}`}
+                      className={iconClass(TRICKSTER_LABEL, styles.tricksterItem)}
+                      style={slotStyle(s)}
+                      onPointerEnter={moveTrickster}
+                      onTouchStart={moveTrickster}
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      <AppIcon appId="trickster" size={60} />
+                      <span className={styles.iconLabel}>{TRICKSTER_LABEL}</span>
+                    </button>
+                  );
+                }
+                // Empty cell: keeps every row the same height across pages
+                return (
+                  <div
+                    key={`empty-${p}-${s}`}
+                    aria-hidden="true"
+                    className={styles.iconItem}
+                    style={{ ...slotStyle(s), visibility: 'hidden', pointerEvents: 'none' }}
+                  >
+                    <span className={styles.appIcon} />
+                    <span className={styles.iconLabel}>&nbsp;</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
-      <div className={styles.searchRow}>
+      {/* Search pill, which turns into the page dots while you swipe (iOS 18) */}
+      <div
+        className={`${styles.searchRow} ${swiping && pages.length > 1 ? styles.searchRowSwiping : ''}`}
+      >
         <label className={styles.searchPill}>
           <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
             <circle cx="6.8" cy="6.8" r="4.6" fill="none" stroke="currentColor" strokeWidth="1.8" />
@@ -574,6 +671,21 @@ function MobileInner() {
             enterKeyHint="search"
           />
         </label>
+        {pages.length > 1 && (
+          <div className={styles.pageDots} role="tablist" aria-label="Home screen pages">
+            {pages.map((_, p) => (
+              <button
+                key={p}
+                type="button"
+                role="tab"
+                aria-selected={p === page}
+                aria-label={`Page ${p + 1}`}
+                className={`${styles.pageDot} ${p === page ? styles.pageDotActive : ''}`}
+                onClick={() => goToPage(p)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <div className={styles.dockWrap}>
@@ -627,10 +739,14 @@ function MobileInner() {
                 .filter(Boolean)
                 .join(' ')}
             >
-              {(() => {
-                const Comp = APP_COMPONENTS[activeWindow.appId];
-                return Comp ? <Comp props={activeWindow.props} /> : null;
-              })()}
+              {ActiveComp ? (
+                <ActiveComp props={activeWindow.props} />
+              ) : (
+                <div className={styles.unavailable}>
+                  <strong>{activeWindow.title}</strong>
+                  <span>This app isn’t available on mobile yet. Try it on a desktop browser.</span>
+                </div>
+              )}
             </div>
           </>
         )}

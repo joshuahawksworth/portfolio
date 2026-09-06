@@ -50,6 +50,7 @@ All shell tokens live on `:root` in `src/index.css`. Use them instead of hard-co
 - Menus/popovers: `--glass-strong` + `blur(30px)`, radius 10px, padding 6px, `1px solid rgba(255,255,255,0.6)`,
   shadow `0 12px 40px rgba(60,40,10,0.22)`. Items 13px, min-height 28px, padding 5px 10px, radius 5px.
   Hover: `--accent` fill + white text.
+- Folders, documents, Macintosh HD and the Trash are drawn in `src/components/icons/FileSystemIcons.tsx` (macOS blue folders) and shared by the desktop, Finder, Get Info and Trash via `NodeIcon`.
 - Desktop icon labels: 12px, `--text`, on a translucent light pill when selected. No heavy dark text-shadows.
 
 ## Rules

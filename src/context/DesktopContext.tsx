@@ -1,5 +1,8 @@
-import { createContext, use, useState, useCallback, useRef } from 'react';
+import { createContext, use, useState, useCallback, useRef, useMemo } from 'react';
 import { APP_DEFAULTS, APP_MAX, APP_MIN } from '../components/apps/appRegistry';
+import { buildSeedFileSystem, ROOT_IDS, type FsNode } from '../data/fileSystemSeed';
+
+export type { FsNode, FsNodeType } from '../data/fileSystemSeed';
 
 export interface WindowInstance {
   id: string;
@@ -43,111 +46,84 @@ function cascadePosition(idx: number, w: number, h: number) {
   };
 }
 
-/** Folder created by the user on the desktop, shared via context so Finder can see it */
-export interface DesktopFolder {
-  id: string;
-  label: string;
+// ── File-system rules (shared by Finder, the desktop and the Trash) ────────
+
+/** Files, images and user folders can go to the Trash; apps, jobs and system items can't. */
+export function canTrashNode(node: FsNode): boolean {
+  return !node.locked && (node.type === 'folder' || node.type === 'file' || node.type === 'image');
 }
 
-/** File or image on the desktop, shared via context so Finder can see it */
-export interface DesktopFileItem {
-  id: string;
-  label: string;
-  type: 'file' | 'image';
-  content?: string;
-  dataUrl?: string;
+export function canRenameNode(node: FsNode): boolean {
+  return !node.locked && node.type !== 'app' && node.type !== 'job';
 }
 
-/** A file uploaded by the user — queued for placement on the desktop */
-export interface UploadedFileItem {
-  id: string;
+/** Anything unlocked can be dragged into another folder (jobs and desktop app shortcuts too). */
+export function canMoveNode(node: FsNode): boolean {
+  return !node.locked;
+}
+
+/** Folders the user can create things in: everything but Applications and the Trash. */
+export function isWritableFolder(node: FsNode | undefined): boolean {
+  if (!node || node.type !== 'folder') return false;
+  return node.id !== ROOT_IDS.applications && node.id !== ROOT_IDS.trash;
+}
+
+export function isInTrash(fs: Record<string, FsNode>, id: string): boolean {
+  let cur: FsNode | undefined = fs[id];
+  while (cur) {
+    if (cur.id === ROOT_IDS.trash) return true;
+    cur = cur.parentId ? fs[cur.parentId] : undefined;
+  }
+  return false;
+}
+
+function isDescendant(fs: Record<string, FsNode>, id: string, ancestorId: string): boolean {
+  let cur: FsNode | undefined = fs[id];
+  while (cur?.parentId) {
+    if (cur.parentId === ancestorId) return true;
+    cur = fs[cur.parentId];
+  }
+  return false;
+}
+
+function collectDescendants(fs: Record<string, FsNode>, id: string, out: Set<string>) {
+  for (const n of Object.values(fs)) {
+    if (n.parentId === id) {
+      out.add(n.id);
+      collectDescendants(fs, n.id, out);
+    }
+  }
+}
+
+/** "untitled folder", "untitled folder 2", … like Finder. */
+function uniqueName(fs: Record<string, FsNode>, parentId: string, base: string): string {
+  const siblings = new Set(
+    Object.values(fs)
+      .filter((n) => n.parentId === parentId)
+      .map((n) => n.name.toLowerCase())
+  );
+  if (!siblings.has(base.toLowerCase())) return base;
+  const dot = base.lastIndexOf('.');
+  const stem = dot > 0 ? base.slice(0, dot) : base;
+  const ext = dot > 0 ? base.slice(dot) : '';
+  for (let i = 2; ; i++) {
+    const candidate = `${stem} ${i}${ext}`;
+    if (!siblings.has(candidate.toLowerCase())) return candidate;
+  }
+}
+
+let nodeCounter = 0;
+function newId(prefix: string) {
+  nodeCounter += 1;
+  return `${prefix}-${Date.now().toString(36)}-${nodeCounter}`;
+}
+
+export interface NewFileInput {
   name: string;
-  content: string; // text content or empty string for binary
-  dataUrl?: string; // base64 data URL for images
-  isImage: boolean;
-}
-
-/** An item that has been dragged into a desktop folder */
-export interface DesktopFolderItem {
-  id: string;
-  type: 'job' | 'folder' | 'app' | 'file' | 'image';
-  label: string;
-  jobId?: string;
-  appId?: string;
+  type?: 'file' | 'image';
   content?: string;
   dataUrl?: string;
 }
-
-export interface TrashedItem {
-  id: string;
-  name: string;
-  date: string;
-  isJoke?: boolean;
-  content?: string;
-  dataUrl?: string;
-}
-
-// Joke items live in context so restoreItem() can find and remove them
-const JOKE_TRASH: TrashedItem[] = [
-  {
-    id: 'joke-jquery',
-    name: 'jQuery.js',
-    date: '2019',
-    isJoke: true,
-    content: `// jQuery v1.11.3 — "Because we had no choice"\n(function( global, factory ) {\n  if ( typeof module === 'object' ) {\n    module.exports = factory( global );\n  } else {\n    factory( global );\n  }\n}(window, function( window ) {\n  // TODO: migrate to vanilla JS... next sprint, promise\n  console.log('jQuery loaded. I am so sorry.');\n}));`,
-  },
-  {
-    id: 'joke-confusion',
-    name: 'var let const confusion.txt',
-    date: '2020',
-    isJoke: true,
-    content: `My notes on JavaScript variable declarations:\n\nvar   - hoisted, function-scoped, can be redeclared. Why? ¯\\_(ツ)_/¯\nlet   - block-scoped, temporal dead zone. OK actually fine.\nconst - block-scoped, immutable binding (not the value!). Use this.\n\nTODO: stop using var\nStatus: still using var in production (2020)\nStatus: still using var in production (2021)\nStatus: stopped, had a stern talk with myself`,
-  },
-  {
-    id: 'joke-index',
-    name: 'index2_FINAL_v3.html',
-    date: '2021',
-    isJoke: true,
-    content: `<!DOCTYPE html>\n<html>\n<head>\n  <title>My Portfolio (FINAL - this is the real one)</title>\n  <!-- index.html was the draft -->\n  <!-- index_v2.html was the "good" draft -->\n  <!-- this one is FINAL. Do NOT edit. -->\n  <!-- note: edited 47 times since calling it FINAL -->\n</head>\n<body>\n  <h1>Hi, I am a developer</h1>\n  <!-- TODO: say something more interesting -->\n</body>\n</html>`,
-  },
-  {
-    id: 'joke-console',
-    name: 'console.log("here").js',
-    date: '2022',
-    isJoke: true,
-    content: `// Debug session: 3 hours, 47 minutes\n// Root cause: off-by-one error in line 12\n\nconsole.log("here");\nconsole.log("here 2");\nconsole.log("HERE");\nconsole.log("HERE??");\nconsole.log("why");\nconsole.log(data);\n// spoiler: it was not the API\nconsole.log(typeof undefined); // "undefined" ← found it`,
-  },
-  {
-    id: 'joke-spaghetti',
-    name: 'spaghetti-code.ts',
-    date: '2023',
-    isJoke: true,
-    content: `// Written at 2am before a deadline\n// Do not touch. It works. Nobody knows why.\n\nexport function doTheThing(x: any, y?: any, z?: any) {\n  if (x) {\n    if (y) {\n      if (z) { return x + y + z; // trust me\n      } else { return x + y; }\n    } else {\n      if (z) { return x + z; }\n    }\n  } else {\n    if (y && z) { return y + z || x || 0; // don't ask\n    }\n  }\n  return null; // :)\n}`,
-  },
-  {
-    id: 'joke-todo',
-    name: 'TODO_do_this_later.md',
-    date: '2024',
-    isJoke: true,
-    content: `# TODO: Do This Later\n\nCreated: January 2024\n\n## High Priority\n- [ ] Refactor auth module\n- [ ] Write tests (lol)\n- [ ] Update dependencies\n\n## Medium Priority\n- [ ] Do the thing from last sprint\n- [ ] Reply to that Slack message\n\n## Low Priority (realistically: never)\n- [ ] Document everything\n- [ ] Remove all console.logs\n- [ ] Actually learn Docker properly\n\n---\n*Est. completion: Q3 2024*\n*Actual completion: ¯\\_(ツ)_/¯*`,
-  },
-  {
-    id: 'secret-game-codes',
-    name: 'secret-codes.txt',
-    date: '2026',
-    isJoke: true,
-    content: `Things I definitely meant to delete:
-
-- Terminal: run "spaceinvaders"
-- Nokia phone: enter "3310" on the keypad
-
-Space Impact controls:
-- D-pad / WASD / arrows to move
-- Center key / Enter to start or fire
-- # also fires
-- * returns to Snake`,
-  },
-];
 
 interface DesktopCtx {
   windows: WindowInstance[];
@@ -159,27 +135,27 @@ interface DesktopCtx {
   moveWindow: (id: string, x: number, y: number) => void;
   resizeWindow: (id: string, x: number, y: number, w: number, h: number) => void;
   toggleMaximize: (id: string) => void;
-  desktopFolders: DesktopFolder[];
-  syncDesktopFolders: (folders: DesktopFolder[]) => void;
-  desktopFiles: DesktopFileItem[];
-  syncDesktopFiles: (files: DesktopFileItem[]) => void;
-  customFolderItems: Record<string, DesktopFolderItem[]>;
-  syncCustomFolderItems: (items: Record<string, DesktopFolderItem[]>) => void;
-  /** Queue a newly-uploaded file to be placed as a desktop icon */
-  queueUploadedFile: (file: UploadedFileItem) => void;
-  uploadedFileQueue: UploadedFileItem[];
-  ackUploadedFile: (id: string) => void;
-  /** Remove an item from a folder and queue it to be placed back on the desktop */
-  moveFromFolderToDesktop: (folderId: string, itemId: string) => void;
-  pendingFromFolder: DesktopFolderItem[];
-  ackFromFolder: (id: string) => void;
-  trashedItems: TrashedItem[];
-  trashEmptied: boolean;
-  trashItem: (item: TrashedItem) => void;
+
+  /** The whole virtual file system, keyed by node id. */
+  fs: Record<string, FsNode>;
+  /** Direct children of a folder in creation order. */
+  childrenOf: (parentId: string) => FsNode[];
+  /** Create a folder and return its id (name is made unique like Finder does). */
+  createFolder: (parentId: string, name?: string) => string;
+  /** Create a text file and return its id. */
+  createFile: (parentId: string, name?: string, content?: string) => string;
+  /** Add an uploaded file or image to a folder and return its id. */
+  addFile: (parentId: string, file: NewFileInput) => string;
+  renameNode: (id: string, name: string) => void;
+  /** Move nodes into a folder. Locked nodes and cyclic moves are skipped. */
+  moveNodes: (ids: string[], parentId: string) => void;
+  /** Move nodes to the Trash, remembering where they came from. Returns how many moved. */
+  trashNodes: (ids: string[]) => number;
+  /** Put trashed nodes back where they came from (or the desktop if that folder is gone). */
+  restoreNodes: (ids: string[]) => void;
   emptyTrash: () => void;
-  restoreItem: (id: string) => void;
-  restoredItemQueue: TrashedItem[];
-  ackRestoredItem: (id: string) => void;
+  /** Number of items sitting in the Trash (drives the full/empty bin icon). */
+  trashCount: number;
 }
 
 export const DesktopContext = createContext<DesktopCtx | null>(null);
@@ -226,61 +202,188 @@ export function DesktopProvider({
   const [focusedId, setFocusedId] = useState<string | null>(() =>
     startWithAbout ? 'about-0' : null
   );
-  const [desktopFolders, setDesktopFolders] = useState<DesktopFolder[]>([]);
-  const syncDesktopFolders = useCallback(
-    (folders: DesktopFolder[]) => setDesktopFolders(folders),
-    []
-  );
-  const [desktopFiles, setDesktopFiles] = useState<DesktopFileItem[]>([]);
-  const syncDesktopFiles = useCallback((files: DesktopFileItem[]) => setDesktopFiles(files), []);
-  const [customFolderItems, setCustomFolderItems] = useState<Record<string, DesktopFolderItem[]>>(
-    {}
-  );
-  const syncCustomFolderItems = useCallback(
-    (items: Record<string, DesktopFolderItem[]>) => setCustomFolderItems(items),
-    []
-  );
-  const [uploadedFileQueue, setUploadedFileQueue] = useState<UploadedFileItem[]>([]);
-  const queueUploadedFile = useCallback((file: UploadedFileItem) => {
-    setUploadedFileQueue((q) => [...q, file]);
-  }, []);
-  const ackUploadedFile = useCallback((id: string) => {
-    setUploadedFileQueue((prev) => prev.filter((f) => f.id !== id));
-  }, []);
-  const [pendingFromFolder, setPendingFromFolder] = useState<DesktopFolderItem[]>([]);
-  const moveFromFolderToDesktop = useCallback((folderId: string, itemId: string) => {
-    setCustomFolderItems((prev) => {
-      const folder = prev[folderId] ?? [];
-      const item = folder.find((i) => i.id === itemId);
-      if (item) setPendingFromFolder((q) => [...q, item]);
-      return { ...prev, [folderId]: folder.filter((i) => i.id !== itemId) };
-    });
-  }, []);
-  const ackFromFolder = useCallback((id: string) => {
-    setPendingFromFolder((prev) => prev.filter((i) => i.id !== id));
-  }, []);
-  const [trashedItems, setTrashedItems] = useState<TrashedItem[]>(JOKE_TRASH);
-  const [trashEmptied, setTrashEmptied] = useState(false);
-  const [restoredItemQueue, setRestoredItemQueue] = useState<TrashedItem[]>([]);
 
-  const trashItem = useCallback((item: TrashedItem) => {
-    setTrashedItems((p) => [...p, item]);
-    setTrashEmptied(false);
+  // ── File system ────────────────────────────────────────────────────────
+  const [fs, setFs] = useState<Record<string, FsNode>>(buildSeedFileSystem);
+  // Mirror so callers that create-then-act in one event (new folder → rename) see fresh data.
+  const fsRef = useRef(fs);
+  fsRef.current = fs;
+
+  const childrenOf = useCallback(
+    (parentId: string) =>
+      Object.values(fs)
+        .filter((n) => n.parentId === parentId)
+        .sort((a, b) => a.createdAt - b.createdAt),
+    [fs]
+  );
+
+  const trashCount = useMemo(
+    () => Object.values(fs).filter((n) => n.parentId === ROOT_IDS.trash).length,
+    [fs]
+  );
+
+  const insertNode = useCallback((node: FsNode) => {
+    fsRef.current = { ...fsRef.current, [node.id]: node };
+    setFs(fsRef.current);
   }, []);
-  const emptyTrash = useCallback(() => {
-    setTrashedItems([]);
-    setTrashEmptied(true);
-  }, []);
-  const restoreItem = useCallback((id: string) => {
-    setTrashedItems((prev) => {
-      const item = prev.find((i) => i.id === id);
-      if (item) setRestoredItemQueue((q) => [...q, item]);
-      return prev.filter((i) => i.id !== id);
+
+  const createFolder = useCallback(
+    (parentId: string, name = 'untitled folder') => {
+      const now = Date.now();
+      const id = newId('folder');
+      insertNode({
+        id,
+        parentId,
+        name: uniqueName(fsRef.current, parentId, name),
+        type: 'folder',
+        createdAt: now,
+        modifiedAt: now,
+      });
+      return id;
+    },
+    [insertNode]
+  );
+
+  const createFile = useCallback(
+    (parentId: string, name = 'untitled.txt', content = '') => {
+      const now = Date.now();
+      const id = newId('file');
+      insertNode({
+        id,
+        parentId,
+        name: uniqueName(fsRef.current, parentId, name),
+        type: 'file',
+        content,
+        createdAt: now,
+        modifiedAt: now,
+      });
+      return id;
+    },
+    [insertNode]
+  );
+
+  const addFile = useCallback(
+    (parentId: string, file: NewFileInput) => {
+      const now = Date.now();
+      const id = newId('upload');
+      insertNode({
+        id,
+        parentId,
+        name: uniqueName(fsRef.current, parentId, file.name),
+        type: file.type ?? (file.dataUrl ? 'image' : 'file'),
+        content: file.content,
+        dataUrl: file.dataUrl,
+        createdAt: now,
+        modifiedAt: now,
+      });
+      return id;
+    },
+    [insertNode]
+  );
+
+  const renameNode = useCallback((id: string, name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setFs((prev) => {
+      const node = prev[id];
+      if (!node || !canRenameNode(node) || node.name === trimmed) return prev;
+      const next = { ...prev, [id]: { ...node, name: trimmed, modifiedAt: Date.now() } };
+      fsRef.current = next;
+      return next;
     });
   }, []);
-  const ackRestoredItem = useCallback((id: string) => {
-    setRestoredItemQueue((prev) => prev.filter((i) => i.id !== id));
+
+  const moveNodes = useCallback((ids: string[], parentId: string) => {
+    setFs((prev) => {
+      const target = prev[parentId];
+      if (!target || target.type !== 'folder') return prev;
+      let changed = false;
+      const next = { ...prev };
+      const now = Date.now();
+      for (const id of ids) {
+        const node = next[id];
+        if (!node || !canMoveNode(node) || node.parentId === parentId) continue;
+        if (id === parentId || isDescendant(next, parentId, id)) continue; // no cycles
+        next[id] = {
+          ...node,
+          parentId,
+          name: uniqueName(next, parentId, node.name),
+          modifiedAt: now,
+          trashedFrom: undefined,
+          trashedAt: undefined,
+        };
+        changed = true;
+      }
+      if (!changed) return prev;
+      fsRef.current = next;
+      return next;
+    });
   }, []);
+
+  const trashNodes = useCallback((ids: string[]) => {
+    let moved = 0;
+    const prev = fsRef.current;
+    const next = { ...prev };
+    const now = Date.now();
+    for (const id of ids) {
+      const node = next[id];
+      if (!node || !canTrashNode(node) || node.parentId === ROOT_IDS.trash) continue;
+      next[id] = {
+        ...node,
+        parentId: ROOT_IDS.trash,
+        trashedFrom: node.parentId ?? ROOT_IDS.desktop,
+        trashedAt: now,
+      };
+      moved += 1;
+    }
+    if (moved > 0) {
+      fsRef.current = next;
+      setFs(next);
+    }
+    return moved;
+  }, []);
+
+  const restoreNodes = useCallback((ids: string[]) => {
+    setFs((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const id of ids) {
+        const node = next[id];
+        if (!node || node.parentId !== ROOT_IDS.trash) continue;
+        const from = node.trashedFrom;
+        const dest =
+          from && next[from] && next[from].type === 'folder' && !isInTrash(next, from)
+            ? from
+            : ROOT_IDS.desktop;
+        next[id] = {
+          ...node,
+          parentId: dest,
+          name: uniqueName(next, dest, node.name),
+          trashedFrom: undefined,
+          trashedAt: undefined,
+          isJoke: undefined,
+        };
+        changed = true;
+      }
+      if (!changed) return prev;
+      fsRef.current = next;
+      return next;
+    });
+  }, []);
+
+  const emptyTrash = useCallback(() => {
+    setFs((prev) => {
+      const doomed = new Set<string>();
+      collectDescendants(prev, ROOT_IDS.trash, doomed);
+      if (doomed.size === 0) return prev;
+      const next: Record<string, FsNode> = {};
+      for (const n of Object.values(prev)) if (!doomed.has(n.id)) next[n.id] = n;
+      fsRef.current = next;
+      return next;
+    });
+  }, []);
+
+  // ── Windows ────────────────────────────────────────────────────────────
   const counter = useRef(1);
 
   const focusWindow = useCallback((id: string) => {
@@ -424,25 +527,17 @@ export function DesktopProvider({
         moveWindow,
         resizeWindow,
         toggleMaximize,
-        desktopFolders,
-        syncDesktopFolders,
-        desktopFiles,
-        syncDesktopFiles,
-        customFolderItems,
-        syncCustomFolderItems,
-        queueUploadedFile,
-        uploadedFileQueue,
-        ackUploadedFile,
-        moveFromFolderToDesktop,
-        pendingFromFolder,
-        ackFromFolder,
-        trashedItems,
-        trashEmptied,
-        trashItem,
+        fs,
+        childrenOf,
+        createFolder,
+        createFile,
+        addFile,
+        renameNode,
+        moveNodes,
+        trashNodes,
+        restoreNodes,
         emptyTrash,
-        restoreItem,
-        restoredItemQueue,
-        ackRestoredItem,
+        trashCount,
       }}
     >
       {children}

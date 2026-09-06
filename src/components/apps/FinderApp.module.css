@@ -6,9 +6,9 @@
   font-family: var(--font-ui);
   background: var(--panel);
   color: var(--text);
+  outline: none;
 }
 
-/* Liquid Desktop variant: transparent-ish light glass, never dark */
 /* ── Sidebar ─────────────────────────── */
 .sidebar {
   width: 185px;
@@ -33,7 +33,9 @@
   margin: 0;
   letter-spacing: 0.01em;
 }
-.sidebarSection:first-child { padding-top: 2px; }
+.sidebarSection:first-child {
+  padding-top: 2px;
+}
 
 .sidebarBtn {
   display: flex;
@@ -41,19 +43,30 @@
   gap: 9px;
   padding: 7px 10px;
   background: transparent;
-  border: none;
-  cursor: pointer;
+  border: 1px solid transparent;
+  cursor: default;
   font-size: 13px;
   color: var(--text);
   font-family: inherit;
   text-align: left;
   border-radius: var(--radius-control);
   margin: 1px 0;
-  transition: background 120ms ease, color 120ms ease;
+  transition:
+    background 120ms ease,
+    color 120ms ease;
 }
 
-.sidebarBtn:hover  { background: rgba(0, 0, 0, 0.03); }
-.sidebarBtn.active { background: rgba(0, 0, 0, 0.06); font-weight: 600; }
+.sidebarBtn:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+.sidebarBtn.active {
+  background: rgba(0, 0, 0, 0.06);
+  font-weight: 600;
+}
+.sidebarDrop {
+  background: var(--accent-soft) !important;
+  border-color: rgba(0, 122, 255, 0.5);
+}
 
 .sidebarIcon {
   width: 16px;
@@ -64,7 +77,10 @@
   justify-content: center;
   color: var(--accent);
 }
-.sidebarIcon svg { width: 16px; height: 16px; }
+.sidebarIcon svg {
+  width: 16px;
+  height: 16px;
+}
 
 /* ── Main ────────────────────────────── */
 .main {
@@ -75,7 +91,6 @@
   min-width: 0;
 }
 
-/* Toolbar — plain CSS, no LiquidGlass */
 .toolbar {
   height: 44px;
   flex-shrink: 0;
@@ -96,24 +111,36 @@
   border: none;
   border-radius: var(--radius-control);
   color: var(--text);
-  cursor: pointer;
+  cursor: default;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: background 120ms ease, color 120ms ease;
+  transition:
+    background 120ms ease,
+    color 120ms ease;
 }
-.toolBtn svg { width: 14px; height: 14px; }
-.toolBtn:hover:not(:disabled) { background: var(--hover); }
-.toolBtn:disabled { color: var(--muted-2); cursor: default; }
+.toolBtn svg {
+  width: 14px;
+  height: 14px;
+}
+.toolBtn:hover:not(:disabled) {
+  background: var(--hover);
+}
+.toolBtn:disabled {
+  color: var(--muted-2);
+}
 
 .uploadBtn {
   color: var(--muted);
-  cursor: pointer;
 }
-.uploadBtn:hover { color: var(--text); background: var(--hover); }
+.uploadBtn:hover:not(:disabled) {
+  color: var(--text);
+}
 
-.hiddenInput { display: none; }
+.hiddenInput {
+  display: none;
+}
 
 /* ── Search bar ── */
 .searchWrap {
@@ -128,13 +155,20 @@
   min-width: 130px;
   max-width: 200px;
   flex-shrink: 0;
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
 }
 .searchWrap:focus-within {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
-.searchIcon { width: 12px; height: 12px; color: var(--muted); flex-shrink: 0; }
+.searchIcon {
+  width: 12px;
+  height: 12px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
 .searchInput {
   background: none;
   border: none;
@@ -145,7 +179,9 @@
   flex: 1;
   min-width: 0;
 }
-.searchInput::placeholder { color: var(--muted-2); }
+.searchInput::placeholder {
+  color: var(--muted-2);
+}
 .searchClear {
   background: none;
   border: none;
@@ -156,7 +192,9 @@
   padding: 0;
   flex-shrink: 0;
 }
-.searchClear:hover { color: var(--text); }
+.searchClear:hover {
+  color: var(--text);
+}
 
 .toolbarPath {
   flex: 1;
@@ -169,27 +207,43 @@
   padding-left: 4px;
 }
 
-.viewToggle { display: flex; gap: 2px; }
+.viewToggle {
+  display: flex;
+  gap: 2px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: var(--radius-control);
+  padding: 2px;
+}
 
 .viewBtn {
-  width: 28px;
-  height: 26px;
+  width: 26px;
+  height: 22px;
   background: transparent;
   border: none;
-  border-radius: var(--radius-control);
+  border-radius: 5px;
   color: var(--muted);
-  font-size: 13px;
-  cursor: pointer;
+  cursor: default;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 120ms ease, color 120ms ease;
+  transition:
+    background 120ms ease,
+    color 120ms ease;
 }
-.viewBtn svg { width: 12px; height: 12px; }
-.viewBtn:hover { background: var(--hover); }
-.viewActive { background: var(--selected); color: var(--text); }
+.viewBtn svg {
+  width: 12px;
+  height: 12px;
+}
+.viewBtn:hover {
+  color: var(--text);
+}
+.viewActive {
+  background: #fff;
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
 
-/* ── File grid (icon view) ───────────── */
+/* ── Icon view ───────────────────────── */
 .grid {
   flex: 1;
   overflow-y: auto;
@@ -200,6 +254,11 @@
   align-content: start;
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+  transition: box-shadow 120ms ease;
+}
+
+.surfaceDrop {
+  box-shadow: inset 0 0 0 2px var(--accent);
 }
 
 .item {
@@ -209,13 +268,18 @@
   gap: 6px;
   padding: 8px 6px 7px;
   border-radius: var(--radius-control);
+  border: 1px solid transparent;
   cursor: default;
-  transition: background 120ms ease;
+  transition:
+    background 120ms ease,
+    opacity 120ms ease;
   user-select: none;
+  -webkit-user-select: none;
 }
 
-.item:hover  { background: var(--hover); }
-.item:active { background: var(--accent-soft); }
+.item:hover {
+  background: var(--hover);
+}
 
 .itemIcon {
   width: 64px;
@@ -223,24 +287,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.itemIcon > svg,
-.itemIcon > img {
-  width: 100% !important;
-  height: 100% !important;
-}
-
-/* Golden Gate folders: warm amber (lighter tab over deeper body) */
-.itemIcon svg path[fill="#4a9eff"],
-.emptyFolder svg path[fill="#4a9eff"] { fill: #e0a23a; }
-.itemIcon svg path[fill="#5aabff"],
-.emptyFolder svg path[fill="#5aabff"] { fill: #f6c86a; opacity: 0.85; }
-
-/* Documents: white sheet with a faint border */
-.itemIcon svg rect[fill="#1e2030"] {
-  fill: #ffffff;
-  stroke: rgba(0, 0, 0, 0.14);
-  stroke-width: 1;
+  filter: drop-shadow(0 2px 3px rgba(60, 40, 10, 0.18));
 }
 
 .itemName {
@@ -256,35 +303,214 @@
   border-radius: 5px;
 }
 
-.itemClickable { cursor: pointer; }
-
 .itemSelected {
-  background: var(--accent-soft) !important;
-  border-radius: var(--radius-control);
+  background: var(--selected) !important;
 }
 .itemSelected .itemName {
   background: var(--accent);
   color: #fff;
 }
+.itemDrop {
+  background: var(--accent-soft) !important;
+  border-color: rgba(0, 122, 255, 0.6);
+}
+.itemDragging {
+  opacity: 0.45;
+}
 
-/* ── Status bar (11px muted, e.g. "4 items") ── */
+.renameInput {
+  width: 96px;
+  font-size: 11px;
+  text-align: center;
+  background: #fff;
+  border: 2px solid var(--accent);
+  border-radius: 4px;
+  color: var(--text);
+  padding: 0 4px;
+  outline: none;
+  font-family: var(--font-ui);
+}
+
+/* ── List view ───────────────────────── */
+.list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-content: start;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+  font-size: 12px;
+}
+
+.listHead,
+.row {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) 130px 150px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  min-height: 24px;
+}
+
+.listHead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--panel-solid);
+  border-bottom: 1px solid var(--line);
+  min-height: 26px;
+}
+
+.listHeadBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: default;
+  white-space: nowrap;
+}
+.listHeadActive {
+  color: var(--text);
+}
+.sortArrow {
+  font-size: 7px;
+}
+
+.row {
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  margin: 0 6px;
+  padding: 0 8px;
+  min-height: 24px;
+  color: var(--text);
+}
+.rowAlt {
+  background: rgba(0, 0, 0, 0.025);
+}
+.row:hover {
+  background: var(--hover);
+}
+.rowSelected {
+  background: var(--accent) !important;
+  color: #fff;
+}
+.rowSelected .colDate,
+.rowSelected .colKind {
+  color: rgba(255, 255, 255, 0.85);
+}
+.rowName {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.rowName .itemName {
+  max-width: none;
+  text-align: left;
+  padding: 0;
+  font-size: 12px;
+  color: inherit;
+}
+.rowName .renameInput {
+  width: 100%;
+  max-width: 260px;
+  text-align: left;
+  font-size: 12px;
+}
+.rowIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.colName {
+  min-width: 0;
+  overflow: hidden;
+}
+.colDate,
+.colKind {
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Status / path bar ───────────────── */
 .statusBar {
   height: 24px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 14px;
+  padding: 0 12px;
   font-size: 11px;
   color: var(--muted);
   background: var(--glass);
   border-top: 1px solid var(--line);
+  overflow: hidden;
+}
+.itemCount {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.pathBar {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+  margin-left: auto;
+}
+.pathSegWrap {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+.pathSep {
+  margin: 0 5px;
+  color: var(--muted-2);
+}
+.pathSeg {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+.pathBtn {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 1px 4px;
+  font: inherit;
+  color: var(--muted);
+  cursor: default;
+}
+.pathBtn:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.pathCurrent {
+  color: var(--text);
+  font-weight: 600;
 }
 
-/* Finder in-window context menu */
+/* ── Context menu ────────────────────── */
 .ctxMenu {
   position: fixed;
   z-index: 9000;
-  min-width: 180px;
+  min-width: 200px;
   padding: 6px;
   border-radius: 10px;
   background: var(--glass-strong);
@@ -296,27 +522,54 @@
   animation: ctxIn 110ms ease;
 }
 @keyframes ctxIn {
-  from { opacity:0; transform: scale(0.96) translateY(-4px); }
-  to   { opacity:1; transform: scale(1)    translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 .ctxItem {
-  display: block; width: 100%; min-height: 28px; padding: 5px 10px;
-  font-size: 13px; color: var(--text);
-  background: none; border: none; border-radius: 5px;
-  text-align: left; cursor: pointer; font-family: inherit;
-  transition: background 80ms ease, color 80ms ease;
+  display: block;
+  width: 100%;
+  min-height: 28px;
+  padding: 5px 10px;
+  font-size: 13px;
+  color: var(--text);
+  background: none;
+  border: none;
+  border-radius: 5px;
+  text-align: left;
+  cursor: default;
+  font-family: inherit;
+  transition:
+    background 80ms ease,
+    color 80ms ease;
 }
-.ctxItem:hover { background: var(--accent); color: #fff; }
-.ctxSep { height:1px; background: var(--line); margin: 4px 6px; }
+.ctxItem:hover:not(:disabled) {
+  background: var(--accent);
+  color: #fff;
+}
+.ctxItem:disabled {
+  color: var(--muted-2);
+}
+.ctxSep {
+  height: 1px;
+  background: var(--line);
+  margin: 4px 6px;
+}
 
 .emptyFolder {
+  grid-column: 1 / -1;
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  padding: 24px;
+  padding: 40px 24px;
 }
 
 .emptyFolderLabel {
@@ -346,9 +599,13 @@
     -webkit-overflow-scrolling: touch;
     flex-shrink: 0;
   }
-  .sidebar::-webkit-scrollbar { display: none; }
+  .sidebar::-webkit-scrollbar {
+    display: none;
+  }
 
-  .sidebarSection { display: none; }
+  .sidebarSection {
+    display: none;
+  }
 
   .sidebarBtn {
     flex-direction: row;
@@ -361,7 +618,19 @@
     margin: 0;
     background: rgba(0, 0, 0, 0.04);
   }
-  .sidebarBtn.active { background: var(--accent-soft); color: var(--accent); }
+  .sidebarBtn.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .toolbar {
+    gap: 4px;
+    padding: 0 8px;
+  }
+  .searchWrap {
+    min-width: 0;
+    flex: 1;
+  }
 
   .main {
     flex: 1;
@@ -384,5 +653,17 @@
   .itemIcon {
     width: 56px;
     height: 56px;
+  }
+
+  .listHead,
+  .row {
+    grid-template-columns: minmax(0, 1fr) 96px;
+  }
+  .colKind {
+    display: none;
+  }
+
+  .pathBar {
+    display: none;
   }
 }

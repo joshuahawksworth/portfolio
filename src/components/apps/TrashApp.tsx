@@ -1,59 +1,82 @@
-import { useDesktop, TrashedItem } from '../../context/DesktopContext';
+import { useDesktop } from '../../context/DesktopContext';
+import { ROOT_IDS } from '../../data/fileSystemSeed';
+import { NodeIcon, nodeKind } from '../icons/NodeIcon';
+import { TrashBinIcon } from '../icons/FileSystemIcons';
+import { openTargetFor } from '../../lib/openNode';
 import styles from './TrashApp.module.css';
 
-function fileIcon(item: TrashedItem) {
-  if (!item.isJoke) return '🗂️';
-  const n = item.name.toLowerCase();
-  if (n.endsWith('.html')) return '🌐';
-  if (n.endsWith('.md') || n.endsWith('.txt')) return '📝';
-  return '📜';
+function whereLabel(fs: ReturnType<typeof useDesktop>['fs'], from?: string): string {
+  const node = from ? fs[from] : undefined;
+  return node ? node.name : 'Desktop';
 }
 
-export default function TrashApp({ props: _ }: { props?: Record<string, unknown> }) {
-  const { trashedItems, trashEmptied, emptyTrash, restoreItem } = useDesktop();
+export default function TrashApp() {
+  const { fs, childrenOf, emptyTrash, restoreNodes, openApp } = useDesktop();
+  const items = childrenOf(ROOT_IDS.trash).sort(
+    (a, b) => (b.trashedAt ?? b.createdAt) - (a.trashedAt ?? a.createdAt)
+  );
 
-  const allItems = trashEmptied ? [] : trashedItems;
+  function open(id: string) {
+    const target = openTargetFor(fs[id]);
+    if (target.kind === 'url') window.open(target.url, '_blank');
+    else if (target.kind === 'app') openApp(target.appId, target.props);
+  }
 
   return (
     <div className={styles.root}>
       <div className={styles.header}>
-        <span className={styles.count}>{allItems.length} item{allItems.length !== 1 ? 's' : ''}</span>
-        <button className={styles.emptyBtn} onClick={emptyTrash} disabled={allItems.length === 0}>
-          Empty Trash
-        </button>
+        <span className={styles.count}>
+          {items.length} item{items.length !== 1 ? 's' : ''}
+        </span>
+        <div className={styles.headerActions}>
+          <button
+            className={styles.emptyBtn}
+            onClick={() => restoreNodes(items.map((i) => i.id))}
+            disabled={items.length === 0}
+          >
+            Put Back All
+          </button>
+          <button className={styles.emptyBtn} onClick={emptyTrash} disabled={items.length === 0}>
+            Empty Trash
+          </button>
+        </div>
       </div>
 
-      {allItems.length === 0 ? (
+      {items.length === 0 ? (
         <div className={styles.empty}>
-          <svg viewBox="0 0 48 54" fill="none" width="48" height="54" style={{ opacity: 0.25 }}>
-            <path d="M6 12H42M22 6H26M8 12L11 46H37L40 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+          <TrashBinIcon size={64} style={{ opacity: 0.45 }} />
           <p className={styles.emptyLabel}>Trash is empty</p>
         </div>
       ) : (
         <>
           <div className={styles.list}>
-            {allItems.map(item => (
-              <div key={item.id} className={styles.item}>
-                <span className={styles.fileIcon}>{fileIcon(item)}</span>
+            {items.map((item) => (
+              <div key={item.id} className={styles.item} onDoubleClick={() => open(item.id)}>
+                <span className={styles.fileIcon}>
+                  <NodeIcon node={item} size={28} />
+                </span>
                 <div className={styles.info}>
                   <span className={styles.name}>{item.name}</span>
                   <span className={styles.meta}>
-                    {item.isJoke ? `deleted ${item.date}` : `moved to trash ${item.date}`}
+                    {nodeKind(item)} ·{' '}
+                    {item.isJoke
+                      ? `deleted ${new Date(item.trashedAt ?? item.createdAt).getFullYear()}`
+                      : `from ${whereLabel(fs, item.trashedFrom)}, ${new Date(item.trashedAt ?? item.createdAt).toLocaleDateString('en-GB')}`}
                   </span>
                 </div>
                 <button
                   className={styles.restoreBtn}
-                  onClick={() => restoreItem(item.id)}
-                  title="Restore to Desktop"
+                  onClick={() => restoreNodes([item.id])}
+                  title={`Put back in ${whereLabel(fs, item.trashedFrom)}`}
                 >
-                  ↩ Restore
+                  ↩ Put Back
                 </button>
               </div>
             ))}
           </div>
           <p className={styles.note}>
-            Items can be restored to the desktop. Click ↩ Restore, or Empty Trash to permanently delete.
+            Put Back returns an item to the folder it came from. Empty Trash deletes everything
+            permanently.
           </p>
         </>
       )}

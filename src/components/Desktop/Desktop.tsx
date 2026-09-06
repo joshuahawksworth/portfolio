@@ -1,10 +1,18 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   DesktopProvider,
   useDesktop,
-  WindowInstance,
-  DesktopFolderItem,
+  canMoveNode,
+  canRenameNode,
+  canTrashNode,
+  type FsNode,
+  type WindowInstance,
 } from '../../context/DesktopContext';
+import { ROOT_IDS } from '../../data/fileSystemSeed';
+import { openTargetFor } from '../../lib/openNode';
+import { NodeIcon, nodeKind } from '../icons/NodeIcon';
+import { FolderIcon } from '../icons/FileSystemIcons';
+import { FINDER_DRAG_TYPE } from '../apps/FinderApp';
 import MenuBar from '../MenuBar/MenuBar';
 import SystemPanels from '../SystemUI/SystemPanels';
 import { SystemUIProvider } from '../../context/SystemUIContext';
@@ -491,14 +499,14 @@ interface IconPos {
   y: number;
 }
 
+/** A desktop icon: a thin view over a file-system node that lives in the Desktop folder. */
 interface DesktopItem {
   id: string;
-  type: 'job' | 'folder' | 'app' | 'file' | 'image';
+  type: FsNode['type'];
   label: string;
   jobId?: string;
   appId?: string;
-  content?: string;
-  dataUrl?: string; // base64 data URL for uploaded images
+  node: FsNode;
 }
 
 interface CtxMenu {
@@ -513,13 +521,15 @@ const ICON_H = 84;
 const ICON_GAP = 8;
 const BOUNCE_MS = 700; // short decorative bounce; windows open immediately
 
-const DESKTOP_TRASH_BLOCKLIST = new Set(['shortcut-trash', 'shortcut-mycomputer', 'trickster']);
-
-function canTrashDesktopItem(item: DesktopItem): boolean {
-  return (
-    (item.type === 'folder' || item.type === 'file' || item.type === 'image') &&
-    !DESKTOP_TRASH_BLOCKLIST.has(item.id)
-  );
+function toItem(node: FsNode): DesktopItem {
+  return {
+    id: node.id,
+    type: node.type,
+    label: node.name,
+    jobId: node.jobId,
+    appId: node.appId,
+    node,
+  };
 }
 
 // ── Grid helper ───────────────────────────────────────────────────────────
@@ -563,24 +573,7 @@ function findEmptyGridCell(taken: Record<string, IconPos>): IconPos {
   };
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────
-// Desktop-level app shortcuts
-const APP_SHORTCUTS: DesktopItem[] = [
-  { id: 'shortcut-mycomputer', type: 'app', label: 'Macintosh HD', appId: 'finder' },
-  { id: 'shortcut-trash', type: 'app', label: 'Trash', appId: 'trash' },
-  { id: 'shortcut-doom', type: 'app', label: 'DOOM', appId: 'doom' },
-  { id: 'shortcut-snake', type: 'app', label: 'Snake', appId: 'snake' },
-  { id: 'trickster', type: 'folder', label: 'My Flaws' },
-];
-
-function makeDefaultItems(): DesktopItem[] {
-  return [
-    ...APP_SHORTCUTS,
-    ...jobsData.map((j) => ({ id: j.id, type: 'job' as const, label: j.company, jobId: j.id })),
-  ];
-}
-
-// All icons stack down the LEFT side in up-to-2 columns
+// All icons stack down the RIGHT side in as many columns as needed
 function initPositions(items: DesktopItem[]): Record<string, IconPos> {
   const startY = GRID_START_Y;
   const maxRows = Math.max(1, Math.floor((window.innerHeight - startY - 80) / (ICON_H + ICON_GAP)));
@@ -598,314 +591,7 @@ function computeCleanPositions(items: DesktopItem[], sortByName: boolean): Recor
   const sorted = sortByName
     ? [...items].sort((a, b) => a.label.localeCompare(b.label))
     : [...items];
-  const startY = GRID_START_Y;
-  const maxRows = Math.max(1, Math.floor((window.innerHeight - startY - 80) / (ICON_H + ICON_GAP)));
-  const result: Record<string, IconPos> = {};
-  sorted.forEach((item, i) => {
-    result[item.id] = {
-      x: gridColX(Math.floor(i / maxRows)),
-      y: startY + (i % maxRows) * (ICON_H + ICON_GAP),
-    };
-  });
-  return result;
-}
-
-// ── Sub-components ─────────────────────────────────────────────────────────
-function ImageThumbIcon({ dataUrl, name }: { dataUrl?: string; name: string }) {
-  if (dataUrl) {
-    return (
-      <img
-        src={dataUrl}
-        alt={name}
-        style={{
-          width: 48,
-          height: 48,
-          borderRadius: 6,
-          objectFit: 'cover',
-          display: 'block',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
-        }}
-      />
-    );
-  }
-  // Fallback generic image icon
-  return (
-    <svg viewBox="0 0 48 48" fill="none" width="48" height="48">
-      <rect
-        x="2"
-        y="4"
-        width="44"
-        height="40"
-        rx="5"
-        fill="#1e3a4a"
-        stroke="#06b6d4"
-        strokeWidth="1.5"
-      />
-      <circle cx="16" cy="16" r="4" fill="#06b6d4" opacity="0.7" />
-      <path d="M4 34 L14 22 L22 30 L32 18 L44 34Z" fill="#06b6d4" opacity="0.35" />
-      <path
-        d="M4 34 L14 22 L22 30 L32 18 L44 34"
-        stroke="#06b6d4"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-        fill="none"
-      />
-    </svg>
-  );
-}
-
-function FileIcon({ name }: { name: string }) {
-  const ext = name.split('.').pop()?.toLowerCase() ?? '';
-  const color =
-    ext === 'js' || ext === 'ts'
-      ? '#f7df1e'
-      : ext === 'md' || ext === 'txt'
-        ? '#94a3b8'
-        : ext === 'html'
-          ? '#e44d26'
-          : '#60a5fa';
-  return (
-    <svg viewBox="0 0 40 48" fill="none" width="40" height="48">
-      <path d="M6 4H28L36 12V44H6Z" fill={color} opacity="0.85" />
-      <path d="M28 4L36 12H28Z" fill="rgba(0,0,0,0.25)" />
-      <path
-        d="M12 22H28M12 28H24M12 34H20"
-        stroke="rgba(0,0,0,0.45)"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function FolderIcon() {
-  return (
-    <svg viewBox="0 0 52 44" fill="none" width="48" height="48">
-      <path
-        d="M2 9Q2 5 6 5L20 5L24 9L47 9Q49 9 49 11L49 38Q49 40 47 40L5 40Q3 40 3 38Z"
-        fill="#4a9eff"
-        opacity="0.88"
-      />
-      <path d="M2 9Q2 5 6 5L20 5L24 9L47 9Q49 9 49 11L49 14L2 14Z" fill="rgba(255,255,255,0.22)" />
-    </svg>
-  );
-}
-
-function TricksterFolderIcon() {
-  return (
-    <svg viewBox="0 0 52 44" fill="none" width="48" height="48">
-      {/* Slightly tilted / wiggly folder */}
-      <path
-        d="M2 9Q2 5 6 5L20 5L24 9L47 9Q49 9 49 11L49 38Q49 40 47 40L5 40Q3 40 3 38Z"
-        fill="#f59e0b"
-        opacity="0.92"
-      />
-      <path d="M2 9Q2 5 6 5L20 5L24 9L47 9Q49 9 49 11L49 14L2 14Z" fill="rgba(255,255,255,0.28)" />
-      {/* Question mark */}
-      <text
-        x="26"
-        y="32"
-        textAnchor="middle"
-        fontSize="16"
-        fontWeight="900"
-        fill="rgba(120,60,0,0.7)"
-        fontFamily="Arial, sans-serif"
-      >
-        ?
-      </text>
-    </svg>
-  );
-}
-
-function MyComputerIcon() {
-  // Macintosh HD — a light grey drive with a soft top light, like macOS Golden Gate
-  return (
-    <svg viewBox="0 0 52 52" fill="none" width="50" height="50">
-      <defs>
-        <linearGradient id="hdBody" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#e9e6e1" />
-          <stop offset="1" stopColor="#b9b4ad" />
-        </linearGradient>
-        <linearGradient id="hdFace" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#f7f5f1" />
-          <stop offset="1" stopColor="#d7d2ca" />
-        </linearGradient>
-      </defs>
-      <rect x="4" y="9" width="44" height="34" rx="9" fill="url(#hdBody)" />
-      <rect x="4.5" y="9.5" width="43" height="33" rx="8.5" stroke="rgba(255,255,255,0.7)" />
-      <rect x="9" y="14" width="34" height="18" rx="5" fill="url(#hdFace)" />
-      <rect x="9.5" y="14.5" width="33" height="17" rx="4.5" stroke="rgba(0,0,0,0.06)" />
-      <rect x="13" y="35" width="26" height="3" rx="1.5" fill="rgba(0,0,0,0.12)" />
-      <circle cx="40" cy="36.5" r="1.6" fill="#34c759" />
-      <path d="M14 19h24" stroke="rgba(0,0,0,0.08)" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M14 23h16" stroke="rgba(0,0,0,0.06)" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function DesktopTrashIcon({ full, glow }: { full: boolean; glow?: boolean }) {
-  // Frosted grey bin — translucent body so the wallpaper shows through slightly
-  return (
-    <svg
-      viewBox="0 0 52 56"
-      fill="none"
-      width="46"
-      height="50"
-      style={
-        glow
-          ? {
-              filter:
-                'drop-shadow(0 0 8px rgba(0,122,255,0.7)) drop-shadow(0 0 16px rgba(0,122,255,0.4))',
-            }
-          : { filter: 'drop-shadow(0 4px 8px rgba(70,40,10,0.22))' }
-      }
-    >
-      <defs>
-        <linearGradient id="binBody" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#f4f2ee" stopOpacity="0.92" />
-          <stop offset="0.5" stopColor="#d9d5ce" stopOpacity="0.9" />
-          <stop offset="1" stopColor="#c8c3bb" stopOpacity="0.92" />
-        </linearGradient>
-        <linearGradient id="binLid" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#fbfaf8" />
-          <stop offset="1" stopColor="#d2cdc5" />
-        </linearGradient>
-      </defs>
-      {full && (
-        <g>
-          <rect
-            x="17"
-            y="7"
-            width="6"
-            height="10"
-            rx="1.5"
-            fill="#f2c96b"
-            transform="rotate(-12 20 12)"
-          />
-          <rect x="25" y="5" width="6" height="12" rx="1.5" fill="#fff" stroke="rgba(0,0,0,0.12)" />
-          <rect
-            x="31"
-            y="8"
-            width="6"
-            height="9"
-            rx="1.5"
-            fill="#9fd0ff"
-            transform="rotate(10 34 12)"
-          />
-        </g>
-      )}
-      <path d="M11 17h30l-3.2 30.5a3 3 0 0 1-3 2.5H17.2a3 3 0 0 1-3-2.5Z" fill="url(#binBody)" />
-      <path
-        d="M11.5 17.5h29l-3.1 29.9a2.5 2.5 0 0 1-2.5 2.1H17.1a2.5 2.5 0 0 1-2.5-2.1Z"
-        stroke="rgba(0,0,0,0.12)"
-      />
-      <path
-        d="M18 22l1.5 24M26 22v24M34 22l-1.5 24"
-        stroke="rgba(0,0,0,0.1)"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <path d="M17 18c0-1 1-2 2-2h14c1 0 2 1 2 2" fill="none" />
-      <rect x="9" y="14" width="34" height="4.5" rx="2.25" fill="url(#binLid)" />
-      <rect x="9.5" y="14.5" width="33" height="3.5" rx="1.75" stroke="rgba(0,0,0,0.12)" />
-      <rect
-        x="22"
-        y="11"
-        width="8"
-        height="3.5"
-        rx="1.75"
-        fill="#e2ddd5"
-        stroke="rgba(0,0,0,0.12)"
-      />
-    </svg>
-  );
-}
-
-function DoomIcon() {
-  return (
-    <img
-      src="/doom-icon.png"
-      alt="DOOM"
-      width="52"
-      height="52"
-      style={{ imageRendering: 'auto', borderRadius: 8 }}
-      onError={(e) => {
-        (e.target as HTMLImageElement).style.display = 'none';
-      }}
-    />
-  );
-}
-
-function NokiaIcon() {
-  return (
-    <svg viewBox="0 0 48 48" width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Phone body */}
-      <rect x="9" y="1" width="30" height="46" rx="7" fill="#1c2233" />
-      <rect x="10" y="2" width="28" height="44" rx="6" fill="#243044" />
-      {/* Top speaker grill */}
-      <rect x="18" y="5" width="12" height="2" rx="1" fill="#161f2e" />
-      {/* Screen bezel */}
-      <rect x="12" y="9" width="24" height="18" rx="2.5" fill="#0d0f0d" />
-      {/* LCD screen */}
-      <rect x="13" y="10" width="22" height="16" rx="1.5" fill="#1c2c10" />
-      {/* Snake game pixels on screen */}
-      {/* Snake head */}
-      <rect x="22" y="12" width="3" height="3" fill="#4ddd4d" />
-      {/* Snake body */}
-      <rect x="19" y="12" width="3" height="3" fill="#35bb35" />
-      <rect x="16" y="12" width="3" height="3" fill="#2aaa2a" />
-      <rect x="16" y="15" width="3" height="3" fill="#2aaa2a" />
-      <rect x="16" y="18" width="3" height="3" fill="#2aaa2a" />
-      <rect x="19" y="18" width="3" height="3" fill="#2aaa2a" />
-      <rect x="22" y="18" width="3" height="3" fill="#2aaa2a" />
-      {/* Food */}
-      <rect x="30" y="13" width="2" height="2" fill="#88ff44" />
-      {/* Nokia logo — pixel-art rects, no font dependency */}
-      <g fill="#5a78a0" opacity="0.9">
-        {/* N */}
-        <rect x="11" y="29" width="1" height="4" />
-        <rect x="12" y="30" width="1" height="1" />
-        <rect x="13" y="31" width="1" height="1" />
-        <rect x="14" y="29" width="1" height="4" />
-        {/* O */}
-        <rect x="16" y="29" width="3" height="1" />
-        <rect x="16" y="32" width="3" height="1" />
-        <rect x="16" y="30" width="1" height="2" />
-        <rect x="18" y="30" width="1" height="2" />
-        {/* K */}
-        <rect x="20" y="29" width="1" height="4" />
-        <rect x="21" y="30" width="1" height="1" />
-        <rect x="22" y="29" width="1" height="1" />
-        <rect x="22" y="31" width="1" height="1" />
-        <rect x="23" y="32" width="1" height="1" />
-        {/* I */}
-        <rect x="25" y="29" width="3" height="1" />
-        <rect x="26" y="30" width="1" height="2" />
-        <rect x="25" y="32" width="3" height="1" />
-        {/* A */}
-        <rect x="29" y="30" width="3" height="1" />
-        <rect x="29" y="29" width="1" height="4" />
-        <rect x="31" y="29" width="1" height="4" />
-        <rect x="30" y="31" width="1" height="1" />
-      </g>
-      {/* Navigation key (oval d-pad) */}
-      <ellipse cx="24" cy="37.5" rx="5.5" ry="3.5" fill="#1a2535" />
-      <circle cx="24" cy="37.5" r="2.5" fill="#141d28" />
-      <circle cx="24" cy="37.5" r="1.2" fill="#1e2a3a" />
-      {/* Left soft key */}
-      <rect x="12" y="34" width="7" height="4" rx="2" fill="#1a2535" />
-      {/* Right soft key */}
-      <rect x="29" y="34" width="7" height="4" rx="2" fill="#1a2535" />
-      {/* Number keys row 1 */}
-      <rect x="12" y="40" width="6" height="3" rx="1.5" fill="#1a2535" />
-      <rect x="21" y="40" width="6" height="3" rx="1.5" fill="#1a2535" />
-      <rect x="30" y="40" width="6" height="3" rx="1.5" fill="#1a2535" />
-      {/* Number keys row 2 */}
-      <rect x="12" y="44" width="6" height="2.5" rx="1.2" fill="#1a2535" />
-      <rect x="21" y="44" width="6" height="2.5" rx="1.2" fill="#1a2535" />
-      <rect x="30" y="44" width="6" height="2.5" rx="1.2" fill="#1a2535" />
-    </svg>
-  );
+  return initPositions(sorted);
 }
 
 function GetInfoModal({
@@ -917,11 +603,7 @@ function GetInfoModal({
 }) {
   const isDesktop = target === 'desktop';
   const name = isDesktop ? 'Desktop' : (target as DesktopItem).label;
-  const kind = isDesktop
-    ? 'Folder'
-    : (target as DesktopItem).type === 'folder'
-      ? 'Folder'
-      : 'Application';
+  const kind = isDesktop ? 'Folder' : nodeKind((target as DesktopItem).node);
   const jobInfo =
     !isDesktop && (target as DesktopItem).jobId
       ? jobsData.find((j) => j.id === (target as DesktopItem).jobId)
@@ -946,48 +628,10 @@ function GetInfoModal({
           <button className={styles.trafficClose} onClick={onClose} aria-label="Close" />
         </div>
         <div className={styles.getInfoHead}>
-          {isDesktop || kind === 'Folder' ? (
-            <svg viewBox="0 0 52 44" fill="none" width="48" height="40">
-              <path
-                d="M2 9Q2 5 6 5L20 5L24 9L47 9Q49 9 49 11L49 38Q49 40 47 40L5 40Q3 40 3 38Z"
-                fill="#4a9eff"
-                opacity="0.9"
-              />
-              <path
-                d="M2 9Q2 5 6 5L20 5L24 9L47 9Q49 9 49 11L49 14L2 14Z"
-                fill="rgba(255,255,255,0.28)"
-              />
-            </svg>
-          ) : jobInfo?.logo ? (
-            <img
-              src={jobInfo.logo}
-              alt={name}
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: 10,
-                objectFit: 'contain',
-                background: 'rgba(255,255,255,0.12)',
-                padding: 4,
-              }}
-            />
+          {isDesktop ? (
+            <FolderIcon size={48} />
           ) : (
-            <div
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: 10,
-                background: 'linear-gradient(135deg,#3b82f6,#1d4ed8)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 18,
-                fontWeight: 700,
-                color: 'white',
-              }}
-            >
-              {name[0]}
-            </div>
+            <NodeIcon node={(target as DesktopItem).node} size={48} />
           )}
           <div>
             <div className={styles.getInfoName}>{name}</div>
@@ -1038,7 +682,24 @@ function GetInfoModal({
                     <td>{jobInfo.period}</td>
                   </tr>
                 </>
-              ) : null}
+              ) : (
+                <>
+                  <tr>
+                    <td>Created:</td>
+                    <td>
+                      {new Date((target as DesktopItem).node.createdAt).toLocaleDateString('en-GB')}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Modified:</td>
+                    <td>
+                      {new Date((target as DesktopItem).node.modifiedAt).toLocaleDateString(
+                        'en-GB'
+                      )}
+                    </td>
+                  </tr>
+                </>
+              )}
             </tbody>
           </table>
         </div>
@@ -1093,26 +754,21 @@ function WallpaperPicker({
 function DesktopSurface() {
   const {
     windows,
+    focusedId,
     openApp,
-    syncDesktopFolders,
-    syncDesktopFiles,
-    syncCustomFolderItems,
-    uploadedFileQueue,
-    ackUploadedFile,
-    moveFromFolderToDesktop,
-    pendingFromFolder,
-    ackFromFolder,
-    trashItem,
-    restoredItemQueue,
-    ackRestoredItem,
-    trashedItems,
-    trashEmptied,
+    childrenOf,
+    createFolder,
+    createFile,
+    renameNode,
+    moveNodes,
+    trashNodes,
+    trashCount,
   } = useDesktop();
 
-  const [items, setItems] = useState<DesktopItem[]>(makeDefaultItems);
-  const [iconPos, setIconPos] = useState<Record<string, IconPos>>(() =>
-    initPositions(makeDefaultItems())
-  );
+  // Desktop icons are simply the children of the Desktop folder.
+  const items = useMemo(() => childrenOf(ROOT_IDS.desktop).map(toItem), [childrenOf]);
+
+  const [iconPos, setIconPos] = useState<Record<string, IconPos>>(() => initPositions(items));
   const [selectedIcons, setSelectedIcons] = useState<Set<string>>(new Set());
   const [selRect, setSelRect] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(
     null
@@ -1133,8 +789,6 @@ function DesktopSurface() {
   const [nearTrashTarget, setNearTrashTarget] = useState<'dock' | 'desktop' | null>(null);
   const [draggingIds, setDraggingIds] = useState<Set<string>>(new Set());
   const [nearFolderTarget, setNearFolderTarget] = useState<string | null>(null);
-  // folderId → items inside that folder (persisted while app is open)
-  const [folderItems, setFolderItems] = useState<Record<string, DesktopFolderItem[]>>({});
 
   // Refs for always-fresh state inside event handler closures
   const selectedIconsRef = useRef<Set<string>>(new Set());
@@ -1156,6 +810,32 @@ function DesktopSurface() {
   }, [iconPos]);
   useEffect(() => {
     itemsRef.current = items;
+  }, [items]);
+
+  // Give newly arrived icons (uploads, restores, items moved out of folders) a free
+  // grid cell, and forget positions of icons that left the desktop.
+  useEffect(() => {
+    setIconPos((prev) => {
+      const ids = new Set(items.map((i) => i.id));
+      let changed = false;
+      const next: Record<string, IconPos> = {};
+      for (const id in prev) {
+        if (ids.has(id)) next[id] = prev[id];
+        else changed = true;
+      }
+      for (const item of items) {
+        if (!next[item.id]) {
+          next[item.id] = findEmptyGridCell(next);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+    setSelectedIcons((prev) => {
+      const ids = new Set(items.map((i) => i.id));
+      const kept = Array.from(prev).filter((id) => ids.has(id));
+      return kept.length === prev.size ? prev : new Set(kept);
+    });
   }, [items]);
 
   // Keep icons in viewport on resize
@@ -1183,134 +863,87 @@ function DesktopSurface() {
     }
   }, [renamingId]);
 
-  // Keep Finder in sync with desktop folder list
-  useEffect(() => {
-    syncDesktopFolders(
-      items.filter((i) => i.type === 'folder').map((i) => ({ id: i.id, label: i.label }))
-    );
-  }, [items, syncDesktopFolders]);
-
-  // Keep Finder in sync with desktop file/image items
-  useEffect(() => {
-    syncDesktopFiles(
-      items
-        .filter((i) => i.type === 'file' || i.type === 'image')
-        .map((i) => ({
-          id: i.id,
-          label: i.label,
-          type: i.type as 'file' | 'image',
-          content: i.content,
-          dataUrl: i.dataUrl,
-        }))
-    );
-  }, [items, syncDesktopFiles]);
-
-  // Keep Finder in sync with folder item contents
-  useEffect(() => {
-    syncCustomFolderItems(folderItems);
-  }, [folderItems, syncCustomFolderItems]);
-
-  // Process newly-uploaded files — add icon to desktop
-  useEffect(() => {
-    if (uploadedFileQueue.length === 0) return;
-    const claimed = { ...iconPosRef.current };
-    for (const uf of uploadedFileQueue) {
-      const type: DesktopItem['type'] = uf.isImage ? 'image' : 'file';
-      const pos = findEmptyGridCell(claimed);
-      claimed[uf.id] = pos;
-      setItems((prev) => {
-        if (prev.some((i) => i.id === uf.id)) return prev;
-        return [
-          ...prev,
-          { id: uf.id, type, label: uf.name, content: uf.content, dataUrl: uf.dataUrl },
-        ];
+  // ── Trash / move helpers (work on many icons at once) ─────────────────
+  const trashIds = useCallback(
+    (ids: string[]) => {
+      const trashable = ids.filter((id) => {
+        const item = itemsRef.current.find((i) => i.id === id);
+        return item && canTrashNode(item.node);
       });
-      setIconPos((prev) => ({ ...prev, [uf.id]: pos }));
-      ackUploadedFile(uf.id);
-    }
-  }, [uploadedFileQueue, ackUploadedFile]);
+      if (trashable.length === 0) return;
+      trashNodes(trashable);
+      setSelectedIcons(new Set());
+      setCtxMenu(null);
+    },
+    [trashNodes]
+  );
 
-  // Process items moved back to desktop from a Finder folder
+  /** Ids the context menu / keyboard should act on: the whole selection if it includes the target. */
+  function actionIds(targetId: string): string[] {
+    const sel = selectedIconsRef.current;
+    return sel.has(targetId) ? Array.from(sel) : [targetId];
+  }
+
+  // Desktop-wide shortcuts while no window has focus: ⌘A selects all, ⌘⌫ / Delete trashes.
   useEffect(() => {
-    if (pendingFromFolder.length === 0) return;
-    const claimed = { ...iconPosRef.current };
-    for (const fi of pendingFromFolder) {
-      // Remove from local folderItems so the sync doesn't restore it back to context
-      setFolderItems((prev) => {
-        const next = { ...prev };
-        for (const folderId in next) {
-          next[folderId] = next[folderId].filter((item) => item.id !== fi.id);
+    function onKey(e: KeyboardEvent) {
+      if (focusedId) return;
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      const cmd = e.metaKey || e.ctrlKey;
+      if (cmd && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        setSelectedIcons(new Set(itemsRef.current.map((i) => i.id)));
+      } else if ((cmd && e.key === 'Backspace') || e.key === 'Delete') {
+        if (selectedIconsRef.current.size > 0) {
+          e.preventDefault();
+          trashIds(Array.from(selectedIconsRef.current));
         }
-        return next;
-      });
-      const pos = findEmptyGridCell(claimed);
-      claimed[fi.id] = pos;
-      setItems((prev) => {
-        if (prev.some((i) => i.id === fi.id)) return prev;
-        return [
-          ...prev,
-          {
-            id: fi.id,
-            type: fi.type,
-            label: fi.label,
-            jobId: fi.jobId,
-            appId: fi.appId,
-            content: fi.content,
-            dataUrl: fi.dataUrl,
-          },
-        ];
-      });
-      setIconPos((prev) => ({ ...prev, [fi.id]: pos }));
-      ackFromFolder(fi.id);
+      } else if (e.key === 'Escape') {
+        setSelectedIcons(new Set());
+        setCtxMenu(null);
+      }
     }
-  }, [pendingFromFolder, ackFromFolder]);
-
-  // Handle restored items from trash — add them back to desktop
-  useEffect(() => {
-    if (restoredItemQueue.length === 0) return;
-    const claimed = { ...iconPosRef.current };
-    for (const item of restoredItemQueue) {
-      const type: DesktopItem['type'] = item.dataUrl ? 'image' : item.isJoke ? 'file' : 'folder';
-      const pos = findEmptyGridCell(claimed);
-      claimed[item.id] = pos;
-      setItems((prev) => {
-        if (prev.some((i) => i.id === item.id)) return prev;
-        return [
-          ...prev,
-          { id: item.id, type, label: item.name, content: item.content, dataUrl: item.dataUrl },
-        ];
-      });
-      setIconPos((prev) => ({ ...prev, [item.id]: pos }));
-      ackRestoredItem(item.id);
-    }
-  }, [restoredItemQueue, ackRestoredItem]);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [focusedId, trashIds]);
 
   // ── Finder → Desktop drag-and-drop ────────────────────────────────────
   function onDesktopDragOver(e: React.DragEvent) {
-    if (!e.dataTransfer.types.includes('application/finder-item')) return;
+    if (!e.dataTransfer.types.includes(FINDER_DRAG_TYPE)) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
   }
   function onDesktopDrop(e: React.DragEvent) {
-    const raw = e.dataTransfer.getData('application/finder-item');
+    const raw = e.dataTransfer.getData(FINDER_DRAG_TYPE);
     if (!raw) return;
     try {
-      const { folderId, itemId } = JSON.parse(raw) as { folderId: string; itemId: string };
-      if (folderId && itemId) moveFromFolderToDesktop(folderId, itemId);
+      const { ids } = JSON.parse(raw) as { ids: string[] };
+      if (!Array.isArray(ids) || ids.length === 0) return;
+      // Land the icons where they were dropped, fanning out extra ones below.
+      const claimed = { ...iconPosRef.current };
+      ids.forEach((id, i) => {
+        claimed[id] = {
+          x: Math.max(0, Math.min(e.clientX - ICON_W / 2, window.innerWidth - ICON_W - 4)),
+          y: Math.max(
+            44,
+            Math.min(e.clientY - 20 + i * (ICON_H + ICON_GAP), window.innerHeight - ICON_H - 4)
+          ),
+        };
+      });
+      setIconPos(claimed);
+      moveNodes(ids, ROOT_IDS.desktop);
     } catch {
       /* bad payload */
     }
   }
 
-  // ── Open with bounce animation (delay window until bounce done) ────────
+  // ── Open with bounce animation ─────────────────────────────────────────
   function openWithBounce(dockKey: string, appId: string, props?: Record<string, unknown>) {
     // Skip animation entirely when an instance of this app is already running
     const alreadyRunning = windows.some((w) => w.appId === appId && !w.minimized);
-    if (alreadyRunning) {
-      openApp(appId, props);
-      return;
-    }
     openApp(appId, props);
+    if (alreadyRunning) return;
     setBouncingKeys((prev) => new Set([...prev, dockKey]));
     setTimeout(() => {
       setBouncingKeys((prev) => {
@@ -1319,6 +952,18 @@ function DesktopSurface() {
         return n;
       });
     }, BOUNCE_MS);
+  }
+
+  function openItem(item: DesktopItem) {
+    if (item.id === 'trickster') return; // can never open it!
+    const target = openTargetFor(item.node);
+    if (target.kind === 'folder') {
+      openWithBounce('finder', 'finder', { folderId: item.id, folderName: item.label });
+    } else if (target.kind === 'url') {
+      window.open(target.url, '_blank');
+    } else {
+      openWithBounce(target.appId, target.appId, target.props);
+    }
   }
 
   // ── Rubber-band selection ──────────────────────────────────────────────
@@ -1392,9 +1037,6 @@ function DesktopSurface() {
       return null;
     }
 
-    // These items can never be moved into folders
-    const PROTECTED_IDS = new Set(['shortcut-trash', 'shortcut-mycomputer']);
-
     // Returns a folder id if cursor is over a folder icon that isn't being dragged
     function getHoveredFolder(x: number, y: number): string | null {
       const allItems = itemsRef.current;
@@ -1431,66 +1073,38 @@ function DesktopSurface() {
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
 
-      // Drop into folder?
+      // Drop into folder? (locked items such as Macintosh HD are refused by the file system)
       const targetFolder = getHoveredFolder(ev.clientX, ev.clientY);
       if (targetFolder) {
-        const movedItems: DesktopFolderItem[] = [];
-        for (const did of dragIds) {
+        const movable = dragIds.filter((did) => {
           const item = itemsRef.current.find((i) => i.id === did);
-          if (item && item.id !== targetFolder && !PROTECTED_IDS.has(item.id)) {
-            movedItems.push({
-              id: item.id,
-              type: item.type,
-              label: item.label,
-              jobId: item.jobId,
-              appId: item.appId,
-              content: item.content,
-              dataUrl: item.dataUrl,
-            });
-          }
-        }
-        if (movedItems.length > 0) {
-          setFolderItems((prev) => {
-            const existing = prev[targetFolder] ?? [];
-            const existingIds = new Set(existing.map((i) => i.id));
-            return {
-              ...prev,
-              [targetFolder]: [...existing, ...movedItems.filter((m) => !existingIds.has(m.id))],
-            };
-          });
-          const movedIds = new Set(movedItems.map((m) => m.id));
-          setItems((prev) => prev.filter((i) => !movedIds.has(i.id)));
-          setIconPos((prev) => {
-            const n = { ...prev };
-            for (const id of movedIds) delete n[id];
-            return n;
-          });
+          return item && did !== targetFolder && canMoveNode(item.node);
+        });
+        if (movable.length > 0) {
+          moveNodes(movable, targetFolder);
           setSelectedIcons(new Set());
+        } else {
+          // Snap protected items back to where they started
+          setIconPos((prev) => ({ ...prev, ...origins }));
         }
         return;
       }
 
       // Drop into trash?
       if (getHoveredTrash(ev.clientX, ev.clientY) !== null) {
-        for (const did of dragIds) {
+        const trashable = dragIds.filter((did) => {
           const item = itemsRef.current.find((i) => i.id === did);
-          if (item && canTrashDesktopItem(item)) {
-            trashItem({
-              id: did,
-              name: item.label,
-              date: new Date().toLocaleDateString('en-GB'),
-              isJoke: item.type === 'file' || item.type === 'image',
-              content: item.content,
-              dataUrl: item.dataUrl,
-            });
-            setItems((prev) => prev.filter((i) => i.id !== did));
-            setIconPos((prev) => {
-              const n = { ...prev };
-              delete n[did];
-              return n;
-            });
-            setSelectedIcons(new Set());
-          }
+          return item && canTrashNode(item.node);
+        });
+        if (trashable.length > 0) trashIds(trashable);
+        // Anything that can't be trashed springs back
+        const stay = dragIds.filter((did) => !trashable.includes(did));
+        if (stay.length > 0) {
+          setIconPos((prev) => {
+            const next = { ...prev };
+            for (const did of stay) next[did] = origins[did];
+            return next;
+          });
         }
       }
     }
@@ -1510,68 +1124,45 @@ function DesktopSurface() {
     setCtxMenu({ x: e.clientX, y: e.clientY, targetId: id });
   }
 
-  // ── Folder ────────────────────────────────────────────────────────────
-  function newFolder() {
-    const id = `folder-${Date.now()}`;
-    const pos = ctxMenu
+  // ── Folder / file creation ────────────────────────────────────────────
+  function spawnPosition(): IconPos {
+    return ctxMenu
       ? { x: Math.max(0, ctxMenu.x - ICON_W / 2), y: Math.max(48, ctxMenu.y - 20) }
       : { x: Math.round(window.innerWidth / 2), y: Math.round(window.innerHeight / 2) };
-    setItems((prev) => [...prev, { id, type: 'folder', label: 'untitled folder' }]);
+  }
+
+  function newFolder() {
+    const pos = spawnPosition();
+    const id = createFolder(ROOT_IDS.desktop);
     setIconPos((prev) => ({ ...prev, [id]: pos }));
+    setSelectedIcons(new Set([id]));
     setCtxMenu(null);
     setRenameVal('untitled folder');
     setRenamingId(id);
   }
 
   function newTextFile() {
-    const id = `file-${Date.now()}`;
-    const pos = ctxMenu
-      ? { x: Math.max(0, ctxMenu.x - ICON_W / 2), y: Math.max(48, ctxMenu.y - 20) }
-      : { x: Math.round(window.innerWidth / 2), y: Math.round(window.innerHeight / 2) };
-    setItems((prev) => [...prev, { id, type: 'file', label: 'untitled', content: '' }]);
+    const pos = spawnPosition();
+    const id = createFile(ROOT_IDS.desktop, 'untitled.txt');
     setIconPos((prev) => ({ ...prev, [id]: pos }));
+    setSelectedIcons(new Set([id]));
     setCtxMenu(null);
-    setRenameVal('untitled');
+    setRenameVal('untitled.txt');
     setRenamingId(id);
   }
 
-  // ── Rename / delete ───────────────────────────────────────────────────
+  // ── Rename ────────────────────────────────────────────────────────────
   function startRename(id: string) {
     const item = items.find((i) => i.id === id);
-    if (!item) return;
+    if (!item || !canRenameNode(item.node)) return;
     setRenameVal(item.label);
     setRenamingId(id);
     setCtxMenu(null);
   }
   function commitRename() {
     if (!renamingId) return;
-    const v = renameVal.trim();
-    if (v) setItems((prev) => prev.map((i) => (i.id === renamingId ? { ...i, label: v } : i)));
+    renameNode(renamingId, renameVal);
     setRenamingId(null);
-  }
-  function trashDesktopItem(id: string) {
-    const item = items.find((i) => i.id === id);
-    if (!item || !canTrashDesktopItem(item)) return;
-    trashItem({
-      id,
-      name: item.label,
-      date: new Date().toLocaleDateString('en-GB'),
-      isJoke: item.type === 'file' || item.type === 'image',
-      content: item.content,
-      dataUrl: item.dataUrl,
-    });
-    setItems((prev) => prev.filter((i) => i.id !== id));
-    setIconPos((prev) => {
-      const n = { ...prev };
-      delete n[id];
-      return n;
-    });
-    setSelectedIcons((prev) => {
-      const n = new Set(prev);
-      n.delete(id);
-      return n;
-    });
-    setCtxMenu(null);
   }
 
   // ── Clean up with animation ───────────────────────────────────────────
@@ -1607,8 +1198,14 @@ function DesktopSurface() {
 
   // ── Render ────────────────────────────────────────────────────────────
   const ctxTarget = ctxMenu?.targetId ? items.find((i) => i.id === ctxMenu.targetId) : null;
-  const ctxX = ctxMenu ? Math.min(ctxMenu.x, window.innerWidth - 210) : 0;
+  const ctxIds = ctxTarget ? actionIds(ctxTarget.id) : [];
+  const ctxTrashable = ctxIds.filter((id) => {
+    const item = items.find((i) => i.id === id);
+    return item && canTrashNode(item.node);
+  });
+  const ctxX = ctxMenu ? Math.min(ctxMenu.x, window.innerWidth - 230) : 0;
   const ctxY = ctxMenu ? Math.min(ctxMenu.y, window.innerHeight - (ctxTarget ? 180 : 260)) : 0;
+  const trashFull = trashCount > 0;
 
   return (
     <div
@@ -1651,7 +1248,6 @@ function DesktopSurface() {
         const pos = iconPos[item.id] ?? { x: gridColX(0), y: GRID_START_Y + i * 92 };
         const selected = selectedIcons.has(item.id);
         const renaming = renamingId === item.id;
-        const job = item.jobId ? jobsData.find((j) => j.id === item.jobId) : null;
 
         // Trickster gets a spring transition when jumping, but not while being dragged
         const isTrickster = item.id === 'trickster';
@@ -1711,33 +1307,12 @@ function DesktopSurface() {
             }}
             onDoubleClick={() => {
               if (renaming) return;
-              if (item.id === 'trickster') return; // can never open it!
-              if (item.type === 'app' && item.appId) {
-                openWithBounce(item.appId, item.appId);
-              } else if (item.type === 'job' && item.jobId) {
-                openWithBounce('experience', 'experience', {
-                  jobId: item.jobId,
-                  title: item.label,
-                });
-              } else if (item.type === 'folder') {
-                openWithBounce('finder', 'finder', { folderId: item.id, folderName: item.label });
-              } else if (item.type === 'file') {
-                openWithBounce('texteditor', 'texteditor', {
-                  fileId: item.id,
-                  filename: item.label,
-                  content: item.content ?? `// ${item.label}\n`,
-                });
-              } else if (item.type === 'image') {
-                openWithBounce('imageviewer', 'imageviewer', {
-                  filename: item.label,
-                  dataUrl: item.dataUrl ?? '',
-                });
-              }
+              openItem(item);
             }}
             onClick={(e) => {
               e.stopPropagation();
-              if (e.shiftKey) {
-                // Shift+click toggles individual icon in selection
+              if (e.shiftKey || e.metaKey || e.ctrlKey) {
+                // Modifier-click toggles individual icon in selection
                 setSelectedIcons((prev) => {
                   const n = new Set(prev);
                   if (n.has(item.id)) {
@@ -1758,57 +1333,20 @@ function DesktopSurface() {
             tabIndex={0}
             aria-label={item.label}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                if (item.type === 'app' && item.appId) openWithBounce(item.appId, item.appId);
-                else if (item.type === 'job' && item.jobId)
-                  openWithBounce('experience', 'experience', {
-                    jobId: item.jobId,
-                    title: item.label,
-                  });
-                else if (item.type === 'folder')
-                  openWithBounce('finder', 'finder', { folderId: item.id, folderName: item.label });
-                else if (item.type === 'file')
-                  openWithBounce('texteditor', 'texteditor', {
-                    fileId: item.id,
-                    filename: item.label,
-                    content: item.content ?? `// ${item.label}\n`,
-                  });
-                else if (item.type === 'image')
-                  openWithBounce('imageviewer', 'imageviewer', {
-                    filename: item.label,
-                    dataUrl: item.dataUrl ?? '',
-                  });
+              if (e.key === 'Enter') openItem(item);
+              if (e.key === 'F2' && canRenameNode(item.node)) startRename(item.id);
+              if (e.key === 'Delete' || (e.key === 'Backspace' && (e.metaKey || e.ctrlKey))) {
+                e.preventDefault();
+                trashIds(actionIds(item.id));
               }
-              if (item.type !== 'app' && item.type !== 'job') {
-                if (e.key === 'F2') startRename(item.id);
-              }
-              if (e.key === 'Delete' && canTrashDesktopItem(item)) trashDesktopItem(item.id);
             }}
           >
-            {item.id === 'shortcut-mycomputer' ? (
-              <MyComputerIcon />
-            ) : item.id === 'shortcut-trash' ? (
-              <DesktopTrashIcon
-                full={trashedItems.length > 0 && !trashEmptied}
-                glow={nearTrashTarget === 'desktop'}
-              />
-            ) : item.id === 'trickster' ? (
-              <TricksterFolderIcon />
-            ) : item.type === 'app' && item.appId === 'doom' ? (
-              <DoomIcon />
-            ) : item.type === 'app' && item.appId === 'snake' ? (
-              <NokiaIcon />
-            ) : item.type === 'folder' ? (
-              <FolderIcon />
-            ) : item.type === 'image' ? (
-              <ImageThumbIcon dataUrl={item.dataUrl} name={item.label} />
-            ) : item.type === 'file' ? (
-              <FileIcon name={item.label} />
-            ) : job?.logo ? (
-              <img src={job.logo} alt={item.label} className={styles.iconImg} />
-            ) : (
-              <div className={styles.iconFallback}>{item.label[0]}</div>
-            )}
+            <NodeIcon
+              node={item.node}
+              size={50}
+              trashFull={trashFull}
+              trashGlow={item.appId === 'trash' && nearTrashTarget === 'desktop'}
+            />
 
             {renaming ? (
               <input
@@ -1829,6 +1367,7 @@ function DesktopSurface() {
               <span
                 className={`${styles.iconLabel} ${selected ? styles.iconLabelFocused : ''}`}
                 onDoubleClick={(e) => {
+                  if (!canRenameNode(item.node)) return;
                   e.stopPropagation();
                   startRename(item.id);
                 }}
@@ -1872,12 +1411,12 @@ function DesktopSurface() {
         >
           {ctxTarget ? (
             <>
-              {ctxTarget.type === 'app' && ctxTarget.appId && (
+              {ctxTarget.id !== 'trickster' && (
                 <>
                   <button
                     className={styles.ctxItem}
                     onClick={() => {
-                      openWithBounce(ctxTarget.appId!, ctxTarget.appId!);
+                      openItem(ctxTarget);
                       setCtxMenu(null);
                     }}
                   >
@@ -1886,34 +1425,19 @@ function DesktopSurface() {
                   <div className={styles.ctxDivider} />
                 </>
               )}
-              {ctxTarget.type === 'job' && ctxTarget.jobId && (
-                <>
-                  <button
-                    className={styles.ctxItem}
-                    onClick={() => {
-                      openWithBounce('experience', 'experience', {
-                        jobId: ctxTarget.jobId,
-                        title: ctxTarget.label,
-                      });
-                      setCtxMenu(null);
-                    }}
-                  >
-                    Open
-                  </button>
-                  <div className={styles.ctxDivider} />
-                </>
-              )}
-              {ctxTarget.type !== 'app' && ctxTarget.type !== 'job' && (
+              {ctxIds.length === 1 && canRenameNode(ctxTarget.node) && (
                 <button className={styles.ctxItem} onClick={() => startRename(ctxTarget.id)}>
                   Rename
                 </button>
               )}
-              {canTrashDesktopItem(ctxTarget) && (
+              {ctxTrashable.length > 0 && (
                 <button
                   className={`${styles.ctxItem} ${styles.ctxDanger}`}
-                  onClick={() => trashDesktopItem(ctxTarget.id)}
+                  onClick={() => trashIds(ctxTrashable)}
                 >
-                  Delete
+                  {ctxTrashable.length > 1
+                    ? `Move ${ctxTrashable.length} Items to Trash`
+                    : 'Move to Trash'}
                 </button>
               )}
               <div className={styles.ctxDivider} />
@@ -1936,6 +1460,15 @@ function DesktopSurface() {
                 New Text File
               </button>
               <div className={styles.ctxDivider} />
+              <button
+                className={styles.ctxItem}
+                onClick={() => {
+                  setSelectedIcons(new Set(items.map((i) => i.id)));
+                  setCtxMenu(null);
+                }}
+              >
+                Select All
+              </button>
               <button
                 className={styles.ctxItem}
                 onClick={() => {

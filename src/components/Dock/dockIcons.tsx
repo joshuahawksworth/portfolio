@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import { AboutLogoIcon } from '../icons/AboutLogoIcon';
 import { CalculatorLogoIcon } from '../icons/CalculatorLogoIcon';
+import { TrashBinIcon } from '../icons/FileSystemIcons';
 
 export function MacIcon({
   top,
@@ -184,72 +185,9 @@ const DRAWN_ICONS = {
       <circle cx="22" cy="22" r="13" fill="none" stroke="white" strokeWidth="1.5" />
     </svg>
   ),
-  trashEmpty: (
-    <MacIcon top="#b0b0b8" bottom="#70707a">
-      {/* Lid handle */}
-      <path d="M19 10.5H25" stroke="rgba(255,255,255,0.9)" strokeWidth="2" strokeLinecap="round" />
-      {/* Lid bar */}
-      <rect x="10" y="13" width="24" height="3" rx="1.5" fill="rgba(255,255,255,0.82)" />
-      {/* Can body — tapers slightly at bottom */}
-      <path
-        d="M13.5 16 L15.5 36 Q15.5 37.5 22 37.5 Q28.5 37.5 28.5 36 L30.5 16 Z"
-        fill="rgba(255,255,255,0.14)"
-        stroke="rgba(255,255,255,0.78)"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      {/* Vertical ribs */}
-      <path
-        d="M19.5 18.5 L19 34 M22 18.5 L22 34 M24.5 18.5 L25 34"
-        stroke="rgba(255,255,255,0.38)"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
-    </MacIcon>
-  ),
-  trashFull: (
-    <MacIcon top="#b0b0b8" bottom="#70707a">
-      {/* Papers sticking out above lid */}
-      <rect
-        x="16.5"
-        y="6"
-        width="3.5"
-        height="7.5"
-        rx="1"
-        fill="rgba(255,255,255,0.72)"
-        transform="rotate(-8 16.5 6)"
-      />
-      <rect x="20.5" y="5.5" width="3.5" height="8" rx="1" fill="rgba(255,255,255,0.85)" />
-      <rect
-        x="24"
-        y="6.5"
-        width="3.5"
-        height="7"
-        rx="1"
-        fill="rgba(255,255,255,0.65)"
-        transform="rotate(7 24 6.5)"
-      />
-      {/* Lid handle */}
-      <path d="M19 12H25" stroke="rgba(255,255,255,0.9)" strokeWidth="2" strokeLinecap="round" />
-      {/* Lid bar */}
-      <rect x="10" y="14.5" width="24" height="3" rx="1.5" fill="rgba(255,255,255,0.82)" />
-      {/* Can body */}
-      <path
-        d="M13.5 17.5 L15.5 37.5 Q15.5 39 22 39 Q28.5 39 28.5 37.5 L30.5 17.5 Z"
-        fill="rgba(255,255,255,0.16)"
-        stroke="rgba(255,255,255,0.78)"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      {/* Vertical ribs */}
-      <path
-        d="M19.5 20 L19 35 M22 20 L22 35 M24.5 20 L25 35"
-        stroke="rgba(255,255,255,0.38)"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
-    </MacIcon>
-  ),
+  // The real macOS bin (no tile), same artwork as the desktop and Finder
+  trashEmpty: <TrashBinIcon size={44} />,
+  trashFull: <TrashBinIcon size={44} full />,
   doom: (
     <img
       src="/doom-icon.png"

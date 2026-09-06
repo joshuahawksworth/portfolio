@@ -85,8 +85,8 @@ function MinimizedSlot({ win }: { win: WindowInstance }) {
 /* ─── Default reorderable key order (Finder & Trash excluded) ────────── */
 /* ─── Dock ────────────────────────────────────────────────────────────── */
 export default function Dock({ bouncingKeys, onItemActivate, trashHighlighted }: DockProps = {}) {
-  const { openApp, windows, trashedItems, trashEmptied } = useDesktop();
-  const trashHasItems = !trashEmptied && trashedItems.length > 0;
+  const { openApp, windows, trashCount } = useDesktop();
+  const trashHasItems = trashCount > 0;
 
   const [order, setOrder] = useState<string[]>(() => [...DOCK_DEFAULT_ORDER]);
   const [dragKey, setDragKey] = useState<string | null>(null);

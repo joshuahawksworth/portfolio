@@ -83,6 +83,14 @@ button {
   cursor: pointer;
 }
 
+/* Dock artwork reused for file-system app nodes scales to its wrapper */
+.nodeAppIcon > svg,
+.nodeAppIcon > img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 /* ── Cross-browser: ensure backdrop-filter has a solid fallback ───────── */
 /* If the browser doesn't support backdrop-filter the rgba background     */
 /* provides opacity — elements remain legible without the blur.           */
