@@ -29,7 +29,7 @@ import { DARK_WALLPAPERS, WALLPAPERS, loadWallpaper } from '../../data/wallpaper
 const ICON_GRADS: Record<string, [string, string]> = {
   about: ['#5aa0ff', '#1f5fd6'],
   experience: ['#ffb340', '#f26f0c'],
-  skills: ['#d581ff', '#8a2fd8'],
+  skills: ['#c46bff', '#6b2fd6'],
   contact: ['#46a8ff', '#0a6ee6'],
   location: ['#4ee07f', '#1fa04a'],
   terminal: ['#3a3a42', '#1c1c1e'],
@@ -74,12 +74,31 @@ const ICON_GLYPHS: Record<string, React.ReactNode> = {
   ),
   skills: (
     <>
-      <rect x="5" y="7.5" width="18" height="3" rx="1.5" fill="white" opacity="0.2" />
-      <rect x="5" y="7.5" width="14" height="3" rx="1.5" fill="white" opacity="0.92" />
-      <rect x="5" y="12.5" width="18" height="3" rx="1.5" fill="white" opacity="0.2" />
-      <rect x="5" y="12.5" width="10" height="3" rx="1.5" fill="white" opacity="0.92" />
-      <rect x="5" y="17.5" width="18" height="3" rx="1.5" fill="white" opacity="0.2" />
-      <rect x="5" y="17.5" width="16" height="3" rx="1.5" fill="white" opacity="0.92" />
+      <path
+        d="M9.5 8.5L4 14L9.5 19.5"
+        stroke="white"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+        opacity="0.95"
+      />
+      <path
+        d="M18.5 8.5L24 14L18.5 19.5"
+        stroke="white"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+        opacity="0.95"
+      />
+      <path
+        d="M16 6.5L12 21.5"
+        stroke="white"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        opacity="0.6"
+      />
     </>
   ),
   contact: (
@@ -303,7 +322,6 @@ const ICON_IMAGES: Record<string, { src: string; scale?: number; bg?: string }> 
   calculator: { src: '/icons/calculator.png' },
   cv: { src: '/icons/pages.png' },
   askjosh: { src: '/icons/claude.png' },
-  skills: { src: '/icons/settings.png' },
   experience: { src: '/icons/reminders.png' },
   shortcuts: { src: '/icons/shortcuts.png' },
   safari: { src: '/icons/chrome.png', scale: 0.72, bg: '#ffffff' },
@@ -418,7 +436,7 @@ const APP_LABELS: Record<string, string> = {
 const TRICKSTER_LABEL = 'My Flaws';
 
 // ── "Now" widget (2×2 glass card, top-left of the first page) ───────────────
-function NowWidget() {
+function NowWidget({ onOpen }: { onOpen: () => void }) {
   const now = useTime();
   const time = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
   const date = now.toLocaleDateString('en-GB', {
@@ -429,7 +447,12 @@ function NowWidget() {
 
   return (
     <div className={styles.widgetItem} style={{ gridColumn: '1 / 3', gridRow: '1 / 3' }}>
-      <div className={styles.widget}>
+      <button
+        type="button"
+        className={styles.widget}
+        onClick={onOpen}
+        aria-label="About Joshua Hawksworth"
+      >
         <div className={styles.widgetPlace}>
           <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
             <path
@@ -445,7 +468,7 @@ function NowWidget() {
         <div className={styles.widgetRule} />
         <div className={styles.widgetName}>Joshua Hawksworth</div>
         <div className={styles.widgetRole}>Senior Full Stack Developer</div>
-      </div>
+      </button>
     </div>
   );
 }
@@ -593,7 +616,7 @@ function MobileInner() {
         {pages.map((slots, p) => (
           <div className={styles.page} key={p} aria-label={`Page ${p + 1} of ${pages.length}`}>
             <div className={styles.iconGrid}>
-              {p === 0 && <NowWidget />}
+              {p === 0 && <NowWidget onOpen={() => openApp('about')} />}
               {slots.map((id, s) => {
                 if (p === 0 && WIDGET_SLOTS.has(s)) return null;
                 if (id) {

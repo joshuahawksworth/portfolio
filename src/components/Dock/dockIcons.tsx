@@ -88,7 +88,7 @@ const DRAWN_ICONS = {
     </MacIcon>
   ),
   skills: (
-    <MacIcon top="#d070ff" bottom="#7928ca">
+    <MacIcon top="#c46bff" bottom="#6b2fd6">
       <path
         d="M16 16L9 22L16 28"
         stroke="rgba(255,255,255,0.9)"
@@ -431,7 +431,6 @@ const REAL_ICONS = {
   cv: <RealIcon src="/icons/pages.png" rounded />,
   texteditor: <RealIcon src="/icons/textedit.png" />,
   imageviewer: <RealIcon src="/icons/preview.png" />,
-  skills: <RealIcon src="/icons/settings.png" rounded />,
   experience: <RealIcon src="/icons/reminders.png" rounded />,
   shortcuts: <RealIcon src="/icons/shortcuts.png" rounded />,
 };

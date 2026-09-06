@@ -12,6 +12,14 @@ interface SearchResult {
   snippet: string;
 }
 
+function hostOf(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return url;
+  }
+}
+
 function proxyUrl(url: string) {
   return `/api/browser-proxy?url=${encodeURIComponent(url)}`;
 }
@@ -353,6 +361,12 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
       )}
 
       <div className={styles.viewport}>
+        {loading && !showingSearch && (
+          <div className={styles.loadingOverlay} role="status" aria-live="polite">
+            <span className={styles.loadingSpinner} aria-hidden="true" />
+            <span className={styles.loadingText}>Loading {hostOf(currentUrl)}…</span>
+          </div>
+        )}
         {showingSearch && searchQuery ? (
           <SearchResults query={searchQuery} onOpen={navigate} />
         ) : showingSearch ? (
