@@ -1,6 +1,6 @@
 # Joshua Hawksworth Portfolio
 
-An interactive macOS-style portfolio built with React, TypeScript, Vite, and CSS Modules.
+A macOS desktop in the browser, with an iOS home screen on phones. Built with React 19, TypeScript, Vite and CSS Modules.
 
 [Live site](https://hawksworth.dev/)
 
@@ -8,18 +8,33 @@ An interactive macOS-style portfolio built with React, TypeScript, Vite, and CSS
 
 ## Overview
 
-This portfolio presents my experience, projects, and technical skills as a desktop environment. Visitors boot into a login screen, open apps from the dock or desktop, move and resize windows, explore Finder-style content, and use a mobile-specific home screen on smaller devices.
+The portfolio is presented as an operating system instead of a page. Visitors boot into a login screen, then land on a
+"Golden Gate" macOS desktop: a warm glass wallpaper, translucent Liquid Glass windows, a menu bar, a dock with the real
+app icons, desktop icons, Finder, and a Trash that remembers where things came from. On a phone the same content is an
+iOS-style home screen with paged, swipeable 4×4 icon grids and full-screen app sheets.
 
-The goal is to make the portfolio feel memorable while still keeping the codebase readable for reviewers: app metadata is centralized, shared UI is componentized, and interactive features are covered by unit and smoke tests.
+Everything is backed by a small virtual file system, so folders nest, items move between the desktop and any folder, and
+the Finder behaves like the real one rather than a list of links.
 
 ## Highlights
 
-- macOS-inspired desktop with boot, login, menu bar, dock, draggable windows, desktop icons, Finder, and Trash.
-- Portfolio apps for About, Experience, Skills, Contact, Location, CV, GitHub, and browser-style project views.
-- Playful extras including Terminal commands, a Nokia-style Snake window, DOOM via js-dos, Calculator, Rubber Duck, and Slotslop.
-- Responsive mobile desktop with touch-friendly app launching and mobile-specific layouts.
-- Vercel serverless API routes for contact, search proxying, and leaderboard data.
-- Ask Claude, a ChatGPT-style desktop app powered by Claude that answers questions about Josh's experience, skills, and projects using the portfolio's own data.
+- **Desktop shell**: boot, login, menu bar, dock with bounce and running dots, draggable and resizable windows, rubber-band
+  selection, multi-select drag, context menus, Get Info, wallpaper picker, Launchpad, Spotlight, Control Center and
+  Notification Center.
+- **Liquid Glass windows**: one blurred, tinted pane per window; apps only tint it, so the wallpaper and the windows behind
+  show through.
+- **Finder on a real file system**: nested folders, New Folder / New Text File anywhere, rename, Move to Trash for the whole
+  selection, ⌘A / ⌘⌫ / ⇧⌘N shortcuts, back and forward history, breadcrumb path bar, icon and list views, drag into
+  folders and sidebar, drop files from your OS, search of the current folder tree.
+- **Trash with Put Back**: trashed items return to the folder they came from.
+- **Portfolio apps**: About, Experience, Skills, Contact, Location (Mapbox), CV, GitHub and a Chrome-style browser with a
+  server-side proxy.
+- **Ask Claude**: a Claude-powered assistant that answers questions about Josh from the portfolio's own data, behind a
+  mock "Sign in to Claude" sheet like a real bundled app.
+- **Toys**: Apple-style Calculator (with a scientific pad on wide windows), Terminal, a Nokia 3310 running Snake (and a
+  hidden Space Impact), DOOM via js-dos, Rubber Duck and Slotslop.
+- **iOS home screen**: blurred wallpaper, 2×2 clock widget, 4×4 pages with scroll-snap swiping and page dots, iOS-style
+  search pill and dock, app sheets with a macOS close light.
 
 ## Tech Stack
 
@@ -29,26 +44,29 @@ The goal is to make the portfolio feel memorable while still keeping the codebas
 - Vitest and Testing Library
 - Playwright
 - Vercel serverless functions
-- js-dos, Mapbox GL
+- js-dos, Mapbox GL, Anthropic SDK
 
 ## Project Structure
 
 ```text
 src/
   components/
-    apps/              Desktop apps and app registry
-    Desktop/           Standard desktop shell
-    Dock/              Shared dock configuration and icons
+    apps/              Desktop apps and the app registry
+    Desktop/           Desktop shell: icons, selection, context menus, widgets
+    Dock/              Dock, dock configuration and icon artwork
+    icons/             Shared file-system icons (folder, document, Macintosh HD, Trash)
+    MobileDesktop/     iOS-style home screen and app sheets
     SystemUI/          Spotlight, Control Center, Notification Center, Launchpad
-    MobileDesktop/     Mobile home-screen experience
-    Window/            Shared macOS-style window chrome
-  context/             Desktop window, file, folder, and trash state
-  data/                Portfolio content
+    Window/            macOS window chrome (Liquid Glass)
+  context/             Window management and the virtual file system
+  data/                Portfolio content, wallpapers, file-system seed
   hooks/               Shared browser and UI hooks
+  lib/                 Small helpers (opening nodes, leaderboard client)
 tests/
   unit/                Vitest coverage for app logic
   e2e/                 Playwright smoke coverage
 api/                   Vercel serverless endpoints
+docs/                  Design notes (Golden Gate theme tokens and rules)
 ```
 
 ## Running Locally
@@ -62,7 +80,8 @@ Create `.env` from `.env.example` before testing API-backed features such as the
 
 ## Backend Configuration
 
-API-backed features are handled by Vercel serverless routes under `api/`. Set these environment variables in Vercel and in local `.env` when needed:
+API-backed features are handled by Vercel serverless routes under `api/`. Set these environment variables in Vercel and in
+local `.env` when needed:
 
 ```bash
 RESEND_API_KEY="your_resend_api_key_here"
@@ -71,9 +90,11 @@ DATABASE_URL="postgres://portfolio:portfolio@localhost:5433/portfolio"
 VITE_MAPBOX_TOKEN="your_mapbox_access_token"
 ```
 
-The Ask Claude assistant streams replies from Claude through `/api/ask`; set `ANTHROPIC_API_KEY` to enable it, otherwise the app shows a friendly not-configured note.
+The Ask Claude assistant streams replies from Claude through `/api/ask`; set `ANTHROPIC_API_KEY` to enable it, otherwise
+the app shows a friendly not-configured note. The sign-in sheet in front of it is a local mock: nothing is sent anywhere.
 
-The Snake leaderboard stores scores in Postgres through the server route at `/api/leaderboard`; the browser client does not need direct database credentials. For local development, start the Docker Postgres service first:
+The Snake leaderboard stores scores in Postgres through the server route at `/api/leaderboard`; the browser client does not
+need direct database credentials. For local development, start the Docker Postgres service first:
 
 ```bash
 docker compose up -d postgres
