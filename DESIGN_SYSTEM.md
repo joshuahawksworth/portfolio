@@ -16,6 +16,7 @@ This project is an interactive macOS-style portfolio. Future work should feel li
 - `src/context/DesktopContext.tsx` owns window state, desktop files/folders, trash state, restored items, and app opening.
 - `src/components/apps/appRegistry.ts` is the source of truth for app IDs, titles, components, default sizes, min sizes, and max sizes.
 - `src/components/Dock/` owns dock order, icons, minimized thumbnails, and dock interactions.
+- `src/components/SystemUI/` owns Spotlight, Control Center, Notification Center and Launchpad; they are driven by `src/context/SystemUIContext.tsx`.
 - `src/components/Window/` owns standard window chrome and resizing behavior.
 - `src/components/MobileDesktop/` owns the mobile home screen, dock, and full-screen app panels.
 - `src/components/LiquidDesktop/` is experimental and should stay isolated from the standard desktop path.
@@ -41,36 +42,33 @@ Use typed local parsing inside the app when `props` carries app-specific data.
 
 ## Visual Language
 
-- Use dark, glassy, macOS-inspired surfaces: deep navy/charcoal backgrounds, subtle borders, blur-backed panels, and restrained blue accents.
-- Existing base colors to harmonize with:
-  - App background: `#1c1e26`
-  - Window body: `#1a1c28`
-  - Sidebar dark: `#171921`
-  - Page/root dark: `#06090f`
-  - Primary blue: `#3b82f6`
-  - Hover blue text: `#93c5fd`
-  - Muted text: `#9ca3af`, `#6b7280`, `#4b5563`
-  - Body text: `#d1d5db`, `#e5e7eb`
-- Prefer layered translucency over flat cards:
-  - `rgba(255, 255, 255, 0.04)` for low emphasis fills.
-  - `rgba(255, 255, 255, 0.08-0.14)` for borders and hover fills.
-  - `backdrop-filter: blur(...) saturate(...)` when glass is part of the shell.
-- Do not introduce a new dominant palette for normal portfolio apps. Highly themed apps such as Snake, DOOM, Terminal, and Slotslop may use their own self-contained palette.
-- Keep border radius modest: standard controls and app cards use about `6px-12px`; dock/window shell elements can be larger where already established.
+The shell is styled after macOS "Golden Gate": a warm amber glass wallpaper, frosted cream windows,
+dark warm text and a blue accent. Mobile follows the latest iOS look (light glass dock, squircle icons,
+translucent nav bars). The full token list and reference measurements live in
+`docs/golden-gate-theme.md`; the tokens themselves are defined on `:root` in `src/index.css`.
+
+- Use the tokens, never raw hex, for normal portfolio apps:
+  - Text: `--text`, `--text-strong`, `--muted`, `--muted-2`
+  - Surfaces: `--panel` (window body), `--panel-2` (inset areas), `--glass` (sidebars, toolbars, title bars),
+    `--glass-strong` (menus, popovers)
+  - Lines: `--line`, `--line-strong`
+  - Accent: `--accent`, `--accent-soft`
+  - Fills: `--hover`, `--selected`
+- Glass surfaces pair a translucent warm fill with `backdrop-filter: blur(30-38px) saturate(1.6)` and a
+  `1px solid rgba(255,255,255,0.4-0.6)` border plus an inset top highlight.
+- Windows: radius `--radius-window` (14px), 46px title bar, 12px traffic lights, warm drop shadow
+  `0 24px 65px var(--warm-shadow)`.
+- Do not reintroduce the old dark navy palette (`#1a1c28`, `#06090f`, etc.). Highly themed apps such as
+  Terminal, Snake, DOOM and Slotslop keep their own self-contained palettes.
+- Wallpapers are JPEGs in `public/wallpapers/` (Golden Gate, Catalina, Tahoe, Sequoia). Desktop defaults to Golden
+  Gate; mobile uses the dark Catalina image so iOS-style white labels read well.
+- Keep border radius modest inside apps: controls and rows use `--radius-control` (7px); large panels use 12-16px.
 
 ## Typography
 
-- Standard app UI uses Apple/system fonts:
+- Standard app UI uses the system font stack via `var(--font-ui)`; large display text can use `var(--font-display)`.
 
-```css
-font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
-```
-
-- Code, terminal, retro games, and faux system files may use monospace:
-
-```css
-font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Menlo, monospace;
-```
+- Code, terminal, retro games, and faux system files use `var(--font-mono)`.
 
 - Use compact, scannable type. Window/app interiors should not use hero-scale headings.
 - Avoid negative letter spacing in new work. Preserve existing local styles unless actively refactoring them.
@@ -96,7 +94,7 @@ font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Menlo, monospace;
 
 ## Mobile Rules
 
-- Mobile is an iOS-style home screen with full-screen panels. Do not reuse desktop windows on mobile.
+- Mobile is an iOS-style home screen (status bar, widget, squircle icon grid, Search pill, floating glass dock) with full-screen panels that use an iOS nav bar. Do not reuse desktop windows on mobile.
 - Touch targets should be at least `40px` high, preferably larger for game controls.
 - Use safe-area insets for status bars, bottom docks, and panel headers.
 - Mobile app panels should be dense but readable. Avoid hover-only affordances.

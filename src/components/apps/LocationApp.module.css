@@ -2,39 +2,61 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  background: var(--panel);
+  color: var(--text);
 }
 
 .header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 16px;
-  background: rgba(255,255,255,0.03);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  min-height: 40px;
+  padding: 8px 16px;
+  background: var(--glass);
+  backdrop-filter: blur(36px) saturate(1.6);
+  -webkit-backdrop-filter: blur(36px) saturate(1.6);
+  border-bottom: 1px solid var(--line);
   flex-shrink: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-family: var(--font-ui);
 }
 
 .pinIcon {
   width: 14px;
   height: 14px;
-  color: #10b981;
+  color: var(--accent);
   flex-shrink: 0;
 }
 
 .label {
   font-size: 13px;
   font-weight: 600;
-  color: #e5e7eb;
+  color: var(--text-strong);
 }
 
 .sub {
   font-size: 11px;
-  color: #4b5563;
+  color: var(--muted);
   margin-left: auto;
+  font-variant-numeric: tabular-nums;
 }
 
 .map {
   flex: 1;
   min-height: 0;
+  background: var(--panel-2);
+}
+
+/* Mapbox navigation control: light glass to match the shell */
+.map :global(.mapboxgl-ctrl-group) {
+  background: var(--glass-strong);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-control);
+  box-shadow: 0 4px 14px rgba(60, 40, 10, 0.16);
+  overflow: hidden;
+}
+
+.map :global(.mapboxgl-ctrl-group button + button) {
+  border-top: 1px solid var(--line);
 }

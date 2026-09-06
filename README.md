@@ -20,6 +20,7 @@ The goal is to make the portfolio feel memorable while still keeping the codebas
 - Responsive mobile desktop with touch-friendly app launching and mobile-specific layouts.
 - Experimental Liquid DOM desktop mode for browsers with Chrome's Canvas Draw Element flag enabled.
 - Vercel serverless API routes for contact, search proxying, and leaderboard data.
+- Ask Josh, a ChatGPT-style desktop app powered by Claude that answers questions about Josh's experience, skills, and projects using the portfolio's own data.
 
 ## Tech Stack
 
@@ -66,9 +67,12 @@ API-backed features are handled by Vercel serverless routes under `api/`. Set th
 
 ```bash
 RESEND_API_KEY="your_resend_api_key_here"
+ANTHROPIC_API_KEY="your_anthropic_api_key"
 DATABASE_URL="postgres://portfolio:portfolio@localhost:5433/portfolio"
 VITE_MAPBOX_TOKEN="your_mapbox_access_token"
 ```
+
+The Ask Josh assistant streams replies from Claude through `/api/ask`; set `ANTHROPIC_API_KEY` to enable it, otherwise the app shows a friendly not-configured note.
 
 The Snake leaderboard stores scores in Postgres through the server route at `/api/leaderboard`; the browser client does not need direct database credentials. For local development, start the Docker Postgres service first:
 

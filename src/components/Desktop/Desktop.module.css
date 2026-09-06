@@ -2,84 +2,26 @@
   position: fixed;
   inset: 0;
   overflow: hidden;
-
-  background:
-    radial-gradient(ellipse at 18% 25%, rgba(59, 100, 220, 0.22) 0%, transparent 48%),
-    radial-gradient(ellipse at 80% 70%, rgba(120, 60, 200, 0.15) 0%, transparent 45%),
-    radial-gradient(ellipse at 55% 5%, rgba(30, 60, 140, 0.25) 0%, transparent 40%),
-    radial-gradient(ellipse at 50% 100%, rgba(15, 35, 80, 0.6) 0%, transparent 50%),
-    linear-gradient(
-      175deg,
-      #06090f 0%,
-      #08101e 20%,
-      #0d1628 45%,
-      #101c32 65%,
-      #0c1520 80%,
-      #06090f 100%
-    );
+  background: #f1c367;
+  color: var(--text);
+  font-family: var(--font-ui);
 }
 
-/* starfield */
-.desktop::before {
-  content: '';
+/* Dark wallpapers: white menu bar text, like macOS auto-switching */
+.desktopDark {
+  --menubar-text: #fff;
+  --menubar-bg: rgba(22, 27, 39, 0.16);
+  --menubar-hover: rgba(255, 255, 255, 0.14);
+}
+
+/* Wallpaper layer — swapped per wallpaper choice */
+.wallpaper {
   position: absolute;
   inset: 0;
+  z-index: 0;
   pointer-events: none;
-  background-image:
-    radial-gradient(1px 1px at 8% 12%, rgba(255, 255, 255, 0.55) 0%, transparent 100%),
-    radial-gradient(1px 1px at 22% 8%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 38% 5%, rgba(255, 255, 255, 0.65) 0%, transparent 100%),
-    radial-gradient(1px 1px at 55% 10%, rgba(255, 255, 255, 0.35) 0%, transparent 100%),
-    radial-gradient(1px 1px at 70% 7%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
-    radial-gradient(1px 1px at 85% 15%, rgba(255, 255, 255, 0.45) 0%, transparent 100%),
-    radial-gradient(1px 1px at 92% 9%, rgba(255, 255, 255, 0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 14% 30%, rgba(255, 255, 255, 0.35) 0%, transparent 100%),
-    radial-gradient(1px 1px at 46% 25%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 72% 22%, rgba(255, 255, 255, 0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 95% 38%, rgba(255, 255, 255, 0.35) 0%, transparent 100%);
-}
-
-/* mountain silhouettes */
-.desktop::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 38%;
-  pointer-events: none;
-  background: linear-gradient(to top, #07090e 0%, transparent 100%);
-  clip-path: polygon(
-    0 100%,
-    0 72%,
-    4% 60%,
-    8% 68%,
-    12% 48%,
-    16% 62%,
-    20% 40%,
-    24% 56%,
-    28% 44%,
-    33% 58%,
-    37% 38%,
-    41% 52%,
-    45% 32%,
-    49% 50%,
-    53% 38%,
-    57% 54%,
-    61% 36%,
-    65% 52%,
-    69% 40%,
-    73% 58%,
-    77% 44%,
-    81% 60%,
-    85% 48%,
-    89% 64%,
-    93% 52%,
-    97% 68%,
-    100% 60%,
-    100% 100%
-  );
-  opacity: 0.85;
+  background: #f1c367 center / cover no-repeat;
+  transition: background-image 300ms ease;
 }
 
 /* ── Desktop icons ──────────────────────── */
@@ -92,7 +34,7 @@
   width: 76px;
   padding: 8px 4px 6px;
   border-radius: 8px;
-  cursor: pointer;
+  cursor: default;
   user-select: none;
   z-index: 10;
   transition: background 120ms ease;
@@ -111,10 +53,11 @@
 }
 
 .icon:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.18);
 }
 .iconSelected {
-  background: rgba(59, 130, 246, 0.25) !important;
+  background: rgba(255, 255, 255, 0.28) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
 }
 /* Elevated during drag so the ghost appears above other windows */
 .iconDragging {
@@ -127,8 +70,8 @@
 }
 /* Folder highlighted as drop target */
 .iconFolderTarget {
-  background: rgba(74, 158, 255, 0.35) !important;
-  outline: 2px solid rgba(74, 158, 255, 0.8);
+  background: rgba(0, 122, 255, 0.18) !important;
+  outline: 2px solid rgba(0, 122, 255, 0.6);
   outline-offset: 2px;
   border-radius: 8px;
 }
@@ -136,43 +79,47 @@
 .iconImg {
   width: 48px;
   height: 48px;
-  border-radius: 10px;
+  border-radius: 11px;
   object-fit: contain;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  padding: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  padding: 5px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 4px 10px rgba(70, 40, 10, 0.22);
   pointer-events: none;
 }
 
 .iconFallback {
   width: 48px;
   height: 48px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: 11px;
+  background: linear-gradient(135deg, #4da3ff, #007aff);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
   font-weight: 700;
   color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 4px 10px rgba(70, 40, 10, 0.22);
   pointer-events: none;
 }
 
 .iconLabel {
-  font-size: 11px;
-  color: white;
+  font-size: 12px;
+  color: #fff;
   text-align: center;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
-  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.55),
+    0 0 6px rgba(0, 0, 0, 0.35);
+  font-family: var(--font-ui);
   max-width: 72px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 500;
   pointer-events: none;
-  line-height: 1.35;
+  line-height: 1.3;
 }
 
 /* Full label shown when the icon is selected */
@@ -183,10 +130,11 @@
   word-break: break-word;
   overflow-wrap: break-word;
   max-width: 84px;
-  background: rgba(0, 80, 180, 0.72);
-  border-radius: 3px;
-  padding: 1px 3px;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+  background: var(--accent);
+  color: #fff;
+  text-shadow: none;
+  border-radius: 4px;
+  padding: 1px 4px;
 }
 
 /* ── Clean-up animation (applied only during cleanup) ────── */
@@ -198,25 +146,24 @@
 
 /* ── Rename input ─────────────────────────────────────────── */
 .renameInput {
-  width: 72px;
-  font-size: 11px;
+  width: 74px;
+  font-size: 12px;
   text-align: center;
-  background: rgba(30, 60, 180, 0.55);
-  border: 1.5px solid rgba(80, 140, 255, 0.85);
+  background: #fff;
+  border: 2px solid var(--accent);
   border-radius: 4px;
-  color: white;
-  padding: 2px 4px;
+  color: var(--text);
+  padding: 1px 4px;
   outline: none;
-  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
-  caret-color: white;
+  font-family: var(--font-ui);
 }
 
 /* ── Rubber-band selection rect ───────────────────────────── */
 .selRect {
   position: absolute;
-  border: 1.5px solid rgba(80, 140, 255, 0.8);
-  background: rgba(80, 140, 255, 0.1);
-  border-radius: 3px;
+  border: 1px solid rgba(0, 122, 255, 0.6);
+  background: rgba(0, 122, 255, 0.12);
+  border-radius: 2px;
   pointer-events: none;
   z-index: 2;
 }
@@ -225,18 +172,15 @@
 .ctxMenu {
   position: fixed;
   z-index: 9000;
-  min-width: 200px;
-  padding: 4px;
-  border-radius: 9px;
-  background: rgba(26, 28, 38, 0.94);
-  /* solid fallback for browsers without backdrop-filter */
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.65),
-    0 0 0 0.5px rgba(255, 255, 255, 0.04);
-  -webkit-backdrop-filter: blur(22px) saturate(160%);
-  backdrop-filter: blur(22px) saturate(160%);
-  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  min-width: 220px;
+  padding: 6px;
+  border-radius: 10px;
+  background: var(--glass-strong);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 12px 40px rgba(60, 40, 10, 0.22);
+  -webkit-backdrop-filter: blur(30px) saturate(1.6);
+  backdrop-filter: blur(30px) saturate(1.6);
+  font-family: var(--font-ui);
   animation: ctxIn 110ms ease;
 }
 
@@ -254,32 +198,35 @@
 .ctxItem {
   display: block;
   width: 100%;
-  padding: 5px 12px;
+  min-height: 28px;
+  padding: 5px 10px;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.92);
+  color: var(--text);
   background: none;
   border: none;
-  border-radius: 6px;
+  border-radius: 5px;
   text-align: left;
-  cursor: pointer;
+  cursor: default;
   font-family: inherit;
   transition: background 80ms ease;
   -webkit-tap-highlight-color: transparent;
 }
 .ctxItem:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--accent);
+  color: #fff;
 }
 .ctxDanger {
-  color: #ff6b6b;
+  color: #d0281e;
 }
 .ctxDanger:hover {
-  background: rgba(255, 59, 48, 0.15);
+  background: #ff3b30;
+  color: #fff;
 }
 
 .ctxDivider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.08);
-  margin: 3px 6px;
+  background: var(--line);
+  margin: 5px 8px;
 }
 
 /* ── Modal overlay (Get Info + Wallpaper picker) ──────────── */
@@ -290,19 +237,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(40, 25, 5, 0.18);
 }
 
 /* ── Get Info window ──────────────────────────────────────── */
 .getInfo {
-  width: 270px;
-  border-radius: 12px;
-  background: rgba(26, 28, 40, 0.97);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.72);
+  width: 280px;
+  border-radius: var(--radius-window);
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  outline: 1px solid rgba(58, 39, 9, 0.17);
+  box-shadow:
+    0 24px 65px var(--warm-shadow),
+    0 3px 14px rgba(0, 0, 0, 0.13);
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
-  color: rgba(255, 255, 255, 0.88);
+  font-family: var(--font-ui);
+  color: var(--text);
   animation: modalIn 160ms ease;
 }
 
@@ -318,12 +268,13 @@
 }
 
 .getInfoTitleBar {
-  height: 32px;
+  height: 36px;
   padding: 0 12px;
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.03);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--glass);
+  border-bottom: 1px solid var(--line);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.47);
 }
 
 .trafficClose {
@@ -331,12 +282,13 @@
   height: 12px;
   border-radius: 50%;
   background: #ff5f57;
-  border: none;
-  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.094);
+  cursor: default;
   flex-shrink: 0;
+  padding: 0;
 }
 .trafficClose:hover {
-  background: #ff3b30;
+  filter: brightness(0.9);
 }
 
 .getInfoHead {
@@ -344,30 +296,29 @@
   align-items: center;
   gap: 12px;
   padding: 14px 16px 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--line);
 }
 
 .getInfoName {
   font-size: 14px;
   font-weight: 600;
-  color: white;
+  color: var(--text-strong);
 }
 .getInfoMeta {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--muted);
   margin-top: 2px;
 }
 
 .getInfoSection {
   padding: 10px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--line);
 }
 
 .getInfoSectionTitle {
   font-size: 12px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--muted);
   margin-bottom: 6px;
 }
 
@@ -381,37 +332,40 @@
   vertical-align: top;
 }
 .getInfoTable td:first-child {
-  color: rgba(255, 255, 255, 0.42);
+  color: var(--muted);
   white-space: nowrap;
   padding-right: 10px;
   min-width: 76px;
 }
 .getInfoTable td:last-child {
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text);
 }
 
 .getInfoBody {
   font-size: 12px;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--muted);
   margin: 0;
 }
 
 /* ── Wallpaper picker ─────────────────────────────────────── */
 .wallpaperPicker {
-  border-radius: 12px;
-  background: rgba(26, 28, 40, 0.97);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.72);
+  border-radius: var(--radius-window);
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  outline: 1px solid rgba(58, 39, 9, 0.17);
+  box-shadow:
+    0 24px 65px var(--warm-shadow),
+    0 3px 14px rgba(0, 0, 0, 0.13);
   padding: 18px 20px 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-ui);
   animation: modalIn 160ms ease;
 }
 
 .wallpaperTitle {
   font-size: 14px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text-strong);
   margin-bottom: 14px;
   text-align: center;
 }
@@ -422,14 +376,17 @@
 }
 
 .wallpaperSwatch {
-  width: 72px;
-  height: 52px;
+  width: 96px;
+  height: 60px;
   border-radius: 8px;
   border: 2px solid transparent;
-  cursor: pointer;
+  outline: 1px solid var(--line-strong);
+  background-size: cover;
+  background-position: center;
+  cursor: default;
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.75);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -443,7 +400,7 @@
   transform: scale(1.06);
 }
 .wallpaperActive {
-  border-color: rgba(80, 140, 255, 0.9) !important;
+  border-color: var(--accent) !important;
 }
 
 /* ── Nokia Phone Window — 8-bit chunky early-2000s brick ─────────────────── */

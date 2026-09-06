@@ -22,12 +22,21 @@ export function MacIcon({
           <stop offset="1" stopColor={bottom} />
         </linearGradient>
         <linearGradient id={gl} x1="0" y1="0" x2="0" y2="20" gradientUnits="userSpaceOnUse">
-          <stop stopColor="rgba(255,255,255,0.22)" />
+          <stop stopColor="rgba(255,255,255,0.32)" />
           <stop offset="1" stopColor="rgba(255,255,255,0)" />
         </linearGradient>
       </defs>
-      <rect width="44" height="44" rx="11" fill={`url(#${g})`} />
-      <rect width="44" height="20" rx="11" fill={`url(#${gl})`} />
+      <rect width="44" height="44" rx="10" fill={`url(#${g})`} />
+      <rect width="44" height="22" rx="10" fill={`url(#${gl})`} />
+      <rect
+        x="0.5"
+        y="0.5"
+        width="43"
+        height="43"
+        rx="9.5"
+        fill="none"
+        stroke="rgba(255,255,255,0.28)"
+      />
       {children}
     </svg>
   );
@@ -63,12 +72,7 @@ export const DOCK_ICONS = {
       </g>
     </svg>
   ),
-  about: (
-    <AboutLogoIcon
-      size={44}
-      style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.35)' }}
-    />
-  ),
+  about: <AboutLogoIcon size={44} style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.35)' }} />,
   experience: (
     <MacIcon top="#ffa030" bottom="#c25c00">
       <rect x="8" y="17" width="28" height="18" rx="3" fill="rgba(255,255,255,0.92)" />
@@ -333,7 +337,7 @@ export const DOCK_ICONS = {
           <stop offset="1" stopColor="#007aff" />
         </linearGradient>
         <linearGradient id="ivgl" x1="0" y1="0" x2="0" y2="22" gradientUnits="userSpaceOnUse">
-          <stop stopColor="rgba(255,255,255,0.22)" />
+          <stop stopColor="rgba(255,255,255,0.32)" />
           <stop offset="1" stopColor="rgba(255,255,255,0)" />
         </linearGradient>
       </defs>
@@ -363,6 +367,21 @@ export const DOCK_ICONS = {
       </g>
     </MacIcon>
   ),
+  askjosh: (
+    // Claude-style sparkle on a warm gradient
+    <MacIcon top="#ffd39a" bottom="#e0862c">
+      <g fill="white" opacity="0.95">
+        {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => (
+          <path
+            key={angle}
+            d="M22 8.5 L24.2 19.8 L22 22 L19.8 19.8 Z"
+            transform={`rotate(${angle} 22 22)`}
+          />
+        ))}
+        <circle cx="22" cy="22" r="2.6" />
+      </g>
+    </MacIcon>
+  ),
   texteditor: (
     // Sublime Text-inspired icon — dark with coloured accent bar
     <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
@@ -381,4 +400,3 @@ export const DOCK_ICONS = {
 };
 
 export type DockIconKey = keyof typeof DOCK_ICONS;
-

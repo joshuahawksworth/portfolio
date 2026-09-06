@@ -15,6 +15,7 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.124.0",
     "@liquid-dom/core": "^0.1.1",
     "@liquid-dom/react": "^0.1.1",
     "js-dos": "^8.3.20",

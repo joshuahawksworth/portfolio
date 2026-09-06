@@ -20,7 +20,7 @@
 }
 .canvas.show { opacity: 1; }
 
-/* ── Loading splash ──────────────────────────────────────────────────── */
+/* ── Loading / error splash (light chrome over the game area) ───────── */
 .splash {
   position: absolute;
   inset: 0;
@@ -29,7 +29,8 @@
   align-items: center;
   justify-content: center;
   gap: 14px;
-  background: #050000;
+  background: var(--panel);
+  color: var(--text);
   z-index: 1;
   pointer-events: none;
 }
@@ -40,12 +41,20 @@
   font-weight: 900;
   letter-spacing: 0.1em;
   color: #cc1100;
-  text-shadow: 0 0 40px rgba(255,0,0,0.5), 4px 4px 0 #300;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
 }
 
-.bar { width: 180px; height: 3px; background: #2a0000; border-radius: 2px; overflow: hidden; }
+.bar {
+  width: 180px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
 .fill {
-  height: 100%; background: #cc0000;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
   animation: sweep 2s ease-in-out infinite;
 }
 @keyframes sweep {
@@ -55,8 +64,10 @@
 }
 .sub {
   margin: 0;
-  font-family: 'SF Mono', monospace;
-  font-size: 11px; color: #663333; letter-spacing: .06em;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0;
 }
 
 /* ── Controls panel ──────────────────────────────────────────────────── */
@@ -66,30 +77,38 @@
   width: 210px;
   transform: translateX(100%);
   transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
-  background: rgba(6, 1, 1, 0.97);
-  border-left: 1px solid rgba(120, 25, 15, 0.45);
+  background: var(--glass-strong);
+  backdrop-filter: blur(36px) saturate(1.6);
+  -webkit-backdrop-filter: blur(36px) saturate(1.6);
+  border-left: 1px solid var(--line);
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.25);
+  color: var(--text);
   z-index: 30;
   pointer-events: auto;
 }
 .panelOpen { transform: translateX(0); }
 
 .panelInner {
-  padding: 16px 14px;
+  padding: 14px 12px;
   display: flex;
   flex-direction: column;
   gap: 12px;
   height: 100%;
   box-sizing: border-box;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
 }
 
 .panelTitle {
   margin: 0;
-  font-family: 'Impact', sans-serif;
-  font-size: 13px;
-  letter-spacing: 0.16em;
-  color: #cc2200;
-  text-transform: uppercase;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--muted);
+  text-transform: none;
+  padding: 2px 2px 0;
 }
 
 /* ── Mute button ─────────────────────────────────────────────────────── */
@@ -98,39 +117,51 @@
   align-items: center;
   gap: 7px;
   width: 100%;
-  padding: 7px 10px;
-  border-radius: 5px;
-  background: rgba(30, 8, 4, 0.8);
-  border: 1px solid rgba(120, 30, 15, 0.4);
-  color: #cc6644;
-  font-family: -apple-system, sans-serif;
-  font-size: 11px;
-  font-weight: 600;
+  min-height: 26px;
+  padding: 5px 11px;
+  border-radius: var(--radius-control);
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
   transition: background 120ms, color 120ms;
 }
-.muteBtn:hover { background: rgba(50, 12, 6, 0.9); color: #ee8866; }
-.muteBtnMuted  { color: #886655; border-color: rgba(80, 20, 10, 0.3); }
-.muteBtnMuted:hover { color: #aa8866; }
+.muteBtn svg { color: var(--accent); }
+.muteBtn:hover { background: rgba(0, 0, 0, 0.08); color: var(--text-strong); }
+.muteBtnMuted  { color: var(--muted); }
+.muteBtnMuted svg { color: var(--muted); }
+.muteBtnMuted:hover { color: var(--text); }
 
 /* ── Controls table ─────────────────────────────────────────────────── */
-.tbl { border-collapse: collapse; width: 100%; }
-.tbl tr { border-bottom: 1px solid rgba(70, 12, 8, 0.45); }
+.tbl {
+  border-collapse: collapse;
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  overflow: hidden;
+}
+.tbl tr { border-bottom: 1px solid var(--line); }
 .tbl tr:last-child { border-bottom: none; }
 
 .tblKey {
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  font-size: 10px; font-weight: 700;
-  color: #dd4422;
-  padding: 5px 10px 5px 0;
+  font-family: var(--font-mono);
+  font-size: 10px; font-weight: 600;
+  color: var(--text-strong);
+  padding: 6px 8px 6px 8px;
   white-space: nowrap;
   vertical-align: middle;
+  background: var(--panel-2);
+  border-right: 1px solid var(--line);
 }
 .tblVal {
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-ui);
   font-size: 11px;
-  color: #9a7060;
-  padding: 5px 0;
+  color: var(--text);
+  padding: 6px 8px;
   vertical-align: middle;
 }
 
@@ -148,23 +179,26 @@
   gap: 5px;
   width: 26px;
   padding: 14px 0;
-  border-radius: 6px 0 0 6px;
-  background: rgba(10, 2, 2, 0.9);
-  border: 1px solid rgba(120, 25, 15, 0.45);
+  border-radius: var(--radius-control) 0 0 var(--radius-control);
+  background: var(--glass-strong);
+  backdrop-filter: blur(30px) saturate(1.6);
+  -webkit-backdrop-filter: blur(30px) saturate(1.6);
+  border: 1px solid var(--line-strong);
   border-right: none;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
   cursor: pointer;
   z-index: 31;
   pointer-events: auto;
 }
 .tabOpen { right: 210px; }
-.tab:hover { background: rgba(28, 5, 3, 0.97); }
+.tab:hover { background: #fff; }
 
-.tabArrow { font-size: 13px; color: #cc3300; line-height: 1; }
+.tabArrow { font-size: 13px; color: var(--accent); line-height: 1; }
 .tabLabel {
-  font-family: -apple-system, sans-serif;
-  font-size: 8px; font-weight: 700;
-  letter-spacing: 0.1em;
-  color: #884433;
+  font-family: var(--font-ui);
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--muted);
   text-transform: uppercase;
   writing-mode: vertical-rl;
   text-orientation: mixed;

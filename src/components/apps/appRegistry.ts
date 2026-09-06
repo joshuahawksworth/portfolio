@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 import AboutApp from './AboutApp';
+import AskJoshApp from './AskJoshApp';
 import CalculatorApp from './CalculatorApp';
 import ContactApp from './ContactApp';
 import DoomApp from './DoomApp';
@@ -36,7 +37,8 @@ export type PortfolioAppId =
   | 'texteditor'
   | 'imageviewer'
   | 'slotslop'
-  | 'calculator';
+  | 'calculator'
+  | 'askjosh';
 
 export type PortfolioAppComponent = ComponentType<{ props?: Record<string, unknown> }>;
 
@@ -193,6 +195,14 @@ export const PORTFOLIO_APPS = {
     defaultSize: { width: 280, height: 420 },
     minSize: { width: 240, height: 360 },
     maxSize: { width: 400, height: 620 },
+  },
+  askjosh: {
+    id: 'askjosh',
+    title: 'Ask Josh',
+    component: AskJoshApp,
+    defaultSize: { width: 860, height: 600 },
+    minSize: { width: 560, height: 420 },
+    maxSize: { width: 1100, height: 760 },
   },
 } satisfies Record<PortfolioAppId, PortfolioAppDefinition>;
 

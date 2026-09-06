@@ -4,6 +4,7 @@ import { DOCK_ICONS } from './dockIcons';
 export const DOCK_DEFAULT_ORDER = [
   'github',
   'safari',
+  'askjosh',
   'about',
   'experience',
   'skills',
@@ -17,12 +18,19 @@ export const DOCK_DEFAULT_ORDER = [
   'slotslop',
 ] as const;
 
-export type DockKey = (typeof DOCK_DEFAULT_ORDER)[number] | 'finder' | 'trash' | 'doom' | 'snake' | 'wallpaper';
+export type DockKey =
+  | (typeof DOCK_DEFAULT_ORDER)[number]
+  | 'finder'
+  | 'trash'
+  | 'doom'
+  | 'snake'
+  | 'wallpaper';
 
 export const DOCK_LABELS: Record<string, string> = {
   finder: 'Finder',
   github: 'GitHub',
   safari: 'Google Chrome',
+  askjosh: 'Ask Josh',
   about: 'About',
   experience: 'Experience',
   skills: 'Skills',

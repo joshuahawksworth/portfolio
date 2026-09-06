@@ -93,7 +93,7 @@ export default function AboutApp() {
 
         <div className={styles.socials}>
           <a
-            href="https://github.com/joshhawksworth"
+            href="https://github.com/joshuahawksworth"
             target="_blank"
             rel="noreferrer"
             className={styles.socialBtn}
