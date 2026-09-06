@@ -1,0 +1,700 @@
+/* ── System overlays: Spotlight, Control Center, Notification Center, Launchpad ── */
+/* Layers: windows ~100–1000 · dock 8000 · menu bar 9000 · popovers 9650 · Spotlight 9700 */
+
+/* ── Shared ─────────────────────────────────────────────────────────── */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.035);
+}
+
+/* Popover backdrops start below the menu bar so its status buttons still toggle */
+.backdropBelowBar {
+  top: var(--menubar-h, 29px);
+  background: transparent;
+}
+
+.brightness {
+  position: fixed;
+  inset: 0;
+  z-index: 9550;
+  background: #000;
+  pointer-events: none;
+}
+
+.glass {
+  background: var(--glass-strong);
+  backdrop-filter: blur(40px) saturate(1.6);
+  -webkit-backdrop-filter: blur(40px) saturate(1.6);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  box-shadow:
+    0 24px 65px var(--warm-shadow),
+    0 3px 14px rgba(0, 0, 0, 0.13);
+  color: var(--text);
+  font-family: var(--font-ui);
+  animation: popIn 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Spotlight ─────────────────────────────────────────────────────── */
+.spotlightLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 9700;
+}
+
+.spotlight {
+  position: absolute;
+  top: 16%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(660px, 92vw);
+  overflow: hidden;
+  animation: spotlightIn 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes spotlightIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%);
+  }
+}
+
+.spotlightInputRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 68px;
+  padding: 0 22px;
+}
+
+.spotlightGlyph {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  color: var(--muted);
+}
+
+.spotlightInput {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-ui);
+  font-size: 25px;
+  font-weight: 300;
+  color: var(--text-strong);
+}
+
+.spotlightInput::placeholder {
+  color: var(--muted-2);
+}
+
+.spotlightBody {
+  border-top: 1px solid var(--line);
+  padding: 8px 10px 6px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.sectionLabel {
+  padding: 6px 10px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.resultList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.resultRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  text-align: left;
+  cursor: default;
+}
+
+.resultRow:hover {
+  background: var(--hover);
+}
+
+.resultRowSelected,
+.resultRowSelected:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.resultIcon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resultIcon {
+  --app-icon-size: 28px;
+}
+.resultIcon > svg,
+.resultIcon > img {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.resultTitle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resultHint {
+  font-size: 11px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.resultRowSelected .resultHint {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.calcIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: linear-gradient(#ff9f0a, #c93400);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calcResult {
+  font-weight: 500;
+}
+
+.empty {
+  padding: 12px 10px 14px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.spotlightFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 6px 16px 8px;
+  border-top: 1px solid var(--line);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* ── Popovers (Control Center + Notification Center) ────────────────── */
+.popoverLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 9650;
+  /* Let clicks fall through to the menu bar; the backdrop and popover re-enable them */
+  pointer-events: none;
+}
+.popoverLayer > * {
+  pointer-events: auto;
+}
+
+.popover {
+  position: absolute;
+  top: 41px;
+  right: 13px;
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+}
+
+.controlCenter {
+  width: 330px;
+  padding: 14px;
+}
+
+.notificationCenter {
+  width: 355px;
+  padding: 22px;
+}
+
+@media (max-width: 400px) {
+  .controlCenter,
+  .notificationCenter {
+    width: calc(100vw - 26px);
+  }
+}
+
+/* Control Center */
+.ccGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 10px;
+}
+
+.tile {
+  padding: 12px;
+  font-size: 12px;
+}
+
+.tileTall {
+  grid-row: span 2;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tileButton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  color: var(--text);
+  font-family: var(--font-ui);
+  cursor: default;
+  transition: background 120ms ease;
+}
+
+.tileButton:hover {
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.tileTitle {
+  display: block;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.tileSub {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.25;
+}
+
+.ccRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  color: var(--text);
+  font-family: var(--font-ui);
+  cursor: default;
+}
+
+.ccRow .tileSub {
+  transition: color 120ms ease;
+}
+
+.ccDot {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: var(--accent);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.35);
+  transition: background 140ms ease;
+}
+
+.ccDot > svg {
+  width: 15px;
+  height: 15px;
+}
+
+.ccDotOff {
+  background: rgba(0, 0, 0, 0.14);
+  color: var(--text);
+  box-shadow: none;
+}
+
+.ccDotMono {
+  background: rgba(0, 0, 0, 0.1);
+  color: var(--text);
+  box-shadow: none;
+}
+
+.ccSliderGroup {
+  margin-top: 12px;
+  padding: 10px 12px 12px;
+}
+
+.ccSliderLabel {
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 7px;
+}
+
+.ccSliderRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+}
+
+.ccSliderRow > svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.slider {
+  --fill: 50%;
+  flex: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  height: 22px;
+  margin: 0;
+  border-radius: 11px;
+  background: linear-gradient(90deg, var(--accent) var(--fill), #fff var(--fill));
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+}
+
+.slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+}
+
+.slider::-moz-range-track {
+  background: transparent;
+}
+
+.slider:focus-visible {
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 0 0 3px var(--accent-soft);
+}
+
+/* Notification Center */
+.ncHeader {
+  margin-bottom: 16px;
+  color: var(--text-strong);
+}
+
+.ncWeekday {
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.ncDate {
+  font-size: 31px;
+  font-weight: 300;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.ncCard {
+  border-radius: 14px;
+  padding: 15px 13px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.ncCard + .ncCard {
+  margin-top: 10px;
+}
+
+.ncCardHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.ncCardHead > svg {
+  width: 15px;
+  height: 15px;
+  color: var(--accent);
+}
+
+.ncEvent {
+  display: flex;
+  gap: 10px;
+}
+
+.ncTime {
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.ncHint {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.ncList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ncList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 3px 0;
+}
+
+.ncBullet {
+  width: 12px;
+  height: 12px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+}
+
+.ncList code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+.ncLink {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.ncLink:hover {
+  text-decoration: underline;
+}
+
+.ncMuted {
+  color: var(--muted);
+}
+
+/* ── Launchpad ─────────────────────────────────────────────────────── */
+.launchpad {
+  position: fixed;
+  inset: 0;
+  z-index: 9600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 24px 40px;
+  overflow-y: auto;
+  background: rgba(41, 26, 25, 0.4);
+  backdrop-filter: blur(28px) saturate(0.85);
+  -webkit-backdrop-filter: blur(28px) saturate(0.85);
+  color: #fff;
+  font-family: var(--font-ui);
+  animation: launchpadIn 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes launchpadIn {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.launchpadSearch {
+  position: relative;
+  width: 310px;
+  max-width: 100%;
+  flex-shrink: 0;
+  margin-bottom: 44px;
+}
+
+.launchpadSearch > svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.7);
+  pointer-events: none;
+}
+
+.launchpadInput {
+  width: 100%;
+  height: 32px;
+  padding: 0 12px 0 30px;
+  border: 1px solid rgba(255, 255, 255, 0.27);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.13);
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  outline: none;
+}
+
+.launchpadInput::placeholder {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.launchpadInput:focus {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.launchpadGrid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 25px 17px;
+  width: 100%;
+  max-width: 1120px;
+}
+
+@media (max-width: 1000px) {
+  .launchpadGrid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .launchpadGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.launchpadApp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 6px 10px;
+  border: none;
+  border-radius: 13px;
+  background: transparent;
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  cursor: default;
+  transition:
+    background 140ms ease,
+    transform 140ms ease;
+}
+
+.launchpadApp:hover,
+.launchpadApp:focus-visible {
+  background: rgba(255, 255, 255, 0.13);
+  transform: scale(1.06);
+  outline: none;
+}
+
+.launchpadApp:active {
+  transform: scale(0.98);
+}
+
+.launchpadIcon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.28));
+}
+
+.launchpadIcon {
+  --app-icon-size: 64px;
+}
+.launchpadIcon > svg,
+.launchpadIcon > img {
+  width: 64px;
+  height: 64px;
+  display: block;
+}
+
+.launchpadLabel {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.launchpadEmpty {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}

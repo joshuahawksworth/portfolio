@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useTime } from '../../hooks/useTime';
 import AboutApp from '../apps/AboutApp';
 import ExperienceApp from '../apps/ExperienceApp';
@@ -12,26 +13,30 @@ import MobileSnakeApp from '../apps/MobileSnakeApp';
 import RubberDuckApp from '../apps/RubberDuckApp';
 import KeyboardShortcutsApp from '../apps/KeyboardShortcutsApp';
 import CalculatorApp from '../apps/CalculatorApp';
+import AskJoshApp from '../apps/AskJoshApp';
 import { CalculatorLogoIcon } from '../icons/CalculatorLogoIcon';
 import { AboutLogoIcon } from '../icons/AboutLogoIcon';
 import { ChromeLogoIcon } from '../icons/ChromeLogoIcon';
 import { DesktopProvider, useDesktop } from '../../context/DesktopContext';
+import StatusBar from './StatusBar';
 import styles from './MobileDesktop.module.css';
+import { DARK_WALLPAPERS, WALLPAPERS, loadWallpaper } from '../../data/wallpapers';
 
-// ── App icon gradients ──────────────────────────────────────────────────────
+// ── App icon gradients (iOS-style flat two-stop, light top → deep bottom) ──
 const ICON_GRADS: Record<string, [string, string]> = {
-  about: ['#4f8ef7', '#1e4fc4'],
-  experience: ['#ffa030', '#c25c00'],
-  skills: ['#d070ff', '#7928ca'],
-  contact: ['#3a9fff', '#0060df'],
-  location: ['#34d870', '#1a8f3f'],
-  terminal: ['#2a2a35', '#1c1c1e'],
-  finder: ['#5ecfff', '#1a7aff'],
-  cv: ['#ff5257', '#c0292e'],
-  github: ['#1b1f24', '#1b1f24'],
-  snake: ['#133d1e', '#0a2410'],
-  trickster: ['#f59e0b', '#b45309'],
-  calculator: ['#ff9f0a', '#c93400'],
+  about: ['#5aa0ff', '#1f5fd6'],
+  experience: ['#ffb340', '#f26f0c'],
+  skills: ['#d581ff', '#8a2fd8'],
+  contact: ['#46a8ff', '#0a6ee6'],
+  location: ['#4ee07f', '#1fa04a'],
+  terminal: ['#3a3a42', '#1c1c1e'],
+  finder: ['#6ad6ff', '#1a7cff'],
+  cv: ['#ff6b6b', '#d92b31'],
+  github: ['#2c3138', '#181b20'],
+  snake: ['#1f6a34', '#0e3a1a'],
+  trickster: ['#ffb23f', '#d97706'],
+  calculator: ['#ffab2e', '#e0470d'],
+  askjosh: ['#ffd39a', '#e0862c'],
 };
 
 // ── App icon glyphs (28×28 viewBox) ────────────────────────────────────────
@@ -209,22 +214,6 @@ const ICON_GLYPHS: Record<string, React.ReactNode> = {
     </>
   ),
 
-  calculator: (
-    <>
-      <rect x="5" y="3" width="18" height="22" rx="3.5" fill="rgba(255,255,255,0.92)" />
-      <rect x="7" y="5" width="14" height="3.5" rx="1.5" fill="#3a3a3c" />
-      <rect x="7" y="11" width="4" height="3.25" rx="1" fill="#636366" />
-      <rect x="12" y="11" width="4" height="3.25" rx="1" fill="#636366" />
-      <rect x="17" y="11" width="4" height="3.25" rx="1" fill="#ff9f0a" />
-      <rect x="7" y="14.75" width="4" height="3.25" rx="1" fill="#636366" />
-      <rect x="12" y="14.75" width="4" height="3.25" rx="1" fill="#636366" />
-      <rect x="17" y="14.75" width="4" height="3.25" rx="1" fill="#ff9f0a" />
-      <rect x="7" y="18.5" width="4" height="3.25" rx="1" fill="#636366" />
-      <rect x="12" y="18.5" width="4" height="3.25" rx="1" fill="#636366" />
-      <rect x="17" y="18.5" width="4" height="3.25" rx="1" fill="#ff9f0a" />
-    </>
-  ),
-
   // Trickster — folder outline with a question mark
   trickster: (
     <>
@@ -248,6 +237,18 @@ const ICON_GLYPHS: Record<string, React.ReactNode> = {
       </text>
     </>
   ),
+  askjosh: (
+    <g fill="white" opacity="0.95">
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => (
+        <path
+          key={angle}
+          d="M14 3.5 L15.5 12.5 L14 14 L12.5 12.5 Z"
+          transform={`rotate(${angle} 14 14)`}
+        />
+      ))}
+      <circle cx="14" cy="14" r="1.8" />
+    </g>
+  ),
 };
 
 const ICON_OFFSETS: Record<string, number> = {
@@ -259,114 +260,119 @@ const ICON_OFFSETS: Record<string, number> = {
   contact: -0.5,
 };
 
+/**
+ * iOS squircle icon frame: two-stop gradient, top-light gloss and a warm drop shadow.
+ * The frame clips its children so branded logos (About / Chrome) share the same corners.
+ */
+function IconFrame({
+  appId,
+  size,
+  children,
+}: {
+  appId: string;
+  size: number;
+  children: React.ReactNode;
+}) {
+  const [c1, c2] = ICON_GRADS[appId] ?? ['#3b82f6', '#1d4ed8'];
+  const style = {
+    '--icon-size': `${size}px`,
+    '--icon-c1': c1,
+    '--icon-c2': c2,
+  } as CSSProperties;
+
+  return (
+    <div className={styles.appIcon} style={style}>
+      {children}
+      <span className={styles.appIconGloss} aria-hidden="true" />
+    </div>
+  );
+}
+
+// Real app artwork (see public/icons). macOS-style icons carry their own margin,
+// so they're scaled up to fill the iOS squircle; iOS-style ones fit as-is.
+const ICON_IMAGES: Record<string, { src: string; scale?: number; bg?: string }> = {
+  finder: { src: '/icons/finder.png', scale: 1.28 },
+  terminal: { src: '/icons/terminal.png', scale: 1.28 },
+  texteditor: { src: '/icons/textedit.png', scale: 1.28 },
+  imageviewer: { src: '/icons/preview.png', scale: 1.28 },
+  contact: { src: '/icons/mail.png' },
+  location: { src: '/icons/maps.png' },
+  calculator: { src: '/icons/calculator.png' },
+  cv: { src: '/icons/pages.png' },
+  askjosh: { src: '/icons/claude.png' },
+  skills: { src: '/icons/settings.png' },
+  experience: { src: '/icons/reminders.png' },
+  shortcuts: { src: '/icons/shortcuts.png' },
+  safari: { src: '/icons/chrome.png', scale: 0.72, bg: '#ffffff' },
+  github: { src: '/icons/github-mark-white.png', scale: 0.62, bg: '#0d1117' },
+};
+
 function AppIcon({ appId, size = 60 }: { appId: string; size?: number }) {
-  const radius = Math.round(size * 0.23);
+  const glyphSize = Math.round(size * 0.72);
+  const real = ICON_IMAGES[appId];
+  if (real) {
+    return (
+      <div
+        className={styles.appIcon}
+        style={
+          {
+            '--icon-size': `${size}px`,
+            background: real.bg ?? 'transparent',
+          } as CSSProperties
+        }
+      >
+        <img
+          src={real.src}
+          alt=""
+          draggable={false}
+          className={styles.appIconImg}
+          style={real.scale ? { transform: `scale(${real.scale})` } : undefined}
+        />
+      </div>
+    );
+  }
+  const flatLogo: CSSProperties = { borderRadius: 0, boxShadow: 'none' };
 
   if (appId === 'about') {
     return (
-      <AboutLogoIcon
-        size={size}
-        style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.45)' }}
-      />
+      <IconFrame appId={appId} size={size}>
+        <AboutLogoIcon size={size} style={flatLogo} />
+      </IconFrame>
     );
   }
 
   if (appId === 'safari') {
     return (
-      <ChromeLogoIcon
-        size={size}
-        style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.45)' }}
-      />
+      <IconFrame appId={appId} size={size}>
+        <ChromeLogoIcon size={size} style={flatLogo} />
+      </IconFrame>
     );
   }
 
   if (appId === 'calculator') {
-    const radius = Math.round(size * 0.23);
-    const glyphSize = Math.round(size * 0.72);
-    const [c1, c2] = ICON_GRADS.calculator;
     return (
-      <div
-        style={{
-          width: size,
-          height: size,
-          borderRadius: radius,
-          background: `linear-gradient(155deg, ${c1} 0%, ${c2} 100%)`,
-          position: 'relative',
-          overflow: 'hidden',
-          flexShrink: 0,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.45)',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '50%',
-            background: 'linear-gradient(to bottom, rgba(255,255,255,0.22), rgba(255,255,255,0))',
-            borderRadius: `${radius}px ${radius}px 0 0`,
-            pointerEvents: 'none',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-          }}
-        >
+      <IconFrame appId={appId} size={size}>
+        <div className={styles.appIconGlyph}>
           <CalculatorLogoIcon size={glyphSize} />
         </div>
-      </div>
+      </IconFrame>
     );
   }
 
-  const [c1, c2] = ICON_GRADS[appId] ?? ['#3b82f6', '#1d4ed8'];
-  const glyphSize = Math.round(size * 0.72);
   const offset = ICON_OFFSETS[appId] ?? 0;
 
   return (
-    <div
-      style={{
-        width: size,
-        height: size,
-        borderRadius: radius,
-        background: `linear-gradient(155deg, ${c1} 0%, ${c2} 100%)`,
-        position: 'relative',
-        overflow: 'hidden',
-        flexShrink: 0,
-        boxShadow: '0 4px 12px rgba(0,0,0,0.45)',
-      }}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '50%',
-          background: 'linear-gradient(to bottom, rgba(255,255,255,0.22), rgba(255,255,255,0))',
-          borderRadius: `${radius}px ${radius}px 0 0`,
-          pointerEvents: 'none',
-        }}
-      />
+    <IconFrame appId={appId} size={size}>
       <svg
         viewBox="0 0 28 28"
         fill="none"
         width={glyphSize}
         height={glyphSize}
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-        }}
+        className={styles.appIconGlyph}
       >
         <g transform={`translate(0, ${offset})`}>{ICON_GLYPHS[appId]}</g>
       </svg>
-    </div>
+    </IconFrame>
   );
 }
 
@@ -384,6 +390,7 @@ const APP_COMPONENTS: Record<string, React.ComponentType<{ props?: Record<string
   rubberduck: RubberDuckApp,
   shortcuts: KeyboardShortcutsApp,
   calculator: CalculatorApp,
+  askjosh: AskJoshApp,
 };
 
 const APP_LABELS: Record<string, string> = {
@@ -399,17 +406,50 @@ const APP_LABELS: Record<string, string> = {
   safari: 'Chrome',
   snake: 'Snake',
   calculator: 'Calculator',
+  askjosh: 'Ask Claude',
 };
 
-function StatusClock() {
+const TRICKSTER_LABEL = 'My Flaws';
+
+// ── "Now" widget (2×2 glass card, top-left of the home screen) ──────────────
+function NowWidget() {
   const now = useTime();
-  return <span>{now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</span>;
+  const time = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const date = now.toLocaleDateString('en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  });
+
+  return (
+    <div className={styles.widgetItem}>
+      <div className={styles.widget}>
+        <div className={styles.widgetPlace}>
+          <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
+            <path
+              d="M6 1C3.8 1 2.2 2.7 2.2 4.8 2.2 7.6 6 11 6 11s3.8-3.4 3.8-6.2C9.8 2.7 8.2 1 6 1Z"
+              fill="currentColor"
+            />
+            <circle cx="6" cy="4.8" r="1.5" fill="#fff" />
+          </svg>
+          Manchester, UK
+        </div>
+        <div className={styles.widgetTime}>{time}</div>
+        <div className={styles.widgetDate}>{date}</div>
+        <div className={styles.widgetRule} />
+        <div className={styles.widgetName}>Joshua Hawksworth</div>
+        <div className={styles.widgetRole}>Senior Full Stack Developer</div>
+      </div>
+      <span className={styles.iconLabel}>Now</span>
+    </div>
+  );
 }
 
 // Fixed base items — these never move (slots 0–11 in the 4-column grid)
 const BASE_ITEMS = [
   'finder',
   'about',
+  'askjosh',
   'experience',
   'skills',
   'contact',
@@ -425,14 +465,20 @@ const BASE_ITEMS = [
 // Trailing zone: slots 12–15 (last row). Trickster lives here; the other 3 stay empty.
 const TRAILING_SLOTS = 4;
 
+const DOCK_APPS = ['about', 'experience', 'contact', 'github'];
+
 function MobileInner() {
   const { windows, openApp, closeWindow } = useDesktop();
+  const wallpaper = loadWallpaper();
   const activeWindow = windows.length > 0 ? windows[windows.length - 1] : null;
 
   // Which trailing slot (0–3) the trickster occupies. Others are genuinely empty.
   const [tricksterSlot, setTricksterSlot] = useState(0);
 
-  const DOCK_APPS = ['about', 'experience', 'contact', 'github'];
+  // Search pill: non-empty query dims every icon whose label doesn't match.
+  const [query, setQuery] = useState('');
+  const q = query.trim().toLowerCase();
+  const matches = (label: string) => q === '' || label.toLowerCase().includes(q);
 
   function handleOpen(id: string) {
     if (id === 'github') {
@@ -448,71 +494,48 @@ function MobileInner() {
     setTricksterSlot(empties[Math.floor(Math.random() * empties.length)]);
   }
 
+  function iconClass(label: string, extra?: string) {
+    return [styles.iconItem, extra, matches(label) ? '' : styles.iconItemDimmed]
+      .filter(Boolean)
+      .join(' ');
+  }
+
   return (
-    <div className={styles.screen}>
-      <div className={styles.statusBar}>
-        <StatusClock />
-        <div className={styles.statusIcons}>
-          <svg
-            viewBox="0 0 18 12"
-            width="18"
-            height="12"
-            aria-hidden
-            className={styles.statusWifi}
-          >
-            <path
-              d="M1.5 4.8c4-3.5 11-3.5 15 0M4.5 7.4c2.5-2.2 6.5-2.2 9 0M7.5 9.8c1.1-1 2.9-1 4 0"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.35"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <circle cx="9" cy="11" r="0.9" fill="currentColor" />
-          </svg>
-          <svg
-            viewBox="0 0 22 12"
-            width="22"
-            height="12"
-            fill="none"
-            stroke="white"
-            strokeWidth="1.2"
-            opacity="0.8"
-          >
-            <rect x="0.5" y="0.5" width="18" height="11" rx="2.5" />
-            <rect x="2" y="2" width="13" height="8" rx="1.5" fill="white" stroke="none" />
-            <path d="M19.5 4v4" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-        </div>
-      </div>
+    <div className={styles.screen} style={{ backgroundImage: `url(${WALLPAPERS[wallpaper]})` }}>
+      <StatusBar />
 
       <div className={styles.homeScreen}>
         <div className={styles.iconGrid}>
+          <NowWidget />
+
           {/* Fixed base items — positions never change */}
-          {BASE_ITEMS.map((id) => (
-            <button
-              key={id}
-              className={styles.iconItem}
-              onClick={() =>
-                id === 'cv' ? window.open('/JoshuaHawksworthCV.pdf', '_blank') : handleOpen(id)
-              }
-            >
-              <AppIcon appId={id} size={62} />
-              <span className={styles.iconLabel}>{APP_LABELS[id] ?? id}</span>
-            </button>
-          ))}
+          {BASE_ITEMS.map((id) => {
+            const label = APP_LABELS[id] ?? id;
+            return (
+              <button
+                key={id}
+                className={iconClass(label)}
+                onClick={() =>
+                  id === 'cv' ? window.open('/JoshuaHawksworthCV.pdf', '_blank') : handleOpen(id)
+                }
+              >
+                <AppIcon appId={id} size={60} />
+                <span className={styles.iconLabel}>{label}</span>
+              </button>
+            );
+          })}
 
           {/* Trailing zone: 4 cells, only tricksterSlot is filled */}
           {Array.from({ length: TRAILING_SLOTS }, (_, i) =>
             i === tricksterSlot ? (
               <button
                 key={`trickster-${tricksterSlot}`}
-                className={`${styles.iconItem} ${styles.tricksterItem}`}
+                className={iconClass(TRICKSTER_LABEL, styles.tricksterItem)}
                 onPointerEnter={moveTrickster}
                 onClick={(e) => e.preventDefault()}
               >
-                <AppIcon appId="trickster" size={62} />
-                <span className={styles.iconLabel}>My Flaws</span>
+                <AppIcon appId="trickster" size={60} />
+                <span className={styles.iconLabel}>{TRICKSTER_LABEL}</span>
               </button>
             ) : (
               <div
@@ -526,35 +549,71 @@ function MobileInner() {
         </div>
       </div>
 
-      <div className={styles.dock}>
-        {DOCK_APPS.map((id) => (
-          <button key={id} className={styles.dockItem} onClick={() => handleOpen(id)}>
-            <AppIcon appId={id} size={52} />
-          </button>
-        ))}
+      <div className={styles.searchRow}>
+        <label className={styles.searchPill}>
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+            <circle cx="6.8" cy="6.8" r="4.6" fill="none" stroke="currentColor" strokeWidth="1.8" />
+            <path
+              d="M10.4 10.4L14 14"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+            />
+          </svg>
+          <input
+            type="search"
+            className={styles.searchInput}
+            placeholder="Search"
+            aria-label="Search apps"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            enterKeyHint="search"
+          />
+        </label>
       </div>
+
+      <div className={styles.dockWrap}>
+        <div className={styles.dock}>
+          {DOCK_APPS.map((id) => (
+            <button
+              key={id}
+              className={styles.dockItem}
+              onClick={() => handleOpen(id)}
+              aria-label={APP_LABELS[id] ?? id}
+            >
+              <AppIcon appId={id} size={60} />
+            </button>
+          ))}
+        </div>
+      </div>
+      <div
+        className={`${styles.homeIndicator} ${DARK_WALLPAPERS.has(wallpaper) ? styles.homeIndicatorLight : ''}`}
+        aria-hidden="true"
+      />
 
       <div className={`${styles.panel} ${activeWindow ? styles.panelOpen : ''}`}>
         {activeWindow && (
           <>
-            <div className={styles.panelHandle}>
-              <div className={styles.panelHandlePill} />
-            </div>
             <div className={styles.panelHeader}>
-              <button
-                className={styles.closeBtn}
-                onClick={() => closeWindow(activeWindow.id)}
-                aria-label="Close"
-              >
+              <button className={styles.backBtn} onClick={() => closeWindow(activeWindow.id)}>
                 <svg
-                  viewBox="0 0 10 10"
+                  viewBox="0 0 12 20"
+                  width="12"
+                  height="20"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2"
+                  strokeWidth="2.6"
                   strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
                 >
-                  <path d="M1 1l8 8M9 1L1 9" />
+                  <path d="M10.5 1.5L2 10l8.5 8.5" />
                 </svg>
+                <span>Back</span>
               </button>
               <span className={styles.panelTitle}>{activeWindow.title}</span>
               <div className={styles.headerSpacer} />

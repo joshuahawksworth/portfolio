@@ -18,8 +18,8 @@ The goal is to make the portfolio feel memorable while still keeping the codebas
 - Portfolio apps for About, Experience, Skills, Contact, Location, CV, GitHub, and browser-style project views.
 - Playful extras including Terminal commands, a Nokia-style Snake window, DOOM via js-dos, Calculator, Rubber Duck, and Slotslop.
 - Responsive mobile desktop with touch-friendly app launching and mobile-specific layouts.
-- Experimental Liquid DOM desktop mode for browsers with Chrome's Canvas Draw Element flag enabled.
 - Vercel serverless API routes for contact, search proxying, and leaderboard data.
+- Ask Claude, a ChatGPT-style desktop app powered by Claude that answers questions about Josh's experience, skills, and projects using the portfolio's own data.
 
 ## Tech Stack
 
@@ -29,7 +29,7 @@ The goal is to make the portfolio feel memorable while still keeping the codebas
 - Vitest and Testing Library
 - Playwright
 - Vercel serverless functions
-- js-dos, Mapbox GL, Liquid DOM
+- js-dos, Mapbox GL
 
 ## Project Structure
 
@@ -39,7 +39,7 @@ src/
     apps/              Desktop apps and app registry
     Desktop/           Standard desktop shell
     Dock/              Shared dock configuration and icons
-    LiquidDesktop/     Experimental liquid-glass desktop
+    SystemUI/          Spotlight, Control Center, Notification Center, Launchpad
     MobileDesktop/     Mobile home-screen experience
     Window/            Shared macOS-style window chrome
   context/             Desktop window, file, folder, and trash state
@@ -66,9 +66,12 @@ API-backed features are handled by Vercel serverless routes under `api/`. Set th
 
 ```bash
 RESEND_API_KEY="your_resend_api_key_here"
+ANTHROPIC_API_KEY="your_anthropic_api_key"
 DATABASE_URL="postgres://portfolio:portfolio@localhost:5433/portfolio"
 VITE_MAPBOX_TOKEN="your_mapbox_access_token"
 ```
+
+The Ask Claude assistant streams replies from Claude through `/api/ask`; set `ANTHROPIC_API_KEY` to enable it, otherwise the app shows a friendly not-configured note.
 
 The Snake leaderboard stores scores in Postgres through the server route at `/api/leaderboard`; the browser client does not need direct database credentials. For local development, start the Docker Postgres service first:
 

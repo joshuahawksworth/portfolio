@@ -1,7 +1,33 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  /* ── Golden Gate theme tokens ─────────────────────────────────────── */
+  --accent: #007aff;
+  --accent-soft: rgba(0, 122, 255, 0.12);
+  --text: #262422;
+  --text-strong: #1c1a18;
+  --muted: #827c76;
+  --muted-2: #a8a29b;
+  --panel: rgba(252, 250, 247, 0.84);
+  --panel-solid: #fcfaf7;
+  --panel-2: rgba(246, 242, 234, 0.9);
+  --line: rgba(0, 0, 0, 0.063);
+  --line-strong: rgba(0, 0, 0, 0.11);
+  --glass: rgba(248, 242, 230, 0.79);
+  --glass-strong: rgba(252, 250, 247, 0.92);
+  --glass-menu: rgba(252, 248, 240, 0.86);
+  --hover: rgba(0, 0, 0, 0.045);
+  --selected: rgba(0, 0, 0, 0.075);
+  --warm-shadow: rgba(87, 52, 10, 0.3);
+  --font-ui: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', Menlo, monospace;
+  --radius-window: 14px;
+  --radius-control: 7px;
+  --menubar-h: 29px;
+
+  font-family: var(--font-ui);
   line-height: 1.5;
   font-weight: 400;
+  color: var(--text);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -10,7 +36,7 @@
 
   /* Prevent Samsung Internet / forced-dark-mode from recolouring anything */
   color-scheme: only light;
-  background: #06090f;
+  background: #f1c367;
 }
 
 *,
@@ -27,7 +53,7 @@ body {
   height: 100%;
   overflow: hidden;
   min-width: 320px;
-  background: #06090f;
+  background: #f1c367;
 }
 
 #root {
@@ -39,12 +65,12 @@ body {
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--accent);
   text-decoration: inherit;
 }
 
 a:hover {
-  color: #535bf2;
+  color: #0062cc;
 }
 
 h1 {
@@ -63,21 +89,21 @@ button {
 @supports not (backdrop-filter: blur(1px)) {
   /* Dock */
   [class*='panel_'] {
-    background: rgba(20, 20, 28, 0.96) !important;
+    background: rgba(252, 248, 240, 0.97) !important;
   }
   [class*='dock_'] {
-    background: rgba(24, 28, 40, 0.96) !important;
+    background: rgba(255, 246, 225, 0.96) !important;
   }
   [class*='bar_'] {
-    background: rgba(18, 20, 30, 0.96) !important;
+    background: rgba(252, 246, 232, 0.96) !important;
   }
   /* App panel header */
   [class*='panelHeader_'] {
-    background: rgba(34, 36, 50, 0.98) !important;
+    background: rgba(252, 250, 247, 0.98) !important;
   }
   /* Context menu */
   [class*='ctxMenu_'] {
-    background: rgba(22, 24, 34, 0.98) !important;
+    background: rgba(252, 250, 247, 0.98) !important;
   }
 }
 

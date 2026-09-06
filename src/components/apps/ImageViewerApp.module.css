@@ -1,10 +1,12 @@
+/* ── Image Viewer — macOS Golden Gate (light, warm) ───────────────────── */
 .root {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #111214;
+  background: var(--panel-2);
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-family: var(--font-ui);
+  color: var(--text);
 }
 
 .toolbar {
@@ -14,14 +16,17 @@
   align-items: center;
   padding: 0 12px;
   gap: 8px;
-  background: rgba(255,255,255,0.04);
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(36px) saturate(1.6);
+  backdrop-filter: blur(36px) saturate(1.6);
+  border-bottom: 1px solid var(--line);
 }
 
 .filename {
   flex: 1;
   font-size: 12px;
-  color: rgba(255,255,255,0.6);
+  font-weight: 600;
+  color: var(--text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -38,11 +43,11 @@
   min-width: 32px;
   height: 26px;
   padding: 0 8px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 5px;
-  color: rgba(255,255,255,0.75);
-  font-size: 13px;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  color: var(--text);
+  font-size: 12px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -50,7 +55,7 @@
   font-family: inherit;
   transition: background 100ms;
 }
-.toolBtn:hover { background: rgba(255,255,255,0.12); }
+.toolBtn:hover { background: rgba(0, 0, 0, 0.08); }
 
 .downloadBtn {
   display: flex;
@@ -58,14 +63,14 @@
   justify-content: center;
   width: 30px;
   height: 26px;
-  background: rgba(74,158,215,0.15);
-  border: 1px solid rgba(74,158,215,0.3);
-  border-radius: 5px;
-  color: #4a9eff;
+  background: var(--accent-soft);
+  border: 1px solid rgba(0, 122, 255, 0.25);
+  border-radius: var(--radius-control);
+  color: var(--accent);
   margin-left: 4px;
   transition: background 100ms;
 }
-.downloadBtn:hover { background: rgba(74,158,215,0.28); }
+.downloadBtn:hover { background: rgba(0, 122, 255, 0.2); }
 
 .viewport {
   flex: 1;
@@ -74,17 +79,18 @@
   align-items: center;
   justify-content: center;
   background:
-    repeating-conic-gradient(rgba(255,255,255,0.04) 0% 25%, transparent 0% 50%) 0 0 / 20px 20px;
+    repeating-conic-gradient(rgba(0, 0, 0, 0.035) 0% 25%, transparent 0% 50%) 0 0 / 20px 20px,
+    var(--panel-2);
   position: relative;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.1) transparent;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
 }
 
 .img {
   display: block;
   user-select: none;
   border-radius: 2px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 24px rgba(60, 40, 10, 0.18);
 }
 
 .empty {
@@ -92,7 +98,7 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: rgba(255,255,255,0.3);
+  color: var(--muted);
   font-size: 14px;
 }
 
@@ -103,20 +109,20 @@
   align-items: center;
   gap: 0;
   padding: 0 12px;
-  background: rgba(255,255,255,0.03);
-  border-top: 1px solid rgba(255,255,255,0.06);
+  background: var(--glass);
+  border-top: 1px solid var(--line);
   font-size: 11px;
-  color: rgba(255,255,255,0.4);
+  color: var(--muted);
 }
 
 .sep {
   width: 1px;
   height: 10px;
-  background: rgba(255,255,255,0.15);
+  background: var(--line-strong);
   margin: 0 8px;
 }
 
 .hint {
   margin-left: auto;
-  opacity: 0.5;
+  color: var(--muted-2);
 }

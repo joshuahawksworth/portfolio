@@ -1,53 +1,56 @@
-/* ── Root ──────────────────────────────── */
+/* ── TextEditor — macOS Golden Gate (light, warm) ─────────────────────── */
 .root {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #272822;
-  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Menlo, Consolas, monospace;
+  background: var(--panel);
+  font-family: var(--font-ui);
   overflow: hidden;
-  color: #f8f8f2;
+  color: var(--text);
+  position: relative;
 }
 
-/* ── Tab bar (Sublime-style) ─────────── */
+/* ── Tab bar (light toolbar with pill tabs) ── */
 .tabBar {
   display: flex;
   align-items: center;
-  background: #21201d;
-  border-bottom: 1px solid #1a1918;
-  min-height: 34px;
-  padding: 0 4px;
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(36px) saturate(1.6);
+  backdrop-filter: blur(36px) saturate(1.6);
+  border-bottom: 1px solid var(--line);
+  min-height: 38px;
+  padding: 0 8px;
   flex-shrink: 0;
-  gap: 4px;
+  gap: 6px;
 }
 
 .tab {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
+  padding: 4px 12px;
   font-size: 12px;
-  color: #ccc;
-  background: #272822;
-  border-top: 1px solid #4c96d7;
-  border-left: 1px solid #1a1918;
-  border-right: 1px solid #1a1918;
-  border-radius: 2px 2px 0 0;
+  font-weight: 500;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
   white-space: nowrap;
-  max-width: 200px;
+  max-width: 220px;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 18px;
 }
 
 .tabDirty {
-  color: #e6db74;
+  color: var(--text-strong);
 }
 
 .tabDot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #a6e22e;
+  background: var(--accent);
   flex-shrink: 0;
 }
 
@@ -55,8 +58,7 @@
   margin-left: auto;
   margin-right: 10px;
   font-size: 11px;
-  color: #a6e22e;
-  opacity: 0.85;
+  color: #34c759;
 }
 
 /* ── Editor area ─────────────────────── */
@@ -64,24 +66,26 @@
   flex: 1;
   display: flex;
   overflow: hidden;
+  background: var(--panel);
 }
 
 /* ── Line numbers ─────────────────────── */
 .lineNumbers {
   width: 48px;
   flex-shrink: 0;
-  background: #272822;
-  border-right: 1px solid #3a3a35;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
   overflow: hidden;
   padding: 12px 0;
   user-select: none;
+  font-family: var(--font-mono);
 }
 
 .lineNum {
   height: 21px;
   line-height: 21px;
   font-size: 12px;
-  color: #565650;
+  color: var(--muted-2);
   text-align: right;
   padding-right: 10px;
   white-space: nowrap;
@@ -101,8 +105,8 @@
   inset: 0;
   margin: 0;
   padding: 12px 14px;
-  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Menlo, Consolas, monospace;
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: 13px;
   line-height: 21px;
   tab-size: 2;
   white-space: pre;
@@ -114,39 +118,39 @@
 
 /* Highlighted display layer */
 .highlight {
-  color: #f8f8f2;
+  color: var(--text);
   pointer-events: none;
   background: transparent;
   z-index: 1;
   overflow: hidden; /* only textarea scrolls */
 }
 
-/* Syntax token colours (Monokai-ish) */
-.highlight :global(.kw) { color: #f92672; } /* keywords */
-.highlight :global(.st) { color: #e6db74; } /* strings */
-.highlight :global(.cm) { color: #75715e; } /* comments */
-.highlight :global(.nm) { color: #ae81ff; } /* numbers */
-.highlight :global(.tp) { color: #66d9e8; } /* types */
+/* Syntax token colours (Xcode light-ish) */
+.highlight :global(.kw) { color: #ad3da4; } /* keywords */
+.highlight :global(.st) { color: #d12f1b; } /* strings */
+.highlight :global(.cm) { color: #7f8b95; } /* comments */
+.highlight :global(.nm) { color: #1c3fd8; } /* numbers */
+.highlight :global(.tp) { color: #0b6e8f; } /* types */
 
 /* Textarea (invisible text, transparent bg) */
 .textarea {
   background: transparent;
   color: transparent;
-  caret-color: #f8f8f2;
+  caret-color: var(--text);
   resize: none;
   z-index: 2;
   -webkit-text-fill-color: transparent;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
 }
 .textarea::selection {
-  background: rgba(73, 72, 62, 0.9);
+  background: rgba(0, 122, 255, 0.22);
   -webkit-text-fill-color: transparent;
 }
 .textarea::-webkit-scrollbar        { width: 8px; height: 8px; }
 .textarea::-webkit-scrollbar-track  { background: transparent; }
-.textarea::-webkit-scrollbar-thumb  { background: rgba(255,255,255,0.12); border-radius: 4px; }
-.textarea::placeholder { -webkit-text-fill-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.2); }
+.textarea::-webkit-scrollbar-thumb  { background: rgba(0, 0, 0, 0.15); border-radius: 4px; }
+.textarea::placeholder { -webkit-text-fill-color: var(--muted-2); color: var(--muted-2); }
 
 /* ── Status bar ──────────────────────── */
 .statusBar {
@@ -154,35 +158,36 @@
   align-items: center;
   gap: 0;
   height: 24px;
-  background: #4c96d7;
+  background: var(--glass);
+  border-top: 1px solid var(--line);
   padding: 0 10px;
   flex-shrink: 0;
   font-size: 11px;
-  color: rgba(255,255,255,0.88);
+  color: var(--muted);
   user-select: none;
 }
 
 .statusLang {
   font-weight: 600;
   letter-spacing: 0.04em;
+  color: var(--text);
 }
 
 .statusSep {
   width: 1px;
   height: 12px;
-  background: rgba(255,255,255,0.3);
+  background: var(--line-strong);
   margin: 0 8px;
 }
 
 .statusRO {
   font-style: italic;
-  opacity: 0.75;
 }
 
 .statusFill { flex: 1; }
 
 .statusHint {
-  opacity: 0.65;
+  color: var(--muted-2);
 }
 
 /* ── Saved flash ── */
@@ -190,7 +195,7 @@
   margin-left: auto;
   margin-right: 4px;
   font-size: 11px;
-  color: #a6e22e;
+  color: #34c759;
   font-family: inherit;
   animation: savedPop 1.4s ease forwards;
 }
@@ -201,38 +206,38 @@
   100% { opacity: 0; }
 }
 
-/* ── Tab bar save button ── */
+/* ── Tab bar save button (default light button) ── */
 .saveTabBtn {
   display: flex;
   align-items: center;
   gap: 5px;
   margin-left: auto;
-  margin-right: 8px;
-  padding: 3px 10px;
-  background: rgba(76, 150, 215, 0.18);
-  border: 1px solid rgba(76, 150, 215, 0.35);
-  border-radius: 5px;
-  color: #4c96d7;
-  font-size: 11px;
+  margin-right: 2px;
+  padding: 4px 11px;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  color: var(--text);
+  font-size: 12px;
   font-family: inherit;
   cursor: pointer;
   transition: background 120ms, border-color 120ms;
   white-space: nowrap;
 }
 .saveTabBtn:hover {
-  background: rgba(76, 150, 215, 0.3);
-  border-color: rgba(76, 150, 215, 0.6);
+  background: rgba(0, 0, 0, 0.08);
 }
 
 /* ── Save sheet overlay ── */
 .sheetOverlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(60, 40, 10, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 100;
+  -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
   animation: sheetFadeIn 120ms ease;
 }
@@ -242,14 +247,17 @@
 }
 
 .sheet {
-  background: #1e1d1a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: blur(30px) saturate(1.6);
+  backdrop-filter: blur(30px) saturate(1.6);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-window);
   padding: 24px;
   width: 340px;
   max-width: calc(100% - 40px);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 12px 40px rgba(60, 40, 10, 0.22), 0 0 0 1px rgba(58, 39, 9, 0.12);
   animation: sheetSlideIn 160ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  color: var(--text);
 }
 @keyframes sheetSlideIn {
   from { transform: scale(0.92) translateY(-12px); opacity: 0; }
@@ -267,25 +275,25 @@
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: rgba(76, 150, 215, 0.18);
-  border: 1px solid rgba(76, 150, 215, 0.3);
+  background: var(--accent-soft);
+  border: 1px solid rgba(0, 122, 255, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #4c96d7;
+  color: var(--accent);
   flex-shrink: 0;
 }
 
 .sheetTitle {
   font-size: 14px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.92);
+  color: var(--text-strong);
   margin-bottom: 3px;
 }
 
 .sheetSubtitle {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--muted);
   line-height: 1.4;
 }
 
@@ -297,29 +305,27 @@
   display: block;
   font-size: 11px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.45);
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
+  color: var(--muted);
   margin-bottom: 6px;
 }
 
 .sheetInput {
   width: 100%;
   box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 7px;
-  padding: 8px 11px;
-  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  padding: 7px 11px;
+  color: var(--text);
   font-size: 13px;
-  font-family: 'SF Mono', 'Fira Code', Menlo, monospace;
+  font-family: var(--font-mono);
   outline: none;
   transition: border-color 120ms, box-shadow 120ms;
   margin-bottom: 8px;
 }
 .sheetInput:focus {
-  border-color: rgba(76, 150, 215, 0.6);
-  box-shadow: 0 0 0 3px rgba(76, 150, 215, 0.15);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .sheetMeta {
@@ -331,27 +337,28 @@
 .sheetMetaPill {
   display: inline-block;
   padding: 2px 8px;
-  background: rgba(166, 226, 46, 0.12);
-  border: 1px solid rgba(166, 226, 46, 0.25);
+  background: rgba(52, 199, 89, 0.12);
+  border: 1px solid rgba(52, 199, 89, 0.3);
   border-radius: 20px;
   font-size: 10px;
-  color: #a6e22e;
+  color: #1f8f3f;
   font-weight: 600;
   letter-spacing: 0.04em;
 }
 
 .sheetMetaSize {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--muted);
 }
 
 .sheetHint {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--muted);
   line-height: 1.5;
   padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 6px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
   margin-bottom: 18px;
 }
 
@@ -362,35 +369,35 @@
 }
 
 .sheetCancel {
-  padding: 7px 16px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 7px;
-  color: rgba(255, 255, 255, 0.7);
+  padding: 6px 14px;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  color: var(--text);
   font-size: 13px;
-  font-family: inherit;
+  font-family: var(--font-ui);
   cursor: pointer;
   transition: background 120ms;
 }
-.sheetCancel:hover { background: rgba(255, 255, 255, 0.12); }
+.sheetCancel:hover { background: rgba(0, 0, 0, 0.08); }
 
 .sheetSave {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 18px;
-  background: #4c96d7;
+  padding: 6px 16px;
+  background: var(--accent);
   border: none;
-  border-radius: 7px;
-  color: white;
+  border-radius: var(--radius-control);
+  color: #fff;
   font-size: 13px;
   font-weight: 600;
-  font-family: inherit;
+  font-family: var(--font-ui);
   cursor: pointer;
   transition: background 120ms, opacity 120ms;
 }
-.sheetSave:hover { background: #5aa8e8; }
-.sheetSave:disabled { opacity: 0.55; cursor: default; }
+.sheetSave:hover { background: #0062cc; }
+.sheetSave:disabled { opacity: 0.5; cursor: default; }
 
 /* ── Success state ── */
 .sheetSuccess {
@@ -413,19 +420,19 @@
 .sheetSuccessTitle {
   font-size: 16px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text-strong);
 }
 
 .sheetSuccessName {
   font-size: 12px;
-  color: #a6e22e;
-  font-family: 'SF Mono', Menlo, monospace;
-  background: rgba(166, 226, 46, 0.1);
+  color: #1f8f3f;
+  font-family: var(--font-mono);
+  background: rgba(52, 199, 89, 0.12);
   padding: 3px 10px;
-  border-radius: 4px;
+  border-radius: 5px;
 }
 
 .sheetSuccessHint {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--muted);
 }

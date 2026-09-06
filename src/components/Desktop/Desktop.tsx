@@ -6,6 +6,19 @@ import {
   DesktopFolderItem,
 } from '../../context/DesktopContext';
 import MenuBar from '../MenuBar/MenuBar';
+import SystemPanels from '../SystemUI/SystemPanels';
+import { SystemUIProvider } from '../../context/SystemUIContext';
+import DesktopWidgets from './DesktopWidgets';
+import {
+  DARK_WALLPAPERS,
+  WALLPAPERS,
+  WALLPAPER_KEYS,
+  WALLPAPER_LABELS,
+  loadWallpaper,
+  preloadWallpapers,
+  saveWallpaper,
+  type WallpaperKey,
+} from '../../data/wallpapers';
 import Dock from '../Dock/Dock';
 import Window from '../Window/Window';
 import SnakeApp from '../apps/SnakeApp';
@@ -494,58 +507,11 @@ interface CtxMenu {
   targetId?: string;
 }
 
-// ── Wallpapers ─────────────────────────────────────────────────────────────
-const WALLPAPERS = {
-  space: [
-    'radial-gradient(ellipse at 18% 25%, rgba(59,100,220,0.22) 0%, transparent 48%)',
-    'radial-gradient(ellipse at 80% 70%, rgba(120,60,200,0.15) 0%, transparent 45%)',
-    'radial-gradient(ellipse at 55% 5%, rgba(30,60,140,0.25) 0%, transparent 40%)',
-    'radial-gradient(ellipse at 50% 100%, rgba(15,35,80,0.6) 0%, transparent 50%)',
-    'linear-gradient(175deg, #06090f 0%, #08101e 20%, #0d1628 45%, #101c32 65%, #0c1520 80%, #06090f 100%)',
-  ].join(', '),
-  sunset: [
-    'radial-gradient(ellipse at 30% 60%, rgba(220,80,20,0.45) 0%, transparent 55%)',
-    'radial-gradient(ellipse at 70% 30%, rgba(180,40,100,0.35) 0%, transparent 50%)',
-    'linear-gradient(175deg, #0a0408 0%, #1e0810 30%, #32100a 60%, #160a08 100%)',
-  ].join(', '),
-  ocean: [
-    'radial-gradient(ellipse at 20% 40%, rgba(0,100,200,0.35) 0%, transparent 55%)',
-    'radial-gradient(ellipse at 80% 20%, rgba(0,180,220,0.25) 0%, transparent 50%)',
-    'linear-gradient(175deg, #020b12 0%, #061520 30%, #082030 60%, #040d18 100%)',
-  ].join(', '),
-  aurora: [
-    'radial-gradient(ellipse at 40% 30%, rgba(0,200,100,0.28) 0%, transparent 50%)',
-    'radial-gradient(ellipse at 70% 60%, rgba(100,0,200,0.22) 0%, transparent 45%)',
-    'radial-gradient(ellipse at 20% 70%, rgba(0,150,180,0.22) 0%, transparent 50%)',
-    'linear-gradient(175deg, #020812 0%, #050f18 30%, #040c14 60%, #030810 100%)',
-  ].join(', '),
-  midnight: [
-    'radial-gradient(ellipse at 50% 50%, rgba(60,0,120,0.35) 0%, transparent 65%)',
-    'linear-gradient(175deg, #050008 0%, #0a0015 50%, #050008 100%)',
-  ].join(', '),
-} as const;
-type WallpaperKey = keyof typeof WALLPAPERS;
-
-const WALLPAPER_LABELS: Record<WallpaperKey, string> = {
-  space: 'Space',
-  sunset: 'Sunset',
-  ocean: 'Ocean',
-  aurora: 'Aurora',
-  midnight: 'Midnight',
-};
-const WALLPAPER_SWATCH: Record<WallpaperKey, string> = {
-  space: '#0d1628',
-  sunset: '#32100a',
-  ocean: '#082030',
-  aurora: '#040c14',
-  midnight: '#0a0015',
-};
-
 // ── Constants ──────────────────────────────────────────────────────────────
 const ICON_W = 76;
 const ICON_H = 84;
 const ICON_GAP = 8;
-const BOUNCE_MS = 1850; // matches 1800ms animation + 50ms buffer
+const BOUNCE_MS = 700; // short decorative bounce; windows open immediately
 
 const DESKTOP_TRASH_BLOCKLIST = new Set(['shortcut-trash', 'shortcut-mycomputer', 'trickster']);
 
@@ -560,9 +526,18 @@ function canTrashDesktopItem(item: DesktopItem): boolean {
 // Returns the first grid cell not already occupied by any icon in `taken`.
 // `taken` is a snapshot of current iconPos — mutate a local copy to reserve
 // cells for multiple items being placed in the same batch.
+// Icons are laid out macOS-style: the first column hugs the right edge, then
+// columns grow leftwards.
+const GRID_START_Y = 54;
+const GRID_RIGHT_PAD = 20;
+function gridColX(col: number): number {
+  const colW = ICON_W + ICON_GAP + 4;
+  return window.innerWidth - GRID_RIGHT_PAD - ICON_W - col * colW;
+}
+
 function findEmptyGridCell(taken: Record<string, IconPos>): IconPos {
-  const startX = 20;
-  const startY = 54;
+  const startX = GRID_RIGHT_PAD;
+  const startY = GRID_START_Y;
   const colW = ICON_W + ICON_GAP + 4;
   const rowH = ICON_H + ICON_GAP;
   const maxRows = Math.max(1, Math.floor((window.innerHeight - startY - 80) / rowH));
@@ -572,7 +547,7 @@ function findEmptyGridCell(taken: Record<string, IconPos>): IconPos {
 
   for (let col = 0; col < maxCols; col++) {
     for (let row = 0; row < maxRows; row++) {
-      const gx = startX + col * colW;
+      const gx = gridColX(col);
       const gy = startY + row * rowH;
       const hit = occupied.some(
         (p) => Math.abs(p.x - gx) < ICON_W * 0.7 && Math.abs(p.y - gy) < ICON_H * 0.7
@@ -583,7 +558,7 @@ function findEmptyGridCell(taken: Record<string, IconPos>): IconPos {
   // All cells full — overflow below the grid
   const n = Object.keys(taken).length;
   return {
-    x: startX,
+    x: gridColX(0),
     y: startY + (n % maxRows) * rowH + maxRows * rowH,
   };
 }
@@ -591,7 +566,7 @@ function findEmptyGridCell(taken: Record<string, IconPos>): IconPos {
 // ── Helpers ────────────────────────────────────────────────────────────────
 // Desktop-level app shortcuts
 const APP_SHORTCUTS: DesktopItem[] = [
-  { id: 'shortcut-mycomputer', type: 'app', label: 'My Computer', appId: 'finder' },
+  { id: 'shortcut-mycomputer', type: 'app', label: 'Macintosh HD', appId: 'finder' },
   { id: 'shortcut-trash', type: 'app', label: 'Trash', appId: 'trash' },
   { id: 'shortcut-doom', type: 'app', label: 'DOOM', appId: 'doom' },
   { id: 'shortcut-snake', type: 'app', label: 'Snake', appId: 'snake' },
@@ -607,14 +582,12 @@ function makeDefaultItems(): DesktopItem[] {
 
 // All icons stack down the LEFT side in up-to-2 columns
 function initPositions(items: DesktopItem[]): Record<string, IconPos> {
-  const startX = 20;
-  const startY = 54;
-  const colW = ICON_W + ICON_GAP + 4;
+  const startY = GRID_START_Y;
   const maxRows = Math.max(1, Math.floor((window.innerHeight - startY - 80) / (ICON_H + ICON_GAP)));
   const result: Record<string, IconPos> = {};
   items.forEach((item, i) => {
     result[item.id] = {
-      x: startX + Math.floor(i / maxRows) * colW,
+      x: gridColX(Math.floor(i / maxRows)),
       y: startY + (i % maxRows) * (ICON_H + ICON_GAP),
     };
   });
@@ -625,14 +598,12 @@ function computeCleanPositions(items: DesktopItem[], sortByName: boolean): Recor
   const sorted = sortByName
     ? [...items].sort((a, b) => a.label.localeCompare(b.label))
     : [...items];
-  const startX = 20;
-  const startY = 54;
-  const colW = ICON_W + ICON_GAP + 4;
+  const startY = GRID_START_Y;
   const maxRows = Math.max(1, Math.floor((window.innerHeight - startY - 80) / (ICON_H + ICON_GAP)));
   const result: Record<string, IconPos> = {};
   sorted.forEach((item, i) => {
     result[item.id] = {
-      x: startX + Math.floor(i / maxRows) * colW,
+      x: gridColX(Math.floor(i / maxRows)),
       y: startY + (i % maxRows) * (ICON_H + ICON_GAP),
     };
   });
@@ -747,84 +718,105 @@ function TricksterFolderIcon() {
 }
 
 function MyComputerIcon() {
+  // Macintosh HD — a light grey drive with a soft top light, like macOS Golden Gate
   return (
-    <svg viewBox="0 0 52 48" fill="none" width="48" height="48">
-      {/* Monitor outer bezel */}
-      <rect
-        x="3"
-        y="3"
-        width="46"
-        height="31"
-        rx="4"
-        fill="#4a7ab5"
-        stroke="rgba(255,255,255,0.3)"
-        strokeWidth="1"
-      />
-      {/* Monitor highlight */}
-      <rect x="3" y="3" width="46" height="10" rx="4" fill="rgba(255,255,255,0.12)" />
-      {/* Screen */}
-      <rect x="7" y="7" width="38" height="23" rx="2" fill="#0d2340" />
-      {/* Screen glow */}
-      <rect x="8" y="8" width="36" height="10" rx="1" fill="rgba(80,160,255,0.15)" />
-      {/* Desktop icons on screen */}
-      <rect x="10" y="11" width="7" height="6" rx="1" fill="#2060c0" opacity="0.9" />
-      <rect x="11" y="19" width="5" height="1" rx="0.5" fill="rgba(255,255,255,0.5)" />
-      <rect x="20" y="11" width="7" height="6" rx="1" fill="#1e8040" opacity="0.9" />
-      <rect x="21" y="19" width="5" height="1" rx="0.5" fill="rgba(255,255,255,0.5)" />
-      <rect x="30" y="11" width="7" height="6" rx="1" fill="#802020" opacity="0.9" />
-      <rect x="31" y="19" width="5" height="1" rx="0.5" fill="rgba(255,255,255,0.5)" />
-      {/* Taskbar at bottom of screen */}
-      <rect x="8" y="24" width="36" height="5" rx="0.5" fill="#1a3a6a" />
-      <rect x="9" y="25" width="10" height="3" rx="1" fill="#2860a0" />
-      {/* Stand */}
-      <rect x="22" y="34" width="8" height="5" rx="1" fill="#3a6090" />
-      <rect
-        x="15"
-        y="39"
-        width="22"
-        height="4"
-        rx="2"
-        fill="#3a6090"
-        stroke="rgba(255,255,255,0.15)"
-        strokeWidth="0.5"
-      />
+    <svg viewBox="0 0 52 52" fill="none" width="50" height="50">
+      <defs>
+        <linearGradient id="hdBody" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#e9e6e1" />
+          <stop offset="1" stopColor="#b9b4ad" />
+        </linearGradient>
+        <linearGradient id="hdFace" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#f7f5f1" />
+          <stop offset="1" stopColor="#d7d2ca" />
+        </linearGradient>
+      </defs>
+      <rect x="4" y="9" width="44" height="34" rx="9" fill="url(#hdBody)" />
+      <rect x="4.5" y="9.5" width="43" height="33" rx="8.5" stroke="rgba(255,255,255,0.7)" />
+      <rect x="9" y="14" width="34" height="18" rx="5" fill="url(#hdFace)" />
+      <rect x="9.5" y="14.5" width="33" height="17" rx="4.5" stroke="rgba(0,0,0,0.06)" />
+      <rect x="13" y="35" width="26" height="3" rx="1.5" fill="rgba(0,0,0,0.12)" />
+      <circle cx="40" cy="36.5" r="1.6" fill="#34c759" />
+      <path d="M14 19h24" stroke="rgba(0,0,0,0.08)" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M14 23h16" stroke="rgba(0,0,0,0.06)" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   );
 }
 
 function DesktopTrashIcon({ full, glow }: { full: boolean; glow?: boolean }) {
-  const stroke = glow ? '#ff6b6b' : 'rgba(255,255,255,0.85)';
+  // Frosted grey bin — translucent body so the wallpaper shows through slightly
   return (
     <svg
-      viewBox="0 0 48 54"
+      viewBox="0 0 52 56"
       fill="none"
-      width="44"
-      height="44"
+      width="46"
+      height="50"
       style={
         glow
           ? {
               filter:
-                'drop-shadow(0 0 8px rgba(255,80,80,0.9)) drop-shadow(0 0 16px rgba(255,40,40,0.6))',
+                'drop-shadow(0 0 8px rgba(0,122,255,0.7)) drop-shadow(0 0 16px rgba(0,122,255,0.4))',
             }
-          : undefined
+          : { filter: 'drop-shadow(0 4px 8px rgba(70,40,10,0.22))' }
       }
     >
-      <path
-        d="M8 14H40M24 8H28M10 14L13 46H35L38 14Z"
-        stroke={stroke}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
+      <defs>
+        <linearGradient id="binBody" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#f4f2ee" stopOpacity="0.92" />
+          <stop offset="0.5" stopColor="#d9d5ce" stopOpacity="0.9" />
+          <stop offset="1" stopColor="#c8c3bb" stopOpacity="0.92" />
+        </linearGradient>
+        <linearGradient id="binLid" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fbfaf8" />
+          <stop offset="1" stopColor="#d2cdc5" />
+        </linearGradient>
+      </defs>
       {full && (
-        <path
-          d="M19 20V40M24 20V40M29 20V40"
-          stroke={glow ? 'rgba(255,150,150,0.7)' : 'rgba(255,255,255,0.55)'}
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
+        <g>
+          <rect
+            x="17"
+            y="7"
+            width="6"
+            height="10"
+            rx="1.5"
+            fill="#f2c96b"
+            transform="rotate(-12 20 12)"
+          />
+          <rect x="25" y="5" width="6" height="12" rx="1.5" fill="#fff" stroke="rgba(0,0,0,0.12)" />
+          <rect
+            x="31"
+            y="8"
+            width="6"
+            height="9"
+            rx="1.5"
+            fill="#9fd0ff"
+            transform="rotate(10 34 12)"
+          />
+        </g>
       )}
+      <path d="M11 17h30l-3.2 30.5a3 3 0 0 1-3 2.5H17.2a3 3 0 0 1-3-2.5Z" fill="url(#binBody)" />
+      <path
+        d="M11.5 17.5h29l-3.1 29.9a2.5 2.5 0 0 1-2.5 2.1H17.1a2.5 2.5 0 0 1-2.5-2.1Z"
+        stroke="rgba(0,0,0,0.12)"
+      />
+      <path
+        d="M18 22l1.5 24M26 22v24M34 22l-1.5 24"
+        stroke="rgba(0,0,0,0.1)"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      <path d="M17 18c0-1 1-2 2-2h14c1 0 2 1 2 2" fill="none" />
+      <rect x="9" y="14" width="34" height="4.5" rx="2.25" fill="url(#binLid)" />
+      <rect x="9.5" y="14.5" width="33" height="3.5" rx="1.75" stroke="rgba(0,0,0,0.12)" />
+      <rect
+        x="22"
+        y="11"
+        width="8"
+        height="3.5"
+        rx="1.75"
+        fill="#e2ddd5"
+        stroke="rgba(0,0,0,0.12)"
+      />
     </svg>
   );
 }
@@ -1078,11 +1070,11 @@ function WallpaperPicker({
       <div className={styles.wallpaperPicker} onClick={(e) => e.stopPropagation()}>
         <div className={styles.wallpaperTitle}>Change Background</div>
         <div className={styles.wallpaperSwatches}>
-          {(Object.keys(WALLPAPERS) as WallpaperKey[]).map((key) => (
+          {WALLPAPER_KEYS.map((key) => (
             <button
               key={key}
               className={`${styles.wallpaperSwatch} ${current === key ? styles.wallpaperActive : ''}`}
-              style={{ background: WALLPAPER_SWATCH[key] }}
+              style={{ backgroundImage: `url(${WALLPAPERS[key]})` }}
               onClick={() => {
                 onChange(key);
                 onClose();
@@ -1130,7 +1122,12 @@ function DesktopSurface() {
   const [renameVal, setRenameVal] = useState('');
   const [getInfoTarget, setGetInfoTarget] = useState<'desktop' | DesktopItem | null>(null);
   const [showWallpaper, setShowWallpaper] = useState(false);
-  const [wallpaper, setWallpaper] = useState<WallpaperKey>('space');
+  const [wallpaper, setWallpaperState] = useState<WallpaperKey>(loadWallpaper);
+  useEffect(preloadWallpapers, []);
+  const setWallpaper = useCallback((k: WallpaperKey) => {
+    setWallpaperState(k);
+    saveWallpaper(k);
+  }, []);
   const [cleaning, setCleaning] = useState(false);
   const [bouncingKeys, setBouncingKeys] = useState<Set<string>>(new Set());
   const [nearTrashTarget, setNearTrashTarget] = useState<'dock' | 'desktop' | null>(null);
@@ -1313,6 +1310,7 @@ function DesktopSurface() {
       openApp(appId, props);
       return;
     }
+    openApp(appId, props);
     setBouncingKeys((prev) => new Set([...prev, dockKey]));
     setTimeout(() => {
       setBouncingKeys((prev) => {
@@ -1320,7 +1318,6 @@ function DesktopSurface() {
         n.delete(dockKey);
         return n;
       });
-      openApp(appId, props);
     }, BOUNCE_MS);
   }
 
@@ -1597,6 +1594,7 @@ function DesktopSurface() {
       action();
       return;
     }
+    action();
     setBouncingKeys((prev) => new Set([...prev, key]));
     setTimeout(() => {
       setBouncingKeys((prev) => {
@@ -1604,7 +1602,6 @@ function DesktopSurface() {
         n.delete(key);
         return n;
       });
-      action();
     }, BOUNCE_MS);
   }
 
@@ -1615,8 +1612,7 @@ function DesktopSurface() {
 
   return (
     <div
-      className={styles.desktop}
-      style={{ background: WALLPAPERS[wallpaper] }}
+      className={`${styles.desktop} ${DARK_WALLPAPERS.has(wallpaper) ? styles.desktopDark : ''}`}
       onMouseDown={onDesktopMouseDown}
       onContextMenu={onDesktopCtx}
       onClick={() => {
@@ -1626,6 +1622,16 @@ function DesktopSurface() {
       onDragOver={onDesktopDragOver}
       onDrop={onDesktopDrop}
     >
+      {/* Every wallpaper stays mounted so switching is instant */}
+      {WALLPAPER_KEYS.map((key) => (
+        <div
+          key={key}
+          className={`${styles.wallpaper} ${key === wallpaper ? styles.wallpaperActive : ''}`}
+          style={{ backgroundImage: `url(${WALLPAPERS[key]})` }}
+          aria-hidden
+        />
+      ))}
+      <DesktopWidgets />
       <MenuBar />
 
       {/* Rubber-band rect */}
@@ -1642,7 +1648,7 @@ function DesktopSurface() {
 
       {/* Desktop icons */}
       {items.map((item, i) => {
-        const pos = iconPos[item.id] ?? { x: window.innerWidth - 96, y: 54 + i * 92 };
+        const pos = iconPos[item.id] ?? { x: gridColX(0), y: GRID_START_Y + i * 92 };
         const selected = selectedIcons.has(item.id);
         const renaming = renamingId === item.id;
         const job = item.jobId ? jobsData.find((j) => j.id === item.jobId) : null;
@@ -1674,8 +1680,8 @@ function DesktopSurface() {
             onMouseEnter={() => {
               if (item.id !== 'trickster') return;
               // Compute every valid grid cell, exclude occupied ones, pick randomly
-              const startX = 20;
-              const startY = 54;
+              const startX = GRID_RIGHT_PAD;
+              const startY = GRID_START_Y;
               const colW = ICON_W + ICON_GAP + 4;
               const rowH = ICON_H + ICON_GAP;
               const maxRows = Math.max(1, Math.floor((window.innerHeight - startY - 80) / rowH));
@@ -1689,7 +1695,7 @@ function DesktopSurface() {
               const empty: IconPos[] = [];
               for (let col = 0; col < maxCols; col++) {
                 for (let row = 0; row < maxRows; row++) {
-                  const gx = startX + col * colW;
+                  const gx = gridColX(col);
                   const gy = startY + row * rowH;
                   // Skip if another icon is already close to this grid cell
                   const taken = occupied.some(
@@ -1853,6 +1859,8 @@ function DesktopSurface() {
         trashHighlighted={nearTrashTarget === 'dock'}
       />
 
+      <SystemPanels />
+
       {/* Context menu */}
       {ctxMenu && (
         <div
@@ -1975,7 +1983,9 @@ function DesktopSurface() {
 export default function Desktop() {
   return (
     <DesktopProvider>
-      <DesktopSurface />
+      <SystemUIProvider>
+        <DesktopSurface />
+      </SystemUIProvider>
     </DesktopProvider>
   );
 }
