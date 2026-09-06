@@ -1,235 +1,257 @@
+/* ── Apple Calculator ─────────────────────────────────────────────────── */
 .root {
+  --calc-bg: #000;
+  --key-digit: #333333;
+  --key-digit-press: #737373;
+  --key-fn: #a5a5a5;
+  --key-fn-press: #d9d9d9;
+  --key-op: #ff9f0a;
+  --key-op-press: #fcc78d;
+  --key-text: #fff;
+
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: var(--panel);
-  color: var(--text-strong);
+  background: var(--calc-bg);
+  color: #fff;
   font-family: var(--font-display);
   user-select: none;
+  -webkit-user-select: none;
   min-height: 0;
 }
 
+/* ── Display ── */
 .display {
   flex: 1;
-  min-height: 64px;
+  min-height: 84px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   justify-content: flex-end;
-  padding: 12px 18px 8px;
+  padding: 10px 22px 6px;
   overflow: hidden;
-  position: relative;
-  background: var(--panel);
+}
+
+.expression {
+  font-size: 1.15rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  font-variant-numeric: tabular-nums;
 }
 
 .displayValue {
-  font-size: clamp(1.75rem, 7vw, 3.25rem);
+  font-size: 3.1rem;
   font-weight: 300;
-  letter-spacing: -0.01em;
-  line-height: 1;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--text-strong);
+  color: #fff;
   font-variant-numeric: tabular-nums;
 }
-
-.modeBadge {
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #ff9f0a;
-  margin-top: 4px;
+.valueM {
+  font-size: 2.5rem;
+}
+.valueS {
+  font-size: 2rem;
+}
+.valueXS {
+  font-size: 1.5rem;
 }
 
-.scientificPad {
-  display: none;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  background: var(--panel);
-  padding: 8px 8px 0;
+/* ── Keys ── */
+.keys {
+  display: flex;
+  gap: 8px;
+  padding: 8px 10px 10px;
   flex-shrink: 0;
 }
 
-.root[data-scientific='true'] .scientificPad {
+.pad {
+  flex: 1;
   display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
 }
 
-.scientificPad button,
-.pad button {
+.scientificPad {
+  flex: 1.25;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.pad button,
+.scientificPad button {
   border: none;
   margin: 0;
   padding: 0;
   min-height: 44px;
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   font-weight: 400;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: background 0.08s ease, filter 0.08s ease;
+  cursor: default;
+  border-radius: 10px;
   font-family: inherit;
-  color: var(--text-strong);
-}
-
-.root[data-scientific='true'] .scientificPad button {
-  min-height: 40px;
-}
-
-.scientificPad button.small {
-  font-size: 0.95rem;
-  font-weight: 500;
-}
-
-.scientificPad button:active,
-.pad button:active {
-  filter: brightness(0.92);
-}
-
-.sciFn {
-  background: rgba(0, 0, 0, 0.1);
-  color: var(--text-strong);
-}
-
-.sciFn:hover {
-  background: rgba(0, 0, 0, 0.14);
-}
-
-.pad {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  background: var(--panel);
-  padding: 8px;
-  flex-shrink: 0;
-}
-
-.root[data-scientific='true'] .pad button {
-  min-height: 48px;
-}
-
-.fn {
-  background: rgba(0, 0, 0, 0.1);
-  color: var(--text-strong);
-}
-
-.fn:hover {
-  background: rgba(0, 0, 0, 0.14);
+  color: var(--key-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 90ms ease,
+    color 90ms ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .digit {
-  background: rgba(0, 0, 0, 0.06);
-  color: var(--text-strong);
+  background: var(--key-digit);
+}
+.digit:active {
+  background: var(--key-digit-press);
 }
 
-.digit:hover {
-  background: rgba(0, 0, 0, 0.09);
+.sci {
+  background: var(--key-digit);
+  font-size: 1rem;
+  font-weight: 500;
+}
+.sci:active {
+  background: var(--key-digit-press);
 }
 
-.zero {
-  grid-column: span 2;
+.fn {
+  background: var(--key-fn);
+  color: #000;
+  font-weight: 500;
+}
+.fn:active {
+  background: var(--key-fn-press);
 }
 
 .op {
-  background: #ff9f0a;
+  background: var(--key-op);
   color: #fff;
-  font-size: 1.5rem;
-  font-weight: 500;
+  font-size: 1.7rem;
+  font-weight: 400;
+}
+.op:active {
+  background: var(--key-op-press);
 }
 
-.op:hover {
-  background: #ffb340;
-}
-
+/* The pending operator inverts, like the real app */
 .opActive {
   background: #fff;
-  color: #ff9f0a;
-  box-shadow: inset 0 0 0 1.5px #ff9f0a;
+  color: var(--key-op);
+}
+.opActive:active {
+  background: #fff;
 }
 
-.opActive:hover {
-  background: #fff7ea;
-  color: #ff9f0a;
+.plusMinus {
+  display: inline-flex;
+  align-items: baseline;
+  font-size: 0.95em;
+  line-height: 1;
+}
+.plusMinus sup,
+.plusMinus sub {
+  font-size: 0.72em;
+  line-height: 0;
+}
+.plusMinus sup {
+  vertical-align: 0.45em;
+}
+.plusMinus sub {
+  vertical-align: -0.25em;
 }
 
-.eq {
-  background: #ff9f0a;
+/* ── Mac: dark rounded window, gentle keys ── */
+.root[data-mobile='false'] {
+  --calc-bg: #1c1c1e;
+  --key-digit: #3a3a3c;
+  --key-digit-press: #636366;
+  --key-fn: #545456;
+  --key-fn-press: #8e8e93;
+}
+.root[data-mobile='false'] .fn {
   color: #fff;
-  font-size: 1.5rem;
-  font-weight: 500;
+}
+.root[data-mobile='false'] .display {
+  padding: 14px 18px 8px;
+}
+.root[data-mobile='false'] .pad button,
+.root[data-mobile='false'] .scientificPad button {
+  min-height: 46px;
+  border-radius: 9px;
 }
 
-.eq:hover {
-  background: #ffb340;
-}
-
-/* ── Mobile: iOS Calculator layout ─────────────────────────────────────── */
+/* ── iPhone: round keys, big thin result ── */
 .root[data-mobile='true'] {
   justify-content: flex-end;
 }
 
 .root[data-mobile='true'] .display {
-  flex: 0 0 auto;
-  height: 108px;
-  max-height: 22vh;
-  min-height: 80px;
-  padding: 0 20px 18px;
-  justify-content: flex-end;
+  flex: 1 1 auto;
+  min-height: 140px;
+  padding: 0 24px 14px;
+}
+
+.root[data-mobile='true'] .expression {
+  font-size: clamp(1.25rem, 5.5vw, 1.75rem);
+  margin-bottom: 4px;
 }
 
 .root[data-mobile='true'] .displayValue {
-  font-size: clamp(3rem, 16vw, 4.25rem);
-  font-weight: 200;
+  font-size: clamp(3.5rem, 19vw, 5.6rem);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+}
+.root[data-mobile='true'] .valueM {
+  font-size: clamp(3rem, 15vw, 4.5rem);
+}
+.root[data-mobile='true'] .valueS {
+  font-size: clamp(2.4rem, 11.5vw, 3.5rem);
+}
+.root[data-mobile='true'] .valueXS {
+  font-size: clamp(1.8rem, 8.5vw, 2.6rem);
 }
 
-.root[data-mobile='true'] .scientificPad {
-  display: none !important;
+.root[data-mobile='true'] .keys {
+  padding: 8px 14px calc(14px + env(safe-area-inset-bottom, 0px));
 }
 
 .root[data-mobile='true'] .pad {
-  flex: 1 1 auto;
-  min-height: 0;
-  max-height: min(72vh, 520px);
-  gap: clamp(10px, 2.8vw, 14px);
-  padding: 8px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  gap: clamp(10px, 3vw, 14px);
   grid-template-rows: repeat(5, minmax(0, 1fr));
-  align-content: stretch;
+  max-height: min(70vh, 540px);
+  align-content: end;
 }
 
 .root[data-mobile='true'] .pad button {
   width: 100%;
-  max-width: 84px;
+  max-width: 88px;
   justify-self: center;
   aspect-ratio: 1;
   min-height: 0;
   height: auto;
   border-radius: 50%;
-  font-size: clamp(1.5rem, 6.5vw, 2rem);
+  font-size: clamp(1.7rem, 8vw, 2.4rem);
   font-weight: 400;
 }
 
 .root[data-mobile='true'] .fn {
-  background: rgba(0, 0, 0, 0.1);
-  color: var(--text-strong);
-  font-size: clamp(1.35rem, 5.5vw, 1.75rem);
+  font-size: clamp(1.4rem, 6.5vw, 2rem);
   font-weight: 500;
 }
 
-.root[data-mobile='true'] .digit {
-  background: rgba(0, 0, 0, 0.06);
-}
-
-.root[data-mobile='true'] .op,
-.root[data-mobile='true'] .eq {
-  font-size: clamp(1.75rem, 7vw, 2.25rem);
-  font-weight: 500;
-}
-
-.root[data-mobile='true'] .zero {
-  grid-column: span 2;
-  max-width: none;
-  width: 100%;
-  aspect-ratio: auto;
-  border-radius: 999px;
-  justify-self: stretch;
+.root[data-mobile='true'] .op {
+  font-size: clamp(2rem, 9vw, 2.8rem);
 }

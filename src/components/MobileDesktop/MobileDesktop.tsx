@@ -499,6 +499,9 @@ const BASE_ITEMS = [
 
 const DOCK_APPS = ['about', 'experience', 'contact', 'github'];
 
+/** Apps with a dark canvas get a dark sheet header so the bar doesn't glare. */
+const DARK_APPS = new Set(['calculator', 'terminal']);
+
 type Page = Array<string | null>;
 
 /** Lay the icons out page by page; returns pages of 16 slots (null = empty). */
@@ -733,22 +736,22 @@ function MobileInner() {
       <div className={`${styles.panel} ${activeWindow ? styles.panelOpen : ''}`}>
         {activeWindow && (
           <>
-            <div className={styles.panelHeader}>
-              <button className={styles.backBtn} onClick={() => closeWindow(activeWindow.id)}>
-                <svg
-                  viewBox="0 0 12 20"
-                  width="12"
-                  height="20"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M10.5 1.5L2 10l8.5 8.5" />
+            <div
+              className={`${styles.panelHeader} ${DARK_APPS.has(activeWindow.appId) ? styles.panelHeaderDark : ''}`}
+            >
+              <button
+                className={styles.closeBtn}
+                onClick={() => closeWindow(activeWindow.id)}
+                aria-label="Close"
+              >
+                <svg viewBox="0 0 8 8" width="8" height="8" aria-hidden="true">
+                  <path
+                    d="M1.5 1.5L6.5 6.5M6.5 1.5L1.5 6.5"
+                    stroke="rgba(0,0,0,0.6)"
+                    strokeWidth="1.3"
+                    strokeLinecap="round"
+                  />
                 </svg>
-                <span>Back</span>
               </button>
               <span className={styles.panelTitle}>{activeWindow.title}</span>
               <div className={styles.headerSpacer} />

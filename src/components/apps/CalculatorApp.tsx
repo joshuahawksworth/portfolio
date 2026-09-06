@@ -3,28 +3,50 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { useCalculator } from './useCalculator';
 import styles from './CalculatorApp.module.css';
 
-const SCIENTIFIC_MIN_W = 360;
-const SCIENTIFIC_MIN_H = 460;
+const SCIENTIFIC_MIN_W = 520;
+const SCIENTIFIC_MIN_H = 420;
 
 type BtnProps = {
   className: string;
   onClick: () => void;
   children: React.ReactNode;
-  small?: boolean;
+  label?: string;
 };
 
-function Btn({ className, onClick, children, small }: BtnProps) {
+function Btn({ className, onClick, children, label }: BtnProps) {
   return (
-    <button
-      type="button"
-      className={`${className} ${small ? styles.small : ''}`}
-      onClick={onClick}
-    >
+    <button type="button" className={className} onClick={onClick} aria-label={label}>
       {children}
     </button>
   );
 }
 
+/** Backspace glyph, drawn like the SF Symbol "delete.left". */
+function BackspaceIcon() {
+  return (
+    <svg viewBox="0 0 28 20" width="30" height="22" fill="none" aria-hidden="true">
+      <path
+        d="M9.2 1.5H24.5Q27 1.5 27 4V16Q27 18.5 24.5 18.5H9.2Q8 18.5 7.2 17.6L1.6 11Q0.8 10 1.6 9L7.2 2.4Q8 1.5 9.2 1.5Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M13 6.5L20 13.5M20 6.5L13 13.5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+/**
+ * Apple Calculator: black canvas, thin white result, grey expression line above it,
+ * dark-grey digit keys, light-grey function keys and orange operators. Round keys
+ * on iPhone, rounded rectangles on the Mac, with the scientific pad when the window
+ * is wide enough (like View › Scientific).
+ */
 export default function CalculatorApp() {
   const rootRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -80,6 +102,11 @@ export default function CalculatorApp() {
         calc.backspace();
         return;
       }
+      if (key === '%') {
+        e.preventDefault();
+        calc.percent();
+        return;
+      }
       const opMap = {
         '+': '+',
         '-': '−',
@@ -96,7 +123,12 @@ export default function CalculatorApp() {
   }, [calc]);
 
   const opCls = (op: Parameters<typeof calc.opActive>[0]) =>
-    calc.opActive(op) ? styles.opActive : '';
+    `${styles.op} ${calc.opActive(op) ? styles.opActive : ''}`;
+
+  // Shrink the result as it gets long, like the real app does.
+  const len = calc.display.length;
+  const sizeCls =
+    len > 12 ? styles.valueXS : len > 9 ? styles.valueS : len > 6 ? styles.valueM : '';
 
   return (
     <div
@@ -106,146 +138,160 @@ export default function CalculatorApp() {
       data-mobile={isMobile ? 'true' : 'false'}
     >
       <div className={styles.display} aria-live="polite" aria-label={`Display: ${calc.display}`}>
-        <span className={styles.displayValue}>{calc.display}</span>
-        {showScientific && <span className={styles.modeBadge}>Scientific</span>}
+        <span className={styles.expression}>{calc.expression || ' '}</span>
+        <span className={`${styles.displayValue} ${sizeCls}`}>{calc.display}</span>
       </div>
 
-      {showScientific && (
-        <div className={styles.scientificPad}>
-          <Btn className={styles.sciFn} onClick={calc.trig.sin} small>
-            sin
-          </Btn>
-          <Btn className={styles.sciFn} onClick={calc.trig.cos} small>
-            cos
-          </Btn>
-          <Btn className={styles.sciFn} onClick={calc.trig.tan} small>
-            tan
-          </Btn>
-          <Btn className={styles.sciFn} onClick={calc.advanced.ln} small>
-            ln
-          </Btn>
+      <div className={styles.keys}>
+        {showScientific && (
+          <div className={styles.scientificPad}>
+            <Btn className={styles.sci} onClick={() => calc.applyUnary((n) => n * n)}>
+              x²
+            </Btn>
+            <Btn className={styles.sci} onClick={() => calc.applyUnary((n) => n * n * n)}>
+              x³
+            </Btn>
+            <Btn className={styles.sci} onClick={calc.advanced.pow}>
+              xʸ
+            </Btn>
+            <Btn className={styles.sci} onClick={() => calc.applyUnary((n) => Math.exp(n))}>
+              eˣ
+            </Btn>
+            <Btn className={styles.sci} onClick={() => calc.applyUnary((n) => Math.pow(10, n))}>
+              10ˣ
+            </Btn>
 
-          <Btn className={styles.sciFn} onClick={calc.advanced.log} small>
-            log
-          </Btn>
-          <Btn className={styles.sciFn} onClick={calc.advanced.sqrt} small>
-            √
-          </Btn>
-          <Btn className={styles.sciFn} onClick={calc.advanced.square} small>
-            x²
-          </Btn>
-          <Btn className={styles.sciFn} onClick={calc.advanced.pow} small>
-            xʸ
-          </Btn>
+            <Btn
+              className={styles.sci}
+              onClick={() => calc.applyUnary((n) => (n === 0 ? NaN : 1 / n))}
+            >
+              1/x
+            </Btn>
+            <Btn className={styles.sci} onClick={calc.advanced.sqrt}>
+              √x
+            </Btn>
+            <Btn className={styles.sci} onClick={() => calc.applyUnary((n) => Math.cbrt(n))}>
+              ∛x
+            </Btn>
+            <Btn className={styles.sci} onClick={calc.advanced.ln}>
+              ln
+            </Btn>
+            <Btn className={styles.sci} onClick={calc.advanced.log}>
+              log₁₀
+            </Btn>
 
-          <Btn className={styles.sciFn} onClick={calc.constants.pi} small>
-            π
+            <Btn className={styles.sci} onClick={calc.trig.sin}>
+              sin
+            </Btn>
+            <Btn className={styles.sci} onClick={calc.trig.cos}>
+              cos
+            </Btn>
+            <Btn className={styles.sci} onClick={calc.trig.tan}>
+              tan
+            </Btn>
+            <Btn className={styles.sci} onClick={calc.constants.e}>
+              e
+            </Btn>
+            <Btn className={styles.sci} onClick={calc.constants.pi}>
+              π
+            </Btn>
+
+            <Btn
+              className={styles.sci}
+              onClick={() =>
+                calc.applyUnary((n) => {
+                  if (n < 0 || !Number.isInteger(n) || n > 170) return NaN;
+                  let f = 1;
+                  for (let i = 2; i <= n; i++) f *= i;
+                  return f;
+                })
+              }
+            >
+              x!
+            </Btn>
+            <Btn className={styles.sci} onClick={() => calc.applyUnary((n) => Math.sinh(n))}>
+              sinh
+            </Btn>
+            <Btn className={styles.sci} onClick={() => calc.applyUnary((n) => Math.cosh(n))}>
+              cosh
+            </Btn>
+            <Btn className={styles.sci} onClick={() => calc.applyUnary((n) => Math.tanh(n))}>
+              tanh
+            </Btn>
+            <Btn className={styles.sci} onClick={() => calc.applyUnary((n) => Math.random() * n)}>
+              Rand
+            </Btn>
+          </div>
+        )}
+
+        <div className={styles.pad}>
+          <Btn className={styles.fn} onClick={calc.backspace} label="Delete">
+            <BackspaceIcon />
           </Btn>
-          <Btn className={styles.sciFn} onClick={calc.constants.e} small>
-            e
-          </Btn>
-          <Btn className={styles.sciFn} onClick={calc.backspace} small>
-            ⌫
-          </Btn>
-          <Btn className={styles.sciFn} onClick={calc.clear} small>
+          <Btn className={styles.fn} onClick={calc.clear} label="All clear">
             AC
           </Btn>
-        </div>
-      )}
-
-      <div className={styles.pad}>
-        {!showScientific && (
-          <>
-            <Btn className={styles.fn} onClick={calc.clear}>
-              AC
-            </Btn>
-            <Btn className={styles.fn} onClick={calc.toggleSign}>
-              ±
-            </Btn>
-            <Btn className={styles.fn} onClick={calc.percent}>
-              %
-            </Btn>
-            <Btn className={`${styles.op} ${opCls('÷')}`} onClick={() => calc.setOp('÷')}>
-              ÷
-            </Btn>
-          </>
-        )}
-
-        {showScientific && (
-          <>
-            <Btn className={styles.fn} onClick={calc.toggleSign}>
-              ±
-            </Btn>
-            <Btn className={styles.fn} onClick={calc.percent}>
-              %
-            </Btn>
-            <Btn className={`${styles.op} ${opCls('÷')}`} onClick={() => calc.setOp('÷')}>
-              ÷
-            </Btn>
-            <Btn className={`${styles.op} ${opCls('×')}`} onClick={() => calc.setOp('×')}>
-              ×
-            </Btn>
-          </>
-        )}
-
-        <Btn className={styles.digit} onClick={() => calc.inputDigit('7')}>
-          7
-        </Btn>
-        <Btn className={styles.digit} onClick={() => calc.inputDigit('8')}>
-          8
-        </Btn>
-        <Btn className={styles.digit} onClick={() => calc.inputDigit('9')}>
-          9
-        </Btn>
-        {showScientific ? (
-          <Btn
-            className={styles.sciFn}
-            onClick={() => calc.applyUnary((n) => (n === 0 ? NaN : 1 / n))}
-            small
-          >
-            1/x
+          <Btn className={styles.fn} onClick={calc.percent} label="Percent">
+            %
           </Btn>
-        ) : (
-          <Btn className={`${styles.op} ${opCls('×')}`} onClick={() => calc.setOp('×')}>
+          <Btn className={opCls('÷')} onClick={() => calc.setOp('÷')} label="Divide">
+            ÷
+          </Btn>
+
+          <Btn className={styles.digit} onClick={() => calc.inputDigit('7')}>
+            7
+          </Btn>
+          <Btn className={styles.digit} onClick={() => calc.inputDigit('8')}>
+            8
+          </Btn>
+          <Btn className={styles.digit} onClick={() => calc.inputDigit('9')}>
+            9
+          </Btn>
+          <Btn className={opCls('×')} onClick={() => calc.setOp('×')} label="Multiply">
             ×
           </Btn>
-        )}
 
-        <Btn className={styles.digit} onClick={() => calc.inputDigit('4')}>
-          4
-        </Btn>
-        <Btn className={styles.digit} onClick={() => calc.inputDigit('5')}>
-          5
-        </Btn>
-        <Btn className={styles.digit} onClick={() => calc.inputDigit('6')}>
-          6
-        </Btn>
-        <Btn className={`${styles.op} ${opCls('−')}`} onClick={() => calc.setOp('−')}>
-          −
-        </Btn>
+          <Btn className={styles.digit} onClick={() => calc.inputDigit('4')}>
+            4
+          </Btn>
+          <Btn className={styles.digit} onClick={() => calc.inputDigit('5')}>
+            5
+          </Btn>
+          <Btn className={styles.digit} onClick={() => calc.inputDigit('6')}>
+            6
+          </Btn>
+          <Btn className={opCls('−')} onClick={() => calc.setOp('−')} label="Subtract">
+            −
+          </Btn>
 
-        <Btn className={styles.digit} onClick={() => calc.inputDigit('1')}>
-          1
-        </Btn>
-        <Btn className={styles.digit} onClick={() => calc.inputDigit('2')}>
-          2
-        </Btn>
-        <Btn className={styles.digit} onClick={() => calc.inputDigit('3')}>
-          3
-        </Btn>
-        <Btn className={`${styles.op} ${opCls('+')}`} onClick={() => calc.setOp('+')}>
-          +
-        </Btn>
+          <Btn className={styles.digit} onClick={() => calc.inputDigit('1')}>
+            1
+          </Btn>
+          <Btn className={styles.digit} onClick={() => calc.inputDigit('2')}>
+            2
+          </Btn>
+          <Btn className={styles.digit} onClick={() => calc.inputDigit('3')}>
+            3
+          </Btn>
+          <Btn className={opCls('+')} onClick={() => calc.setOp('+')} label="Add">
+            +
+          </Btn>
 
-        <Btn className={`${styles.digit} ${styles.zero}`} onClick={() => calc.inputDigit('0')}>
-          0
-        </Btn>
-        <Btn className={styles.digit} onClick={() => calc.inputDigit('.')}>
-          .
-        </Btn>
-        <Btn className={styles.eq} onClick={calc.equals}>
-          =
-        </Btn>
+          <Btn className={styles.digit} onClick={calc.toggleSign} label="Toggle sign">
+            <span className={styles.plusMinus}>
+              <sup>+</sup>⁄<sub>−</sub>
+            </span>
+          </Btn>
+          <Btn className={styles.digit} onClick={() => calc.inputDigit('0')}>
+            0
+          </Btn>
+          <Btn className={styles.digit} onClick={() => calc.inputDigit('.')}>
+            .
+          </Btn>
+          <Btn className={styles.op} onClick={calc.equals} label="Equals">
+            =
+          </Btn>
+        </div>
       </div>
     </div>
   );

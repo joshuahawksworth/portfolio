@@ -21,6 +21,8 @@ export function useCalculator() {
   const [stored, setStored] = useState<number | null>(null);
   const [operator, setOperator] = useState<Op>(null);
   const [fresh, setFresh] = useState(true);
+  // The line above the result, like iOS ("8×7" while 56 is shown).
+  const [expression, setExpression] = useState('');
 
   const apply = useCallback((a: number, b: number, op: Op): number => {
     switch (op) {
@@ -41,6 +43,7 @@ export function useCalculator() {
 
   const inputDigit = useCallback(
     (digit: string) => {
+      if (fresh && operator === null) setExpression('');
       setDisplay((prev) => {
         if (fresh || prev === 'Error') {
           setFresh(false);
@@ -52,13 +55,14 @@ export function useCalculator() {
         return prev + digit;
       });
     },
-    [fresh]
+    [fresh, operator]
   );
 
   const clear = useCallback(() => {
     setDisplay('0');
     setStored(null);
     setOperator(null);
+    setExpression('');
     setFresh(true);
   }, []);
 
@@ -78,13 +82,15 @@ export function useCalculator() {
   const setOp = useCallback(
     (op: Op) => {
       const current = parseDisplay(display);
+      let base = current;
       if (stored !== null && operator && !fresh) {
-        const result = apply(stored, current, operator);
-        setDisplay(formatDisplay(result));
-        setStored(result);
+        base = apply(stored, current, operator);
+        setDisplay(formatDisplay(base));
+        setStored(base);
       } else {
         setStored(current);
       }
+      setExpression(`${formatDisplay(base)}${op ?? ''}`);
       setOperator(op);
       setFresh(true);
     },
@@ -95,6 +101,7 @@ export function useCalculator() {
     if (operator === null || stored === null) return;
     const current = parseDisplay(display);
     const result = apply(stored, current, operator);
+    setExpression(`${formatDisplay(stored)}${operator}${formatDisplay(current)}`);
     setDisplay(formatDisplay(result));
     setStored(null);
     setOperator(null);
@@ -124,6 +131,7 @@ export function useCalculator() {
 
   return {
     display,
+    expression,
     operator,
     inputDigit,
     clear,
