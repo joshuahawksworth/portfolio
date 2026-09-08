@@ -110,7 +110,17 @@ local `.env` when needed:
 RESEND_API_KEY="your_resend_api_key_here"
 ANTHROPIC_API_KEY="your_anthropic_api_key"
 VITE_MAPBOX_TOKEN="your_mapbox_access_token"
+GOOGLE_SEARCH_KEY="your_google_api_key"
+GOOGLE_SEARCH_CX="your_programmable_search_engine_id"
 ```
+
+Chrome's search box is a real search. Google can't be embedded in another site (it forbids framing and shows a captcha
+to server requests), so `/api/search` fetches results and the app renders them on a Google-style results page. With
+`GOOGLE_SEARCH_KEY` and `GOOGLE_SEARCH_CX` set, those are genuine Google results from the
+[Programmable Search JSON API](https://developers.google.com/custom-search/v1/overview) (create an engine that searches
+the entire web, then an API key with the Custom Search API enabled; 100 queries a day are free). Without them it falls
+back to DuckDuckGo, which sometimes refuses requests from hosting providers, in which case the page says search isn't
+configured.
 
 Ask Claude answers guests from the portfolio data in the browser, so it works with no backend at all. Visitors who enter
 their own Anthropic API key are answered by Claude through `/api/ask` with that key (sent as a request header, never

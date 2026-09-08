@@ -319,7 +319,9 @@
   font-size: 22px;
   font-weight: 600;
   color: var(--accent);
-  transition: background 120ms, transform 120ms;
+  transition:
+    background 120ms,
+    transform 120ms;
 }
 .favItem:hover .favTile {
   background: #fff;
@@ -335,93 +337,450 @@
 }
 
 /* ── Results page ── */
-.resultsPage {
+/* ── Google results page ─────────────────────────────────────────────── */
+.serp {
   position: absolute;
   inset: 0;
-  background: var(--panel);
   overflow-y: auto;
-  padding: 28px 42px;
+  background: #fff;
+  color: #202124;
+  font-family: Arial, Helvetica, sans-serif;
+  display: flex;
+  flex-direction: column;
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 }
 
-.resultsHeader {
+.serpHeader {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #fff;
+  border-bottom: 1px solid #ebebeb;
+}
+
+.serpTop {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 22px;
-  color: var(--text);
+  gap: 28px;
+  padding: 18px 20px 0 28px;
 }
 
-.resultsLogo {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: #4285f4;
-  color: #fff;
+.serpLogoBtn {
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  flex-shrink: 0;
+}
+
+.serpForm {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 690px;
+  height: 44px;
+  border: 1px solid #dfe1e5;
+  border-radius: 24px;
+  background: #fff;
+  padding: 0 8px 0 18px;
+  box-shadow: 0 1px 6px rgba(32, 33, 36, 0.12);
+}
+
+.serpForm:focus-within {
+  box-shadow: 0 1px 6px rgba(32, 33, 36, 0.28);
+  border-color: rgba(223, 225, 229, 0);
+}
+
+.serpInput {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font:
+    16px Arial,
+    Helvetica,
+    sans-serif;
+  color: #202124;
+}
+
+.serpClear,
+.serpSubmit {
+  border: 0;
+  background: none;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: Arial, Helvetica, sans-serif;
-  font-weight: 600;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: #70757a;
 }
 
-.resultsHeader h2 {
-  margin: 0;
-  font-size: 18px;
-  color: var(--text-strong);
+.serpClear {
+  font-size: 24px;
+  line-height: 1;
+  border-right: 1px solid #dfe1e5;
+  border-radius: 0;
+  width: 40px;
 }
 
-.resultsHeader p {
-  margin: 2px 0 0;
-  font-size: 13px;
-  color: var(--muted);
+.serpSubmit {
+  color: #4285f4;
 }
 
-.resultsStatus {
-  margin: 0;
-  color: var(--muted);
-  font-size: 13px;
+.serpTabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 10px 20px 0 180px;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
-.resultList {
+.serpTab {
+  border: 0;
+  background: none;
+  cursor: default;
+  padding: 8px 12px 12px;
+  font:
+    14px Arial,
+    Helvetica,
+    sans-serif;
+  color: #5f6368;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+}
+
+.serpTabActive {
+  color: #1a73e8;
+  border-bottom-color: #1a73e8;
+}
+
+.serpTools {
+  margin-left: auto;
+}
+
+.serpMain {
+  flex: 1;
+  padding: 14px 20px 32px 180px;
+  max-width: 652px;
+  box-sizing: content-box;
+}
+
+.serpStats {
+  margin: 0 0 22px;
+  color: #70757a;
+  font-size: 14px;
+}
+
+.serpResults {
   list-style: none;
   margin: 0;
-  padding: 0 0 28px;
-  max-width: 760px;
-}
-
-.resultItem {
-  margin-bottom: 22px;
-}
-
-.resultTitle {
-  display: block;
-  border: 0;
-  background: transparent;
   padding: 0;
-  color: var(--accent);
+}
+
+.serpResult {
+  margin-bottom: 30px;
+}
+
+.serpSource {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  background: none;
+  padding: 0;
   cursor: pointer;
   font: inherit;
-  font-size: 17px;
-  line-height: 1.3;
+  color: inherit;
+  text-align: left;
+  max-width: 100%;
+}
+
+.serpFavicon,
+.serpFaviconFallback {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #f1f3f4;
+  border: 1px solid #ecedef;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  box-sizing: border-box;
+  object-fit: contain;
+}
+
+.serpFaviconFallback {
+  font-size: 12px;
+  font-weight: 700;
+  color: #5f6368;
+}
+
+.serpSite {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.serpSiteName {
+  font-size: 14px;
+  color: #202124;
+  line-height: 20px;
+}
+
+.serpCrumb {
+  font-size: 12px;
+  color: #4d5156;
+  line-height: 18px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.serpTitle {
+  margin: 4px 0 0;
+  font-weight: 400;
+}
+
+.serpTitle button {
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font:
+    20px Arial,
+    Helvetica,
+    sans-serif;
+  line-height: 26px;
+  color: #1a0dab;
   text-align: left;
 }
 
-.resultTitle:hover {
+.serpTitle button:hover {
   text-decoration: underline;
 }
 
-.resultUrl {
-  margin-top: 3px;
-  color: #1f8f3f;
-  font-size: 12px;
+.serpTitle button:visited {
+  color: #681da8;
+}
+
+.serpSnippet {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 22px;
+  color: #4d5156;
   overflow-wrap: anywhere;
 }
 
-.resultSnippet {
-  margin: 5px 0 0;
-  color: var(--text);
-  font-size: 13px;
-  line-height: 1.45;
+.serpSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  padding-top: 8px;
+}
+
+.serpSkeletonItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.serpSkeletonItem span {
+  display: block;
+  height: 14px;
+  border-radius: 7px;
+  background: linear-gradient(90deg, #f1f3f4 25%, #e8eaed 50%, #f1f3f4 75%);
+  background-size: 200% 100%;
+  animation: serpShimmer 1.2s linear infinite;
+}
+
+.serpSkeletonItem span:nth-child(2) {
+  height: 20px;
+}
+
+@keyframes serpShimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.serpNotice {
+  font-size: 14px;
+  line-height: 22px;
+  color: #4d5156;
+}
+
+.serpNotice h2 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: 400;
+  color: #202124;
+}
+
+.serpNotice p {
+  margin: 0 0 10px;
+}
+
+.serpNotice ul {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.serpNotice code {
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 12px;
+  background: #f1f3f4;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.serpRetry {
+  margin-top: 6px;
+  border: 1px solid #dadce0;
+  background: #fff;
+  color: #1a73e8;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font:
+    14px Arial,
+    Helvetica,
+    sans-serif;
+  cursor: pointer;
+}
+
+.serpRetry:hover {
+  background: #f8f9fa;
+}
+
+.serpPager {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.serpPagerLogo {
+  font:
+    500 34px 'Product Sans',
+    'Google Sans',
+    Arial,
+    Helvetica,
+    sans-serif;
+  letter-spacing: -1px;
+  user-select: none;
+}
+
+.serpPages {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+
+.serpPages button {
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: #1a0dab;
+}
+
+.serpPages button:hover {
+  text-decoration: underline;
+}
+
+.serpPageCurrent {
+  color: #202124;
+}
+
+.serpFooter {
+  background: #f2f2f2;
+  color: #70757a;
+  font-size: 14px;
+}
+
+.serpFooterRegion {
+  padding: 14px 30px;
+  border-bottom: 1px solid #dadce0;
+  font-size: 15px;
+}
+
+.serpFooterLinks {
+  display: flex;
+  gap: 28px;
+  padding: 14px 30px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 767px) {
+  .serpTop {
+    gap: 12px;
+    padding: 12px 12px 0;
+  }
+  .serpTop svg {
+    height: 24px;
+    width: auto;
+  }
+  .serpTabs,
+  .serpMain {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .serpForm {
+    height: 42px;
+  }
+  .serpInput {
+    font-size: 16px;
+  }
+}
+
+/* The WinUI / Material field layer must not restyle the bare inputs inside the pills. */
+:global(html[data-os='windows']) .root .urlBar .urlInput,
+:global(html[data-os='android']) .root .urlBar .urlInput,
+:global(html[data-os='windows']) .root .serpForm .serpInput,
+:global(html[data-os='android']) .root .serpForm .serpInput,
+:global(html[data-os='windows']) .root .urlBar .urlInput:focus,
+:global(html[data-os='android']) .root .urlBar .urlInput:focus,
+:global(html[data-os='windows']) .root .serpForm .serpInput:focus,
+:global(html[data-os='android']) .root .serpForm .serpInput:focus,
+:global(html[data-os='windows']) .root .urlBar .urlInput:focus-visible,
+:global(html[data-os='android']) .root .urlBar .urlInput:focus-visible,
+:global(html[data-os='windows']) .root .serpForm .serpInput:focus-visible,
+:global(html[data-os='android']) .root .serpForm .serpInput:focus-visible {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+  min-height: 0;
+  padding: 0;
+}
+:global(html[data-os='android']) .root .serpForm .serpInput,
+:global(html[data-os='windows']) .root .serpForm .serpInput {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+}
+:global(html[data-os='android']) .root .urlBar .urlInput,
+:global(html[data-os='windows']) .root .urlBar .urlInput {
+  font-family: inherit;
+  font-size: 12px;
+}
+@media (max-width: 767px) {
+  :global(html[data-os='android']) .root .urlBar .urlInput {
+    font-size: 16px;
+  }
 }

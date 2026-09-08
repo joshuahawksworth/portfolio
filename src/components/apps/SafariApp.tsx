@@ -46,11 +46,33 @@ function isSearchQuery(input: string): boolean {
   return true;
 }
 
-async function fetchSearch(query: string): Promise<SearchResult[]> {
-  const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-  if (!response.ok) return [];
-  const data = (await response.json()) as { results?: SearchResult[] };
-  return Array.isArray(data.results) ? data.results : [];
+interface SearchResponse {
+  query: string;
+  page: number;
+  results: SearchResult[];
+  provider?: 'google' | 'duckduckgo';
+  totalResults?: string;
+  searchTime?: string;
+  error?: 'unconfigured' | 'blocked' | 'failed';
+}
+
+const RESULTS_PER_PAGE = 10;
+const MAX_PAGES = 10;
+
+async function fetchSearch(query: string, page = 1): Promise<SearchResponse> {
+  const pageParam = page > 1 ? `&page=${page}` : '';
+  const response = await fetch(`/api/search?q=${encodeURIComponent(query)}${pageParam}`);
+  if (!response.ok) throw new Error(`search ${response.status}`);
+  const data = (await response.json()) as Partial<SearchResponse>;
+  return {
+    query,
+    page,
+    results: Array.isArray(data.results) ? data.results : [],
+    provider: data.provider,
+    totalResults: data.totalResults,
+    searchTime: data.searchTime,
+    error: data.error,
+  };
 }
 
 function SearchHome({ onSearch }: { onSearch: (query: string) => void }) {
@@ -90,64 +112,340 @@ function SearchHome({ onSearch }: { onSearch: (query: string) => void }) {
   );
 }
 
-function SearchResults({ query, onOpen }: { query: string; onOpen: (url: string) => void }) {
-  const [results, setResults] = useState<SearchResult[]>([]);
+/** The Google wordmark, drawn so it needs no image and no web font. */
+function GoogleLogo({ height = 30, className }: { height?: number; className?: string }) {
+  const letters: [string, string][] = [
+    ['G', '#4285f4'],
+    ['o', '#ea4335'],
+    ['o', '#fbbc05'],
+    ['g', '#4285f4'],
+    ['l', '#34a853'],
+    ['e', '#ea4335'],
+  ];
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 272 92"
+      height={height}
+      width={(272 / 92) * height}
+      role="img"
+      aria-label="Google"
+    >
+      <text
+        x="6"
+        y="72"
+        fontFamily="'Product Sans', 'Google Sans', Arial, Helvetica, sans-serif"
+        fontSize="86"
+        fontWeight="500"
+        letterSpacing="-4"
+      >
+        {letters.map(([ch, fill], i) => (
+          <tspan key={i} fill={fill}>
+            {ch}
+          </tspan>
+        ))}
+      </text>
+    </svg>
+  );
+}
+
+function SearchIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+    </svg>
+  );
+}
+
+/** Google shows "https://host › path › segments" under the site name. */
+function breadcrumb(url: string): string {
+  try {
+    const parsed = new URL(url);
+    const parts = parsed.pathname
+      .split('/')
+      .filter(Boolean)
+      .map((seg) => decodeURIComponent(seg));
+    const shown = parts.length > 3 ? [parts[0], '…', parts[parts.length - 1]] : parts;
+    return [`${parsed.protocol}//${parsed.hostname}`, ...shown].join(' › ');
+  } catch {
+    return url;
+  }
+}
+
+function siteName(url: string): string {
+  const host = hostOf(url);
+  const label = host.split('.').slice(0, -1).join('.') || host;
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+function Favicon({ url }: { url: string }) {
+  const [failed, setFailed] = useState(false);
+  const host = hostOf(url);
+  if (failed) {
+    return (
+      <span className={styles.serpFaviconFallback} aria-hidden="true">
+        {host.charAt(0).toUpperCase()}
+      </span>
+    );
+  }
+  return (
+    <img
+      className={styles.serpFavicon}
+      src={`https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=32`}
+      alt=""
+      width={18}
+      height={18}
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
+const SERP_TABS = ['All', 'Images', 'Videos', 'News', 'Maps', 'Shopping', 'More'];
+
+function SearchResults({
+  query,
+  onOpen,
+  onSearch,
+}: {
+  query: string;
+  onOpen: (url: string) => void;
+  onSearch: (query: string) => void;
+}) {
+  const [page, setPage] = useState(1);
+  const [draft, setDraft] = useState(query);
   const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading');
+  const [data, setData] = useState<SearchResponse | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const topRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setPage(1);
+    setDraft(query);
+  }, [query]);
 
   useEffect(() => {
     let cancelled = false;
     setStatus('loading');
-    setResults([]);
-
-    fetchSearch(query)
-      .then((nextResults) => {
+    fetchSearch(query, page)
+      .then((next) => {
         if (cancelled) return;
-        setResults(nextResults);
+        setData(next);
         setStatus('done');
       })
       .catch(() => {
         if (cancelled) return;
+        setData(null);
         setStatus('error');
       });
-
+    topRef.current?.scrollTo?.({ top: 0 });
     return () => {
       cancelled = true;
     };
-  }, [query]);
+  }, [query, page, attempt]);
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    const next = draft.trim();
+    if (next && next !== query) onSearch(next);
+  }
+
+  const results = data?.results ?? [];
+  const error = status === 'error' ? 'failed' : data?.error;
+  const stats =
+    data?.totalResults && data?.searchTime
+      ? `About ${data.totalResults} results (${data.searchTime} seconds)`
+      : results.length > 0
+        ? `Page ${page} of results`
+        : '';
+  const canPaginate = results.length === RESULTS_PER_PAGE || page > 1;
+  const lastPage = Math.min(MAX_PAGES, results.length === RESULTS_PER_PAGE ? page + 4 : page);
+  const pages = Array.from({ length: lastPage }, (_, i) => i + 1);
 
   return (
-    <div className={styles.resultsPage}>
-      <div className={styles.resultsHeader}>
-        <div className={styles.resultsLogo} aria-hidden="true">
-          G
-        </div>
-        <div>
-          <h2>Search results</h2>
-          <p>Results for "{query}"</p>
-        </div>
-      </div>
-
-      {status === 'loading' && <p className={styles.resultsStatus}>Searching the web...</p>}
-      {status === 'error' && (
-        <p className={styles.resultsStatus}>Search failed. Try a different query or enter a URL.</p>
-      )}
-      {status === 'done' && results.length === 0 && (
-        <p className={styles.resultsStatus}>No results found. Try a more specific search.</p>
-      )}
-
-      {results.length > 0 && (
-        <ol className={styles.resultList}>
-          {results.map((result) => (
-            <li key={result.url} className={styles.resultItem}>
-              <button className={styles.resultTitle} onClick={() => onOpen(result.url)}>
-                {result.title}
+    <div ref={topRef} className={styles.serp}>
+      <header className={styles.serpHeader}>
+        <div className={styles.serpTop}>
+          <button
+            type="button"
+            className={styles.serpLogoBtn}
+            onClick={() => onSearch('')}
+            aria-label="Google home"
+          >
+            <GoogleLogo height={30} />
+          </button>
+          <form className={styles.serpForm} onSubmit={submit} role="search">
+            <input
+              className={styles.serpInput}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              aria-label="Search"
+              autoComplete="off"
+              spellCheck={false}
+            />
+            {draft && (
+              <button
+                type="button"
+                className={styles.serpClear}
+                onClick={() => setDraft('')}
+                aria-label="Clear"
+              >
+                ×
               </button>
-              <div className={styles.resultUrl}>{result.displayUrl}</div>
-              {result.snippet && <p className={styles.resultSnippet}>{result.snippet}</p>}
-            </li>
+            )}
+            <button type="submit" className={styles.serpSubmit} aria-label="Google Search">
+              <SearchIcon />
+            </button>
+          </form>
+        </div>
+        <nav className={styles.serpTabs} aria-label="Search type">
+          {SERP_TABS.map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              className={`${styles.serpTab} ${tab === 'All' ? styles.serpTabActive : ''}`}
+              aria-current={tab === 'All' ? 'page' : undefined}
+            >
+              {tab}
+            </button>
           ))}
-        </ol>
-      )}
+          <button type="button" className={`${styles.serpTab} ${styles.serpTools}`}>
+            Tools
+          </button>
+        </nav>
+      </header>
+
+      <main className={styles.serpMain}>
+        {status === 'loading' && (
+          <div className={styles.serpSkeleton} role="status" aria-label="Searching">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className={styles.serpSkeletonItem}>
+                <span style={{ width: '38%' }} />
+                <span style={{ width: '62%' }} />
+                <span style={{ width: '90%' }} />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {status !== 'loading' && stats && <p className={styles.serpStats}>{stats}</p>}
+
+        {status !== 'loading' && error === 'unconfigured' && (
+          <div className={styles.serpNotice}>
+            <h2>Search isn't set up on this site yet</h2>
+            <p>
+              Google can't be embedded in another website, so results have to come from the Google
+              Programmable Search API. Add <code>GOOGLE_SEARCH_KEY</code> and{' '}
+              <code>GOOGLE_SEARCH_CX</code> to the deployment and this page fills with real Google
+              results.
+            </p>
+            <p>In the meantime you can still type a full web address in the bar above.</p>
+          </div>
+        )}
+        {status !== 'loading' && (error === 'blocked' || error === 'failed') && (
+          <div className={styles.serpNotice}>
+            <h2>Something went wrong</h2>
+            <p>Google couldn't answer this search right now. Give it a moment and try again.</p>
+            <button
+              type="button"
+              className={styles.serpRetry}
+              onClick={() => setAttempt((a) => a + 1)}
+            >
+              Try again
+            </button>
+          </div>
+        )}
+        {status === 'done' && !error && results.length === 0 && (
+          <div className={styles.serpNotice}>
+            <p>
+              Your search - <b>{query}</b> - did not match any documents.
+            </p>
+            <p>Suggestions:</p>
+            <ul>
+              <li>Make sure that all words are spelled correctly.</li>
+              <li>Try different keywords.</li>
+              <li>Try more general keywords.</li>
+            </ul>
+          </div>
+        )}
+
+        {status === 'done' && results.length > 0 && (
+          <ol className={styles.serpResults}>
+            {results.map((result) => (
+              <li key={result.url} className={styles.serpResult}>
+                <button
+                  type="button"
+                  className={styles.serpSource}
+                  onClick={() => onOpen(result.url)}
+                  title={result.url}
+                >
+                  <Favicon url={result.url} />
+                  <span className={styles.serpSite}>
+                    <span className={styles.serpSiteName}>{siteName(result.url)}</span>
+                    <span className={styles.serpCrumb}>{breadcrumb(result.url)}</span>
+                  </span>
+                </button>
+                <h3 className={styles.serpTitle}>
+                  <button type="button" onClick={() => onOpen(result.url)}>
+                    {result.title}
+                  </button>
+                </h3>
+                {result.snippet && <p className={styles.serpSnippet}>{result.snippet}</p>}
+              </li>
+            ))}
+          </ol>
+        )}
+
+        {status === 'done' && canPaginate && (
+          <nav className={styles.serpPager} aria-label="Pagination">
+            <div className={styles.serpPagerLogo} aria-hidden="true">
+              <span style={{ color: '#4285f4' }}>G</span>
+              {pages.map((p) => (
+                <span key={p} style={{ color: p === page ? '#ea4335' : '#fbbc05' }}>
+                  o
+                </span>
+              ))}
+              <span style={{ color: '#4285f4' }}>g</span>
+              <span style={{ color: '#34a853' }}>l</span>
+              <span style={{ color: '#ea4335' }}>e</span>
+            </div>
+            <div className={styles.serpPages}>
+              {page > 1 && (
+                <button type="button" onClick={() => setPage(page - 1)}>
+                  ‹ Previous
+                </button>
+              )}
+              {pages.map((p) =>
+                p === page ? (
+                  <span key={p} className={styles.serpPageCurrent} aria-current="page">
+                    {p}
+                  </span>
+                ) : (
+                  <button key={p} type="button" onClick={() => setPage(p)}>
+                    {p}
+                  </button>
+                )
+              )}
+              {results.length === RESULTS_PER_PAGE && page < MAX_PAGES && (
+                <button type="button" onClick={() => setPage(page + 1)}>
+                  Next ›
+                </button>
+              )}
+            </div>
+          </nav>
+        )}
+      </main>
+
+      <footer className={styles.serpFooter}>
+        <div className={styles.serpFooterRegion}>United Kingdom</div>
+        <div className={styles.serpFooterLinks}>
+          <span>Help</span>
+          <span>Send feedback</span>
+          <span>Privacy</span>
+          <span>Terms</span>
+          {data?.provider === 'duckduckgo' && <span>Results via DuckDuckGo</span>}
+        </div>
+      </footer>
     </div>
   );
 }
@@ -368,7 +666,7 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
           </div>
         )}
         {showingSearch && searchQuery ? (
-          <SearchResults query={searchQuery} onOpen={navigate} />
+          <SearchResults query={searchQuery} onOpen={navigate} onSearch={search} />
         ) : showingSearch ? (
           <SearchHome onSearch={search} />
         ) : (

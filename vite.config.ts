@@ -121,10 +121,11 @@ function browserProxyPlugin(): Plugin {
             return;
           }
 
-          const results = await searchWeb(query);
+          const page = Number(new URLSearchParams(qs).get('page') ?? 1);
+          const response = await searchWeb(query, page);
           res.statusCode = 200;
           res.setHeader('Content-Type', 'application/json; charset=utf-8');
-          res.end(JSON.stringify({ query, results }));
+          res.end(JSON.stringify(response));
         } catch (err) {
           res.statusCode = 500;
           res.setHeader('Content-Type', 'application/json; charset=utf-8');
