@@ -77,6 +77,25 @@
   display: none;
 }
 
+/* Mouse users can drag the pages; snapping pauses while the drag is live */
+@media (hover: hover) and (pointer: fine) {
+  .pager {
+    cursor: grab;
+  }
+}
+
+.pagerDragging {
+  scroll-snap-type: none;
+  cursor: grabbing;
+  user-select: none;
+}
+
+.pagerDragging .iconItem,
+.pagerDragging .widget,
+.pagerDragging .glance {
+  pointer-events: none;
+}
+
 .page {
   flex: 0 0 100%;
   width: 100%;

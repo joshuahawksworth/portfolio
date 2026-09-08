@@ -189,12 +189,14 @@ const DRAWN_ICONS = {
   trashEmpty: <TrashBinIcon size={44} />,
   trashFull: <TrashBinIcon size={44} full />,
   doom: (
+    // Sized by the surface's CSS (dock, taskbar, title bar) like the drawn SVGs; the
+    // width/height attributes are only the fallback.
     <img
       src="/doom-icon.png"
       alt="DOOM"
       width="44"
       height="44"
-      style={{ width: 44, height: 44, borderRadius: 10, display: 'block', objectFit: 'cover' }}
+      style={{ borderRadius: '22%', display: 'block', objectFit: 'cover' }}
       onError={(e) => {
         // Fallback SVG if PNG not yet added
         const el = e.target as HTMLImageElement;

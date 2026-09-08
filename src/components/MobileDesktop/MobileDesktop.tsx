@@ -657,6 +657,60 @@ function MobileInner() {
     el.scrollTo({ left: p * el.clientWidth, behavior: 'smooth' });
   }
 
+  // Mouse drag swipes the pages too, so the home screen works in a narrow desktop window
+  // (touch already scrolls natively). Snapping is paused while dragging, then restored.
+  const drag = useRef<{ startX: number; startScroll: number; moved: boolean } | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const suppressClick = useRef(false);
+
+  function onPagerPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+    const el = pagerRef.current;
+    if (!el) return;
+    drag.current = { startX: e.clientX, startScroll: el.scrollLeft, moved: false };
+    el.setPointerCapture(e.pointerId);
+  }
+
+  function onPagerPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    const d = drag.current;
+    const el = pagerRef.current;
+    if (!d || !el) return;
+    const dx = e.clientX - d.startX;
+    if (!d.moved && Math.abs(dx) > 6) {
+      d.moved = true;
+      setDragging(true);
+    }
+    if (d.moved) el.scrollLeft = d.startScroll - dx;
+  }
+
+  function onPagerPointerUp(e: React.PointerEvent<HTMLDivElement>) {
+    const d = drag.current;
+    const el = pagerRef.current;
+    drag.current = null;
+    if (!d || !el) return;
+    if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId);
+    if (!d.moved) return;
+    setDragging(false);
+    // Snap to the page the drag was heading for: a short flick still turns the page.
+    const dx = e.clientX - d.startX;
+    const from = Math.round(d.startScroll / Math.max(1, el.clientWidth));
+    const target =
+      Math.abs(dx) > el.clientWidth * 0.2
+        ? from - Math.sign(dx)
+        : Math.round(el.scrollLeft / el.clientWidth);
+    goToPage(Math.max(0, Math.min(pages.length - 1, target)));
+    // The icon under the pointer would otherwise open on the click that ends the drag.
+    suppressClick.current = true;
+    window.setTimeout(() => (suppressClick.current = false), 0);
+  }
+
+  function onPagerClickCapture(e: React.MouseEvent) {
+    if (suppressClick.current) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+  }
+
   useEffect(() => () => window.clearTimeout(swipeTimer.current), []);
 
   // Search pill: non-empty query dims every icon whose label doesn't match.
@@ -758,7 +812,16 @@ function MobileInner() {
       <DisplayOverlays />
       <StatusBar />
 
-      <div className={styles.pager} ref={pagerRef} onScroll={onPagerScroll}>
+      <div
+        className={`${styles.pager} ${dragging ? styles.pagerDragging : ''}`}
+        ref={pagerRef}
+        onScroll={onPagerScroll}
+        onPointerDown={onPagerPointerDown}
+        onPointerMove={onPagerPointerMove}
+        onPointerUp={onPagerPointerUp}
+        onPointerCancel={onPagerPointerUp}
+        onClickCapture={onPagerClickCapture}
+      >
         {pages.map((slots, p) => (
           <div className={styles.page} key={p} aria-label={`Page ${p + 1} of ${pages.length}`}>
             <div className={styles.iconGrid}>
