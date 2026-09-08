@@ -323,7 +323,7 @@ const ICON_IMAGES: Record<string, { src: string; scale?: number; bg?: string }> 
   finder: { src: '/icons/finder.png', scale: 1.28 },
   terminal: { src: '/icons/terminal.png', scale: 1.28 },
   texteditor: { src: '/icons/textedit.png', scale: 1.28 },
-  imageviewer: { src: '/icons/preview.png', scale: 1.28 },
+  imageviewer: { src: '/icons/preview.png' },
   contact: { src: '/icons/mail.png' },
   location: { src: '/icons/maps.png' },
   calculator: { src: '/icons/calculator.png' },
@@ -374,6 +374,17 @@ function AppIcon({ appId, size = 60 }: { appId: string; size?: number }) {
         </div>
       );
     }
+  }
+  if (appId === 'snake') {
+    // Shared Nokia-LCD art; the Android launcher clips it to the chosen icon shape.
+    return (
+      <div
+        className={`${styles.appIcon} ${os === 'android' ? styles.appIconDroid : styles.appIconFlat}`}
+        style={{ '--icon-size': `${size}px` } as CSSProperties}
+      >
+        {appIconFor('snake', os)}
+      </div>
+    );
   }
   const real = ICON_IMAGES[appId];
   if (real) {

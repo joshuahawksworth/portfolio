@@ -722,6 +722,17 @@
   letter-spacing: 0;
 }
 
+/* Full-bleed drawn art in the iOS squircle */
+.appIconFlat {
+  background: transparent;
+}
+
+.appIconFlat > svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 /* Material icons: full-bleed discs, clipped to the chosen shape */
 .appIconDroid {
   background: transparent;

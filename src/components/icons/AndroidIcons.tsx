@@ -5,6 +5,7 @@
  * icon shape (circle, squircle or rounded square).
  */
 import type { ReactNode } from 'react';
+import { SnakeLcdIcon } from './SnakeLcdIcon';
 
 const JH_PATH =
   'm 64.986601,198.54254 c 17.955449,0 30.263619,-9.55694 30.263619,-30.55323 V 98.773958 H 74.97794 v 68.925752 c 0,10.13614 -4.199258,12.74258 -10.860151,12.74258 -6.950496,0 -9.846536,-4.77847 -13.03218,-10.42575 l -16.507428,9.99134 c 4.778466,10.13614 14.190596,18.53466 30.40842,18.53466 z m 49.811939,-1.30322 h 20.27228 V 167.2653 h 42.13738 v 29.97402 h 20.27228 V 98.773958 H 177.2082 V 149.16505 H 135.07082 V 98.773958 h -20.27228 z';
@@ -56,39 +57,34 @@ export function FilesIcon() {
   );
 }
 
-export function TasksIcon() {
+export function BriefcaseDiscIcon() {
   return (
-    <AndroidDisc title="Tasks">
-      <circle cx="22" cy="22" r="11" fill="#1a73e8" />
+    <AndroidDisc title="Experience">
       <path
-        d="M16.5 22.5l3.5 3.5 7.5-8"
-        stroke="#fff"
-        strokeWidth="2.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M17.5 16v-2q0-2.5 2.5-2.5h4q2.5 0 2.5 2.5v2"
+        fill="none"
+        stroke="#1a73e8"
+        strokeWidth="2"
       />
+      <rect x="10" y="16" width="24" height="16" rx="3" fill="#1a73e8" />
+      <path d="M10 22h24" stroke="#fff" strokeWidth="1.4" opacity="0.7" />
+      <rect x="20" y="20.5" width="4" height="3.5" rx="0.8" fill="#fff" />
     </AndroidDisc>
   );
 }
 
-export function AndroidStudioIcon() {
+export function SkillsDiscIcon() {
   return (
-    <AndroidDisc bg="#2b2f3a" title="Android Studio">
+    <AndroidDisc bg="#7c4dff" title="Skills">
       <path
-        d="M13 16l-5 6 5 6"
-        stroke="#3ddc84"
+        d="M15 16l-6 6 6 6M29 16l6 6-6 6"
+        stroke="#fff"
         strokeWidth="2.6"
         strokeLinecap="round"
         strokeLinejoin="round"
+        fill="none"
       />
-      <path
-        d="M31 16l5 6-5 6"
-        stroke="#3ddc84"
-        strokeWidth="2.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path d="M25 13l-6 18" stroke="#8ab4f8" strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M25 14l-6 16" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" opacity="0.7" />
     </AndroidDisc>
   );
 }
@@ -294,8 +290,8 @@ export const ANDROID_ICONS = {
       <path d={JH_PATH} fill="#333" transform="translate(9.5 4) scale(0.118)" />
     </svg>
   ),
-  experience: <TasksIcon />,
-  skills: <AndroidStudioIcon />,
+  experience: <BriefcaseDiscIcon />,
+  skills: <SkillsDiscIcon />,
   contact: <GmailIcon />,
   location: <GoogleMapsIcon />,
   terminal: <TermuxIcon />,
@@ -310,4 +306,5 @@ export const ANDROID_ICONS = {
   safari: <DiscImage src="/icons/chrome.png" scale={0.66} />,
   github: <DiscImage src="/icons/github-mark.png" scale={0.62} />,
   askjosh: <DiscImage src="/icons/claude.png" bg="#d97757" scale={1.02} />,
+  snake: <SnakeLcdIcon round />,
 } as const;

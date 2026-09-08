@@ -2,6 +2,7 @@ import { useId } from 'react';
 import { AboutLogoIcon } from '../icons/AboutLogoIcon';
 import { CalculatorLogoIcon } from '../icons/CalculatorLogoIcon';
 import { TrashBinIcon } from '../icons/FileSystemIcons';
+import { SnakeLcdIcon } from '../icons/SnakeLcdIcon';
 
 export function MacIcon({
   top,
@@ -213,35 +214,7 @@ const DRAWN_ICONS = {
       }}
     />
   ),
-  snake: (
-    <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
-      <rect width="44" height="44" rx="11" fill="#0a1f0a" />
-      <rect width="44" height="20" rx="11" fill="rgba(48,209,88,0.06)" />
-      {/* Body — thick sinuous S-curve */}
-      <path
-        d="M10 36 Q10 26 18 26 Q26 26 26 18 Q26 10 34 10"
-        stroke="#1d5e2e"
-        strokeWidth="7"
-        strokeLinecap="round"
-        fill="none"
-      />
-      {/* Head — triangular/elongated pointing right */}
-      <ellipse cx="36" cy="10" rx="5.5" ry="4" fill="#30d158" transform="rotate(-35 36 10)" />
-      {/* Eyes */}
-      <circle cx="37.5" cy="7.5" r="1.3" fill="#081408" />
-      {/* Tongue */}
-      <path
-        d="M40 11 L43 10 M43 10 L43 8.5 M43 10 L43 11.5"
-        stroke="#ff453a"
-        strokeWidth="0.9"
-        strokeLinecap="round"
-      />
-      {/* Apple food — drawn, no emoji */}
-      <circle cx="10" cy="37" r="4" fill="#cc2200" />
-      <rect x="9.5" y="32" width="1" height="3" fill="#5a3a10" />
-      <ellipse cx="12" cy="33" rx="2.5" ry="1.2" transform="rotate(-20 12 33)" fill="#2a7a18" />
-    </svg>
-  ),
+  snake: <SnakeLcdIcon />,
   imageviewer: (
     // Preview-inspired icon — teal/blue gradient with landscape
     <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
@@ -414,7 +387,8 @@ const REAL_ICONS = {
   calculator: <RealIcon src="/icons/calculator.png" rounded />,
   cv: <RealIcon src="/icons/pages.png" rounded />,
   texteditor: <RealIcon src="/icons/textedit.png" />,
-  imageviewer: <RealIcon src="/icons/preview.png" />,
+  // Preview's render is full-bleed, unlike the other macOS icons, so it gets the squircle
+  imageviewer: <RealIcon src="/icons/preview.png" rounded />,
   experience: <RealIcon src="/icons/reminders.png" rounded />,
   shortcuts: <RealIcon src="/icons/shortcuts.png" rounded />,
   settings: <RealIcon src="/icons/settings.png" />,

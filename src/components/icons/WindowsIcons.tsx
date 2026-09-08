@@ -58,28 +58,35 @@ export function ExplorerIcon() {
   );
 }
 
-export function ToDoIcon() {
+export function BriefcaseIcon() {
   return (
     <WinTile top="#3a7bea" bottom="#1f56c9">
-      <circle cx="22" cy="22" r="10.5" fill="#fff" />
       <path
-        d="M16.5 22.3l3.6 3.6 7.4-7.6"
-        stroke="#1f56c9"
-        strokeWidth="2.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M17 15v-2.5q0-2.5 2.5-2.5h5q2.5 0 2.5 2.5V15"
+        fill="none"
+        stroke="#fff"
+        strokeWidth="2"
       />
+      <rect x="8" y="15" width="28" height="19" rx="3" fill="#fff" />
+      <rect x="8" y="15" width="28" height="7" rx="3" fill="#dbe8ff" />
+      <path d="M8 22h28" stroke="#9dbdf5" strokeWidth="1.2" />
+      <rect x="19.5" y="20" width="5" height="4" rx="1" fill="#1f56c9" />
     </WinTile>
   );
 }
 
-export function VsCodeIcon() {
+export function SkillsIcon() {
   return (
-    <WinTile top="#2ea2f2" bottom="#0d6fd8">
-      {/* The VS Code ribbon, simplified */}
-      <path d="M31 8l6 3v22l-6 3-14-13.5z" fill="#fff" opacity="0.95" />
-      <path d="M31 8L14 24.5 8 20l4-2 19 11.5z" fill="#fff" opacity="0.7" />
-      <path d="M8 24l6-4.5L31 36l-4 1.5z" fill="#fff" opacity="0.85" />
+    <WinTile top="#a35cf0" bottom="#5b2fc4">
+      <path
+        d="M15 15l-7 7 7 7M29 15l7 7-7 7"
+        stroke="#fff"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+      <path d="M25 13l-6 18" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" opacity="0.7" />
     </WinTile>
   );
 }
@@ -315,8 +322,8 @@ export function WindowsLogo({ size = 24, color = '#0078d4' }: { size?: number; c
 
 export const WINDOWS_ICONS = {
   finder: <ExplorerIcon />,
-  experience: <ToDoIcon />,
-  skills: <VsCodeIcon />,
+  experience: <BriefcaseIcon />,
+  skills: <SkillsIcon />,
   contact: <OutlookIcon />,
   location: <WinMapsIcon />,
   terminal: <WinTerminalIcon />,

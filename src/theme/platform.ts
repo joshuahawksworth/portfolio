@@ -47,7 +47,6 @@ const APP_LABELS: Partial<Record<string, Partial<Record<OsName, string>>>> = {
   settings: { macos: 'System Settings' },
   texteditor: { windows: 'Notepad', android: 'Keep' },
   imageviewer: { windows: 'Photos', android: 'Photos' },
-  experience: { windows: 'To Do', android: 'Tasks' },
   contact: { windows: 'Outlook', android: 'Gmail' },
   location: { windows: 'Maps', android: 'Maps' },
   cv: { windows: 'Word', android: 'Docs' },
