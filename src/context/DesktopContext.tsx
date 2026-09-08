@@ -168,8 +168,18 @@ export function useDesktop() {
 
 let zTop = 100;
 
+/** Shrink a requested size so the window fits between the shell bars, honouring the app minimum. */
+function fitToWorkArea(appId: string, width: number, height: number) {
+  const { top, bottom } = shellInsets();
+  const min = APP_MIN[appId] ?? { width: 320, height: 240 };
+  const maxW = Math.max(min.width, window.innerWidth - 24);
+  const maxH = Math.max(min.height, window.innerHeight - top - bottom - 16);
+  return { width: Math.min(width, maxW), height: Math.min(height, maxH) };
+}
+
 function makeAbout(): WindowInstance {
-  const d = APP_DEFAULTS.about;
+  const base = APP_DEFAULTS.about;
+  const d = { ...base, ...fitToWorkArea('about', base.width, base.height) };
   const { x, y } = cascadePosition(0, d.width, d.height);
   return {
     id: 'about-0',
@@ -399,8 +409,12 @@ export function DesktopProvider({
     const idx = counter.current;
     const newZ = ++zTop;
     const id = `${appId}-${idx}`;
-    const width = typeof props?.width === 'number' ? props.width : defaults.width;
-    const height = typeof props?.height === 'number' ? props.height : defaults.height;
+    const wanted = {
+      width: typeof props?.width === 'number' ? props.width : defaults.width,
+      height: typeof props?.height === 'number' ? props.height : defaults.height,
+    };
+    // Never open a window larger than the work area (small laptops, short browser windows).
+    const { width, height } = fitToWorkArea(appId, wanted.width, wanted.height);
     const { x, y } = cascadePosition(idx, width, height);
 
     setWindows((prev) => {

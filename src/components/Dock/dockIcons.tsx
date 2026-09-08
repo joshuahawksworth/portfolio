@@ -189,31 +189,9 @@ const DRAWN_ICONS = {
   // The real macOS bin (no tile), same artwork as the desktop and Finder
   trashEmpty: <TrashBinIcon size={44} />,
   trashFull: <TrashBinIcon size={44} full />,
-  doom: (
-    // Sized by the surface's CSS (dock, taskbar, title bar) like the drawn SVGs; the
-    // width/height attributes are only the fallback.
-    <img
-      src="/doom-icon.png"
-      alt="DOOM"
-      width="44"
-      height="44"
-      style={{ borderRadius: '22%', display: 'block', objectFit: 'cover' }}
-      onError={(e) => {
-        // Fallback SVG if PNG not yet added
-        const el = e.target as HTMLImageElement;
-        el.style.display = 'none';
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('viewBox', '0 0 44 44');
-        svg.setAttribute('width', '44');
-        svg.setAttribute('height', '44');
-        svg.innerHTML = `<rect width="44" height="44" rx="11" fill="#0a0000"/>
-          <text x="22" y="29" text-anchor="middle" fill="#cc2200"
-            font-size="15" font-weight="900" font-style="italic"
-            font-family="Impact,Arial Black,sans-serif">DOOM</text>`;
-        el.parentElement?.appendChild(svg);
-      }}
-    />
-  ),
+  // The DOOM render has its own dark margin, so it sits a little larger than the
+  // squircle-scaled apps to read the same size.
+  doom: <RealIcon src="/doom-icon.png" rounded scale={0.92} />,
   snake: <SnakeLcdIcon />,
   imageviewer: (
     // Preview-inspired icon — teal/blue gradient with landscape
