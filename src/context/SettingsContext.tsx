@@ -19,7 +19,13 @@ import {
   type Settings,
 } from '../lib/settingsStore';
 import { useIsMobile } from '../hooks/useIsMobile';
-import { WALLPAPERS, wallpaperFor, type WallpaperKey } from '../data/wallpapers';
+import {
+  WALLPAPERS,
+  probeOptionalWallpapers,
+  subscribeWallpaperAvailability,
+  wallpaperFor,
+  type WallpaperKey,
+} from '../data/wallpapers';
 
 export interface SettingsValue {
   settings: Settings;
@@ -73,6 +79,12 @@ function applyToDocument(settings: Settings, os: OsName) {
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings>(loadSettings);
   const isMobile = useIsMobile();
+  // Optional real wallpapers are discovered at runtime; bump to re-render when one loads.
+  const [, setWallpaperTick] = useState(0);
+  useEffect(() => {
+    probeOptionalWallpapers();
+    return subscribeWallpaperAvailability(() => setWallpaperTick((n) => n + 1));
+  }, []);
   const os = resolveOs(settings.platform, isMobile);
 
   useEffect(() => {

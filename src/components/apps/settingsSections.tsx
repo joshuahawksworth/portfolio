@@ -7,7 +7,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { useSettings } from '../../context/SettingsContext';
 import { useSession } from '../../context/SessionContext';
 import { useDesktop } from '../../context/DesktopContext';
-import { WALLPAPERS, WALLPAPERS_FOR_OS, WALLPAPER_LABELS } from '../../data/wallpapers';
+import { WALLPAPERS, WALLPAPER_LABELS, availableWallpapersFor } from '../../data/wallpapers';
 import { ACCENTS, ACCENT_KEYS, NETWORKS, initialsOf, type Platform } from '../../lib/settingsStore';
 import { DEVICE_INFO, OS_LABELS, appTitleFor } from '../../theme/platform';
 import { WindowsLogo } from '../icons/WindowsIcons';
@@ -252,7 +252,7 @@ export function AccentSection() {
 
 export function WallpaperSection() {
   const { os, wallpaper, setWallpaper } = useSettings();
-  const keys = WALLPAPERS_FOR_OS[os];
+  const keys = availableWallpapersFor(os);
   return (
     <Group
       title={os === 'windows' ? 'Background' : 'Wallpaper'}

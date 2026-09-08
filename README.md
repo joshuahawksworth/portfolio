@@ -47,8 +47,13 @@ the Finder behaves like the real one rather than a list of links.
   to this site's `/api/ask` route for their messages, never stored) to talk to Claude itself, or continue as a guest and
   get answers built from the portfolio data in the browser (free, offline). With `ANTHROPIC_API_KEY` set on the server,
   the site's own key is used when a visitor has none.
-- **Toys**: Apple-style Calculator (with a scientific pad on wide windows), Terminal, a Nokia 3310 running Snake with a
+- **Toys**: Apple-style Calculator (with a scientific pad on wide windows), a Nokia 3310 running Snake with a
   personal high-score table (and a hidden Space Impact), DOOM via js-dos and Rubber Duck.
+- **Terminal**: a real shell per platform: zsh on macOS/iOS, Windows PowerShell (with cmd aliases such as `dir`, `type`,
+  `del`, `ni`, `start`) on Windows, and bash inside Termux on Android. Home folders are mounted on the same virtual file
+  system as Finder/Explorer/Files, so `ls ~/Desktop`, `mkdir`, `touch`, `rm`, `mv`, `cp`, `nano` and `open`/`start` change
+  what you see on the desktop. Supports `&&`, `||`, `;`, `$HOME`/`$env:USERPROFILE`/`%VAR%`, Tab completion, history,
+  Ctrl+C/Ctrl+L, plus `neofetch`/`winfetch`, `systeminfo`, `pkg install`, `getprop`, `say` and `spaceinvaders`.
 - **iOS home screen**: blurred wallpaper, 2×2 clock widget, 4×4 pages with scroll-snap swiping and page dots, iOS-style
   search pill and dock, app sheets with a macOS close light.
 

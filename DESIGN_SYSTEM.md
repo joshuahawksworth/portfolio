@@ -29,6 +29,11 @@ Rules for platform-aware work:
 - Names differ per OS: use `appTitleFor` / `appLabelFor` / `nodeDisplayName` instead of hard-coding "Finder" or "Trash".
 - Space above and below windows comes from `shellInsets(os)`; never hard-code the menu bar or dock height.
 - Wallpapers are per OS (`WALLPAPERS_FOR_OS`); Windows and Android sets are SVGs in `public/wallpapers/`.
+  Microsoft's real wallpapers are copyrighted, so they are not committed. Drop `windows-11-bloom.jpg`,
+  `windows-10-hero.jpg`, `windows-7-harmony.jpg` and `windows-xp-bliss.jpg` into `public/wallpapers/` (they are
+  git-ignored) and the Windows picker lists them automatically; `probeOptionalWallpapers` hides any that are missing.
+- The Terminal's commands live in `lib/terminalShell.ts`: one `Shell` class with a zsh, PowerShell or bash personality
+  chosen by `shellFor(os)`. Add commands there, not in `TerminalApp.tsx`; keep error messages in each shell's own wording.
 - Boot, shutdown and lock screens live in `Boot/` and `Login/` and branch on `os`. Power actions (lock, log out, restart,
   shut down, `switchPlatform`) come from `useSession()`; restart and shut down play `Boot/Shutdown.tsx` for the current
   OS first, and `switchPlatform` shuts the old OS down before the new one boots. With no saved settings the platform is

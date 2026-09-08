@@ -32,3 +32,9 @@ test-results
 *.sw?
 .vercel
 .env*
+
+# Real Windows backgrounds are copyrighted: keep local copies out of the repo
+public/wallpapers/windows-11-bloom.jpg
+public/wallpapers/windows-10-hero.jpg
+public/wallpapers/windows-7-harmony.jpg
+public/wallpapers/windows-xp-bliss.jpg

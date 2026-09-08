@@ -97,3 +97,89 @@
     font-size: 16px;
   }
 }
+
+/* ── Windows Terminal (PowerShell) ─────────────────────────────────────── */
+:global(html[data-os='windows']) .root {
+  background: #0c0c0c;
+  color: #cccccc;
+  font-family: 'Cascadia Mono', 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+  font-size: 13px;
+}
+:global(html[data-os='windows']) .root .prompt,
+:global(html[data-os='windows']) .root .promptLabel {
+  color: #f2f2f2;
+}
+:global(html[data-os='windows']) .root .out {
+  color: #cccccc;
+}
+:global(html[data-os='windows']) .root .err {
+  color: #f14c4c;
+}
+:global(html[data-os='windows']) .root .inputRow {
+  border-top: none;
+  padding-top: 0;
+}
+:global(html[data-os='windows']) .root .inputRow .input {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  min-height: 0;
+  padding: 0;
+  box-shadow: none;
+  color: #f2f2f2;
+  caret-color: #f2f2f2;
+  font-family: inherit;
+  font-size: 13px;
+}
+:global(html[data-os='windows']) .root .cursor {
+  background: #f2f2f2;
+  width: 8px;
+  height: 15px;
+  border-radius: 0;
+}
+
+/* ── Termux (Android) ──────────────────────────────────────────────────── */
+:global(html[data-os='android']) .root {
+  background: #000000;
+  color: #e8e8e8;
+  font-family: 'Roboto Mono', 'Droid Sans Mono', 'Cascadia Code', monospace;
+}
+:global(html[data-os='android']) .root .prompt,
+:global(html[data-os='android']) .root .promptLabel {
+  color: #e8e8e8;
+}
+:global(html[data-os='android']) .root .out {
+  color: #e8e8e8;
+}
+:global(html[data-os='android']) .root .err {
+  color: #ff6b6b;
+}
+:global(html[data-os='android']) .root .inputRow {
+  border-top: none;
+}
+:global(html[data-os='android']) .root .inputRow .input {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  min-height: 0;
+  padding: 0;
+  box-shadow: none;
+  color: #e8e8e8;
+  caret-color: #e8e8e8;
+  font-family: inherit;
+}
+:global(html[data-os='android']) .root .cursor {
+  background: #e8e8e8;
+  border-radius: 0;
+}
+
+/* The field rules above also restyle on focus; the shell input stays bare. */
+:global(html[data-os='windows']) .root .inputRow .input:focus,
+:global(html[data-os='windows']) .root .inputRow .input:focus-visible,
+:global(html[data-os='android']) .root .inputRow .input:focus,
+:global(html[data-os='android']) .root .inputRow .input:focus-visible {
+  background: transparent;
+  border: none;
+  outline: none;
+  box-shadow: none;
+}

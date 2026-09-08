@@ -23,8 +23,8 @@ import DesktopWidgets from './DesktopWidgets';
 import {
   DARK_WALLPAPERS,
   WALLPAPERS,
-  WALLPAPERS_FOR_OS,
   WALLPAPER_LABELS,
+  availableWallpapersFor,
   preloadWallpapers,
   type WallpaperKey,
 } from '../../data/wallpapers';
@@ -738,7 +738,7 @@ function WallpaperPicker({
           {os === 'windows' ? 'Choose a background' : 'Change Background'}
         </div>
         <div className={styles.wallpaperSwatches}>
-          {WALLPAPERS_FOR_OS[os].map((key) => (
+          {availableWallpapersFor(os).map((key) => (
             <button
               key={key}
               className={`${styles.wallpaperSwatch} ${current === key ? styles.wallpaperActive : ''}`}
@@ -1238,7 +1238,7 @@ function DesktopSurface() {
       onDrop={onDesktopDrop}
     >
       {/* Every wallpaper for this OS stays mounted so switching is instant */}
-      {WALLPAPERS_FOR_OS[os].map((key) => (
+      {availableWallpapersFor(os).map((key) => (
         <div
           key={key}
           className={`${styles.wallpaper} ${key === wallpaper ? styles.wallpaperActive : ''}`}
