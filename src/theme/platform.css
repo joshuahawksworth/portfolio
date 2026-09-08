@@ -1,0 +1,409 @@
+/*
+ * Platform control layer. macOS keeps the Golden Gate styles the components ship with;
+ * when the shell renders Windows or Android this file re-dresses the shared primitives
+ * inside app roots (`[class*='_root_']`) and system panels to the native conventions:
+ *
+ *  - Windows 11 / WinUI 3: Segoe UI, 4px corners, 32px controls, 1px hairline buttons,
+ *    accent-underlined text fields, square thin scrollbars, black focus rectangles.
+ *  - Android / Material 3: Roboto, pill buttons (40dp), outlined 4px text fields, 8px+
+ *    corners, 16px body text, no hover states, ripple-style press feedback.
+ *
+ * Selectors carry `html[data-os]` so they outrank single CSS-module classes without
+ * resorting to !important; components that must keep their own look (dock, taskbar,
+ * icon buttons, games) sit outside app roots or use compound selectors.
+ */
+
+/* ── Windows 11 ─────────────────────────────────────────────────────── */
+html[data-os='windows'] {
+  accent-color: var(--accent);
+  scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+  scrollbar-width: thin;
+}
+
+html[data-os='windows'] ::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+html[data-os='windows'] ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border: 4px solid transparent;
+  background-clip: padding-box;
+  border-radius: 6px;
+}
+html[data-os='windows'] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.45);
+  background-clip: padding-box;
+}
+html[data-os='windows'] ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html[data-os='windows'] ::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Text controls: WinUI text box (light fill, hairline border, accent bottom line on focus) */
+html[data-os='windows']
+  [class*='_root_']
+  :is(input:not([type='range']):not([type='checkbox']):not([type='radio']), textarea, select) {
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom-color: rgba(0, 0, 0, 0.45);
+  background: rgba(255, 255, 255, 0.85);
+  font-family: var(--font-ui);
+  min-height: 32px;
+  padding-left: 10px;
+  padding-right: 10px;
+  transition:
+    border-color 100ms ease,
+    background 100ms ease;
+}
+html[data-os='windows'] [class*='_root_'] textarea {
+  padding-top: 6px;
+}
+html[data-os='windows']
+  [class*='_root_']
+  :is(
+    input:not([type='range']):not([type='checkbox']):not([type='radio']),
+    textarea,
+    select
+  ):focus {
+  outline: none;
+  border-bottom: 2px solid var(--accent);
+  background: #fff;
+  box-shadow: none;
+}
+
+/* Standard buttons: flat, hairline, 4px. Icon-only buttons keep their own shape. */
+html[data-os='windows']
+  [class*='_root_']
+  button:not([class*='Btn']):not([class*='btn']):not([class*='tab']):not([class*='segment']):not(
+    [class*='toggle']
+  ):not([class*='swatch']):not([class*='digit']):not([class*='op']):not([class*='fn']):not(
+    [class*='sci']
+  ):not([class*='row']):not([class*='item']):not([class*='sideRow']):not(
+    [class*='platformCard']
+  ):not([class*='wallpaperThumb']) {
+  border-radius: 4px;
+  font-family: var(--font-ui);
+}
+html[data-os='windows']
+  [class*='_root_']
+  :is(
+    [class*='actionBtn'],
+    [class*='socialBtn'],
+    [class*='sendBtn'],
+    [class*='emptyBtn'],
+    [class*='restoreBtn'],
+    [class*='uploadBtn'],
+    [class*='sheetSave'],
+    [class*='sheetCancel'],
+    [class*='saveTabBtn'],
+    [class*='_button_']
+  ) {
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom-color: rgba(0, 0, 0, 0.18);
+  background: #fbfbfb;
+  color: var(--text);
+  font-family: var(--font-ui);
+  min-height: 32px;
+  padding-left: 14px;
+  padding-right: 14px;
+  box-shadow: none;
+  transition: background 100ms ease;
+}
+html[data-os='windows']
+  [class*='_root_']
+  :is(
+    [class*='actionBtn'],
+    [class*='socialBtn'],
+    [class*='sendBtn'],
+    [class*='emptyBtn'],
+    [class*='restoreBtn'],
+    [class*='uploadBtn'],
+    [class*='sheetSave'],
+    [class*='sheetCancel'],
+    [class*='saveTabBtn'],
+    [class*='_button_']
+  ):hover {
+  background: #f6f6f6;
+}
+html[data-os='windows']
+  [class*='_root_']
+  :is(
+    [class*='actionBtn'],
+    [class*='socialBtn'],
+    [class*='sendBtn'],
+    [class*='emptyBtn'],
+    [class*='restoreBtn'],
+    [class*='uploadBtn'],
+    [class*='sheetSave'],
+    [class*='sheetCancel'],
+    [class*='saveTabBtn'],
+    [class*='_button_']
+  ):active {
+  background: #f0f0f0;
+  color: var(--muted);
+}
+/* Primary (accent) actions */
+html[data-os='windows']
+  [class*='_root_']
+  :is([class*='sendBtn'], [class*='sheetSave'], [class*='buttonPrimary']) {
+  background: var(--accent);
+  border-color: transparent;
+  color: #fff;
+}
+html[data-os='windows']
+  [class*='_root_']
+  :is([class*='sendBtn'], [class*='sheetSave'], [class*='buttonPrimary']):hover {
+  background: var(--accent);
+  filter: brightness(1.08);
+}
+
+/* Toolbar / icon buttons: flat squares that tint on hover, like the WinUI command bar */
+html[data-os='windows']
+  [class*='_root_']
+  :is([class*='toolBtn'], [class*='viewBtn'], [class*='pathBtn'], [class*='searchClear']) {
+  border-radius: 4px;
+}
+html[data-os='windows']
+  [class*='_root_']
+  :is([class*='toolBtn'], [class*='viewBtn'], [class*='pathBtn']):hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Focus rectangles: WinUI draws a 2px black ring outside the control */
+html[data-os='windows']
+  :is(button, input, select, textarea, [role='button'], [tabindex]):focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 1px;
+}
+
+/* Headings inside apps: Segoe semibold, tighter */
+html[data-os='windows'] [class*='_root_'] :is(h1, h2, h3) {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+/* Cards, sections and pills lose the macOS pill-roundness */
+html[data-os='windows']
+  [class*='_root_']
+  :is([class*='group'], [class*='card'], [class*='section'], [class*='panel'], [class*='sheet']) {
+  border-radius: 4px;
+}
+
+/* System menus and popovers: WinUI flyouts */
+html[data-os='windows'] :is([class*='ctxMenu_'], [class*='dropdown_'], [class*='tilingMenu_']) {
+  border-radius: 8px;
+  padding: 4px;
+  background: rgba(249, 249, 249, 0.97);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+html[data-os='windows'] :is([class*='ctxItem_'], [class*='menuItem_'], [class*='tilingItem_']) {
+  border-radius: 4px;
+  min-height: 32px;
+  padding-left: 12px;
+  padding-right: 12px;
+  font-size: 12.5px;
+}
+html[data-os='windows'] :is([class*='ctxItem_'], [class*='menuItem_']):hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text);
+}
+
+/* ── Android / Material 3 ───────────────────────────────────────────── */
+html[data-os='android'] {
+  accent-color: var(--accent);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+}
+
+html[data-os='android'] ::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+html[data-os='android'] ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 2px;
+}
+
+html[data-os='android'] ::selection {
+  background: var(--accent-soft);
+}
+
+/* Body text is 16sp on Android; secondary text 14sp */
+html[data-os='android'] [class*='_root_'] {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Text fields: Material outlined */
+html[data-os='android']
+  [class*='_root_']
+  :is(
+    input:not([type='range']):not([type='checkbox']):not([type='radio']):not([type='search']),
+    textarea,
+    select
+  ) {
+  border-radius: 4px;
+  border: 1px solid #79747e;
+  background: transparent;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  min-height: 48px;
+  padding-left: 16px;
+  padding-right: 16px;
+  transition: border-color 120ms ease;
+}
+html[data-os='android'] [class*='_root_'] textarea {
+  padding-top: 12px;
+}
+html[data-os='android']
+  [class*='_root_']
+  :is(
+    input:not([type='range']):not([type='checkbox']):not([type='radio']):not([type='search']),
+    textarea,
+    select
+  ):focus {
+  outline: none;
+  border: 2px solid var(--accent);
+  box-shadow: none;
+}
+/* Search fields are pill-shaped search bars */
+html[data-os='android']
+  [class*='_root_']
+  :is(input[type='search'], [class*='searchWrap'], [class*='searchPill'], [class*='_search_']) {
+  border-radius: 28px;
+  background: #eceff4;
+  border: 0;
+  min-height: 44px;
+}
+
+/* Buttons: Material filled / outlined pills, 40dp tall, no hover on touch */
+html[data-os='android']
+  [class*='_root_']
+  :is(
+    [class*='actionBtn'],
+    [class*='socialBtn'],
+    [class*='sendBtn'],
+    [class*='emptyBtn'],
+    [class*='restoreBtn'],
+    [class*='uploadBtn'],
+    [class*='sheetSave'],
+    [class*='sheetCancel'],
+    [class*='saveTabBtn'],
+    [class*='_button_']
+  ) {
+  border-radius: 20px;
+  min-height: 40px;
+  padding-left: 20px;
+  padding-right: 20px;
+  border: 1px solid #79747e;
+  background: transparent;
+  color: var(--accent);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  box-shadow: none;
+  transition: background 120ms ease;
+}
+html[data-os='android']
+  [class*='_root_']
+  :is(
+    [class*='actionBtn'],
+    [class*='socialBtn'],
+    [class*='sendBtn'],
+    [class*='emptyBtn'],
+    [class*='restoreBtn'],
+    [class*='uploadBtn'],
+    [class*='sheetSave'],
+    [class*='sheetCancel'],
+    [class*='saveTabBtn'],
+    [class*='_button_']
+  ):active {
+  background: var(--accent-soft);
+}
+html[data-os='android']
+  [class*='_root_']
+  :is([class*='sendBtn'], [class*='sheetSave'], [class*='buttonPrimary']) {
+  background: var(--accent);
+  border-color: transparent;
+  color: #fff;
+}
+html[data-os='android']
+  [class*='_root_']
+  :is([class*='sendBtn'], [class*='sheetSave'], [class*='buttonPrimary']):active {
+  background: var(--accent);
+  filter: brightness(1.1);
+}
+
+/* Icon buttons: 48dp circular touch targets */
+html[data-os='android']
+  [class*='_root_']
+  :is([class*='toolBtn'], [class*='viewBtn'], [class*='searchClear'], [class*='closeBtn']) {
+  border-radius: 50%;
+  min-width: 40px;
+  min-height: 40px;
+}
+html[data-os='android']
+  [class*='_root_']
+  :is([class*='toolBtn'], [class*='viewBtn'], [class*='uploadBtn']):active {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* Material focus: soft accent halo instead of a hard ring */
+html[data-os='android'] :is(button, input, select, textarea, [role='button']):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Headings: Roboto medium; cards and sheets use 12–28dp corners */
+html[data-os='android'] [class*='_root_'] :is(h1, h2, h3) {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+html[data-os='android']
+  [class*='_root_']
+  :is([class*='group'], [class*='card'], [class*='section']) {
+  border-radius: 12px;
+}
+html[data-os='android'] [class*='_root_'] :is([class*='sheet'], [class*='panel']) {
+  border-radius: 28px 28px 0 0;
+}
+
+/* Lists: 56dp rows, 1dp dividers, no hover */
+html[data-os='android'] [class*='_root_'] :is([class*='_row_'], [class*='_item_']) {
+  min-height: 56px;
+}
+
+/* Menus: Material menu surfaces */
+html[data-os='android'] :is([class*='ctxMenu_'], [class*='dropdown_']) {
+  border-radius: 4px;
+  padding: 8px 0;
+  background: #f3edf7;
+  border: 0;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.15),
+    0 8px 24px rgba(0, 0, 0, 0.15);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+html[data-os='android'] :is([class*='ctxItem_'], [class*='menuItem_']) {
+  border-radius: 0;
+  min-height: 48px;
+  padding-left: 12px;
+  padding-right: 12px;
+  font-size: 14px;
+}
+html[data-os='android'] :is([class*='ctxItem_'], [class*='menuItem_']):hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text);
+}

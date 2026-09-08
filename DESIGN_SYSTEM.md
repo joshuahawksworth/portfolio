@@ -31,6 +31,11 @@ Rules for platform-aware work:
 - Wallpapers are per OS (`WALLPAPERS_FOR_OS`); Windows and Android sets are SVGs in `public/wallpapers/`.
 - Boot and lock screens live in `Boot/` and `Login/` and branch on `os`. Power actions (lock, log out, restart, shut
   down) come from `useSession()`.
+- `src/theme/platform.css` re-dresses shared primitives (buttons, text fields, menus, scrollbars, focus rings, headings)
+  inside app roots to WinUI 3 on Windows and Material 3 on Android. It keys off `[class*='_root_']`, so give every app a
+  `.root` class and keep icon-only buttons on `*Btn` classes (toolBtn, viewBtn, uploadBtn) so they stay flat. App-specific
+  looks (File Explorer / Files, Windows / Google Calculator, Notepad / Keep) live in each app's module under
+  `:global(html[data-os='…'])` blocks.
 - Settings must be real: every control in `apps/settingsSections.tsx` changes the store, the session or the file system.
   Add new settings to `Settings`/`DEFAULT_SETTINGS`/`sanitizeSettings` in the store, then to the relevant section.
 

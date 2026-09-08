@@ -925,3 +925,9 @@
 .android.darkWall .homeIndicator {
   background: rgba(255, 255, 255, 0.85);
 }
+
+/* Google Calculator is light, so its sheet is too */
+.android .panelBodyCalculator {
+  background: #f8f9fb;
+  color: #1c1b1f;
+}

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import styles from './TextEditorApp.module.css';
+import { currentOs } from '../../theme/platform';
 
 // ── Syntax highlighting ────────────────────────────────────────────────────
 
@@ -7,45 +8,60 @@ function escHtml(s: string) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-const JS_KEYWORDS = /\b(const|let|var|function|return|if|else|while|for|of|in|new|class|extends|import|export|default|from|async|await|try|catch|finally|throw|typeof|instanceof|void|null|undefined|true|false|this|super|type|interface|enum|readonly|abstract|implements|declare|namespace|module|require|yield|delete|switch|case|break|continue|do|with|debugger|get|set|static)\b/g;
+const JS_KEYWORDS =
+  /\b(const|let|var|function|return|if|else|while|for|of|in|new|class|extends|import|export|default|from|async|await|try|catch|finally|throw|typeof|instanceof|void|null|undefined|true|false|this|super|type|interface|enum|readonly|abstract|implements|declare|namespace|module|require|yield|delete|switch|case|break|continue|do|with|debugger|get|set|static)\b/g;
 
 function highlightJS(code: string): string {
   // Tokenise line by line to handle multi-line strings simply
-  return code.split('\n').map(line => {
-    const esc = escHtml(line);
-    return esc
-      // Line comments
-      .replace(/(&lt;|&gt;|[^:])(\/\/.*)$/g, (_, pre, cmt) => `${pre}<span class="cm">${cmt}</span>`)
-      // Template literals — crude single-line
-      .replace(/(`[^`]*`)/g, '<span class="st">$1</span>')
-      // Strings
-      .replace(/(["'])((?:[^\\]|\\.)*?)\1/g, '<span class="st">$1$2$1</span>')
-      // Numbers
-      .replace(/\b(\d+\.?\d*)\b/g, '<span class="nm">$1</span>')
-      // Keywords
-      .replace(JS_KEYWORDS, '<span class="kw">$1</span>')
-      // Type annotations (TS: after : or <)
-      .replace(/(?<=:\s*)([A-Z][a-zA-Z0-9]*)/g, '<span class="tp">$1</span>');
-  }).join('\n');
+  return code
+    .split('\n')
+    .map((line) => {
+      const esc = escHtml(line);
+      return (
+        esc
+          // Line comments
+          .replace(
+            /(&lt;|&gt;|[^:])(\/\/.*)$/g,
+            (_, pre, cmt) => `${pre}<span class="cm">${cmt}</span>`
+          )
+          // Template literals — crude single-line
+          .replace(/(`[^`]*`)/g, '<span class="st">$1</span>')
+          // Strings
+          .replace(/(["'])((?:[^\\]|\\.)*?)\1/g, '<span class="st">$1$2$1</span>')
+          // Numbers
+          .replace(/\b(\d+\.?\d*)\b/g, '<span class="nm">$1</span>')
+          // Keywords
+          .replace(JS_KEYWORDS, '<span class="kw">$1</span>')
+          // Type annotations (TS: after : or <)
+          .replace(/(?<=:\s*)([A-Z][a-zA-Z0-9]*)/g, '<span class="tp">$1</span>')
+      );
+    })
+    .join('\n');
 }
 
 function highlightMD(code: string): string {
-  return code.split('\n').map(line => {
-    const esc = escHtml(line);
-    if (/^#{1,6} /.test(line)) return `<span class="kw">${esc}</span>`;
-    if (/^\s*[-*+] /.test(line)) return esc.replace(/^(\s*[-*+] )/, '<span class="nm">$1</span>');
-    if (/^\s*\d+\. /.test(line)) return esc.replace(/^(\s*\d+\. )/, '<span class="nm">$1</span>');
-    return esc
-      .replace(/(`[^`]+`)/g, '<span class="st">$1</span>')
-      .replace(/(\*\*[^*]+\*\*)/g, '<span class="tp">$1</span>')
-      .replace(/(\*[^*]+\*)/g, '<span class="cm">$1</span>');
-  }).join('\n');
+  return code
+    .split('\n')
+    .map((line) => {
+      const esc = escHtml(line);
+      if (/^#{1,6} /.test(line)) return `<span class="kw">${esc}</span>`;
+      if (/^\s*[-*+] /.test(line)) return esc.replace(/^(\s*[-*+] )/, '<span class="nm">$1</span>');
+      if (/^\s*\d+\. /.test(line)) return esc.replace(/^(\s*\d+\. )/, '<span class="nm">$1</span>');
+      return esc
+        .replace(/(`[^`]+`)/g, '<span class="st">$1</span>')
+        .replace(/(\*\*[^*]+\*\*)/g, '<span class="tp">$1</span>')
+        .replace(/(\*[^*]+\*)/g, '<span class="cm">$1</span>');
+    })
+    .join('\n');
 }
 
 function highlightHTML(code: string): string {
   return escHtml(code)
     .replace(/(&lt;\/?[a-zA-Z][a-zA-Z0-9-]*)/g, '<span class="kw">$1</span>')
-    .replace(/([a-zA-Z-]+=)(["'][^"']*["'])/g, '<span class="tp">$1</span><span class="st">$2</span>')
+    .replace(
+      /([a-zA-Z-]+=)(["'][^"']*["'])/g,
+      '<span class="tp">$1</span><span class="st">$2</span>'
+    )
     .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="cm">$1</span>');
 }
 
@@ -517,20 +533,39 @@ Created: January 2024
 // ── File save helpers ──────────────────────────────────────────────────────
 
 const MIME_MAP: Record<string, string> = {
-  ts: 'application/typescript', tsx: 'application/typescript',
-  js: 'application/javascript', jsx: 'application/javascript',
-  json: 'application/json', html: 'text/html', css: 'text/css',
-  md: 'text/markdown', txt: 'text/plain', py: 'text/x-python',
-  sh: 'application/x-sh', xml: 'application/xml',
+  ts: 'application/typescript',
+  tsx: 'application/typescript',
+  js: 'application/javascript',
+  jsx: 'application/javascript',
+  json: 'application/json',
+  html: 'text/html',
+  css: 'text/css',
+  md: 'text/markdown',
+  txt: 'text/plain',
+  py: 'text/x-python',
+  sh: 'application/x-sh',
+  xml: 'application/xml',
 };
 
 const FORMAT_LABELS: Record<string, string> = {
-  md: 'Markdown', txt: 'Plain Text', ts: 'TypeScript', tsx: 'TypeScript JSX',
-  js: 'JavaScript', jsx: 'JavaScript JSX', json: 'JSON', html: 'HTML',
-  css: 'CSS', py: 'Python', sh: 'Shell Script', xml: 'XML',
+  md: 'Markdown',
+  txt: 'Plain Text',
+  ts: 'TypeScript',
+  tsx: 'TypeScript JSX',
+  js: 'JavaScript',
+  jsx: 'JavaScript JSX',
+  json: 'JSON',
+  html: 'HTML',
+  css: 'CSS',
+  py: 'Python',
+  sh: 'Shell Script',
+  xml: 'XML',
 };
 
-async function saveFileToDisk(name: string, text: string): Promise<'saved' | 'cancelled' | 'fallback'> {
+async function saveFileToDisk(
+  name: string,
+  text: string
+): Promise<'saved' | 'cancelled' | 'fallback'> {
   const ext = name.split('.').pop()?.toLowerCase() ?? 'txt';
   const mime = MIME_MAP[ext] ?? 'text/plain';
 
@@ -540,7 +575,9 @@ async function saveFileToDisk(name: string, text: string): Promise<'saved' | 'ca
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const handle = await (window as any).showSaveFilePicker({
         suggestedName: name,
-        types: [{ description: FORMAT_LABELS[ext] ?? 'Text file', accept: { [mime]: [`.${ext}`] } }],
+        types: [
+          { description: FORMAT_LABELS[ext] ?? 'Text file', accept: { [mime]: [`.${ext}`] } },
+        ],
         startIn: 'desktop',
       });
       const writable = await handle.createWritable();
@@ -555,9 +592,9 @@ async function saveFileToDisk(name: string, text: string): Promise<'saved' | 'ca
 
   // Blob download fallback (all browsers)
   const blob = new Blob([text], { type: `${mime};charset=utf-8` });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
   a.download = name;
   document.body.appendChild(a);
   a.click();
@@ -574,30 +611,30 @@ const sessionFileStore = new Map<string, string>();
 
 export default function TextEditorApp({ props }: { props?: Record<string, unknown> }) {
   const initFilename = (props?.filename as string) ?? 'untitled.txt';
-  const initContent  = (props?.content  as string) ?? '';
+  const initContent = (props?.content as string) ?? '';
   // fileId is a stable key (Finder item ID) so edits survive rename in the store
-  const fileId       = (props?.fileId   as string | undefined) ?? initFilename;
+  const fileId = (props?.fileId as string | undefined) ?? initFilename;
 
   // On first render: check session store, fall back to props content
   const [filename, setFilename] = useState(initFilename);
-  const [content,  setContent]  = useState(() => sessionFileStore.get(fileId) ?? initContent);
-  const [dirty,    setDirty]    = useState(() => sessionFileStore.has(fileId));
+  const [content, setContent] = useState(() => sessionFileStore.get(fileId) ?? initContent);
+  const [dirty, setDirty] = useState(() => sessionFileStore.has(fileId));
 
   // Save sheet state
-  const [saveSheet,     setSaveSheet]     = useState(false);
-  const [saveName,      setSaveName]      = useState(initFilename);
-  const [saveStatus,    setSaveStatus]    = useState<'idle' | 'saving' | 'done' | 'fallback'>('idle');
+  const [saveSheet, setSaveSheet] = useState(false);
+  const [saveName, setSaveName] = useState(initFilename);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'done' | 'fallback'>('idle');
   const saveNameRef = useRef<HTMLInputElement>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const hlRef       = useRef<HTMLDivElement>(null);
-  const lineNumRef  = useRef<HTMLDivElement>(null);
+  const hlRef = useRef<HTMLDivElement>(null);
+  const lineNumRef = useRef<HTMLDivElement>(null);
 
-  const ext       = filename.split('.').pop()?.toLowerCase() ?? '';
-  const saveExt   = saveName.split('.').pop()?.toLowerCase() ?? '';
+  const ext = filename.split('.').pop()?.toLowerCase() ?? '';
+  const saveExt = saveName.split('.').pop()?.toLowerCase() ?? '';
 
   const highlighted = useMemo(() => highlight(content, ext), [content, ext]);
-  const lineCount   = content.split('\n').length;
+  const lineCount = content.split('\n').length;
 
   // ── Local save — instant, no dialog ──────────────────────────────────
   const [savedFlash, setSavedFlash] = useState(false);
@@ -619,30 +656,33 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
     }, 60);
   }
 
-  const doSave = useCallback(async (nameOverride?: string) => {
-    const name = (nameOverride ?? saveName).trim() || 'untitled.txt';
-    setSaveStatus('saving');
-    const result = await saveFileToDisk(name, content);
-    if (result === 'cancelled') {
-      setSaveStatus('idle');
-      return;
-    }
-    // Keep store up-to-date under the new name
-    sessionFileStore.set(fileId, content);
-    setFilename(name);
-    setSaveStatus(result === 'fallback' ? 'fallback' : 'done');
-    setDirty(false);
-    setTimeout(() => {
-      setSaveSheet(false);
-      setSaveStatus('idle');
-    }, 1800);
-  }, [fileId, saveName, content]);
+  const doSave = useCallback(
+    async (nameOverride?: string) => {
+      const name = (nameOverride ?? saveName).trim() || 'untitled.txt';
+      setSaveStatus('saving');
+      const result = await saveFileToDisk(name, content);
+      if (result === 'cancelled') {
+        setSaveStatus('idle');
+        return;
+      }
+      // Keep store up-to-date under the new name
+      sessionFileStore.set(fileId, content);
+      setFilename(name);
+      setSaveStatus(result === 'fallback' ? 'fallback' : 'done');
+      setDirty(false);
+      setTimeout(() => {
+        setSaveSheet(false);
+        setSaveStatus('idle');
+      }, 1800);
+    },
+    [fileId, saveName, content]
+  );
 
   // Sync scroll between textarea and highlight overlay
   function syncScroll() {
     if (!hlRef.current || !textareaRef.current || !lineNumRef.current) return;
-    hlRef.current.scrollTop      = textareaRef.current.scrollTop;
-    hlRef.current.scrollLeft     = textareaRef.current.scrollLeft;
+    hlRef.current.scrollTop = textareaRef.current.scrollTop;
+    hlRef.current.scrollLeft = textareaRef.current.scrollLeft;
     lineNumRef.current.scrollTop = textareaRef.current.scrollTop;
   }
 
@@ -656,12 +696,14 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Tab') {
       e.preventDefault();
-      const ta    = e.currentTarget;
+      const ta = e.currentTarget;
       const start = ta.selectionStart;
-      const end   = ta.selectionEnd;
+      const end = ta.selectionEnd;
       setContent(content.slice(0, start) + '  ' + content.slice(end));
       setDirty(true);
-      requestAnimationFrame(() => { ta.selectionStart = ta.selectionEnd = start + 2; });
+      requestAnimationFrame(() => {
+        ta.selectionStart = ta.selectionEnd = start + 2;
+      });
     }
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       e.preventDefault();
@@ -676,14 +718,17 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
     setContent(stored ?? initContent);
     setDirty(!!stored);
     setSaveSheet(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fileId]);
 
   // Close sheet on Escape
   useEffect(() => {
     if (!saveSheet) return;
     function onKey(e: globalThis.KeyboardEvent) {
-      if (e.key === 'Escape') { setSaveSheet(false); setSaveStatus('idle'); }
+      if (e.key === 'Escape') {
+        setSaveSheet(false);
+        setSaveStatus('idle');
+      }
       if (e.key === 'Enter' && saveStatus === 'idle') doSave();
     }
     window.addEventListener('keydown', onKey);
@@ -702,13 +747,19 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
         {savedFlash && <span className={styles.savedFlash}>Saved ✓</span>}
 
         {/* Export to disk */}
-        <button
-          className={styles.saveTabBtn}
-          onClick={openSaveSheet}
-          title="Export file to disk"
-        >
-          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M7 2v7M4 6.5l3 3 3-3"/><path d="M2 12h10"/>
+        <button className={styles.saveTabBtn} onClick={openSaveSheet} title="Export file to disk">
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 14 14"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M7 2v7M4 6.5l3 3 3-3" />
+            <path d="M2 12h10" />
           </svg>
           Export
         </button>
@@ -718,7 +769,9 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
       <div className={styles.editorArea}>
         <div ref={lineNumRef} className={styles.lineNumbers} aria-hidden="true">
           {Array.from({ length: lineCount }, (_, i) => (
-            <div key={i} className={styles.lineNum}>{i + 1}</div>
+            <div key={i} className={styles.lineNum}>
+              {i + 1}
+            </div>
           ))}
         </div>
         <div className={styles.codeWrap}>
@@ -752,21 +805,41 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
         <span className={styles.statusSep} />
         <span>{content.length} chars</span>
         <span className={styles.statusFill} />
-        <span className={styles.statusHint}>⌘S to save</span>
+        <span className={styles.statusHint}>
+          {currentOs() === 'windows' ? 'Ctrl+S to save' : '⌘S to save'}
+        </span>
       </div>
 
       {/* ── Save sheet ──────────────────────────────────────────────── */}
       {saveSheet && (
-        <div className={styles.sheetOverlay} onClick={() => { setSaveSheet(false); setSaveStatus('idle'); }}>
-          <div className={styles.sheet} onClick={e => e.stopPropagation()}>
-
+        <div
+          className={styles.sheetOverlay}
+          onClick={() => {
+            setSaveSheet(false);
+            setSaveStatus('idle');
+          }}
+        >
+          <div className={styles.sheet} onClick={(e) => e.stopPropagation()}>
             {saveStatus === 'done' || saveStatus === 'fallback' ? (
               /* Success state */
               <div className={styles.sheetSuccess}>
                 <div className={styles.sheetSuccessIcon}>
                   <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                    <circle cx="16" cy="16" r="14" fill="rgba(48,209,88,0.18)" stroke="#30d158" strokeWidth="1.5"/>
-                    <path d="M10 16l4 4 8-8" stroke="#30d158" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle
+                      cx="16"
+                      cy="16"
+                      r="14"
+                      fill="rgba(48,209,88,0.18)"
+                      stroke="#30d158"
+                      strokeWidth="1.5"
+                    />
+                    <path
+                      d="M10 16l4 4 8-8"
+                      stroke="#30d158"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 </div>
                 <div className={styles.sheetSuccessTitle}>File saved</div>
@@ -780,9 +853,18 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
               <>
                 <div className={styles.sheetHeader}>
                   <div className={styles.sheetIcon}>
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M15 18H5a1.5 1.5 0 01-1.5-1.5v-13A1.5 1.5 0 015 2h7.5L16.5 6v10.5A1.5 1.5 0 0115 18z"/>
-                      <path d="M13 2v5H7V2M7 18v-6h6v6"/>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M15 18H5a1.5 1.5 0 01-1.5-1.5v-13A1.5 1.5 0 015 2h7.5L16.5 6v10.5A1.5 1.5 0 0115 18z" />
+                      <path d="M13 2v5H7V2M7 18v-6h6v6" />
                     </svg>
                   </div>
                   <div>
@@ -799,7 +881,7 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
                     ref={saveNameRef}
                     className={styles.sheetInput}
                     value={saveName}
-                    onChange={e => setSaveName(e.target.value)}
+                    onChange={(e) => setSaveName(e.target.value)}
                     spellCheck={false}
                     autoComplete="off"
                   />
@@ -828,7 +910,10 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
                 <div className={styles.sheetActions}>
                   <button
                     className={styles.sheetCancel}
-                    onClick={() => { setSaveSheet(false); setSaveStatus('idle'); }}
+                    onClick={() => {
+                      setSaveSheet(false);
+                      setSaveStatus('idle');
+                    }}
                   >
                     Cancel
                   </button>
@@ -841,9 +926,18 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
                       'Saving…'
                     ) : (
                       <>
-                        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M7 2v8M4 7l3 3 3-3"/>
-                          <path d="M2 12h10"/>
+                        <svg
+                          width="13"
+                          height="13"
+                          viewBox="0 0 14 14"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M7 2v8M4 7l3 3 3-3" />
+                          <path d="M2 12h10" />
                         </svg>
                         Export File
                       </>

@@ -667,3 +667,186 @@
     display: none;
   }
 }
+
+/* ── File Explorer (Windows 11) ─────────────────────────────────── */
+:global(html[data-os='windows']) .root {
+  font-size: 12.5px;
+}
+:global(html[data-os='windows']) .sidebar {
+  background: rgba(255, 255, 255, 0.35);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 8px 6px;
+}
+:global(html[data-os='windows']) .sidebarSection {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  text-transform: none;
+  padding: 10px 10px 6px;
+}
+:global(html[data-os='windows']) .sidebarBtn {
+  border-radius: 4px;
+  min-height: 32px;
+  font-weight: 400;
+  position: relative;
+}
+:global(html[data-os='windows']) .sidebarBtn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+:global(html[data-os='windows']) .sidebarBtn.active {
+  background: rgba(0, 0, 0, 0.06);
+  font-weight: 400;
+}
+:global(html[data-os='windows']) .sidebarBtn.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+:global(html[data-os='windows']) .sidebarIcon {
+  color: #e8a416;
+}
+:global(html[data-os='windows']) .toolbar {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.4);
+}
+:global(html[data-os='windows']) .searchWrap {
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom-color: rgba(0, 0, 0, 0.45);
+  background: #fff;
+  height: 30px;
+}
+:global(html[data-os='windows']) .viewToggle {
+  border-radius: 4px;
+  background: transparent;
+  border: 0;
+}
+:global(html[data-os='windows']) .viewBtn {
+  border-radius: 4px;
+}
+:global(html[data-os='windows']) .viewActive {
+  background: rgba(0, 0, 0, 0.06);
+  box-shadow: none;
+}
+:global(html[data-os='windows']) .item {
+  border-radius: 4px;
+}
+:global(html[data-os='windows']) .itemSelected {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+:global(html[data-os='windows']) .itemName {
+  border-radius: 2px;
+}
+:global(html[data-os='windows']) .row {
+  border-radius: 0;
+  min-height: 28px;
+}
+:global(html[data-os='windows']) .rowAlt {
+  background: transparent;
+}
+:global(html[data-os='windows']) .row:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+:global(html[data-os='windows']) .rowSelected,
+:global(html[data-os='windows']) .rowSelected:hover {
+  background: var(--accent-soft);
+  color: var(--text);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+:global(html[data-os='windows']) .listHead {
+  background: transparent;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  font-weight: 400;
+}
+:global(html[data-os='windows']) .statusBar {
+  background: rgba(255, 255, 255, 0.5);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 12px;
+}
+:global(html[data-os='windows']) .pathSeg,
+:global(html[data-os='windows']) .pathBtn {
+  border-radius: 4px;
+}
+
+/* ── Files (Android, Material 3) ────────────────────────────────── */
+:global(html[data-os='android']) .root {
+  font-size: 15px;
+}
+:global(html[data-os='android']) .sidebar {
+  display: none;
+}
+:global(html[data-os='android']) .toolbar {
+  height: 64px;
+  padding: 0 8px;
+  border-bottom: 0;
+  background: transparent;
+}
+:global(html[data-os='android']) .toolbarPath {
+  font-size: 17px;
+  font-weight: 500;
+}
+:global(html[data-os='android']) .searchWrap {
+  border-radius: 20px;
+  background: #eceff4;
+  border: 0;
+  height: 40px;
+}
+:global(html[data-os='android']) .searchInput {
+  border: 0;
+  background: transparent;
+  min-height: 0;
+  font-size: 15px;
+}
+:global(html[data-os='android']) .uploadBtn {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  min-width: 40px;
+}
+:global(html[data-os='android']) .item {
+  border-radius: 12px;
+}
+:global(html[data-os='android']) .itemSelected {
+  background: var(--accent-soft);
+  box-shadow: none;
+}
+:global(html[data-os='android']) .row {
+  min-height: 56px;
+  border-radius: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+:global(html[data-os='android']) .rowAlt {
+  background: transparent;
+}
+:global(html[data-os='android']) .rowSelected,
+:global(html[data-os='android']) .rowSelected:hover {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+:global(html[data-os='android']) .listHead {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  border-bottom: 0;
+  background: transparent;
+}
+:global(html[data-os='android']) .statusBar {
+  background: transparent;
+  border-top: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+:global(html[data-os='android']) .viewToggle {
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.05);
+  border: 0;
+}
+:global(html[data-os='android']) .viewBtn {
+  border-radius: 20px;
+}

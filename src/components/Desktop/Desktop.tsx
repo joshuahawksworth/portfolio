@@ -1215,7 +1215,7 @@ function DesktopSurface() {
     const item = items.find((i) => i.id === id);
     return item && canTrashNode(item.node);
   });
-  const ctxX = ctxMenu ? Math.min(ctxMenu.x, window.innerWidth - 230) : 0;
+  const ctxX = ctxMenu ? Math.min(ctxMenu.x, window.innerWidth - 256) : 0;
   const ctxY = ctxMenu ? Math.min(ctxMenu.y, window.innerHeight - (ctxTarget ? 180 : 260)) : 0;
   const trashFull = trashCount > 0;
   void settings;

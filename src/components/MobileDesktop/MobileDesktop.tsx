@@ -862,7 +862,7 @@ function MobileInner() {
         {activeWindow && (
           <>
             <div
-              className={`${styles.panelHeader} ${DARK_APPS.has(activeWindow.appId) ? styles.panelHeaderDark : ''}`}
+              className={`${styles.panelHeader} ${DARK_APPS.has(activeWindow.appId) && !(android && activeWindow.appId === 'calculator') ? styles.panelHeaderDark : ''}`}
             >
               <button
                 className={styles.closeBtn}
