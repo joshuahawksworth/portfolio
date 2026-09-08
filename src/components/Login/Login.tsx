@@ -100,7 +100,6 @@ function WindowsLogin({ onLogin }: Props) {
   const [powerOpen, setPowerOpen] = useState(false);
   const { leaving, enter } = useUnlock(onLogin, stage === 'signin');
   const { now, time } = useLockClock();
-  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80);
@@ -118,10 +117,6 @@ function WindowsLogin({ onLogin }: Props) {
       window.removeEventListener('keydown', dismiss);
       window.removeEventListener('pointerdown', dismiss);
     };
-  }, [stage]);
-
-  useEffect(() => {
-    if (stage === 'signin') inputRef.current?.focus();
   }, [stage]);
 
   return (
@@ -144,40 +139,10 @@ function WindowsLogin({ onLogin }: Props) {
         <div className={styles.winPanel}>
           <div className={styles.winAvatar}>{initialsOf(settings.userName)}</div>
           <div className={styles.winName}>{settings.userName}</div>
-          <form
-            className={styles.winForm}
-            onSubmit={(e) => {
-              e.preventDefault();
-              enter();
-            }}
-          >
-            <input
-              ref={inputRef}
-              className={styles.winInput}
-              type="password"
-              placeholder="PIN"
-              aria-label="PIN"
-              autoComplete="off"
-            />
-            <button type="submit" className={styles.winGo} aria-label="Sign in">
-              <svg
-                viewBox="0 0 16 16"
-                width="14"
-                height="14"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M3 8h10M9 4l4 4-4 4" />
-              </svg>
-            </button>
-          </form>
-          <button type="button" className={styles.winLink} onClick={enter}>
-            Sign-in options
+          <button type="button" className={styles.winSignIn} onClick={enter} autoFocus>
+            Sign in
           </button>
-          <p className={styles.winHint}>Any PIN (or Enter) signs in</p>
+          <p className={styles.winHint}>Click Sign in or press any key</p>
         </div>
       )}
 

@@ -226,52 +226,31 @@
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
 }
 
-.winForm {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.winInput {
-  width: 240px;
-  height: 34px;
-  padding: 0 12px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-bottom: 2px solid rgba(255, 255, 255, 0.9);
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.14);
-  color: #fff;
-  font: inherit;
-  font-size: 14px;
-  outline: none;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.winInput::placeholder {
-  color: rgba(255, 255, 255, 0.75);
-}
-
-.winInput:focus {
-  background: rgba(255, 255, 255, 0.22);
-}
-
-.winGo {
-  width: 34px;
-  height: 34px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+.winSignIn {
+  margin-top: 14px;
+  height: 36px;
+  min-width: 140px;
+  padding: 0 24px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.18);
   color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: background 120ms ease;
 }
 
-.winGo:hover {
+.winSignIn:hover {
   background: rgba(255, 255, 255, 0.3);
 }
+
+
+
+
+
 
 .winLink {
   border: 0;
