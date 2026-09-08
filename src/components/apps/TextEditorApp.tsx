@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import styles from './TextEditorApp.module.css';
 import { currentOs } from '../../theme/platform';
+import { useDesktop } from '../../context/DesktopContext';
+import { ROOT_IDS } from '../../data/fileSystemSeed';
 
 // ── Syntax highlighting ────────────────────────────────────────────────────
 
@@ -615,13 +617,22 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
   // fileId is a stable key (Finder item ID) so edits survive rename in the store
   const fileId = (props?.fileId as string | undefined) ?? initFilename;
 
+  const { fs, writeFile, createFile } = useDesktop();
+  // The file-system node this document is saved in (null until a new document is saved).
+  const [boundId, setBoundId] = useState<string | null>(() =>
+    typeof props?.fileId === 'string' && fs[props.fileId] ? props.fileId : null
+  );
+  const boundFolder = boundId ? fs[fs[boundId]?.parentId ?? '']?.name : undefined;
+
   // On first render: check session store, fall back to props content
   const [filename, setFilename] = useState(initFilename);
   const [content, setContent] = useState(() => sessionFileStore.get(fileId) ?? initContent);
   const [dirty, setDirty] = useState(() => sessionFileStore.has(fileId));
 
-  // Save sheet state
+  // Save sheet state ('save' writes into the portfolio's file system, 'export' downloads)
   const [saveSheet, setSaveSheet] = useState(false);
+  const [sheetMode, setSheetMode] = useState<'save' | 'export'>('save');
+  const [saveWhere, setSaveWhere] = useState<string>(ROOT_IDS.desktop);
   const [saveName, setSaveName] = useState(initFilename);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'done' | 'fallback'>('idle');
   const saveNameRef = useRef<HTMLInputElement>(null);
@@ -636,17 +647,51 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
   const highlighted = useMemo(() => highlight(content, ext), [content, ext]);
   const lineCount = content.split('\n').length;
 
-  // ── Local save — instant, no dialog ──────────────────────────────────
-  const [savedFlash, setSavedFlash] = useState(false);
-  function localSave() {
-    sessionFileStore.set(fileId, content);
-    setDirty(false);
-    setSavedFlash(true);
-    setTimeout(() => setSavedFlash(false), 1400);
+  // ── Save — into the desktop's file system ───────────────────────────
+  const [savedFlash, setSavedFlash] = useState<string | null>(null);
+  function flash(text: string) {
+    setSavedFlash(text);
+    setTimeout(() => setSavedFlash(null), 1600);
+  }
+  function save() {
+    if (boundId && fs[boundId]) {
+      writeFile(boundId, content);
+      sessionFileStore.set(fileId, content);
+      setDirty(false);
+      flash(`Saved to ${boundFolder ?? 'Desktop'}`);
+      return;
+    }
+    // A new document: ask where to put it.
+    openSheet('save');
   }
 
-  // ── Export sheet — triggers actual file download ──────────────────────
-  function openSaveSheet() {
+  const WHERE_OPTIONS = [
+    { id: ROOT_IDS.desktop, label: 'Desktop' },
+    { id: ROOT_IDS.documents, label: 'Documents' },
+    { id: ROOT_IDS.downloads, label: 'Downloads' },
+  ];
+
+  function confirmSave() {
+    const name = saveName.trim() || 'untitled.txt';
+    const id = createFile(saveWhere, name, content);
+    const savedName = fs[id]?.name ?? name;
+    setBoundId(id);
+    setFilename(savedName);
+    setSaveName(savedName);
+    sessionFileStore.set(fileId, content);
+    setDirty(false);
+    setSaveStatus('done');
+    setTimeout(() => {
+      setSaveSheet(false);
+      setSaveStatus('idle');
+      // Back to typing: ⌘S / Ctrl+S is handled by the textarea.
+      textareaRef.current?.focus();
+    }, 1300);
+  }
+
+  // ── Sheet (Save As / Export) ───────────────────────────────────────────
+  function openSheet(mode: 'save' | 'export') {
+    setSheetMode(mode);
     setSaveName(filename);
     setSaveStatus('idle');
     setSaveSheet(true);
@@ -707,7 +752,7 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
     }
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       e.preventDefault();
-      localSave();
+      save();
     }
   }
 
@@ -729,11 +774,15 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
         setSaveSheet(false);
         setSaveStatus('idle');
       }
-      if (e.key === 'Enter' && saveStatus === 'idle') doSave();
+      if (e.key === 'Enter' && saveStatus === 'idle') {
+        if (sheetMode === 'save') confirmSave();
+        else doSave();
+      }
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [saveSheet, saveStatus, doSave]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [saveSheet, saveStatus, sheetMode, doSave]);
 
   return (
     <div className={styles.root}>
@@ -744,10 +793,38 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
           {filename}
         </div>
         {/* Saved flash */}
-        {savedFlash && <span className={styles.savedFlash}>Saved ✓</span>}
+        {savedFlash && <span className={styles.savedFlash}>{savedFlash} ✓</span>}
+
+        {/* Save into the portfolio's file system (the desktop, Documents…) */}
+        <button
+          className={`${styles.saveTabBtn} ${styles.savePrimary}`}
+          onClick={save}
+          title={
+            boundId ? `Save (${currentOs() === 'windows' ? 'Ctrl' : '⌘'}+S)` : 'Save to the desktop'
+          }
+        >
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 14 14"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M2.5 2.5h7l2 2v7h-9z" />
+            <path d="M4.5 2.5v3h4v-3M4.5 11.5v-4h5v4" />
+          </svg>
+          {boundId ? 'Save' : 'Save…'}
+        </button>
 
         {/* Export to disk */}
-        <button className={styles.saveTabBtn} onClick={openSaveSheet} title="Export file to disk">
+        <button
+          className={styles.saveTabBtn}
+          onClick={() => openSheet('export')}
+          title="Download a copy to your computer"
+        >
           <svg
             width="12"
             height="12"
@@ -806,7 +883,11 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
         <span>{content.length} chars</span>
         <span className={styles.statusFill} />
         <span className={styles.statusHint}>
-          {currentOs() === 'windows' ? 'Ctrl+S to save' : '⌘S to save'}
+          {dirty
+            ? `Unsaved changes · ${currentOs() === 'windows' ? 'Ctrl+S' : '⌘S'} to save`
+            : boundId
+              ? `Saved in ${boundFolder ?? 'Desktop'}`
+              : `${currentOs() === 'windows' ? 'Ctrl+S' : '⌘S'} saves to the desktop`}
         </span>
       </div>
 
@@ -842,10 +923,21 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
                     />
                   </svg>
                 </div>
-                <div className={styles.sheetSuccessTitle}>File saved</div>
+                <div className={styles.sheetSuccessTitle}>
+                  {sheetMode === 'save' ? 'Saved' : 'File exported'}
+                </div>
                 <div className={styles.sheetSuccessName}>{saveName}</div>
-                {saveStatus === 'fallback' && (
-                  <div className={styles.sheetSuccessHint}>Saved to your Downloads folder</div>
+                {sheetMode === 'save' ? (
+                  <div className={styles.sheetSuccessHint}>
+                    Now on the {WHERE_OPTIONS.find((o) => o.id === saveWhere)?.label ?? 'Desktop'}
+                    {saveWhere === ROOT_IDS.desktop
+                      ? ' — look behind this window'
+                      : ' (open Finder)'}
+                  </div>
+                ) : (
+                  saveStatus === 'fallback' && (
+                    <div className={styles.sheetSuccessHint}>Saved to your Downloads folder</div>
+                  )
                 )}
               </div>
             ) : (
@@ -868,9 +960,13 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
                     </svg>
                   </div>
                   <div>
-                    <div className={styles.sheetTitle}>Export File</div>
+                    <div className={styles.sheetTitle}>
+                      {sheetMode === 'save' ? 'Save' : 'Export File'}
+                    </div>
                     <div className={styles.sheetSubtitle}>
-                      Download a copy to your Desktop or chosen folder
+                      {sheetMode === 'save'
+                        ? 'Keep this file on the portfolio desktop or in a folder'
+                        : 'Download a copy to your own computer'}
                     </div>
                   </div>
                 </div>
@@ -885,6 +981,25 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
                     spellCheck={false}
                     autoComplete="off"
                   />
+                  {sheetMode === 'save' && (
+                    <>
+                      <label className={styles.sheetLabel} htmlFor="texteditor-where">
+                        Where
+                      </label>
+                      <select
+                        id="texteditor-where"
+                        className={styles.sheetInput}
+                        value={saveWhere}
+                        onChange={(e) => setSaveWhere(e.target.value)}
+                      >
+                        {WHERE_OPTIONS.map((o) => (
+                          <option key={o.id} value={o.id}>
+                            {o.label}
+                          </option>
+                        ))}
+                      </select>
+                    </>
+                  )}
                   <div className={styles.sheetMeta}>
                     <span className={styles.sheetMetaPill}>
                       {FORMAT_LABELS[saveExt] ?? (saveExt.toUpperCase() || 'Text file')}
@@ -897,15 +1012,16 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
                   </div>
                 </div>
 
-                {'showSaveFilePicker' in window ? (
-                  <div className={styles.sheetHint}>
-                    Your browser supports native save — you can choose the Desktop or any folder.
-                  </div>
-                ) : (
-                  <div className={styles.sheetHint}>
-                    File will download to your browser's default downloads folder.
-                  </div>
-                )}
+                {sheetMode === 'export' &&
+                  ('showSaveFilePicker' in window ? (
+                    <div className={styles.sheetHint}>
+                      Your browser supports native save — you can choose any folder.
+                    </div>
+                  ) : (
+                    <div className={styles.sheetHint}>
+                      File will download to your browser's default downloads folder.
+                    </div>
+                  ))}
 
                 <div className={styles.sheetActions}>
                   <button
@@ -919,11 +1035,13 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
                   </button>
                   <button
                     className={styles.sheetSave}
-                    onClick={() => doSave()}
+                    onClick={() => (sheetMode === 'save' ? confirmSave() : doSave())}
                     disabled={saveStatus === 'saving'}
                   >
                     {saveStatus === 'saving' ? (
                       'Saving…'
+                    ) : sheetMode === 'save' ? (
+                      'Save'
                     ) : (
                       <>
                         <svg

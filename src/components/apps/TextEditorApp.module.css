@@ -259,6 +259,17 @@
     border-color 120ms;
   white-space: nowrap;
 }
+.savePrimary {
+  background: var(--accent);
+  border-color: transparent;
+  color: #fff;
+}
+
+.savePrimary:hover {
+  background: var(--accent);
+  filter: brightness(1.08);
+}
+
 .saveTabBtn:hover {
   background: rgba(0, 0, 0, 0.08);
 }

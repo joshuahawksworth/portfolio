@@ -41,7 +41,13 @@ export default function LocationApp() {
     });
     mapRef.current = map;
 
+    // Mapbox only watches the window; the window here is a resizable pane, so follow the
+    // container itself.
+    const observer = new ResizeObserver(() => map.resize());
+    observer.observe(mapContainerRef.current);
+
     return () => {
+      observer.disconnect();
       map.remove();
       mapRef.current = null;
     };

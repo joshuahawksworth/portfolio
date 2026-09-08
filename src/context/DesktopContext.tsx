@@ -147,6 +147,8 @@ interface DesktopCtx {
   /** Add an uploaded file or image to a folder and return its id. */
   addFile: (parentId: string, file: NewFileInput) => string;
   renameNode: (id: string, name: string) => void;
+  /** Replace a text file's content (the Text Editor's Save). */
+  writeFile: (id: string, content: string) => void;
   /** Move nodes into a folder. Locked nodes and cyclic moves are skipped. */
   moveNodes: (ids: string[], parentId: string) => void;
   /** Move nodes to the Trash, remembering where they came from. Returns how many moved. */
@@ -298,6 +300,16 @@ export function DesktopProvider({
       const node = prev[id];
       if (!node || !canRenameNode(node) || node.name === trimmed) return prev;
       const next = { ...prev, [id]: { ...node, name: trimmed, modifiedAt: Date.now() } };
+      fsRef.current = next;
+      return next;
+    });
+  }, []);
+
+  const writeFile = useCallback((id: string, content: string) => {
+    setFs((prev) => {
+      const node = prev[id];
+      if (!node || node.type !== 'file' || node.content === content) return prev;
+      const next = { ...prev, [id]: { ...node, content, modifiedAt: Date.now() } };
       fsRef.current = next;
       return next;
     });
@@ -550,6 +562,7 @@ export function DesktopProvider({
         createFile,
         addFile,
         renameNode,
+        writeFile,
         moveNodes,
         trashNodes,
         restoreNodes,
