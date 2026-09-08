@@ -15,6 +15,8 @@ const groups = [
     shortcuts: [
       ['Drag title bar', 'Move window'],
       ['Green button', 'Zoom window'],
+      ['Hover green button', 'Tile: halves, quarters, fill or centre'],
+      ['Hover Maximize (Windows)', 'Snap layouts'],
       ['Yellow button', 'Minimize window'],
       ['Red button', 'Close window'],
     ],

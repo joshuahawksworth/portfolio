@@ -12,6 +12,115 @@ interface Props {
   children: React.ReactNode;
 }
 
+/** A region of the work area, as fractions of its width and height. */
+interface SnapZone {
+  label: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+const Z = (label: string, x: number, y: number, w: number, h: number): SnapZone => ({
+  label,
+  x,
+  y,
+  w,
+  h,
+});
+
+/** macOS Sequoia green-button menu: Move & Resize tiles, then quarters. */
+const MAC_TILES: { title: string; tiles: { label: string; zone: SnapZone | 'center' }[] }[] = [
+  {
+    title: 'Move & Resize',
+    tiles: [
+      { label: 'Left', zone: Z('Left', 0, 0, 0.5, 1) },
+      { label: 'Right', zone: Z('Right', 0.5, 0, 0.5, 1) },
+      { label: 'Top', zone: Z('Top', 0, 0, 1, 0.5) },
+      { label: 'Bottom', zone: Z('Bottom', 0, 0.5, 1, 0.5) },
+    ],
+  },
+  {
+    title: 'Fill & Arrange',
+    tiles: [
+      { label: 'Fill', zone: Z('Fill', 0, 0, 1, 1) },
+      { label: 'Center', zone: 'center' },
+      { label: 'Top Left', zone: Z('Top Left', 0, 0, 0.5, 0.5) },
+      { label: 'Top Right', zone: Z('Top Right', 0.5, 0, 0.5, 0.5) },
+      { label: 'Bottom Left', zone: Z('Bottom Left', 0, 0.5, 0.5, 0.5) },
+      { label: 'Bottom Right', zone: Z('Bottom Right', 0.5, 0.5, 0.5, 0.5) },
+    ],
+  },
+];
+
+/** Windows 11 snap layouts: each card is a layout, each region a drop zone. */
+const WIN_LAYOUTS: { label: string; zones: SnapZone[] }[] = [
+  { label: 'Two halves', zones: [Z('Left half', 0, 0, 0.5, 1), Z('Right half', 0.5, 0, 0.5, 1)] },
+  {
+    label: 'Two thirds and one third',
+    zones: [Z('Left two thirds', 0, 0, 2 / 3, 1), Z('Right third', 2 / 3, 0, 1 / 3, 1)],
+  },
+  {
+    label: 'Three columns',
+    zones: [
+      Z('Left third', 0, 0, 1 / 3, 1),
+      Z('Middle third', 1 / 3, 0, 1 / 3, 1),
+      Z('Right third', 2 / 3, 0, 1 / 3, 1),
+    ],
+  },
+  {
+    label: 'Four quarters',
+    zones: [
+      Z('Top left', 0, 0, 0.5, 0.5),
+      Z('Top right', 0.5, 0, 0.5, 0.5),
+      Z('Bottom left', 0, 0.5, 0.5, 0.5),
+      Z('Bottom right', 0.5, 0.5, 0.5, 0.5),
+    ],
+  },
+  {
+    label: 'Half and two quarters',
+    zones: [
+      Z('Left half', 0, 0, 0.5, 1),
+      Z('Top right', 0.5, 0, 0.5, 0.5),
+      Z('Bottom right', 0.5, 0.5, 0.5, 0.5),
+    ],
+  },
+  {
+    label: 'Three with a wide middle',
+    zones: [
+      Z('Left quarter', 0, 0, 0.25, 1),
+      Z('Middle half', 0.25, 0, 0.5, 1),
+      Z('Right quarter', 0.75, 0, 0.25, 1),
+    ],
+  },
+];
+
+/** Little screen with the target region filled, for the macOS tile buttons. */
+function TileGlyph({ zone }: { zone: SnapZone | 'center' }) {
+  const z = zone === 'center' ? Z('Center', 0.2, 0.2, 0.6, 0.6) : zone;
+  return (
+    <svg viewBox="0 0 30 20" width="30" height="20" aria-hidden="true">
+      <rect
+        x="0.5"
+        y="0.5"
+        width="29"
+        height="19"
+        rx="3"
+        fill="rgba(0,0,0,0.06)"
+        stroke="rgba(0,0,0,0.25)"
+      />
+      <rect
+        x={1.5 + z.x * 27}
+        y={1.5 + z.y * 17}
+        width={z.w * 27}
+        height={z.h * 17}
+        rx="1.5"
+        fill="var(--accent)"
+      />
+    </svg>
+  );
+}
+
 export default function Window({ win, children }: Props) {
   const {
     closeWindow,
@@ -47,35 +156,40 @@ export default function Window({ win, children }: Props) {
   }
   useEffect(() => () => window.clearTimeout(snapTimer.current), []);
 
+  const snapMenuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!tilingOpen) return;
-    const close = () => setTilingOpen(false);
+    // Close on any press outside the popover; presses inside must reach the option buttons.
+    const close = (e: PointerEvent) => {
+      if (snapMenuRef.current?.contains(e.target as Node)) return;
+      setTilingOpen(false);
+    };
     document.addEventListener('pointerdown', close);
     return () => document.removeEventListener('pointerdown', close);
   }, [tilingOpen]);
 
-  // ── tiling (macOS window layout menu) ────────────────────────────────
-  function tile(kind: 'left' | 'right' | 'top' | 'bottom' | 'fill' | 'center') {
+  // ── snapping (macOS green-button tiles / Windows snap layouts) ──────────
+  function snapTo(zone: SnapZone | 'center') {
     const insets = shellInsets();
-    const menuH = insets.top;
-    const dockH = insets.bottom + 6;
-    const gap = 8;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight - menuH - dockH;
+    const gap = isWindows ? 0 : 8;
+    const areaX = gap;
+    const areaY = insets.top + gap;
+    const areaW = window.innerWidth - gap * 2;
+    const areaH = window.innerHeight - insets.top - insets.bottom - (isWindows ? 0 : 6) - gap * 2;
     const w = winRef.current;
-    let x = gap,
-      y = menuH + gap,
-      width = vw - gap * 2,
-      height = vh - gap * 2;
-    if (kind === 'left' || kind === 'right') width = Math.floor((vw - gap * 3) / 2);
-    if (kind === 'right') x = gap * 2 + width;
-    if (kind === 'top' || kind === 'bottom') height = Math.floor((vh - gap * 3) / 2);
-    if (kind === 'bottom') y = menuH + gap * 2 + height;
-    if (kind === 'center') {
-      width = Math.min(w.width, vw - gap * 2);
-      height = Math.min(w.height, vh - gap * 2);
-      x = Math.round((vw - width) / 2);
-      y = menuH + Math.round((vh - height) / 2);
+    let x: number, y: number, width: number, height: number;
+    if (zone === 'center') {
+      width = Math.min(w.width, areaW);
+      height = Math.min(w.height, areaH);
+      x = areaX + Math.round((areaW - width) / 2);
+      y = areaY + Math.round((areaH - height) / 2);
+    } else {
+      // Tiles share the gutter between them on macOS.
+      const innerGap = gap;
+      x = Math.round(areaX + zone.x * (areaW + innerGap));
+      y = Math.round(areaY + zone.y * (areaH + innerGap));
+      width = Math.round(zone.w * (areaW + innerGap) - innerGap);
+      height = Math.round(zone.h * (areaH + innerGap) - innerGap);
     }
     setTransitioning(true);
     resizeWindow(w.id, x, y, width, height);
@@ -269,7 +383,12 @@ export default function Window({ win, children }: Props) {
               type="button"
               className={`${styles.dot} ${styles.green}`}
               onMouseDown={(e) => e.stopPropagation()}
-              onClick={handleMaximize}
+              onClick={(e) => {
+                setTilingOpen(false);
+                handleMaximize(e);
+              }}
+              onMouseEnter={openSnap}
+              onMouseLeave={closeSnapSoon}
               aria-label={win.maximized ? 'Restore' : 'Zoom'}
             >
               <svg viewBox="0 0 8 8" className={styles.dotIcon}>
@@ -343,50 +462,64 @@ export default function Window({ win, children }: Props) {
               </button>
             </div>
           )}
-          <button
-            type="button"
-            className={styles.titleAction}
-            hidden={isWindows}
-            aria-label="Window tiling options"
-            title="Window layout"
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => {
-              e.stopPropagation();
-              setTilingOpen((o) => !o);
-            }}
-          >
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4">
-              <rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.2" />
-              <rect x="9" y="1.5" width="5.5" height="5.5" rx="1.2" />
-              <rect x="1.5" y="9" width="5.5" height="5.5" rx="1.2" />
-              <rect x="9" y="9" width="5.5" height="5.5" rx="1.2" />
-            </svg>
-          </button>
           {tilingOpen && (
             <div
-              className={styles.tilingMenu}
+              ref={snapMenuRef}
+              className={isWindows ? styles.snapLayouts : styles.snapPopover}
+              role="menu"
+              aria-label={isWindows ? 'Snap layouts' : 'Window tiling'}
               onMouseDown={(e) => e.stopPropagation()}
-              onMouseEnter={isWindows ? openSnap : undefined}
-              onMouseLeave={isWindows ? closeSnapSoon : undefined}
+              onMouseEnter={openSnap}
+              onMouseLeave={closeSnapSoon}
             >
-              <button type="button" className={styles.tilingItem} onClick={() => tile('fill')}>
-                Fill
-              </button>
-              <button type="button" className={styles.tilingItem} onClick={() => tile('center')}>
-                Center
-              </button>
-              <button type="button" className={styles.tilingItem} onClick={() => tile('left')}>
-                Left Half
-              </button>
-              <button type="button" className={styles.tilingItem} onClick={() => tile('right')}>
-                Right Half
-              </button>
-              <button type="button" className={styles.tilingItem} onClick={() => tile('top')}>
-                Top Half
-              </button>
-              <button type="button" className={styles.tilingItem} onClick={() => tile('bottom')}>
-                Bottom Half
-              </button>
+              {isWindows
+                ? WIN_LAYOUTS.map((layout, i) => (
+                    <div
+                      key={i}
+                      className={styles.snapLayout}
+                      role="group"
+                      aria-label={layout.label}
+                    >
+                      {layout.zones.map((zone) => (
+                        <button
+                          key={zone.label}
+                          type="button"
+                          role="menuitem"
+                          className={styles.snapZone}
+                          style={{
+                            left: `${zone.x * 100}%`,
+                            top: `${zone.y * 100}%`,
+                            width: `${zone.w * 100}%`,
+                            height: `${zone.h * 100}%`,
+                          }}
+                          title={`${layout.label}: ${zone.label}`}
+                          aria-label={`${layout.label}: ${zone.label}`}
+                          onClick={() => snapTo(zone)}
+                        />
+                      ))}
+                    </div>
+                  ))
+                : MAC_TILES.map((group, gi) => (
+                    <div key={gi} className={styles.snapGroup}>
+                      <span className={styles.snapGroupTitle}>{group.title}</span>
+                      <div className={styles.snapRow}>
+                        {group.tiles.map((tile) => (
+                          <button
+                            key={tile.label}
+                            type="button"
+                            role="menuitem"
+                            className={styles.snapTile}
+                            title={tile.label}
+                            aria-label={tile.label}
+                            onClick={() => snapTo(tile.zone)}
+                          >
+                            <TileGlyph zone={tile.zone} />
+                            <span>{tile.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
             </div>
           )}
         </div>
