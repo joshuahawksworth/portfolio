@@ -14,7 +14,9 @@
 }
 
 @keyframes fadeOut {
-  to { opacity: 0; }
+  to {
+    opacity: 0;
+  }
 }
 
 .logoWrap {
@@ -25,11 +27,21 @@
 }
 
 @keyframes logoIn {
-  from { opacity: 0; transform: scale(0.88); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-.logo { display: block; border-radius: 18px; overflow: visible; }
+.logo {
+  display: block;
+  border-radius: 18px;
+  overflow: visible;
+}
 
 /* The animated clip rect — slides upward from bottom to reveal white fill */
 .fillRect {
@@ -37,25 +49,44 @@
 }
 
 @keyframes revealUp {
-  0%   { y: 212px; height: 0px; }
-  40%  { y: 95px;  height: 117px; }
-  70%  { y: 54px;  height: 158px; }
-  90%  { y: 17px;  height: 195px; }
-  100% { y: 0px;   height: 212px; }
+  0% {
+    y: 212px;
+    height: 0px;
+  }
+  40% {
+    y: 95px;
+    height: 117px;
+  }
+  70% {
+    y: 54px;
+    height: 158px;
+  }
+  90% {
+    y: 17px;
+    height: 195px;
+  }
+  100% {
+    y: 0px;
+    height: 212px;
+  }
 }
 
 .barTrack {
   width: 180px;
   height: 3px;
-  background: rgba(255,255,255,0.12);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 2px;
   overflow: hidden;
   animation: barAppear 0.3s ease 0.8s both;
 }
 
 @keyframes barAppear {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .barFill {
@@ -67,9 +98,123 @@
 }
 
 @keyframes fillBar {
-  0%   { width: 0%; }
-  40%  { width: 55%; }
-  70%  { width: 78%; }
-  90%  { width: 92%; }
-  100% { width: 100%; }
+  0% {
+    width: 0%;
+  }
+  40% {
+    width: 55%;
+  }
+  70% {
+    width: 78%;
+  }
+  90% {
+    width: 92%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+/* ── Windows 11 boot ─────────────────────────────────── */
+.winLogo {
+  animation: logoIn 0.6s ease 0.15s both;
+}
+
+.winSpinner {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  animation: barAppear 0.3s ease 0.7s both;
+}
+
+.winDot {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  border-radius: 50%;
+  background: #fff;
+  transform-origin: 2.5px 18px;
+  animation: winSpin 2.2s cubic-bezier(0.55, 0.15, 0.45, 0.85) infinite;
+}
+
+@keyframes winSpin {
+  0% {
+    transform: rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 1;
+  }
+  90% {
+    transform: rotate(360deg);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* ── Android boot ───────────────────────────────────── */
+.droidLogo {
+  flex-direction: column;
+  gap: 14px;
+}
+
+.droidWord {
+  font-family: Roboto, 'Google Sans', system-ui, sans-serif;
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: #fff;
+}
+
+.barTrackDroid {
+  width: 220px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.barFillDroid {
+  background: #3ddc84;
+}
+
+/* ── Powered off ────────────────────────────────────── */
+.off {
+  animation: none;
+  gap: 18px;
+}
+
+.powerBtn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.powerBtn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  transform: scale(1.05);
+}
+
+.powerHint {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 12px;
+  font-family: var(--font-ui);
 }

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b3f8f"/>
+      <stop offset="0.55" stop-color="#1b6fd4"/>
+      <stop offset="1" stop-color="#5fb8ff"/>
+    </linearGradient>
+    <linearGradient id="p1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8fd3ff"/>
+      <stop offset="1" stop-color="#1f7ae0"/>
+    </linearGradient>
+    <linearGradient id="p2" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#0c3c8a"/>
+      <stop offset="1" stop-color="#3aa0ff"/>
+    </linearGradient>
+    <linearGradient id="p3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d9f1ff"/>
+      <stop offset="1" stop-color="#4aa8ff"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <g transform="translate(960 560)">
+    <g filter="url(#soft)" opacity="0.55">
+      <ellipse rx="520" ry="380" fill="#0a3a86"/>
+    </g>
+    <g>
+      <path d="M0 0 C -120 -260 -60 -520 160 -560 C 330 -590 470 -430 420 -250 C 380 -110 200 -40 0 0Z" fill="url(#p1)" opacity="0.95"/>
+      <path d="M0 0 C 260 -120 520 -60 560 160 C 590 330 430 470 250 420 C 110 380 40 200 0 0Z" fill="url(#p2)" opacity="0.95"/>
+      <path d="M0 0 C 120 260 60 520 -160 560 C -330 590 -470 430 -420 250 C -380 110 -200 40 0 0Z" fill="url(#p3)" opacity="0.95"/>
+      <path d="M0 0 C -260 120 -520 60 -560 -160 C -590 -330 -430 -470 -250 -420 C -110 -380 -40 -200 0 0Z" fill="url(#p1)" opacity="0.9"/>
+      <path d="M0 0 C -40 -200 60 -330 220 -330 C 330 -330 360 -200 280 -120 C 200 -40 80 -20 0 0Z" fill="#dff2ff" opacity="0.85"/>
+      <path d="M0 0 C 200 40 330 -60 330 -220 C 330 -330 200 -360 120 -280 C 40 -200 20 -80 0 0Z" fill="#7cc4ff" opacity="0.85"/>
+      <path d="M0 0 C 40 200 -60 330 -220 330 C -330 330 -360 200 -280 120 C -200 40 -80 20 0 0Z" fill="#2b86e8" opacity="0.9"/>
+      <path d="M0 0 C -200 -40 -330 60 -330 220 C -330 330 -200 360 -120 280 C -40 200 -20 80 0 0Z" fill="#a9dcff" opacity="0.85"/>
+      <circle r="70" fill="#eaf7ff" opacity="0.95"/>
+    </g>
+  </g>
+</svg>

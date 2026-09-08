@@ -1,7 +1,9 @@
 import { useDesktop } from '../../context/DesktopContext';
 import { ROOT_IDS } from '../../data/fileSystemSeed';
 import { NodeIcon, nodeKind } from '../icons/NodeIcon';
-import { TrashBinIcon } from '../icons/FileSystemIcons';
+import { PlatformBinIcon } from '../icons/PlatformFileIcons';
+import { useOs } from '../../context/SettingsContext';
+import { appTitleFor } from '../../theme/platform';
 import { openTargetFor } from '../../lib/openNode';
 import styles from './TrashApp.module.css';
 
@@ -12,6 +14,8 @@ function whereLabel(fs: ReturnType<typeof useDesktop>['fs'], from?: string): str
 
 export default function TrashApp() {
   const { fs, childrenOf, emptyTrash, restoreNodes, openApp } = useDesktop();
+  const os = useOs();
+  const binName = appTitleFor('trash', 'Trash', os);
   const items = childrenOf(ROOT_IDS.trash).sort(
     (a, b) => (b.trashedAt ?? b.createdAt) - (a.trashedAt ?? a.createdAt)
   );
@@ -37,15 +41,15 @@ export default function TrashApp() {
             Put Back All
           </button>
           <button className={styles.emptyBtn} onClick={emptyTrash} disabled={items.length === 0}>
-            Empty Trash
+            Empty {binName}
           </button>
         </div>
       </div>
 
       {items.length === 0 ? (
         <div className={styles.empty}>
-          <TrashBinIcon size={64} style={{ opacity: 0.45 }} />
-          <p className={styles.emptyLabel}>Trash is empty</p>
+          <PlatformBinIcon os={os} size={64} style={{ opacity: 0.45 }} />
+          <p className={styles.emptyLabel}>{binName} is empty</p>
         </div>
       ) : (
         <>
@@ -75,7 +79,7 @@ export default function TrashApp() {
             ))}
           </div>
           <p className={styles.note}>
-            Put Back returns an item to the folder it came from. Empty Trash deletes everything
+            Put Back returns an item to the folder it came from. Empty {binName} deletes everything
             permanently.
           </p>
         </>

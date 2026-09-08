@@ -11,22 +11,24 @@ import {
 import { ROOT_IDS } from '../../data/fileSystemSeed';
 import { openTargetFor } from '../../lib/openNode';
 import { NodeIcon, nodeKind } from '../icons/NodeIcon';
-import { FolderIcon } from '../icons/FileSystemIcons';
+import { PlatformFolderIcon } from '../icons/PlatformFileIcons';
 import { FINDER_DRAG_TYPE } from '../apps/FinderApp';
 import MenuBar from '../MenuBar/MenuBar';
+import Taskbar from '../Taskbar/Taskbar';
 import SystemPanels from '../SystemUI/SystemPanels';
 import { SystemUIProvider } from '../../context/SystemUIContext';
+import { useSettings } from '../../context/SettingsContext';
+import { currentOs, nodeDisplayName } from '../../theme/platform';
 import DesktopWidgets from './DesktopWidgets';
 import {
   DARK_WALLPAPERS,
   WALLPAPERS,
-  WALLPAPER_KEYS,
+  WALLPAPERS_FOR_OS,
   WALLPAPER_LABELS,
-  loadWallpaper,
   preloadWallpapers,
-  saveWallpaper,
   type WallpaperKey,
 } from '../../data/wallpapers';
+import type { OsName } from '../../lib/settingsStore';
 import Dock from '../Dock/Dock';
 import Window from '../Window/Window';
 import SnakeApp from '../apps/SnakeApp';
@@ -542,6 +544,7 @@ const GRID_START_Y = 54;
 const GRID_RIGHT_PAD = 20;
 function gridColX(col: number): number {
   const colW = ICON_W + ICON_GAP + 4;
+  if (currentOs() === 'windows') return GRID_RIGHT_PAD + col * colW;
   return window.innerWidth - GRID_RIGHT_PAD - ICON_W - col * colW;
 }
 
@@ -629,7 +632,7 @@ function GetInfoModal({
         </div>
         <div className={styles.getInfoHead}>
           {isDesktop ? (
-            <FolderIcon size={48} />
+            <PlatformFolderIcon os={currentOs()} size={48} />
           ) : (
             <NodeIcon node={(target as DesktopItem).node} size={48} />
           )}
@@ -718,10 +721,12 @@ function GetInfoModal({
 }
 
 function WallpaperPicker({
+  os,
   current,
   onChange,
   onClose,
 }: {
+  os: OsName;
   current: WallpaperKey;
   onChange: (k: WallpaperKey) => void;
   onClose: () => void;
@@ -729,9 +734,11 @@ function WallpaperPicker({
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.wallpaperPicker} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.wallpaperTitle}>Change Background</div>
+        <div className={styles.wallpaperTitle}>
+          {os === 'windows' ? 'Choose a background' : 'Change Background'}
+        </div>
         <div className={styles.wallpaperSwatches}>
-          {WALLPAPER_KEYS.map((key) => (
+          {WALLPAPERS_FOR_OS[os].map((key) => (
             <button
               key={key}
               className={`${styles.wallpaperSwatch} ${current === key ? styles.wallpaperActive : ''}`}
@@ -765,8 +772,18 @@ function DesktopSurface() {
     trashCount,
   } = useDesktop();
 
+  const { settings, os, wallpaper, setWallpaper } = useSettings();
+  const isWindows = os === 'windows';
+
   // Desktop icons are simply the children of the Desktop folder.
-  const items = useMemo(() => childrenOf(ROOT_IDS.desktop).map(toItem), [childrenOf]);
+  const items = useMemo(
+    () =>
+      childrenOf(ROOT_IDS.desktop).map((node) => {
+        const item = toItem(node);
+        return { ...item, label: nodeDisplayName(node.id, item.label, os) };
+      }),
+    [childrenOf, os]
+  );
 
   const [iconPos, setIconPos] = useState<Record<string, IconPos>>(() => initPositions(items));
   const [selectedIcons, setSelectedIcons] = useState<Set<string>>(new Set());
@@ -778,12 +795,7 @@ function DesktopSurface() {
   const [renameVal, setRenameVal] = useState('');
   const [getInfoTarget, setGetInfoTarget] = useState<'desktop' | DesktopItem | null>(null);
   const [showWallpaper, setShowWallpaper] = useState(false);
-  const [wallpaper, setWallpaperState] = useState<WallpaperKey>(loadWallpaper);
-  useEffect(preloadWallpapers, []);
-  const setWallpaper = useCallback((k: WallpaperKey) => {
-    setWallpaperState(k);
-    saveWallpaper(k);
-  }, []);
+  useEffect(() => preloadWallpapers(os), [os]);
   const [cleaning, setCleaning] = useState(false);
   const [bouncingKeys, setBouncingKeys] = useState<Set<string>>(new Set());
   const [nearTrashTarget, setNearTrashTarget] = useState<'dock' | 'desktop' | null>(null);
@@ -1206,10 +1218,16 @@ function DesktopSurface() {
   const ctxX = ctxMenu ? Math.min(ctxMenu.x, window.innerWidth - 230) : 0;
   const ctxY = ctxMenu ? Math.min(ctxMenu.y, window.innerHeight - (ctxTarget ? 180 : 260)) : 0;
   const trashFull = trashCount > 0;
+  void settings;
 
   return (
     <div
-      className={`${styles.desktop} ${DARK_WALLPAPERS.has(wallpaper) ? styles.desktopDark : ''}`}
+      className={[
+        styles.desktop,
+        DARK_WALLPAPERS.has(wallpaper) ? styles.desktopDark : '',
+        isWindows ? styles.desktopWin : '',
+      ].join(' ')}
+      data-os={os}
       onMouseDown={onDesktopMouseDown}
       onContextMenu={onDesktopCtx}
       onClick={() => {
@@ -1219,8 +1237,8 @@ function DesktopSurface() {
       onDragOver={onDesktopDragOver}
       onDrop={onDesktopDrop}
     >
-      {/* Every wallpaper stays mounted so switching is instant */}
-      {WALLPAPER_KEYS.map((key) => (
+      {/* Every wallpaper for this OS stays mounted so switching is instant */}
+      {WALLPAPERS_FOR_OS[os].map((key) => (
         <div
           key={key}
           className={`${styles.wallpaper} ${key === wallpaper ? styles.wallpaperActive : ''}`}
@@ -1228,8 +1246,8 @@ function DesktopSurface() {
           aria-hidden
         />
       ))}
-      <DesktopWidgets />
-      <MenuBar />
+      {!isWindows && <DesktopWidgets />}
+      {isWindows ? <Taskbar /> : <MenuBar />}
 
       {/* Rubber-band rect */}
       {selRect &&
@@ -1392,11 +1410,13 @@ function DesktopSurface() {
         );
       })}
 
-      <Dock
-        bouncingKeys={bouncingKeys}
-        onItemActivate={handleDockActivate}
-        trashHighlighted={nearTrashTarget === 'dock'}
-      />
+      {!isWindows && (
+        <Dock
+          bouncingKeys={bouncingKeys}
+          onItemActivate={handleDockActivate}
+          trashHighlighted={nearTrashTarget === 'dock'}
+        />
+      )}
 
       <SystemPanels />
 
@@ -1435,9 +1455,11 @@ function DesktopSurface() {
                   className={`${styles.ctxItem} ${styles.ctxDanger}`}
                   onClick={() => trashIds(ctxTrashable)}
                 >
-                  {ctxTrashable.length > 1
-                    ? `Move ${ctxTrashable.length} Items to Trash`
-                    : 'Move to Trash'}
+                  {isWindows
+                    ? 'Delete'
+                    : ctxTrashable.length > 1
+                      ? `Move ${ctxTrashable.length} Items to Trash`
+                      : 'Move to Trash'}
                 </button>
               )}
               <div className={styles.ctxDivider} />
@@ -1448,7 +1470,7 @@ function DesktopSurface() {
                   setCtxMenu(null);
                 }}
               >
-                Get Info
+                {isWindows ? 'Properties' : 'Get Info'}
               </button>
             </>
           ) : (
@@ -1476,7 +1498,7 @@ function DesktopSurface() {
                   setCtxMenu(null);
                 }}
               >
-                Get Info
+                {isWindows ? 'Properties' : 'Get Info'}
               </button>
               <button
                 className={styles.ctxItem}
@@ -1485,8 +1507,40 @@ function DesktopSurface() {
                   setCtxMenu(null);
                 }}
               >
-                Change Background…
+                {isWindows ? 'Choose background…' : 'Change Background…'}
               </button>
+              {isWindows ? (
+                <>
+                  <button
+                    className={styles.ctxItem}
+                    onClick={() => {
+                      openApp('settings', { pane: 'system' });
+                      setCtxMenu(null);
+                    }}
+                  >
+                    Display settings
+                  </button>
+                  <button
+                    className={styles.ctxItem}
+                    onClick={() => {
+                      openApp('settings', { pane: 'personalization' });
+                      setCtxMenu(null);
+                    }}
+                  >
+                    Personalise
+                  </button>
+                </>
+              ) : (
+                <button
+                  className={styles.ctxItem}
+                  onClick={() => {
+                    openApp('settings', { pane: 'wallpaper' });
+                    setCtxMenu(null);
+                  }}
+                >
+                  Wallpaper Settings…
+                </button>
+              )}
               <div className={styles.ctxDivider} />
               <button className={styles.ctxItem} onClick={() => cleanUp(false)}>
                 Clean Up
@@ -1504,6 +1558,7 @@ function DesktopSurface() {
       )}
       {showWallpaper && (
         <WallpaperPicker
+          os={os}
           current={wallpaper}
           onChange={setWallpaper}
           onClose={() => setShowWallpaper(false)}

@@ -1,7 +1,13 @@
 import { createContext, use, useCallback, useMemo, useState, type ReactNode } from 'react';
 
 /** System-level overlays that live above windows: Spotlight, Control Center, etc. */
-export type SystemPanel = 'spotlight' | 'controlCenter' | 'notificationCenter' | 'launchpad';
+export type SystemPanel =
+  | 'spotlight'
+  | 'controlCenter'
+  | 'notificationCenter'
+  | 'launchpad'
+  | 'startMenu'
+  | 'appleMenu';
 
 interface SystemUIValue {
   panel: SystemPanel | null;

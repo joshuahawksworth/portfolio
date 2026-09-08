@@ -19,7 +19,8 @@
   --selected: rgba(0, 0, 0, 0.075);
   --warm-shadow: rgba(87, 52, 10, 0.3);
   --font-ui: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
-  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+  --font-display:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
   --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', Menlo, monospace;
   --radius-window: 14px;
   --radius-control: 7px;
@@ -125,6 +126,109 @@ button {
     scroll-behavior: auto !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+/* ── Platform overrides (set on <html data-os> by SettingsProvider) ───── */
+html[data-os='windows'] {
+  --font-ui:
+    'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial,
+    sans-serif;
+  --font-display:
+    'Segoe UI Variable Display', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+  --text: #1b1b1b;
+  --text-strong: #111;
+  --muted: #616161;
+  --muted-2: #9a9a9a;
+  --panel: rgba(251, 251, 251, 0.55);
+  --panel-solid: #f9f9f9;
+  --panel-2: rgba(243, 243, 243, 0.8);
+  --line: rgba(0, 0, 0, 0.07);
+  --line-strong: rgba(0, 0, 0, 0.14);
+  --glass: rgba(246, 246, 246, 0.72);
+  --glass-strong: rgba(249, 249, 249, 0.96);
+  --glass-menu: rgba(249, 249, 249, 0.94);
+  --hover: rgba(0, 0, 0, 0.04);
+  --selected: rgba(0, 0, 0, 0.07);
+  --warm-shadow: rgba(0, 0, 0, 0.26);
+  --radius-window: 8px;
+  --radius-control: 4px;
+  --menubar-h: 0px;
+  background: #0f4c9a;
+}
+
+html[data-os='android'] {
+  --font-ui: Roboto, 'Google Sans', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Google Sans', Roboto, system-ui, -apple-system, Arial, sans-serif;
+  --text: #1c1b1f;
+  --text-strong: #111;
+  --muted: #5f6368;
+  --muted-2: #9aa0a6;
+  --panel: rgba(253, 251, 255, 0.6);
+  --panel-solid: #fdfbff;
+  --panel-2: rgba(235, 238, 245, 0.75);
+  --line: rgba(0, 0, 0, 0.08);
+  --line-strong: rgba(0, 0, 0, 0.14);
+  --glass: rgba(246, 245, 250, 0.82);
+  --glass-strong: rgba(250, 249, 253, 0.96);
+  --warm-shadow: rgba(20, 30, 60, 0.24);
+  --radius-control: 12px;
+  background: #dbe6f7;
+}
+
+html[data-os='ios'] {
+  background: #101a2b;
+}
+
+html[data-os='windows'] body,
+html[data-os='android'] body,
+html[data-os='ios'] body {
+  background: inherit;
+}
+
+/* ── Accessibility settings ─────────────────────────────────────────── */
+html[data-reduce-motion='on'] *,
+html[data-reduce-motion='on'] *::before,
+html[data-reduce-motion='on'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+  transition-duration: 0.001ms !important;
+}
+
+html[data-reduce-transparency='on'] {
+  --panel: rgba(252, 250, 247, 0.96);
+  --panel-2: rgba(246, 242, 234, 0.96);
+  --glass: rgba(248, 242, 230, 0.96);
+  --glass-strong: rgba(252, 250, 247, 0.99);
+  --glass-menu: rgba(252, 248, 240, 0.99);
+}
+html[data-reduce-transparency='on'] * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html[data-reduce-transparency='on'] [class*='window_'] {
+  background: var(--panel-solid) !important;
+}
+html[data-reduce-transparency='on'] [class*='panel_'],
+html[data-reduce-transparency='on'] [class*='dock_'],
+html[data-reduce-transparency='on'] [class*='bar_'],
+html[data-reduce-transparency='on'] [class*='taskbar_'],
+html[data-reduce-transparency='on'] [class*='panelHeader_'],
+html[data-reduce-transparency='on'] [class*='ctxMenu_'],
+html[data-reduce-transparency='on'] [class*='dropdown_'],
+html[data-reduce-transparency='on'] [class*='glass_'] {
+  background: var(--glass-strong) !important;
+}
+
+html[data-increase-contrast='on'] {
+  --text: #000;
+  --text-strong: #000;
+  --muted: #3d3833;
+  --muted-2: #5a544e;
+  --line: rgba(0, 0, 0, 0.28);
+  --line-strong: rgba(0, 0, 0, 0.45);
+  --hover: rgba(0, 0, 0, 0.09);
+  --selected: rgba(0, 0, 0, 0.14);
 }
 
 /* ── Prevent iOS Safari tap flash on interactive elements ─────────────── */

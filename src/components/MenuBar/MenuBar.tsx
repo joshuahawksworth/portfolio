@@ -1,10 +1,14 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useDesktop } from '../../context/DesktopContext';
 import { useSystemUI } from '../../context/SystemUIContext';
+import { useSettings } from '../../context/SettingsContext';
+import { useSession } from '../../context/SessionContext';
 import { useTime } from '../../hooks/useTime';
+import { formatTime } from '../../lib/clock';
+import { appTitleFor } from '../../theme/platform';
 import styles from './MenuBar.module.css';
 
-type MenuName = 'File' | 'Edit' | 'View' | 'Go' | 'Window' | 'Help';
+type MenuName = 'apple' | 'File' | 'Edit' | 'View' | 'Go' | 'Window' | 'Help';
 type MenuItem = {
   label: string;
   shortcut?: string;
@@ -15,12 +19,16 @@ type MenuItem = {
 
 function Clock() {
   const time = useTime();
+  const { settings } = useSettings();
   const date = time.toLocaleDateString('en-US', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
   });
-  const clock = time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  const clock = formatTime(time, {
+    clock24h: settings.clock24h,
+    showSeconds: settings.showSeconds,
+  });
   return (
     <span className={styles.clock} aria-label={`${date} ${clock}`}>
       <span>{date}</span>
@@ -35,8 +43,12 @@ const JH_PATH =
 export default function MenuBar() {
   const { windows, focusedId, openApp, closeWindow, minimizeWindow, toggleMaximize } = useDesktop();
   const systemUI = useSystemUI();
+  const { settings, os } = useSettings();
+  const session = useSession();
   const focusedWindow = windows.find((w) => w.id === focusedId);
-  const appName = focusedWindow?.title ?? 'Finder';
+  const appName = focusedWindow
+    ? appTitleFor(focusedWindow.appId, focusedWindow.title, os)
+    : 'Finder';
   const [activeMenu, setActiveMenu] = useState<MenuName | null>(null);
   const barRef = useRef<HTMLDivElement>(null);
 
@@ -57,6 +69,14 @@ export default function MenuBar() {
 
   const hasFocusedWindow = Boolean(focusedWindow && focusedId);
   const menus: Record<MenuName, MenuItem[]> = {
+    apple: [
+      { label: 'About This Mac', action: () => openApp('settings', { pane: 'general' }) },
+      { label: 'System Settings…', divider: true, action: () => openApp('settings') },
+      { label: 'Lock Screen', shortcut: '⌃⌘Q', divider: true, action: session.lock },
+      { label: `Log Out ${settings.userName}…`, shortcut: '⇧⌘Q', action: session.logOut },
+      { label: 'Restart…', divider: true, action: session.restart },
+      { label: 'Shut Down…', action: session.shutDown },
+    ],
     File: [
       {
         label: 'New Finder Window',
@@ -121,6 +141,7 @@ export default function MenuBar() {
       { label: 'Bring All to Front', disabled: true, divider: true, action: () => {} },
       { label: 'Calculator', action: () => openApp('calculator') },
       { label: 'Text Editor', action: () => openApp('texteditor') },
+      { label: 'System Settings', action: () => openApp('settings') },
     ],
     Help: [
       { label: 'Keyboard Shortcuts', action: () => openApp('shortcuts') },
@@ -129,17 +150,52 @@ export default function MenuBar() {
     ],
   };
 
-  const menuNames = Object.keys(menus) as MenuName[];
+  const menuNames = (Object.keys(menus) as MenuName[]).filter((m) => m !== 'apple');
+
+  function renderDropdown(name: MenuName) {
+    return (
+      <div className={styles.dropdown} role="menu">
+        {menus[name].map((item) => (
+          <Fragment key={item.label}>
+            {item.divider && <div className={styles.menuDivider} />}
+            <button
+              type="button"
+              className={styles.menuItem}
+              disabled={item.disabled}
+              onClick={() => runAction(item)}
+              role="menuitem"
+            >
+              <span>{item.label}</span>
+              {item.shortcut && <span className={styles.shortcut}>{item.shortcut}</span>}
+            </button>
+          </Fragment>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div ref={barRef} className={styles.bar}>
       <title>{appName} — Josh Hawksworth</title>
       <div className={styles.left}>
         {/* JH logo stands in for the Apple menu */}
-        <svg viewBox="0 0 212 212" className={styles.apple} aria-label="JH">
-          <rect width="212" height="212" fill="#1c1a18" rx="40" />
-          <path d={JH_PATH} fill="#fff" />
-        </svg>
+        <div className={styles.menuWrap}>
+          <button
+            type="button"
+            className={`${styles.appleBtn} ${activeMenu === 'apple' ? styles.menuActive : ''}`}
+            onClick={() => setActiveMenu(activeMenu === 'apple' ? null : 'apple')}
+            onMouseEnter={() => activeMenu && activeMenu !== 'apple' && setActiveMenu('apple')}
+            aria-haspopup="menu"
+            aria-expanded={activeMenu === 'apple'}
+            aria-label="JH menu"
+          >
+            <svg viewBox="0 0 212 212" className={styles.apple} aria-hidden="true">
+              <rect width="212" height="212" fill="#1c1a18" rx="40" />
+              <path d={JH_PATH} fill="#fff" />
+            </svg>
+          </button>
+          {activeMenu === 'apple' && renderDropdown('apple')}
+        </div>
         <span className={styles.appName}>{appName}</span>
         {menuNames.map((m) => (
           <div key={m} className={styles.menuWrap}>
@@ -153,35 +209,42 @@ export default function MenuBar() {
             >
               {m}
             </button>
-            {activeMenu === m && (
-              <div className={styles.dropdown} role="menu">
-                {menus[m].map((item) => (
-                  <Fragment key={item.label}>
-                    {item.divider && <div className={styles.menuDivider} />}
-                    <button
-                      type="button"
-                      className={styles.menuItem}
-                      disabled={item.disabled}
-                      onClick={() => runAction(item)}
-                      role="menuitem"
-                    >
-                      <span>{item.label}</span>
-                      {item.shortcut && <span className={styles.shortcut}>{item.shortcut}</span>}
-                    </button>
-                  </Fragment>
-                ))}
-              </div>
-            )}
+            {activeMenu === m && renderDropdown(m)}
           </div>
         ))}
       </div>
       <div className={styles.right}>
+        {settings.doNotDisturb && (
+          <button
+            type="button"
+            className={styles.statusBtn}
+            aria-label="Focus: Do Not Disturb"
+            title="Do Not Disturb"
+            onClick={() => openApp('settings', { pane: 'notifications' })}
+          >
+            <svg className={styles.statusIcon} viewBox="0 0 16 16" fill="currentColor">
+              <path d="M9.5 1.5a6.5 6.5 0 1 0 5 9.9A5.5 5.5 0 0 1 9.5 1.5z" />
+            </svg>
+          </button>
+        )}
         {/* Wi-Fi */}
-        <button type="button" className={styles.statusBtn} aria-label="Wi-Fi" title="Wi-Fi">
+        <button
+          type="button"
+          className={styles.statusBtn}
+          aria-label={settings.wifi ? `Wi-Fi: ${settings.network}` : 'Wi-Fi off'}
+          title={settings.wifi ? settings.network : 'Wi-Fi off'}
+          onClick={() => openApp('settings', { pane: 'wifi' })}
+        >
           <svg className={styles.statusIcon} viewBox="0 0 16 16" fill="currentColor">
             <path d="M8 12.2a1.4 1.4 0 110 2.8 1.4 1.4 0 010-2.8z" />
-            <path d="M4.6 9.9a4.8 4.8 0 016.8 0l-1.05 1.05a3.3 3.3 0 00-4.7 0L4.6 9.9z" />
-            <path d="M1.6 6.9a9 9 0 0112.8 0l-1.05 1.05a7.5 7.5 0 00-10.7 0L1.6 6.9z" />
+            <path
+              d="M4.6 9.9a4.8 4.8 0 016.8 0l-1.05 1.05a3.3 3.3 0 00-4.7 0L4.6 9.9z"
+              opacity={settings.wifi ? 1 : 0.25}
+            />
+            <path
+              d="M1.6 6.9a9 9 0 0112.8 0l-1.05 1.05a7.5 7.5 0 00-10.7 0L1.6 6.9z"
+              opacity={settings.wifi ? 1 : 0.25}
+            />
           </svg>
         </button>
         {/* Battery */}

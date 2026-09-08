@@ -8,7 +8,9 @@ import {
   dockAppId,
   getDockAction,
 } from './dockConfig';
-import { DOCK_ICONS } from './dockIcons';
+import { useSettings } from '../../context/SettingsContext';
+import { appIconFor } from '../../theme/platformIcons';
+import { appLabelFor } from '../../theme/platform';
 import styles from './Dock.module.css';
 
 /* ─── Types ───────────────────────────────────────────────────────────── */
@@ -51,22 +53,7 @@ function MinimizedThumb({ appId, icon }: { appId: string; icon: React.ReactNode 
 
 function MinimizedSlot({ win }: { win: WindowInstance }) {
   const { focusWindow } = useDesktop();
-  const iconMap: Record<string, React.ReactNode> = {
-    about: DOCK_ICONS.about,
-    experience: DOCK_ICONS.experience,
-    skills: DOCK_ICONS.skills,
-    contact: DOCK_ICONS.contact,
-    location: DOCK_ICONS.location,
-    terminal: DOCK_ICONS.terminal,
-    calculator: DOCK_ICONS.calculator,
-    finder: DOCK_ICONS.finder,
-    trash: DOCK_ICONS.trashEmpty,
-    cv: DOCK_ICONS.cv,
-    github: DOCK_ICONS.github,
-    githubapp: DOCK_ICONS.github,
-    safari: DOCK_ICONS.safari,
-    imageviewer: DOCK_ICONS.imageviewer,
-  };
+  const { os } = useSettings();
   return (
     <div className={styles.item}>
       <button
@@ -75,7 +62,10 @@ function MinimizedSlot({ win }: { win: WindowInstance }) {
         aria-label={`Restore ${win.title}`}
         title={`Restore "${win.title}"`}
       >
-        <MinimizedThumb appId={win.appId} icon={iconMap[win.appId] ?? DOCK_ICONS.about} />
+        <MinimizedThumb
+          appId={win.appId}
+          icon={appIconFor(win.appId, os) ?? appIconFor('about', os)}
+        />
       </button>
       <span className={styles.label}>{win.title}</span>
     </div>
@@ -86,6 +76,7 @@ function MinimizedSlot({ win }: { win: WindowInstance }) {
 /* ─── Dock ────────────────────────────────────────────────────────────── */
 export default function Dock({ bouncingKeys, onItemActivate, trashHighlighted }: DockProps = {}) {
   const { openApp, windows, trashCount } = useDesktop();
+  const { os } = useSettings();
   const trashHasItems = trashCount > 0;
 
   const [order, setOrder] = useState<string[]>(() => [...DOCK_DEFAULT_ORDER]);
@@ -222,13 +213,12 @@ export default function Dock({ bouncingKeys, onItemActivate, trashHighlighted }:
   }
 
   function dockMeta(key: string) {
-    return (
-      DOCK_ITEMS.find((i) => i.key === key) ?? {
-        key,
-        label: DOCK_LABELS[key] ?? key,
-        icon: DOCK_ICONS[key as keyof typeof DOCK_ICONS],
-      }
-    );
+    const base = DOCK_ITEMS.find((i) => i.key === key);
+    return {
+      key,
+      label: appLabelFor(dockAppId(key), base?.label ?? DOCK_LABELS[key] ?? key, os),
+      icon: appIconFor(key, os),
+    };
   }
 
   // Every slot the dock is showing right now, so the CSS can shrink icons to fit.
@@ -238,7 +228,7 @@ export default function Dock({ bouncingKeys, onItemActivate, trashHighlighted }:
     <div className={styles.wrapper}>
       <div className={styles.panel} style={{ '--dock-count': dockCount } as React.CSSProperties}>
         {/* Fixed — Finder */}
-        {renderItem('finder', 'Finder', DOCK_ICONS.finder, false)}
+        {renderItem('finder', dockMeta('finder').label, appIconFor('finder', os), false)}
 
         <div className={styles.sep} />
 
@@ -260,8 +250,8 @@ export default function Dock({ bouncingKeys, onItemActivate, trashHighlighted }:
         {/* Fixed — Trash (icon changes when items present) */}
         {renderItem(
           'trash',
-          'Trash',
-          trashHasItems ? DOCK_ICONS.trashFull : DOCK_ICONS.trashEmpty,
+          dockMeta('trash').label,
+          appIconFor(trashHasItems ? 'trashFull' : 'trashEmpty', os),
           false,
           !!trashHighlighted
         )}

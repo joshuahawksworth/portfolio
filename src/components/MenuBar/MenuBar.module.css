@@ -208,3 +208,24 @@
     padding: 0 10px;
   }
 }
+
+.appleBtn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 4px 6px;
+  margin-right: 2px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  cursor: default;
+}
+
+.appleBtn .apple {
+  margin-right: 0;
+}
+
+.appleBtn:hover,
+.appleBtn.menuActive {
+  background: var(--menubar-hover, rgba(255, 255, 255, 0.3));
+}

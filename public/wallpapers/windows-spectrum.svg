@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe0f0"/>
+      <stop offset="0.5" stop-color="#e6d6ff"/>
+      <stop offset="1" stop-color="#cdeeff"/>
+    </linearGradient>
+    <filter id="blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="90"/></filter>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <g filter="url(#blur)">
+    <ellipse cx="420" cy="300" rx="420" ry="300" fill="#ff8ac2" opacity="0.7"/>
+    <ellipse cx="1350" cy="260" rx="460" ry="300" fill="#7fb8ff" opacity="0.7"/>
+    <ellipse cx="1000" cy="820" rx="560" ry="300" fill="#b48cff" opacity="0.65"/>
+    <ellipse cx="300" cy="900" rx="380" ry="260" fill="#8de7ff" opacity="0.6"/>
+    <ellipse cx="1650" cy="900" rx="380" ry="260" fill="#ffd28a" opacity="0.6"/>
+  </g>
+  <g fill="none" stroke="#fff" stroke-opacity="0.35" stroke-width="3">
+    <path d="M-100 700 C 400 500 800 900 1300 620 S 2000 300 2100 500"/>
+    <path d="M-100 780 C 400 580 800 980 1300 700 S 2000 380 2100 580" stroke-opacity="0.22"/>
+  </g>
+</svg>

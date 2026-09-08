@@ -1,6 +1,7 @@
 import { createContext, use, useState, useCallback, useRef, useMemo } from 'react';
 import { APP_DEFAULTS, APP_MAX, APP_MIN } from '../components/apps/appRegistry';
 import { buildSeedFileSystem, ROOT_IDS, type FsNode } from '../data/fileSystemSeed';
+import { shellInsets } from '../theme/platform';
 
 export type { FsNode, FsNodeType } from '../data/fileSystemSeed';
 
@@ -24,8 +25,7 @@ export interface WindowInstance {
 
 const CASCADE_STEPS = 8;
 function cascadePosition(idx: number, w: number, h: number) {
-  const menuH = 28;
-  const dockH = 90;
+  const { top: menuH, bottom: dockH } = shellInsets();
   const pad = 60;
   const origins = [
     { x: 0.14, y: 0.12 },
@@ -491,8 +491,7 @@ export function DesktopProvider({
           };
         }
         const maxDef = APP_MAX[w.appId] ?? { width: 900, height: 600 };
-        const menuH = 28;
-        const dockH = 90;
+        const { top: menuH, bottom: dockH } = shellInsets();
         const newW = Math.min(maxDef.width, window.innerWidth - 60);
         const newH = Math.min(maxDef.height, window.innerHeight - menuH - dockH - 40);
         const nx = Math.round((window.innerWidth - newW) / 2);

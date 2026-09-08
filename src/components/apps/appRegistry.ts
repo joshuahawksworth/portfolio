@@ -11,6 +11,7 @@ import KeyboardShortcutsApp from './KeyboardShortcutsApp';
 import LocationApp from './LocationApp';
 import RubberDuckApp from './RubberDuckApp';
 import SafariApp from './SafariApp';
+import SettingsApp from './SettingsApp';
 import SkillsApp from './SkillsApp';
 import TerminalApp from './TerminalApp';
 import TextEditorApp from './TextEditorApp';
@@ -36,7 +37,8 @@ export type PortfolioAppId =
   | 'texteditor'
   | 'imageviewer'
   | 'calculator'
-  | 'askjosh';
+  | 'askjosh'
+  | 'settings';
 
 export type PortfolioAppComponent = ComponentType<{ props?: Record<string, unknown> }>;
 
@@ -193,6 +195,14 @@ export const PORTFOLIO_APPS = {
     defaultSize: { width: 860, height: 600 },
     minSize: { width: 560, height: 420 },
     maxSize: { width: 1100, height: 760 },
+  },
+  settings: {
+    id: 'settings',
+    title: 'System Settings',
+    component: SettingsApp,
+    defaultSize: { width: 860, height: 600 },
+    minSize: { width: 560, height: 420 },
+    maxSize: { width: 1100, height: 780 },
   },
 } satisfies Record<PortfolioAppId, PortfolioAppDefinition>;
 

@@ -7,13 +7,13 @@ import styles from './DesktopWidgets.module.css';
 const LAT = 53.48;
 const LON = -2.24;
 
-interface Weather {
+export interface Weather {
   temp: number;
   code: number;
 }
 
 // WMO weather interpretation codes → label + glyph
-function describe(code: number): { label: string; glyph: string } {
+export function describeWeather(code: number): { label: string; glyph: string } {
   if (code === 0) return { label: 'Sunny', glyph: '☀' };
   if (code <= 2) return { label: 'Partly cloudy', glyph: '⛅' };
   if (code === 3) return { label: 'Cloudy', glyph: '☁' };
@@ -25,7 +25,7 @@ function describe(code: number): { label: string; glyph: string } {
   return { label: 'Thunder', glyph: '⛈' };
 }
 
-function useWeather(): Weather | null {
+export function useWeather(): Weather | null {
   const [weather, setWeather] = useState<Weather | null>(null);
   useEffect(() => {
     const ctrl = new AbortController();
@@ -53,7 +53,7 @@ export default function DesktopWidgets() {
   const { openApp } = useDesktop();
   const now = useTime();
   const weather = useWeather();
-  const { label, glyph } = describe(weather?.code ?? 3);
+  const { label, glyph } = describeWeather(weather?.code ?? 3);
   const weekday = now.toLocaleDateString('en-GB', { weekday: 'long' });
 
   return (

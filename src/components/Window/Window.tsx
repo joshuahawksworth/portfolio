@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useDesktop, WindowInstance } from '../../context/DesktopContext';
+import { useOs } from '../../context/SettingsContext';
+import { appIconFor } from '../../theme/platformIcons';
+import { appTitleFor, shellInsets } from '../../theme/platform';
 import styles from './Window.module.css';
 
 type Dir = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
@@ -20,6 +23,9 @@ export default function Window({ win, children }: Props) {
     focusedId,
   } = useDesktop();
   const isFocused = focusedId === win.id;
+  const os = useOs();
+  const isWindows = os === 'windows';
+  const title = appTitleFor(win.appId, win.title, os);
 
   // Always-current snapshot of win — eliminates every stale-closure risk
   const winRef = useRef(win);
@@ -38,8 +44,9 @@ export default function Window({ win, children }: Props) {
 
   // ── tiling (macOS window layout menu) ────────────────────────────────
   function tile(kind: 'left' | 'right' | 'top' | 'bottom' | 'fill' | 'center') {
-    const menuH = 29;
-    const dockH = 96;
+    const insets = shellInsets();
+    const menuH = insets.top;
+    const dockH = insets.bottom + 6;
     const gap = 8;
     const vw = window.innerWidth;
     const vh = window.innerHeight - menuH - dockH;
@@ -121,7 +128,7 @@ export default function Window({ win, children }: Props) {
         moveWindow(
           id,
           Math.max(0, startWX + ev.clientX - startMX),
-          Math.max(29, startWY + ev.clientY - startMY)
+          Math.max(shellInsets().top, startWY + ev.clientY - startMY)
         ),
       () => {}
     );
@@ -172,6 +179,7 @@ export default function Window({ win, children }: Props) {
     <div
       className={[
         styles.outer,
+        isWindows ? styles.win : '',
         isTransitioning ? styles.transitioning : '',
         isMinimizing ? styles.minimizing : '',
       ].join(' ')}
@@ -202,8 +210,17 @@ export default function Window({ win, children }: Props) {
         onMouseDown={() => focusWindow(win.id)}
       >
         {/* Title bar — drag starts here, focus fires from parent above */}
-        <div className={styles.titleBar} onMouseDown={handleTitleMouseDown}>
-          <div className={styles.lights}>
+        <div
+          className={styles.titleBar}
+          onMouseDown={handleTitleMouseDown}
+          onDoubleClick={isWindows ? handleMaximize : undefined}
+        >
+          {isWindows && (
+            <span className={styles.winAppIcon} aria-hidden="true">
+              {appIconFor(win.appId, os)}
+            </span>
+          )}
+          <div className={styles.lights} hidden={isWindows}>
             {/* Buttons: stopPropagation on mouseDown prevents the title bar's
                 drag handler from seeing this event. onClick works normally. */}
             <button
@@ -264,10 +281,56 @@ export default function Window({ win, children }: Props) {
               </svg>
             </button>
           </div>
-          <span className={styles.title}>{win.title}</span>
+          <span className={styles.title}>{title}</span>
+          {isWindows && (
+            <div className={styles.captions} onMouseDown={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                className={styles.caption}
+                onClick={handleMinimize}
+                aria-label="Minimize"
+              >
+                <svg viewBox="0 0 10 10" width="10" height="10">
+                  <path d="M0 5h10" stroke="currentColor" strokeWidth="1" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                className={styles.caption}
+                onClick={handleMaximize}
+                onMouseEnter={() => setTilingOpen(true)}
+                aria-label={win.maximized ? 'Restore' : 'Maximize'}
+              >
+                <svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor">
+                  {win.maximized ? (
+                    <>
+                      <rect x="0.5" y="2.5" width="7" height="7" rx="1" />
+                      <path d="M2.5 2.5v-1a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-1" />
+                    </>
+                  ) : (
+                    <rect x="0.5" y="0.5" width="9" height="9" rx="1.5" />
+                  )}
+                </svg>
+              </button>
+              <button
+                type="button"
+                className={`${styles.caption} ${styles.captionClose}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  closeWindow(win.id);
+                }}
+                aria-label="Close"
+              >
+                <svg viewBox="0 0 10 10" width="10" height="10">
+                  <path d="M1 1l8 8M9 1l-8 8" stroke="currentColor" strokeWidth="1" />
+                </svg>
+              </button>
+            </div>
+          )}
           <button
             type="button"
             className={styles.titleAction}
+            hidden={isWindows}
             aria-label="Window tiling options"
             title="Window layout"
             onMouseDown={(e) => e.stopPropagation()}
@@ -284,7 +347,11 @@ export default function Window({ win, children }: Props) {
             </svg>
           </button>
           {tilingOpen && (
-            <div className={styles.tilingMenu} onMouseDown={(e) => e.stopPropagation()}>
+            <div
+              className={styles.tilingMenu}
+              onMouseDown={(e) => e.stopPropagation()}
+              onMouseLeave={isWindows ? () => setTilingOpen(false) : undefined}
+            >
               <button type="button" className={styles.tilingItem} onClick={() => tile('fill')}>
                 Fill
               </button>

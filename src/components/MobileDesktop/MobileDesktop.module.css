@@ -649,3 +649,279 @@
   color: var(--text-strong);
   font-size: 17px;
 }
+
+/* ── Android (Pixel launcher) ─────────────────────────────── */
+.android {
+  font-family: var(--font-ui);
+  background: #dbe6f7;
+}
+
+/* Pixel shows the wallpaper sharp */
+.android .wallpaper {
+  filter: none;
+}
+
+.statusBarDroid {
+  padding-left: 28px;
+  padding-right: 20px;
+}
+
+.statusBarDroid .statusTime {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.statusBarDroid .statusIcons {
+  gap: 5px;
+}
+
+.statusPct {
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 2px;
+}
+
+/* Dark Pixel icons on the light wallpapers, like the real launcher */
+.android[data-os='android'] .statusBar,
+.android .statusIcons,
+.android .iconLabel {
+  color: #1c1b1f;
+  text-shadow: none;
+}
+
+.android .page {
+  padding-top: 6px;
+}
+
+.android .iconGrid {
+  gap: 20px 6px;
+}
+
+.android .iconLabel {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+/* Material icons: full-bleed discs, clipped to the chosen shape */
+.appIconDroid {
+  background: transparent;
+  box-shadow: 0 2px 6px rgba(20, 30, 60, 0.18);
+  border-radius: var(--droid-radius, 50%);
+}
+
+.appIconDroid > svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+:global(html[data-icon-shape='circle']) .appIconDroid {
+  --droid-radius: 50%;
+}
+:global(html[data-icon-shape='squircle']) .appIconDroid {
+  --droid-radius: 28%;
+}
+:global(html[data-icon-shape='square']) .appIconDroid {
+  --droid-radius: 16%;
+}
+
+/* At a Glance row */
+.glanceItem {
+  display: flex;
+  min-width: 0;
+  padding: 0 2px;
+}
+
+.glance {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 12px 6px;
+  border: 0;
+  background: transparent;
+  color: #1c1b1f;
+  font: inherit;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.glanceDate {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+.glanceSub {
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+/* Page dots row without the search pill */
+.searchRowDots {
+  height: 30px;
+}
+
+.searchRowDots .pageDots {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: auto;
+  background: transparent;
+  border: 0;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.android .pageDot {
+  background: rgba(28, 27, 31, 0.35);
+  box-shadow: none;
+}
+
+.android .pageDotActive {
+  background: #1c1b1f;
+}
+
+/* Pixel dock: no slab, icons float; Google bar underneath */
+.android .dockWrap {
+  padding: 0 14px calc(env(safe-area-inset-bottom, 0px) + 30px);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.android .dock {
+  height: 68px;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0 6px;
+}
+
+.googleRow {
+  display: flex;
+  justify-content: center;
+  padding: 0 6px;
+}
+
+.googleBar {
+  width: 100%;
+  height: 50px;
+  padding: 0 16px;
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 0;
+  box-shadow: 0 2px 8px rgba(20, 30, 60, 0.14);
+  color: #5f6368;
+  gap: 12px;
+}
+
+.googleBar .searchInput {
+  flex: 1;
+  width: auto;
+  color: #1c1b1f;
+  font-size: 15px;
+}
+
+.googleBar .searchInput::placeholder {
+  color: #5f6368;
+  opacity: 1;
+}
+
+.googleBar .searchInput:focus,
+.googleBar .searchInput:not(:placeholder-shown) {
+  width: auto;
+}
+
+.googleMic {
+  flex-shrink: 0;
+}
+
+.android .homeIndicator {
+  width: 96px;
+  height: 4px;
+  background: rgba(28, 27, 31, 0.6);
+}
+
+/* Material 3 app sheet: left-aligned title, back arrow, tonal surface */
+.android .panel {
+  background: var(--panel-solid);
+  border-radius: 28px 28px 0 0;
+}
+
+.android .panelHeader {
+  height: calc(64px + env(safe-area-inset-top, 0px));
+  padding-left: 4px;
+  background: #eef2f8;
+  border-bottom: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.android .panelHeaderDark {
+  background: rgba(28, 28, 30, 0.96);
+}
+
+.android .closeBtn {
+  margin-left: 0;
+  width: 48px;
+  height: 48px;
+  color: #1c1b1f;
+}
+
+.android .closeBtn svg {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.android .closeBtn svg path {
+  opacity: 1;
+}
+
+.android .panelHeaderDark .closeBtn {
+  color: #fff;
+}
+
+.android .panelTitle {
+  text-align: left;
+  font-size: 22px;
+  font-weight: 400;
+  padding-left: 4px;
+}
+
+.android .headerSpacer {
+  width: 48px;
+}
+
+/* Dark Pixel wallpaper: flip the launcher text back to white */
+.android.darkWall .statusBar,
+.android.darkWall .statusIcons,
+.android.darkWall .iconLabel,
+.android.darkWall .glance {
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+.android.darkWall .pageDot {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.android.darkWall .pageDotActive {
+  background: #fff;
+}
+
+.android.darkWall .homeIndicator {
+  background: rgba(255, 255, 255, 0.85);
+}

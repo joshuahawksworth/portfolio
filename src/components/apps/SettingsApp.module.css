@@ -1,0 +1,1226 @@
+/* ── System Settings: shared layout, then per-OS looks via [data-os] ─────── */
+.root {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  background: var(--panel);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+
+/* Sidebar (macOS / Windows) */
+.sidebar {
+  width: 210px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 10px;
+  background: var(--glass);
+  border-right: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  color: var(--text);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.search input::-webkit-search-decoration,
+.search input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+.sideProfile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: default;
+}
+
+.sideProfile:hover {
+  background: var(--hover);
+}
+
+.sideList {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  scrollbar-width: thin;
+}
+
+.sideRow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: default;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sideRow:hover {
+  background: var(--hover);
+}
+
+.sideRowOn,
+.sideRowOn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.paneIcon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.12);
+}
+
+.paneIcon > svg {
+  width: 14px;
+  height: 14px;
+}
+
+.paneIconMono {
+  background: transparent;
+  color: var(--text);
+  box-shadow: none;
+}
+
+.sideRowOn .paneIconMono {
+  color: #fff;
+}
+
+/* Detail */
+.content {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 18px 26px 28px;
+  scrollbar-width: thin;
+}
+
+.contentHead {
+  margin-bottom: 14px;
+}
+
+.breadcrumb {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.contentTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-strong);
+  line-height: 1.25;
+}
+
+.paneBody {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 640px;
+}
+
+/* Groups & rows */
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.groupTitle {
+  margin: 0;
+  padding: 0 2px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.groupBody {
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.55);
+  overflow: hidden;
+}
+
+.groupFooter {
+  margin: 0;
+  padding: 0 4px;
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 42px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--line);
+  width: 100%;
+  text-align: left;
+  color: var(--text);
+  font: inherit;
+  background: transparent;
+}
+
+.row:first-child {
+  border-top: 0;
+}
+
+.rowButton {
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  cursor: default;
+}
+
+.rowButton:hover {
+  background: var(--hover);
+}
+
+.rowStacked {
+  flex-wrap: wrap;
+}
+
+.rowStacked .rowControl {
+  flex-basis: 100%;
+  margin-top: 4px;
+}
+
+.rowIcon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+.rowText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.rowLabel {
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.rowSub {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.rowControl {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chevron {
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid var(--muted-2);
+  border-bottom: 1.5px solid var(--muted-2);
+  transform: rotate(-45deg);
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+
+.value {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.avatar,
+.profileAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffd166, #f7a531 60%, #d87a1c);
+  color: #3a2200;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.deviceArt {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Toggle (macOS default) */
+.toggle {
+  position: relative;
+  width: 40px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.18);
+  cursor: default;
+  transition: background 160ms ease;
+  flex-shrink: 0;
+}
+
+.toggleKnob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 160ms ease;
+}
+
+.toggleOn {
+  background: var(--accent);
+}
+
+.toggleOn .toggleKnob {
+  transform: translateX(16px);
+}
+
+.toggleText {
+  display: none;
+}
+
+/* Slider */
+.sliderRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.sliderCap {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.slider {
+  --fill: 50%;
+  flex: 1;
+  min-width: 80px;
+  appearance: none;
+  -webkit-appearance: none;
+  height: 4px;
+  margin: 8px 0;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent) var(--fill), rgba(0, 0, 0, 0.14) var(--fill));
+  outline: none;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 0.5px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 0.5px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.slider:focus-visible {
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Segmented */
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.06);
+  gap: 2px;
+}
+
+.segment {
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  cursor: default;
+}
+
+.segmentOn {
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  font-weight: 600;
+}
+
+/* Buttons, fields */
+.button {
+  height: 26px;
+  padding: 0 11px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  cursor: default;
+  white-space: nowrap;
+}
+
+.button:hover:not(:disabled) {
+  background: #fff;
+}
+
+.button:disabled {
+  color: var(--muted-2);
+  cursor: default;
+}
+
+.buttonPrimary {
+  background: var(--accent);
+  border-color: transparent;
+  color: #fff;
+}
+
+.buttonDanger {
+  color: #d0281e;
+}
+
+.buttonRow {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.textField {
+  width: 150px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  background: #fff;
+  font: inherit;
+  font-size: 12px;
+  color: var(--text);
+  outline: none;
+}
+
+.textField:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.check {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+}
+
+.checkOn {
+  background: var(--accent);
+  color: #fff;
+}
+
+.empty {
+  padding: 14px 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Platform cards */
+.platformGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+}
+
+.platformCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border: 2px solid var(--line-strong);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: default;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease;
+}
+
+.platformCard:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.platformCardOn {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.platformArt {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.platformName {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.platformName .check {
+  margin-left: auto;
+}
+
+.platformDesc {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.platformRenders {
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+@media (max-width: 560px) {
+  .platformGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Swatches & wallpapers */
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  cursor: default;
+  padding: 0;
+}
+
+.swatchOn {
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 4px var(--accent);
+}
+
+.wallpaperGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.wallpaperThumb {
+  aspect-ratio: 16 / 10;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: #ccc center / cover no-repeat;
+  display: flex;
+  align-items: flex-end;
+  padding: 6px;
+  color: #fff;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  cursor: default;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.wallpaperThumbOn {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.storageBar {
+  width: 100%;
+  height: 12px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.storageBar > span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #5ac8fa);
+}
+
+/* ── Phone layouts ─────────────────────────────────────────────────── */
+.root[data-os='ios'],
+.root[data-os='android'] {
+  flex-direction: column;
+}
+
+.mobileScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 16px 32px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobileTitle {
+  margin: 10px 0 8px;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-strong);
+  letter-spacing: -0.02em;
+}
+
+.mobileSearch {
+  margin-bottom: 14px;
+}
+
+.mobileSearch .search {
+  height: 36px;
+  border-radius: 10px;
+}
+
+.mobileSearch .search input {
+  font-size: 16px;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+}
+
+.profile .profileAvatar {
+  width: 52px;
+  height: 52px;
+  font-size: 17px;
+}
+
+.profileText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.profileName {
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.profileSub {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.sidebar .profileName {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mobileList {
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  overflow: hidden;
+}
+
+.mobileRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 8px 14px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobileRow:first-child {
+  border-top: 0;
+}
+
+.mobileRow:active {
+  background: var(--hover);
+}
+
+.mobileRow .rowLabel {
+  font-size: 16px;
+}
+
+.mobileRow .paneIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+}
+
+.mobileRow .paneIcon > svg {
+  width: 18px;
+  height: 18px;
+}
+
+.mobileNav {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--line);
+  background: var(--glass);
+  position: relative;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: 16px;
+  z-index: 1;
+}
+
+.mobileNavTitle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-strong);
+  pointer-events: none;
+}
+
+.root[data-os='ios'] .paneBody,
+.root[data-os='android'] .paneBody {
+  max-width: none;
+  padding-top: 16px;
+}
+
+.root[data-os='ios'] .groupBody,
+.root[data-os='android'] .groupBody {
+  border: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.root[data-os='ios'] .row,
+.root[data-os='android'] .row {
+  min-height: 46px;
+  padding: 10px 14px;
+}
+
+.root[data-os='ios'] .rowLabel,
+.root[data-os='android'] .rowLabel {
+  font-size: 16px;
+}
+
+.root[data-os='ios'] .rowSub,
+.root[data-os='android'] .rowSub {
+  font-size: 13px;
+}
+
+.root[data-os='ios'] .button,
+.root[data-os='android'] .button {
+  height: 34px;
+  font-size: 14px;
+}
+
+.root[data-os='ios'] .textField,
+.root[data-os='android'] .textField {
+  height: 34px;
+  font-size: 16px;
+  width: 130px;
+}
+
+/* iOS: green switches, big rounded groups */
+.root[data-os='ios'] .toggle {
+  width: 51px;
+  height: 31px;
+  border-radius: 16px;
+  background: rgba(120, 120, 128, 0.32);
+}
+
+.root[data-os='ios'] .toggleKnob {
+  width: 27px;
+  height: 27px;
+}
+
+.root[data-os='ios'] .toggleOn {
+  background: #34c759;
+}
+
+.root[data-os='ios'] .toggleOn .toggleKnob {
+  transform: translateX(20px);
+}
+
+.root[data-os='ios'] .segmented {
+  border-radius: 9px;
+  background: rgba(120, 120, 128, 0.16);
+}
+
+.root[data-os='ios'] .segment {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 7px;
+}
+
+/* Android: Material 3 */
+.root[data-os='android'] {
+  background: var(--panel-solid);
+}
+
+.root[data-os='android'] .mobileSearch .search {
+  height: 52px;
+  border-radius: 26px;
+  border: 0;
+  background: #e9eef6;
+  padding: 0 18px;
+  margin-top: 10px;
+}
+
+.root[data-os='android'] .mobileList,
+.root[data-os='android'] .profile,
+.root[data-os='android'] .groupBody {
+  background: transparent;
+  border-radius: 0;
+}
+
+.root[data-os='android'] .mobileRow {
+  border-top: 0;
+  min-height: 72px;
+  padding: 10px 8px;
+}
+
+.root[data-os='android'] .mobileRow .paneIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e2e8f2;
+  color: #1c1b1f;
+}
+
+.root[data-os='android'] .row {
+  border-top: 0;
+  min-height: 60px;
+}
+
+.root[data-os='android'] .groupTitle {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--accent);
+  padding: 8px 14px 0;
+}
+
+.root[data-os='android'] .groupFooter {
+  padding: 0 14px;
+}
+
+.root[data-os='android'] .mobileNav {
+  height: 64px;
+  border-bottom: 0;
+  background: transparent;
+}
+
+.root[data-os='android'] .backBtn {
+  color: var(--text);
+  width: 48px;
+  justify-content: center;
+}
+
+.root[data-os='android'] .mobileNavTitle {
+  position: static;
+  text-align: left;
+  font-size: 22px;
+  font-weight: 400;
+  padding-left: 4px;
+}
+
+.root[data-os='android'] .toggle {
+  width: 52px;
+  height: 32px;
+  border-radius: 16px;
+  background: #e2e8f2;
+  box-shadow: inset 0 0 0 2px #79747e;
+}
+
+.root[data-os='android'] .toggleKnob {
+  top: 8px;
+  left: 8px;
+  width: 16px;
+  height: 16px;
+  background: #79747e;
+  box-shadow: none;
+}
+
+.root[data-os='android'] .toggleOn {
+  background: var(--accent);
+  box-shadow: none;
+}
+
+.root[data-os='android'] .toggleOn .toggleKnob {
+  top: 4px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  background: #fff;
+  transform: translateX(20px);
+}
+
+.root[data-os='android'] .button {
+  height: 36px;
+  border-radius: 18px;
+  border-color: #79747e;
+  background: transparent;
+  color: var(--accent);
+  font-weight: 500;
+  padding: 0 16px;
+}
+
+.root[data-os='android'] .buttonDanger {
+  color: #b3261e;
+}
+
+.root[data-os='android'] .segmented {
+  background: transparent;
+  border: 1px solid #79747e;
+  border-radius: 18px;
+  padding: 0;
+  gap: 0;
+}
+
+.root[data-os='android'] .segment {
+  border-radius: 0;
+  padding: 7px 12px;
+}
+
+.root[data-os='android'] .segment:first-child {
+  border-radius: 18px 0 0 18px;
+}
+
+.root[data-os='android'] .segment:last-child {
+  border-radius: 0 18px 18px 0;
+}
+
+.root[data-os='android'] .segmentOn {
+  background: var(--accent-soft);
+  box-shadow: none;
+  color: var(--accent);
+}
+
+.root[data-os='android'] .textField {
+  border-radius: 4px;
+  border-color: #79747e;
+}
+
+/* ── Windows 11 ───────────────────────────────────────────────────── */
+.root[data-os='windows'] {
+  font-size: 13px;
+}
+
+.root[data-os='windows'] .sidebar {
+  width: 240px;
+  background: transparent;
+  border-right: 0;
+  padding: 18px 10px 12px 14px;
+  gap: 12px;
+}
+
+.root[data-os='windows'] .search {
+  height: 32px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.45);
+  background: #fff;
+}
+
+.root[data-os='windows'] .sideProfile {
+  padding: 8px 6px;
+}
+
+.root[data-os='windows'] .sideRow {
+  border-radius: 4px;
+  min-height: 36px;
+  padding: 6px 10px;
+  position: relative;
+}
+
+.root[data-os='windows'] .sideRowOn,
+.root[data-os='windows'] .sideRowOn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text);
+}
+
+.root[data-os='windows'] .sideRowOn::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  bottom: 9px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.root[data-os='windows'] .sideRowOn .paneIconMono {
+  color: var(--text);
+}
+
+.root[data-os='windows'] .content {
+  padding: 24px 30px 30px 12px;
+}
+
+.root[data-os='windows'] .contentTitle {
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.root[data-os='windows'] .paneBody {
+  max-width: 760px;
+}
+
+.root[data-os='windows'] .groupTitle {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.root[data-os='windows'] .groupBody {
+  border: 0;
+  background: transparent;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.root[data-os='windows'] .row {
+  min-height: 62px;
+  padding: 12px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.root[data-os='windows'] .rowButton:hover {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.root[data-os='windows'] .rowLabel {
+  font-size: 14px;
+}
+
+.root[data-os='windows'] .rowSub {
+  font-size: 12px;
+}
+
+.root[data-os='windows'] .toggle {
+  width: 40px;
+  height: 20px;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.45);
+  margin-right: 34px;
+  overflow: visible;
+}
+
+.root[data-os='windows'] .toggleKnob {
+  top: 4px;
+  left: 4px;
+  width: 12px;
+  height: 12px;
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow: none;
+}
+
+.root[data-os='windows'] .toggleOn {
+  background: var(--accent);
+  box-shadow: none;
+}
+
+.root[data-os='windows'] .toggleOn .toggleKnob {
+  background: #fff;
+  transform: translateX(20px);
+}
+
+.root[data-os='windows'] .toggleText {
+  display: block;
+  position: absolute;
+  left: 48px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.root[data-os='windows'] .button {
+  height: 32px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom-color: rgba(0, 0, 0, 0.2);
+  background: #fbfbfb;
+  font-size: 13px;
+  padding: 0 14px;
+}
+
+.root[data-os='windows'] .segmented {
+  background: transparent;
+  gap: 4px;
+  padding: 0;
+}
+
+.root[data-os='windows'] .segment {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  padding: 6px 12px;
+  background: #fbfbfb;
+}
+
+.root[data-os='windows'] .segmentOn {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.root[data-os='windows'] .textField {
+  height: 32px;
+  border-radius: 4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.45);
+}
+
+.root[data-os='windows'] .groupBody .row .slider::-webkit-slider-thumb {
+  background: #fff;
+  border: 5px solid var(--accent);
+}
+
+.root[data-os='windows'] .platformCard {
+  border-radius: 4px;
+}
+
+.root[data-os='windows'] .wallpaperThumb {
+  border-radius: 4px;
+}
+
+@media (max-width: 640px) {
+  .root[data-os='macos'] .sidebar,
+  .root[data-os='windows'] .sidebar {
+    width: 160px;
+  }
+}

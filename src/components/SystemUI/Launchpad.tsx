@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDesktop } from '../../context/DesktopContext';
 import { useSystemUI } from '../../context/SystemUIContext';
-import { launchSystemApp, searchSystemApps, type SystemApp } from './systemApps';
+import { launchSystemApp, searchSystemApps, useSystemApps, type SystemApp } from './systemApps';
 import styles from './SystemUI.module.css';
 
 export default function Launchpad() {
@@ -14,7 +14,8 @@ export default function Launchpad() {
     inputRef.current?.focus();
   }, []);
 
-  const apps = useMemo(() => searchSystemApps(query), [query]);
+  const catalogue = useSystemApps();
+  const apps = useMemo(() => searchSystemApps(query, catalogue), [query, catalogue]);
 
   function open(app: SystemApp) {
     launchSystemApp(app, openApp);

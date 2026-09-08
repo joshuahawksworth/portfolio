@@ -294,6 +294,14 @@ const DRAWN_ICONS = {
       </g>
     </MacIcon>
   ),
+  rubberduck: (
+    <MacIcon top="#ffd83d" bottom="#f2a300">
+      <ellipse cx="23" cy="27" rx="11" ry="7.5" fill="#fff3a6" />
+      <circle cx="17" cy="18" r="6.5" fill="#fff3a6" />
+      <circle cx="15.5" cy="17" r="1.3" fill="#2a2320" />
+      <path d="M10 19.5 Q6.5 20.5 8.5 22.5 Q11 23 12.5 21.5 Z" fill="#ff7a1a" />
+    </MacIcon>
+  ),
   texteditor: (
     // Sublime Text-inspired icon — dark with coloured accent bar
     <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
@@ -407,6 +415,7 @@ const REAL_ICONS = {
   imageviewer: <RealIcon src="/icons/preview.png" />,
   experience: <RealIcon src="/icons/reminders.png" rounded />,
   shortcuts: <RealIcon src="/icons/shortcuts.png" rounded />,
+  settings: <RealIcon src="/icons/settings.png" />,
 };
 
 export const DOCK_ICONS = { ...DRAWN_ICONS, ...REAL_ICONS };

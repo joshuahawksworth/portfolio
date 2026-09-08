@@ -11,7 +11,9 @@ import {
 import { FINDER_ROOTS, ROOT_IDS, type RootId } from '../../data/fileSystemSeed';
 import { openTargetFor } from '../../lib/openNode';
 import { NodeIcon, nodeKind } from '../icons/NodeIcon';
-import { FolderIcon } from '../icons/FileSystemIcons';
+import { PlatformFolderIcon } from '../icons/PlatformFileIcons';
+import { useOs } from '../../context/SettingsContext';
+import { nodeDisplayName } from '../../theme/platform';
 import styles from './FinderApp.module.css';
 
 /** Drag payload shared with the desktop (a JSON list of node ids). */
@@ -58,6 +60,7 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
     trashNodes,
     trashCount,
   } = useDesktop();
+  const finderOs = useOs();
 
   // ── Navigation ───────────────────────────────────────────────────────
   const [currentId, setCurrentId] = useState<string>(() => {
@@ -519,7 +522,7 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
         }}
         onDoubleClick={() => window.clearTimeout(renameTimer.current)}
       >
-        {node.name}
+        {nodeDisplayName(node.id, node.name, finderOs)}
       </span>
     );
   }
@@ -527,7 +530,7 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
   const emptyState =
     items.length === 0 ? (
       <div className={styles.emptyFolder}>
-        {!q && <FolderIcon size={64} style={{ opacity: 0.35 }} />}
+        {!q && <PlatformFolderIcon os={finderOs} size={64} style={{ opacity: 0.35 }} />}
         <span className={styles.emptyFolderLabel}>
           {q ? `No results for “${searchQuery}”` : `${title} is empty`}
         </span>
@@ -563,7 +566,13 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
     >
       {/* Sidebar */}
       <aside className={styles.sidebar}>
-        <p className={styles.sidebarSection}>Favourites</p>
+        <p className={styles.sidebarSection}>
+          {finderOs === 'windows'
+            ? 'Quick access'
+            : finderOs === 'android'
+              ? 'Browse'
+              : 'Favourites'}
+        </p>
         {FINDER_ROOTS.map((id) => (
           <button
             key={id}
@@ -759,7 +768,7 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
                     dropTarget === node.id ? styles.itemDrop : '',
                     draggingIds.has(node.id) ? styles.itemDragging : '',
                   ].join(' ')}
-                  title={node.name}
+                  title={nodeDisplayName(node.id, node.name, finderOs)}
                   {...itemHandlers(node)}
                 >
                   <div className={styles.itemIcon}>
@@ -793,7 +802,7 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
                     dropTarget === node.id ? styles.itemDrop : '',
                     draggingIds.has(node.id) ? styles.itemDragging : '',
                   ].join(' ')}
-                  title={node.name}
+                  title={nodeDisplayName(node.id, node.name, finderOs)}
                   {...itemHandlers(node)}
                 >
                   <span className={`${styles.colName} ${styles.rowName}`}>

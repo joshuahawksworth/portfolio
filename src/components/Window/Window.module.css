@@ -36,17 +36,26 @@
 /* Smooth transition for maximize / restore */
 .transitioning {
   transition:
-    left   220ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    top    220ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    width  220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    left 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    top 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    width 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
     height 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 /* Minimize — genie-ish drop toward the dock */
 @keyframes minimizeOut {
-  0%   { opacity: 1;   transform: scale(1);    }
-  70%  { opacity: 0.6; transform: scale(0.2);  }
-  100% { opacity: 0;   transform: scale(0.06); }
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  70% {
+    opacity: 0.6;
+    transform: scale(0.2);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.06);
+  }
 }
 
 .minimizing {
@@ -105,16 +114,64 @@
 }
 
 /* Edges */
-.hn  { cursor: n-resize;  top: -4px;    left: 14px;    right: 14px;   height: 8px;  }
-.hs  { cursor: s-resize;  bottom: -4px; left: 14px;    right: 14px;   height: 8px;  }
-.he  { cursor: e-resize;  right: -4px;  top: 14px;     bottom: 14px;  width: 8px;   }
-.hw  { cursor: w-resize;  left: -4px;   top: 14px;     bottom: 14px;  width: 8px;   }
+.hn {
+  cursor: n-resize;
+  top: -4px;
+  left: 14px;
+  right: 14px;
+  height: 8px;
+}
+.hs {
+  cursor: s-resize;
+  bottom: -4px;
+  left: 14px;
+  right: 14px;
+  height: 8px;
+}
+.he {
+  cursor: e-resize;
+  right: -4px;
+  top: 14px;
+  bottom: 14px;
+  width: 8px;
+}
+.hw {
+  cursor: w-resize;
+  left: -4px;
+  top: 14px;
+  bottom: 14px;
+  width: 8px;
+}
 
 /* Corners */
-.hne { cursor: ne-resize; top: -4px;    right: -4px;   width: 18px;   height: 18px; }
-.hnw { cursor: nw-resize; top: -4px;    left: -4px;    width: 18px;   height: 18px; }
-.hse { cursor: se-resize; bottom: -4px; right: -4px;   width: 18px;   height: 18px; }
-.hsw { cursor: sw-resize; bottom: -4px; left: -4px;    width: 18px;   height: 18px; }
+.hne {
+  cursor: ne-resize;
+  top: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+}
+.hnw {
+  cursor: nw-resize;
+  top: -4px;
+  left: -4px;
+  width: 18px;
+  height: 18px;
+}
+.hse {
+  cursor: se-resize;
+  bottom: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+}
+.hsw {
+  cursor: sw-resize;
+  bottom: -4px;
+  left: -4px;
+  width: 18px;
+  height: 18px;
+}
 
 /* ── Title bar ───────────────────────────────────────────────────────── */
 .titleBar {
@@ -155,11 +212,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: filter 120ms ease, background 160ms ease;
+  transition:
+    filter 120ms ease,
+    background 160ms ease;
   flex-shrink: 0;
 }
 
-.dot:hover  { filter: brightness(0.9); }
+.dot:hover {
+  filter: brightness(0.9);
+}
 
 .dotIcon {
   width: 8px;
@@ -168,11 +229,19 @@
   pointer-events: none;
   transition: opacity 100ms ease;
 }
-.lights:hover .dotIcon { opacity: 1; }
+.lights:hover .dotIcon {
+  opacity: 1;
+}
 
-.red    { background: #ff5f57; }
-.yellow { background: #febc2e; }
-.green  { background: #28c840; }
+.red {
+  background: #ff5f57;
+}
+.yellow {
+  background: #febc2e;
+}
+.green {
+  background: #28c840;
+}
 
 .blurred .red,
 .blurred .yellow,
@@ -196,7 +265,9 @@
   text-overflow: ellipsis;
 }
 
-.blurred .title { color: var(--muted); }
+.blurred .title {
+  color: var(--muted);
+}
 
 /* Right-hand title bar affordance (window tiling / layout menu) */
 .titleAction {
@@ -212,7 +283,9 @@
   color: var(--muted);
   cursor: pointer;
   flex-shrink: 0;
-  transition: background 120ms ease, color 120ms ease;
+  transition:
+    background 120ms ease,
+    color 120ms ease;
 }
 .titleAction:hover {
   background: rgba(0, 0, 0, 0.06);
@@ -265,4 +338,136 @@
   flex-direction: column;
   /* Transparent: the app root tints the window's glass */
   background: transparent;
+}
+
+/* ── Windows 11 chrome (Mica pane, left title, caption buttons) ──────── */
+.lights[hidden],
+.titleAction[hidden] {
+  display: none;
+}
+
+.win .window {
+  border-radius: 8px;
+  background: rgba(243, 243, 243, 0.86);
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  outline: none;
+}
+
+.win .focused {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset,
+    0 32px 64px rgba(0, 0, 0, 0.28),
+    0 2px 10px rgba(0, 0, 0, 0.16);
+}
+
+.win .blurred {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.4) inset,
+    0 8px 24px rgba(0, 0, 0, 0.16);
+}
+
+.win .titleBar {
+  height: 32px;
+  padding: 0 0 0 12px;
+  gap: 8px;
+  background: transparent;
+  border-bottom: 0;
+  box-shadow: none;
+}
+
+.winAppIcon {
+  --app-icon-size: 16px;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.winAppIcon > svg,
+.winAppIcon > img,
+.winAppIcon > span {
+  width: 16px;
+  height: 16px;
+}
+
+.win .title {
+  position: static;
+  transform: none;
+  max-width: none;
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 400;
+  text-align: left;
+}
+
+.captions {
+  display: flex;
+  align-self: stretch;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.caption {
+  width: 46px;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  transition: background 100ms ease;
+}
+
+.caption:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.captionClose:hover {
+  background: #c42b1c;
+  color: #fff;
+}
+
+.captionClose {
+  border-top-right-radius: 8px;
+}
+
+.win .blurred .caption {
+  color: var(--muted);
+}
+
+/* Snap layouts pop out under the maximize button */
+.win .tilingMenu {
+  top: 34px;
+  right: 46px;
+  width: 232px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 8px;
+  background: rgba(249, 249, 249, 0.98);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.win .tilingItem {
+  border-radius: 4px;
+  padding: 8px 6px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.win .tilingItem:hover {
+  background: var(--accent);
+}
+
+.win .body {
+  border-top: 1px solid var(--line);
 }

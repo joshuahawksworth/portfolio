@@ -1,6 +1,8 @@
 # Joshua Hawksworth Portfolio
 
-A macOS desktop in the browser, with an iOS home screen on phones. Built with React 19, TypeScript, Vite and CSS Modules.
+A macOS desktop in the browser, with an iOS home screen on phones. Flip one switch in System Settings and the whole
+thing becomes Windows 11 on desktops and a Pixel-style Android launcher on phones. Built with React 19, TypeScript, Vite
+and CSS Modules.
 
 [Live site](https://hawksworth.dev/)
 
@@ -17,6 +19,16 @@ Everything is backed by a small virtual file system, so folders nest, items move
 the Finder behaves like the real one rather than a list of links.
 
 ## Highlights
+
+- **System Settings**: a real settings app in the dock, Launchpad, Spotlight, Start menu and on the phone home screen. Every
+  control does something: platform switch, wallpaper, accent colour, dock size and magnification, taskbar alignment, icon
+  shape, brightness, Night Shift, volume and a test tone, Wi-Fi networks, Bluetooth, Do Not Disturb, 24-hour clock, seconds
+  in the clock, reduce motion / transparency / contrast, user name, lock / log out / restart / shut down, About and Storage
+  (with Empty Trash) and a full reset. Everything persists in `localStorage`, so it survives a reload.
+- **Platform switch**: Apple (macOS + iOS) or Windows + Android. The boot screen, lock screen, wallpaper, window chrome,
+  icons, dock or taskbar, Start menu, quick settings and notification centre are all remade for the platform: Fluent icons,
+  Recycle Bin, File Explorer and a Windows 11 sign-in on the desktop; Material discs, an At a Glance row, the Google search
+  bar and a Pixel lock screen on phones. iOS gets an iPhone-style lock screen (swipe up, flashlight, camera).
 
 - **Desktop shell**: boot, login, menu bar, dock with bounce and running dots, draggable and resizable windows, rubber-band
   selection, multi-select drag, context menus, Get Info, wallpaper picker, Launchpad, Spotlight, Control Center and
@@ -53,15 +65,17 @@ src/
   components/
     apps/              Desktop apps and the app registry
     Desktop/           Desktop shell: icons, selection, context menus, widgets
-    Dock/              Dock, dock configuration and icon artwork
-    icons/             Shared file-system icons (folder, document, Macintosh HD, Trash)
-    MobileDesktop/     iOS-style home screen and app sheets
-    SystemUI/          Spotlight, Control Center, Notification Center, Launchpad
-    Window/            macOS window chrome (Liquid Glass)
-  context/             Window management and the virtual file system
+    Dock/              Dock, dock configuration and macOS icon artwork
+    icons/             Shared file-system icons plus the Windows (Fluent) and Android (Material) icon sets
+    MobileDesktop/     iOS / Android home screens and app sheets
+    SystemUI/          Spotlight, Control Center / Quick Settings, Notification Center, Launchpad, Start menu
+    Taskbar/           Windows 11 taskbar
+    Window/            Window chrome (Liquid Glass on macOS, Mica + caption buttons on Windows)
+  context/             Window management, the virtual file system, settings and session (lock / restart)
   data/                Portfolio content, wallpapers, file-system seed
   hooks/               Shared browser and UI hooks
-  lib/                 Small helpers (opening nodes, offline answers, local high scores)
+  lib/                 Small helpers (settings store, clock formatting, opening nodes, offline answers, high scores)
+  theme/               Platform helpers: which OS is rendered, per-OS names, icon resolver
 tests/
   unit/                Vitest coverage for app logic
   e2e/                 Playwright smoke coverage

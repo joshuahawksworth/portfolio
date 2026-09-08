@@ -15,6 +15,7 @@ export const DOCK_DEFAULT_ORDER = [
   'texteditor',
   'imageviewer',
   'cv',
+  'settings',
 ] as const;
 
 export type DockKey =
@@ -44,6 +45,9 @@ export const DOCK_LABELS: Record<string, string> = {
   snake: 'Snake',
   trash: 'Trash',
   wallpaper: 'Wallpaper',
+  settings: 'Settings',
+  shortcuts: 'Shortcuts',
+  rubberduck: 'Rubber Duck',
 };
 
 /** Apps that live on the desktop as shortcuts — only appear in dock when running */

@@ -5,20 +5,11 @@
 import type { CSSProperties } from 'react';
 import type { FsNode } from '../../context/DesktopContext';
 import { jobsData } from '../../data/experienceData';
-import { DOCK_ICONS } from '../Dock/dockIcons';
-import {
-  DocumentIcon,
-  FolderIcon,
-  MacintoshHDIcon,
-  PictureIcon,
-  TrashBinIcon,
-} from './FileSystemIcons';
+import { DocumentIcon, PictureIcon } from './FileSystemIcons';
 import { NokiaIcon } from './NokiaIcon';
-
-const APP_TO_DOCK: Record<string, keyof typeof DOCK_ICONS> = {
-  githubapp: 'github',
-  trash: 'trashEmpty',
-};
+import { PlatformBinIcon, PlatformDriveIcon, PlatformFolderIcon } from './PlatformFileIcons';
+import { appIconFor } from '../../theme/platformIcons';
+import { useOs } from '../../context/SettingsContext';
 
 export function NodeIcon({
   node,
@@ -31,13 +22,16 @@ export function NodeIcon({
   trashFull?: boolean;
   trashGlow?: boolean;
 }) {
-  if (node.id === 'shortcut-mycomputer') return <MacintoshHDIcon size={size} />;
-  if (node.appId === 'trash') return <TrashBinIcon size={size} full={trashFull} glow={trashGlow} />;
+  const os = useOs();
+  if (node.id === 'shortcut-mycomputer') return <PlatformDriveIcon os={os} size={size} />;
+  if (node.appId === 'trash') {
+    return <PlatformBinIcon os={os} size={size} full={trashFull} glow={trashGlow} />;
+  }
 
   if (node.type === 'folder') {
     if (node.id === 'trickster') {
       return (
-        <FolderIcon size={size} tone="amber">
+        <PlatformFolderIcon os={os} size={size} tone="amber">
           <text
             x="32"
             y="42"
@@ -49,10 +43,10 @@ export function NodeIcon({
           >
             ?
           </text>
-        </FolderIcon>
+        </PlatformFolderIcon>
       );
     }
-    return <FolderIcon size={size} />;
+    return <PlatformFolderIcon os={os} size={size} />;
   }
 
   if (node.type === 'job') {
@@ -107,8 +101,7 @@ export function NodeIcon({
       );
     }
     if (node.appId === 'snake') return <NokiaIcon size={size} />;
-    const key = (APP_TO_DOCK[node.appId ?? ''] ?? node.appId) as keyof typeof DOCK_ICONS;
-    const art = DOCK_ICONS[key];
+    const art = appIconFor(node.appId ?? '', os);
     if (art) {
       // Dock artwork sizes itself from --app-icon-size (real PNGs) or a fixed 44px (drawn SVGs).
       return (

@@ -71,7 +71,7 @@
   --slot: clamp(
     34px,
     calc((100vw - 64px - 10px * var(--dock-count, 16)) / var(--dock-count, 16)),
-    60px
+    var(--dock-slot-max, 60px)
   );
   --app-icon-size: var(--slot);
   width: var(--slot);
@@ -90,6 +90,11 @@
 
 .iconBtn:hover {
   transform: translateY(-6px) scale(1.12);
+}
+
+/* Settings → Desktop & Dock → Magnification off */
+:global(html[data-dock-magnification='off']) .iconBtn:hover {
+  transform: translateY(-3px);
 }
 .iconBtn:active {
   transform: translateY(-2px) scale(0.94);

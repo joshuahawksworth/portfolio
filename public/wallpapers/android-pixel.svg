@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 2340" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dbe6f7"/>
+      <stop offset="1" stop-color="#c6d5ec"/>
+    </linearGradient>
+    <filter id="blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="70"/></filter>
+  </defs>
+  <rect width="1080" height="2340" fill="url(#bg)"/>
+  <g filter="url(#blur)">
+    <ellipse cx="180" cy="420" rx="520" ry="420" fill="#a9c4f5" opacity="0.9"/>
+    <ellipse cx="980" cy="1100" rx="560" ry="520" fill="#ffd9c2" opacity="0.85"/>
+    <ellipse cx="240" cy="1900" rx="600" ry="520" fill="#c9bff5" opacity="0.85"/>
+    <ellipse cx="900" cy="2200" rx="460" ry="380" fill="#bfe3d6" opacity="0.8"/>
+  </g>
+  <g fill="none" stroke="#fff" stroke-opacity="0.5" stroke-width="10" stroke-linecap="round">
+    <path d="M120 1500 C 320 1300 620 1560 900 1340"/>
+  </g>
+</svg>

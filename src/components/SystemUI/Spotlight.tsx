@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDesktop } from '../../context/DesktopContext';
 import { useSystemUI } from '../../context/SystemUIContext';
-import { launchSystemApp, searchSystemApps, SYSTEM_APPS } from './systemApps';
+import { launchSystemApp, searchSystemApps, useSystemApps } from './systemApps';
 import styles from './SystemUI.module.css';
 
 const EMPTY_LIMIT = 8;
@@ -84,10 +84,11 @@ export default function Spotlight() {
   }, []);
 
   const calc = useMemo(() => evaluateArithmetic(query), [query]);
+  const catalogue = useSystemApps();
   const apps = useMemo(() => {
     const q = query.trim();
-    return q ? searchSystemApps(q) : SYSTEM_APPS.slice(0, EMPTY_LIMIT);
-  }, [query]);
+    return q ? searchSystemApps(q, catalogue) : catalogue.slice(0, EMPTY_LIMIT);
+  }, [query, catalogue]);
 
   // Row 0 is the calculator line when present; apps follow.
   const rowCount = apps.length + (calc !== null ? 1 : 0);

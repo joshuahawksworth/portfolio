@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback, KeyboardEvent } from 'react';
 import { useDesktop } from '../../context/DesktopContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import styles from './TerminalApp.module.css';
+import { currentOs } from '../../theme/platform';
 
 interface Line {
   type: 'prompt' | 'out' | 'err' | 'blank';
@@ -52,7 +53,8 @@ const FILE_CONTENTS: Record<string, string> = {
   [`/Users/${USER}/Documents/Notes.txt`]: `TODO:\n- Learn .NET Blazor (in progress)\n- Finish automotive side project with dad\n- Win game jam\n- Let Jiji stop breaking the keyboard`,
 };
 
-const NEOFETCH = `
+const NEOFETCH_BY_OS: Record<string, string> = {
+  macos: `
              ██████████            ${USER}@${HOST}
            ██          ██          -------------------
           ██  ████████  ██         OS: macOS 26.0 Tahoe
@@ -65,7 +67,54 @@ const NEOFETCH = `
                                    Terminal: Portfolio.app
                                    CPU: Apple M4 (12-core)
                                    Memory: 16 GiB / 16 GiB
-`;
+`,
+  windows: `
+        ████████  ████████         ${USER}@JOSH-DESKTOP
+        ████████  ████████         -------------------
+        ████████  ████████         OS: Windows 11 Pro 25H2
+        ████████  ████████         Kernel: 10.0.26200
+                                   Host: Surface Laptop 7
+        ████████  ████████         Uptime: 6 years
+        ████████  ████████         Packages: 847 (winget)
+        ████████  ████████         Shell: PowerShell 7.5
+        ████████  ████████         Resolution: 2496×1664
+                                   Terminal: Windows Terminal
+                                   CPU: Snapdragon X Elite
+                                   Memory: 32 GiB / 32 GiB
+`,
+  android: `
+          ██████████████           ${USER}@pixel
+        ██████████████████         -------------------
+       ██  ████████████  ██        OS: Android 16
+      ██████████████████████       Kernel: Linux 6.6
+      ██████████████████████       Host: Google Pixel 10 Pro
+      ██████████████████████       Uptime: 6 years
+      ██████████████████████       Packages: 847 (pkg)
+        ██████████████████         Shell: bash 5.2
+                                   Resolution: 1344×2992
+                                   Terminal: Termux
+                                   CPU: Google Tensor G5
+                                   Memory: 16 GiB / 16 GiB
+`,
+  ios: `
+             ██████████            ${USER}@iphone
+           ██          ██          -------------------
+          ██  ████████  ██         OS: iOS 26
+         ██  ██      ██  ██        Kernel: Darwin 25.5.0
+        ████████████████████       Host: iPhone 17 Pro
+       ██                  ██      Uptime: 6 years
+      ██  ██████████████████  ██   Packages: 847 (npm)
+     ████████████████████████████  Shell: zsh 5.9
+                                   Resolution: 1206×2622
+                                   Terminal: Portfolio.app
+                                   CPU: A19 Pro
+                                   Memory: 12 GiB / 12 GiB
+`,
+};
+
+function neofetch(): string {
+  return NEOFETCH_BY_OS[currentOs()] ?? NEOFETCH_BY_OS.macos;
+}
 
 // ── Space Invaders ─────────────────────────────────────────────────────────
 
@@ -853,7 +902,8 @@ export default function TerminalApp({ props }: { props?: Record<string, unknown>
       }
 
       case 'neofetch':
-        NEOFETCH.trim()
+        neofetch()
+          .trim()
           .split('\n')
           .forEach((l) => push({ type: 'out', text: l }));
         break;

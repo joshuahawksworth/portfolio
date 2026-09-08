@@ -9,6 +9,31 @@ This project is an interactive macOS-style portfolio. Future work should feel li
 - Portfolio content should be discoverable through apps and files. Avoid adding landing-page sections, hero blocks, or standalone pages unless the product model changes.
 - Playful features are welcome when they feel like native desktop apps, easter eggs, terminal commands, files, or utilities.
 
+## Platforms
+
+The shell renders one of four operating systems from a single setting. `src/context/SettingsContext.tsx` owns the
+persisted settings (`src/lib/settingsStore.ts`) and derives `os` from the chosen platform and the device:
+
+| Platform | Desktop | Phone |
+| --- | --- | --- |
+| `apple` (default) | macOS (menu bar, Dock, Launchpad, Liquid Glass) | iOS (squircle grid, glass dock, iPhone lock screen) |
+| `windows` | Windows 11 (taskbar, Start menu, Mica windows, Fluent icons) | Android (Pixel launcher, Material discs, Google bar) |
+
+Rules for platform-aware work:
+
+- Read the OS with `useOs()` / `useSettings()` in components, or `currentOs()` (`src/theme/platform.ts`) in plain helpers.
+  `<html data-os>` mirrors it, so CSS can branch with `:global(html[data-os='windows'])` or a `data-os` on the app root.
+- App artwork goes through `appIconFor(key, os)` (`src/theme/platformIcons.tsx`): macOS art lives in `dockIcons.tsx`,
+  Windows in `icons/WindowsIcons.tsx`, Android in `icons/AndroidIcons.tsx`. Shared apps with no native counterpart
+  (GitHub, Chrome, Claude, DOOM, Snake) fall through to the macOS art. Folders, drives and bins use `PlatformFileIcons`.
+- Names differ per OS: use `appTitleFor` / `appLabelFor` / `nodeDisplayName` instead of hard-coding "Finder" or "Trash".
+- Space above and below windows comes from `shellInsets(os)`; never hard-code the menu bar or dock height.
+- Wallpapers are per OS (`WALLPAPERS_FOR_OS`); Windows and Android sets are SVGs in `public/wallpapers/`.
+- Boot and lock screens live in `Boot/` and `Login/` and branch on `os`. Power actions (lock, log out, restart, shut
+  down) come from `useSession()`.
+- Settings must be real: every control in `apps/settingsSections.tsx` changes the store, the session or the file system.
+  Add new settings to `Settings`/`DEFAULT_SETTINGS`/`sanitizeSettings` in the store, then to the relevant section.
+
 ## Architecture
 
 - `src/App.tsx` controls the phase flow: boot, login, then desktop or mobile desktop.
@@ -16,7 +41,9 @@ This project is an interactive macOS-style portfolio. Future work should feel li
 - `src/context/DesktopContext.tsx` owns window state, desktop files/folders, trash state, restored items, and app opening.
 - `src/components/apps/appRegistry.ts` is the source of truth for app IDs, titles, components, default sizes, min sizes, and max sizes.
 - `src/components/Dock/` owns dock order, icons, minimized thumbnails, and dock interactions.
-- `src/components/SystemUI/` owns Spotlight, Control Center, Notification Center and Launchpad; they are driven by `src/context/SystemUIContext.tsx`.
+- `src/components/SystemUI/` owns Spotlight, Control Center (Quick Settings on Windows), Notification Center, Launchpad and the Start menu; they are driven by `src/context/SystemUIContext.tsx`.
+- `src/components/Taskbar/` owns the Windows 11 taskbar, which replaces the menu bar and dock when the platform is Windows.
+- `src/components/apps/SettingsApp.tsx` is System Settings: per-OS pane lists, with the functional sections in `settingsSections.tsx`.
 - `src/components/Window/` owns standard window chrome and resizing behavior.
 - `src/components/MobileDesktop/` owns the mobile home screen, dock, and full-screen app panels.
 - `api/` contains Vercel serverless routes. Shared server helpers live in root `lib/`.

@@ -17,13 +17,20 @@ import AskJoshApp from '../apps/AskJoshApp';
 import TextEditorApp from '../apps/TextEditorApp';
 import ImageViewerApp from '../apps/ImageViewerApp';
 import TrashApp from '../apps/TrashApp';
+import SettingsApp from '../apps/SettingsApp';
 import { CalculatorLogoIcon } from '../icons/CalculatorLogoIcon';
 import { AboutLogoIcon } from '../icons/AboutLogoIcon';
 import { ChromeLogoIcon } from '../icons/ChromeLogoIcon';
 import { DesktopProvider, useDesktop } from '../../context/DesktopContext';
+import { useSettings } from '../../context/SettingsContext';
+import { appIconFor } from '../../theme/platformIcons';
+import { appLabelFor, appTitleFor } from '../../theme/platform';
+import { formatShortDate } from '../../lib/clock';
+import { describeWeather, useWeather } from '../Desktop/DesktopWidgets';
+import { DisplayOverlays } from '../SystemUI/SystemPanels';
 import StatusBar from './StatusBar';
 import styles from './MobileDesktop.module.css';
-import { DARK_WALLPAPERS, WALLPAPERS, loadWallpaper } from '../../data/wallpapers';
+import { DARK_WALLPAPERS, WALLPAPERS } from '../../data/wallpapers';
 
 // ── App icon gradients (iOS-style flat two-stop, light top → deep bottom) ──
 const ICON_GRADS: Record<string, [string, string]> = {
@@ -324,12 +331,50 @@ const ICON_IMAGES: Record<string, { src: string; scale?: number; bg?: string }> 
   askjosh: { src: '/icons/claude.png' },
   experience: { src: '/icons/reminders.png' },
   shortcuts: { src: '/icons/shortcuts.png' },
+  settings: { src: '/icons/settings.png', scale: 1.28 },
   safari: { src: '/icons/chrome.png', scale: 0.72, bg: '#ffffff' },
   github: { src: '/icons/github-mark-white.png', scale: 0.62, bg: '#0d1117' },
 };
 
 function AppIcon({ appId, size = 60 }: { appId: string; size?: number }) {
+  const { os } = useSettings();
   const glyphSize = Math.round(size * 0.72);
+  if (os === 'android') {
+    const art =
+      appId === 'trickster' ? (
+        <svg viewBox="0 0 44 44" width="44" height="44" aria-hidden="true">
+          <circle cx="22" cy="22" r="22" fill="#fbbc04" />
+          <path
+            d="M11 15q0-2 2-2h7l2.5 2.5H31q2 0 2 2V30q0 2-2 2H13q-2 0-2-2z"
+            fill="#fff"
+            opacity="0.9"
+          />
+          <text
+            x="22"
+            y="29"
+            textAnchor="middle"
+            fontSize="11"
+            fontWeight="800"
+            fill="#b06000"
+            fontFamily="Roboto, Arial, sans-serif"
+          >
+            ?
+          </text>
+        </svg>
+      ) : (
+        appIconFor(appId, 'android')
+      );
+    if (art) {
+      return (
+        <div
+          className={`${styles.appIcon} ${styles.appIconDroid}`}
+          style={{ '--icon-size': `${size}px` } as CSSProperties}
+        >
+          {art}
+        </div>
+      );
+    }
+  }
   const real = ICON_IMAGES[appId];
   if (real) {
     return (
@@ -415,6 +460,7 @@ const APP_COMPONENTS: Record<string, React.ComponentType<{ props?: Record<string
   texteditor: TextEditorApp,
   imageviewer: ImageViewerApp,
   trash: TrashApp,
+  settings: SettingsApp,
 };
 
 const APP_LABELS: Record<string, string> = {
@@ -431,6 +477,7 @@ const APP_LABELS: Record<string, string> = {
   snake: 'Snake',
   calculator: 'Calculator',
   askjosh: 'Ask Claude',
+  settings: 'Settings',
 };
 
 const TRICKSTER_LABEL = 'My Flaws';
@@ -473,12 +520,33 @@ function NowWidget({ onOpen }: { onOpen: () => void }) {
   );
 }
 
+// ── "At a Glance" (Pixel launcher: date, weather and a line of context) ─────
+function AtAGlance({ onOpen }: { onOpen: () => void }) {
+  const now = useTime();
+  const weather = useWeather();
+  const { label, glyph } = describeWeather(weather?.code ?? 3);
+  return (
+    <div className={styles.glanceItem} style={{ gridColumn: '1 / 5', gridRow: '1 / 2' }}>
+      <button type="button" className={styles.glance} onClick={onOpen} aria-label="At a glance">
+        <span className={styles.glanceDate}>{formatShortDate(now)}</span>
+        <span className={styles.glanceSub}>
+          <span aria-hidden="true">{glyph}</span> {weather ? `${weather.temp}°` : '—'} {label} ·
+          Manchester
+        </span>
+      </button>
+    </div>
+  );
+}
+
 // ── Home-screen layout: 4 columns × 4 rows per page, like iOS ───────────────
 const COLS = 4;
 const ROWS = 4;
 const PAGE_SLOTS = COLS * ROWS;
-/** Cells the 2×2 widget covers on the first page. */
-const WIDGET_SLOTS = new Set([0, 1, 4, 5]);
+/** Cells the 2×2 "Now" widget covers on the first iOS page. */
+const IOS_WIDGET_SLOTS = new Set([0, 1, 4, 5]);
+/** Cells the "At a Glance" row covers on the first Android page. */
+const ANDROID_WIDGET_SLOTS = new Set([0, 1, 2, 3]);
+const NO_WIDGET_SLOTS = new Set<number>();
 
 // App order. Anything that doesn't fit on a page spills onto the next one.
 const BASE_ITEMS = [
@@ -494,10 +562,12 @@ const BASE_ITEMS = [
   'github',
   'safari',
   'cv',
+  'settings',
   'snake',
 ] as const;
 
-const DOCK_APPS = ['about', 'experience', 'contact', 'github'];
+const DOCK_APPS_IOS = ['about', 'experience', 'contact', 'settings'];
+const DOCK_APPS_ANDROID = ['about', 'experience', 'contact', 'github', 'settings'];
 
 /** Apps with a dark canvas get a dark sheet header so the bar doesn't glare. */
 const DARK_APPS = new Set(['calculator', 'terminal']);
@@ -505,12 +575,12 @@ const DARK_APPS = new Set(['calculator', 'terminal']);
 type Page = Array<string | null>;
 
 /** Lay the icons out page by page; returns pages of 16 slots (null = empty). */
-function buildPages(ids: readonly string[]): Page[] {
+function buildPages(ids: readonly string[], widgetSlots: Set<number>): Page[] {
   const pages: Page[] = [];
   let page: Page = Array(PAGE_SLOTS).fill(null);
   let slot = 0;
   for (const id of ids) {
-    while (pages.length === 0 && WIDGET_SLOTS.has(slot)) slot += 1;
+    while (pages.length === 0 && widgetSlots.has(slot)) slot += 1;
     if (slot >= PAGE_SLOTS) {
       pages.push(page);
       page = Array(PAGE_SLOTS).fill(null);
@@ -529,26 +599,33 @@ function slotStyle(slot: number): CSSProperties {
 
 function MobileInner() {
   const { windows, openApp, closeWindow } = useDesktop();
-  const wallpaper = loadWallpaper();
+  const { settings, os, wallpaper } = useSettings();
+  const android = os === 'android';
   const activeWindow = windows.length > 0 ? windows[windows.length - 1] : null;
+  const WIDGET_SLOTS = android
+    ? settings.showAtAGlance
+      ? ANDROID_WIDGET_SLOTS
+      : NO_WIDGET_SLOTS
+    : IOS_WIDGET_SLOTS;
+  const dockApps = android ? DOCK_APPS_ANDROID : DOCK_APPS_IOS;
 
   // Pages of icons. The trickster lives in one of the empty slots of the last page
   // (or on a fresh page if the last one is full) and hops whenever it's touched.
-  const basePages = useMemo(() => buildPages(BASE_ITEMS), []);
+  const basePages = useMemo(() => buildPages(BASE_ITEMS, WIDGET_SLOTS), [WIDGET_SLOTS]);
   const pages = useMemo(() => {
     const last = basePages[basePages.length - 1];
     const hasRoom = last.some(
       (id, s) => id === null && !(basePages.length === 1 && WIDGET_SLOTS.has(s))
     );
     return hasRoom ? basePages : [...basePages, Array<string | null>(PAGE_SLOTS).fill(null)];
-  }, [basePages]);
+  }, [basePages, WIDGET_SLOTS]);
   const lastPage = pages.length - 1;
   const emptySlots = useMemo(
     () =>
       pages[lastPage]
         .map((id, s) => (id === null && !(lastPage === 0 && WIDGET_SLOTS.has(s)) ? s : -1))
         .filter((s) => s >= 0),
-    [pages, lastPage]
+    [pages, lastPage, WIDGET_SLOTS]
   );
   const [tricksterSlot, setTricksterSlot] = useState(() => emptySlots[0] ?? 0);
 
@@ -604,35 +681,104 @@ function MobileInner() {
   }
 
   const ActiveComp = activeWindow ? APP_COMPONENTS[activeWindow.appId] : null;
+  const activeTitle = activeWindow ? appTitleFor(activeWindow.appId, activeWindow.title, os) : '';
+  const label = (id: string) => appLabelFor(id, APP_LABELS[id] ?? id, os);
+
+  const searchBar = (
+    <label className={`${styles.searchPill} ${android ? styles.googleBar : ''}`}>
+      {android ? (
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+          <path
+            d="M21.6 12.2c0-.7-.1-1.4-.2-2H12v3.9h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.7 3-4.3 3-7.4z"
+            fill="#4285f4"
+          />
+          <path
+            d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22z"
+            fill="#34a853"
+          />
+          <path d="M6.4 14a6 6 0 0 1 0-3.9V7.5H3.1a10 10 0 0 0 0 9z" fill="#fbbc04" />
+          <path
+            d="M12 6c1.5 0 2.8.5 3.8 1.5l2.8-2.8A10 10 0 0 0 3.1 7.5l3.3 2.6C7.2 7.8 9.4 6 12 6z"
+            fill="#ea4335"
+          />
+        </svg>
+      ) : (
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+          <circle cx="6.8" cy="6.8" r="4.6" fill="none" stroke="currentColor" strokeWidth="1.8" />
+          <path
+            d="M10.4 10.4L14 14"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
+        </svg>
+      )}
+      <input
+        type="search"
+        className={styles.searchInput}
+        placeholder="Search"
+        aria-label="Search apps"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
+        spellCheck={false}
+        enterKeyHint="search"
+      />
+      {android && (
+        <svg
+          viewBox="0 0 24 24"
+          width="20"
+          height="20"
+          className={styles.googleMic}
+          aria-hidden="true"
+        >
+          <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z" fill="#4285f4" />
+          <path
+            d="M17 11a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11z"
+            fill="#ea4335"
+          />
+        </svg>
+      )}
+    </label>
+  );
 
   return (
-    <div className={styles.screen}>
+    <div
+      className={`${styles.screen} ${android ? styles.android : ''} ${DARK_WALLPAPERS.has(wallpaper) ? styles.darkWall : ''}`}
+      data-os={os}
+    >
       {/* Wallpaper sits in its own layer so it can be blurred without blurring the UI */}
       <div
         className={styles.wallpaper}
         style={{ backgroundImage: `url(${WALLPAPERS[wallpaper]})` }}
         aria-hidden="true"
       />
+      <DisplayOverlays />
       <StatusBar />
 
       <div className={styles.pager} ref={pagerRef} onScroll={onPagerScroll}>
         {pages.map((slots, p) => (
           <div className={styles.page} key={p} aria-label={`Page ${p + 1} of ${pages.length}`}>
             <div className={styles.iconGrid}>
-              {p === 0 && <NowWidget onOpen={() => openApp('about')} />}
+              {p === 0 && !android && <NowWidget onOpen={() => openApp('about')} />}
+              {p === 0 && android && settings.showAtAGlance && (
+                <AtAGlance onOpen={() => openApp('location')} />
+              )}
               {slots.map((id, s) => {
                 if (p === 0 && WIDGET_SLOTS.has(s)) return null;
                 if (id) {
-                  const label = APP_LABELS[id] ?? id;
+                  const text = label(id);
                   return (
                     <button
                       key={id}
-                      className={iconClass(label)}
+                      className={iconClass(text)}
                       style={slotStyle(s)}
                       onClick={() => handleOpen(id)}
                     >
                       <AppIcon appId={id} size={60} />
-                      <span className={styles.iconLabel}>{label}</span>
+                      <span className={styles.iconLabel}>{text}</span>
                     </button>
                   );
                 }
@@ -669,34 +815,12 @@ function MobileInner() {
         ))}
       </div>
 
-      {/* Search pill, which turns into the page dots while you swipe (iOS 18) */}
+      {/* iOS: search pill that turns into the page dots while you swipe (iOS 18).
+          Android: the page dots always sit here; the Google bar lives under the dock. */}
       <div
-        className={`${styles.searchRow} ${swiping && pages.length > 1 ? styles.searchRowSwiping : ''}`}
+        className={`${styles.searchRow} ${swiping && pages.length > 1 ? styles.searchRowSwiping : ''} ${android || !settings.showHomeSearch ? styles.searchRowDots : ''}`}
       >
-        <label className={styles.searchPill}>
-          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
-            <circle cx="6.8" cy="6.8" r="4.6" fill="none" stroke="currentColor" strokeWidth="1.8" />
-            <path
-              d="M10.4 10.4L14 14"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-            />
-          </svg>
-          <input
-            type="search"
-            className={styles.searchInput}
-            placeholder="Search"
-            aria-label="Search apps"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck={false}
-            enterKeyHint="search"
-          />
-        </label>
+        {!android && settings.showHomeSearch && searchBar}
         {pages.length > 1 && (
           <div className={styles.pageDots} role="tablist" aria-label="Home screen pages">
             {pages.map((_, p) => (
@@ -716,20 +840,21 @@ function MobileInner() {
 
       <div className={styles.dockWrap}>
         <div className={styles.dock}>
-          {DOCK_APPS.map((id) => (
+          {dockApps.map((id) => (
             <button
               key={id}
               className={styles.dockItem}
               onClick={() => handleOpen(id)}
-              aria-label={APP_LABELS[id] ?? id}
+              aria-label={label(id)}
             >
-              <AppIcon appId={id} size={60} />
+              <AppIcon appId={id} size={android ? 56 : 60} />
             </button>
           ))}
         </div>
+        {android && <div className={styles.googleRow}>{searchBar}</div>}
       </div>
       <div
-        className={`${styles.homeIndicator} ${DARK_WALLPAPERS.has(wallpaper) ? styles.homeIndicatorLight : ''}`}
+        className={`${styles.homeIndicator} ${DARK_WALLPAPERS.has(wallpaper) || android ? styles.homeIndicatorLight : ''}`}
         aria-hidden="true"
       />
 
@@ -742,18 +867,27 @@ function MobileInner() {
               <button
                 className={styles.closeBtn}
                 onClick={() => closeWindow(activeWindow.id)}
-                aria-label="Close"
+                aria-label={android ? 'Back' : 'Close'}
               >
-                <svg viewBox="0 0 8 8" width="8" height="8" aria-hidden="true">
-                  <path
-                    d="M1.5 1.5L6.5 6.5M6.5 1.5L1.5 6.5"
-                    stroke="rgba(0,0,0,0.6)"
-                    strokeWidth="1.3"
-                    strokeLinecap="round"
-                  />
-                </svg>
+                {android ? (
+                  <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                    <path
+                      d="M20 11H7.8l5.6-5.6L12 4l-8 8 8 8 1.4-1.4L7.8 13H20z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 8 8" width="8" height="8" aria-hidden="true">
+                    <path
+                      d="M1.5 1.5L6.5 6.5M6.5 1.5L1.5 6.5"
+                      stroke="rgba(0,0,0,0.6)"
+                      strokeWidth="1.3"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                )}
               </button>
-              <span className={styles.panelTitle}>{activeWindow.title}</span>
+              <span className={styles.panelTitle}>{activeTitle}</span>
               <div className={styles.headerSpacer} />
             </div>
             <div
