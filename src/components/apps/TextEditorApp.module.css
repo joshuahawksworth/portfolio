@@ -556,3 +556,27 @@
   border-top: 0;
   color: var(--muted);
 }
+
+/* The code editor's textarea is a transparent layer over the highlighted text; keep it
+   that way under the Windows / Android field styles. */
+:global(html[data-os='windows']) .codeWrap .textarea,
+:global(html[data-os='android']) .codeWrap .textarea {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  min-height: 0;
+  padding: 12px 14px;
+  font-family: Consolas, 'Cascadia Mono', 'Cascadia Code', var(--font-mono);
+  font-size: 13px;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  caret-color: var(--text);
+  box-shadow: none;
+}
+:global(html[data-os='windows']) .codeWrap .textarea:focus,
+:global(html[data-os='android']) .codeWrap .textarea:focus {
+  background: transparent;
+  border: 0;
+  outline: none;
+  box-shadow: none;
+}

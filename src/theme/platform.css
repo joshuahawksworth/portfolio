@@ -47,9 +47,11 @@ html[data-os='windows'] ::selection {
 html[data-os='windows']
   [class*='_root_']
   :is(
-    input:not([type='range']):not([type='checkbox']):not([type='radio']):not(
-        [class*='searchInput']
-      ):not([class*='renameInput']),
+    input:where(
+      :not([type='range']):not([type='checkbox']):not([type='radio']):not(
+          [class*='searchInput']
+        ):not([class*='renameInput'])
+    ),
     textarea,
     select
   ) {
@@ -71,9 +73,11 @@ html[data-os='windows'] [class*='_root_'] textarea {
 html[data-os='windows']
   [class*='_root_']
   :is(
-    input:not([type='range']):not([type='checkbox']):not([type='radio']):not(
-        [class*='searchInput']
-      ):not([class*='renameInput']),
+    input:where(
+      :not([type='range']):not([type='checkbox']):not([type='radio']):not(
+          [class*='searchInput']
+        ):not([class*='renameInput'])
+    ),
     textarea,
     select
   ):focus {
@@ -255,9 +259,11 @@ html[data-os='android'] [class*='_root_'] {
 html[data-os='android']
   [class*='_root_']
   :is(
-    input:not([type='range']):not([type='checkbox']):not([type='radio']):not(
-        [class*='searchInput']
-      ):not([class*='renameInput']):not([type='search']),
+    input:where(
+        :not([type='range']):not([type='checkbox']):not([type='radio']):not(
+            [class*='searchInput']
+          ):not([class*='renameInput'])
+      ):not([type='search']),
     textarea,
     select
   ) {
@@ -277,9 +283,11 @@ html[data-os='android'] [class*='_root_'] textarea {
 html[data-os='android']
   [class*='_root_']
   :is(
-    input:not([type='range']):not([type='checkbox']):not([type='radio']):not(
-        [class*='searchInput']
-      ):not([class*='renameInput']):not([type='search']),
+    input:where(
+        :not([type='range']):not([type='checkbox']):not([type='radio']):not(
+            [class*='searchInput']
+          ):not([class*='renameInput'])
+      ):not([type='search']),
     textarea,
     select
   ):focus {

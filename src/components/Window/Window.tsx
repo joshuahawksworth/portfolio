@@ -34,6 +34,18 @@ export default function Window({ win, children }: Props) {
   const [isMinimizing, setMinimizing] = useState(false);
   const [isTransitioning, setTransitioning] = useState(false);
   const [tilingOpen, setTilingOpen] = useState(false);
+  // Windows snap layouts open on hover; a short grace period lets the pointer travel
+  // from the maximize button into the flyout before it closes.
+  const snapTimer = useRef<number | undefined>(undefined);
+  function openSnap() {
+    window.clearTimeout(snapTimer.current);
+    setTilingOpen(true);
+  }
+  function closeSnapSoon() {
+    window.clearTimeout(snapTimer.current);
+    snapTimer.current = window.setTimeout(() => setTilingOpen(false), 220);
+  }
+  useEffect(() => () => window.clearTimeout(snapTimer.current), []);
 
   useEffect(() => {
     if (!tilingOpen) return;
@@ -297,8 +309,12 @@ export default function Window({ win, children }: Props) {
               <button
                 type="button"
                 className={styles.caption}
-                onClick={handleMaximize}
-                onMouseEnter={() => setTilingOpen(true)}
+                onClick={(e) => {
+                  setTilingOpen(false);
+                  handleMaximize(e);
+                }}
+                onMouseEnter={openSnap}
+                onMouseLeave={closeSnapSoon}
                 aria-label={win.maximized ? 'Restore' : 'Maximize'}
               >
                 <svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor">
@@ -350,7 +366,8 @@ export default function Window({ win, children }: Props) {
             <div
               className={styles.tilingMenu}
               onMouseDown={(e) => e.stopPropagation()}
-              onMouseLeave={isWindows ? () => setTilingOpen(false) : undefined}
+              onMouseEnter={isWindows ? openSnap : undefined}
+              onMouseLeave={isWindows ? closeSnapSoon : undefined}
             >
               <button type="button" className={styles.tilingItem} onClick={() => tile('fill')}>
                 Fill

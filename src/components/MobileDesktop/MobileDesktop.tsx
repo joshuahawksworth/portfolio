@@ -679,7 +679,6 @@ function MobileInner() {
     const el = pagerRef.current;
     if (!el) return;
     drag.current = { startX: e.clientX, startScroll: el.scrollLeft, moved: false };
-    el.setPointerCapture(e.pointerId);
   }
 
   function onPagerPointerMove(e: React.PointerEvent<HTMLDivElement>) {
@@ -690,6 +689,8 @@ function MobileInner() {
     if (!d.moved && Math.abs(dx) > 6) {
       d.moved = true;
       setDragging(true);
+      // Capture only now: a plain click must still reach the icon under the pointer.
+      el.setPointerCapture(e.pointerId);
     }
     if (d.moved) el.scrollLeft = d.startScroll - dx;
   }
