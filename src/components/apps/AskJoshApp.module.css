@@ -662,3 +662,32 @@
   color: var(--accent);
   cursor: pointer;
 }
+
+.gateInput {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  margin-bottom: 10px;
+}
+
+.gateInput:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.gateError {
+  margin: -2px 0 10px;
+  font-size: 12px;
+  color: #d0281e;
+}
+
+.gateText a {
+  color: var(--accent);
+}

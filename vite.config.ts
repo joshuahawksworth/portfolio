@@ -2,71 +2,13 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import type { Plugin } from 'vite';
 import { searchWeb } from './api/search-utils';
-
-const STRIP = new Set([
-  'x-frame-options',
-  'content-security-policy',
-  'content-security-policy-report-only',
-  'frame-options',
-  'x-xss-protection',
-  'transfer-encoding',
-  'content-encoding',
-  'cross-origin-opener-policy',
-  'cross-origin-embedder-policy',
-  'cross-origin-resource-policy',
-  'origin-agent-cluster',
-]);
-
-// Injected at the very top of <head> so it runs before any site script.
-// Intercepts link clicks AND form submissions AND history.pushState/replaceState
-// and relays the destination URL to the parent frame for proxy navigation.
-const NAV_RELAY = `<script>
-(function(){
-  // Wrap history API so cross-origin SecurityErrors (e.g. Google calling
-  // replaceState with a google.com URL while our iframe origin is localhost)
-  // are caught silently instead of crashing the page before it renders.
-  var _push=history.pushState, _rep=history.replaceState;
-  history.pushState=function(s,t,u){try{_push.call(history,s,t,u);}catch(e){}};
-  history.replaceState=function(s,t,u){try{_rep.call(history,s,t,u);}catch(e){}};
-
-  function relay(url){
-    try{var abs=new URL(url,document.baseURI).href;window.parent.postMessage({type:'__browse__',url:abs},'*');}catch(e){}
-  }
-  // Link clicks (capture phase — fires before site handlers)
-  document.addEventListener('click',function(e){
-    var a=e.target&&e.target.closest&&e.target.closest('a[href]');
-    if(a){var h=a.getAttribute('href');
-      if(h&&h[0]!=='#'&&h.indexOf('javascript:')!==0&&a.target!=='_blank'){
-        e.preventDefault();e.stopImmediatePropagation();relay(h);
-      }
-    }
-  },true);
-  // GET form submissions (e.g. Google search box)
-  document.addEventListener('submit',function(e){
-    var f=e.target;
-    if((f.method||'get').toLowerCase()!=='get')return;
-    e.preventDefault();e.stopImmediatePropagation();
-    try{
-      var u=new URL(f.action||document.baseURI);
-      new FormData(f).forEach(function(v,k){u.searchParams.set(k,String(v));});
-      relay(u.href);
-    }catch(ex){}
-  },true);
-})();
-</script>`;
-
-function processHtml(html: string, target: string): string {
-  // Strip inline CSP meta tags that would block our injected scripts
-  html = html.replace(/<meta[^>]+http-equiv=["']?content-security-policy["']?[^>]*\/?>/gi, '');
-  // Inject base + relay at the very top of <head>
-  const inject = `<base href="${target}">${NAV_RELAY}`;
-  if (/<head[^>]*>/i.test(html)) {
-    html = html.replace(/<head[^>]*>/i, (m) => `${m}${inject}`);
-  } else {
-    html = inject + html;
-  }
-  return html;
-}
+import {
+  FETCH_TIMEOUT_MS,
+  STRIP_HEADERS,
+  errorPage,
+  isBlockedTarget,
+  processHtml,
+} from './api/browser-utils';
 
 function browserProxyPlugin(): Plugin {
   return {
@@ -83,9 +25,22 @@ function browserProxyPlugin(): Plugin {
           }
 
           const target = decodeURIComponent(raw);
-          new URL(target);
+          if (isBlockedTarget(new URL(target))) {
+            res.statusCode = 403;
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
+            res.end(
+              errorPage(
+                target,
+                "This site can't be reached",
+                'Only public http and https addresses can be opened here.',
+                'ERR_BLOCKED_BY_CLIENT'
+              )
+            );
+            return;
+          }
 
           const upstream = await fetch(target, {
+            signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
             headers: {
               'User-Agent':
                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
@@ -97,8 +52,26 @@ function browserProxyPlugin(): Plugin {
 
           const ct = upstream.headers.get('content-type') ?? 'application/octet-stream';
 
+          if (upstream.status >= 400 && ct.includes('text/html')) {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
+            res.end(
+              errorPage(
+                target,
+                `${new URL(target).hostname} sent back an error`,
+                'The site refused this request or returned an error instead of the page.',
+                `HTTP ${upstream.status}`
+              )
+            );
+            return;
+          }
+
           upstream.headers.forEach((v, k) => {
-            if (!STRIP.has(k.toLowerCase())) {
+            if (
+              !STRIP_HEADERS.has(k.toLowerCase()) &&
+              k.toLowerCase() !== 'set-cookie' &&
+              k.toLowerCase() !== 'content-length'
+            ) {
               try {
                 res.setHeader(k, v);
               } catch {
@@ -109,7 +82,7 @@ function browserProxyPlugin(): Plugin {
           res.setHeader('Access-Control-Allow-Origin', '*');
 
           if (ct.includes('text/html')) {
-            const html = processHtml(await upstream.text(), target);
+            const html = processHtml(await upstream.text(), upstream.url || target);
             res.statusCode = upstream.status;
             res.setHeader('Content-Type', 'text/html; charset=utf-8');
             res.end(html);
@@ -119,8 +92,22 @@ function browserProxyPlugin(): Plugin {
             res.end(buf);
           }
         } catch (err) {
-          res.statusCode = 502;
-          res.end(`Proxy error: ${err}`);
+          const target = decodeURIComponent(
+            new URLSearchParams(req.url?.split('?')[1] ?? '').get('url') ?? ''
+          );
+          const timedOut = err instanceof Error && err.name === 'TimeoutError';
+          res.statusCode = 200;
+          res.setHeader('Content-Type', 'text/html; charset=utf-8');
+          res.end(
+            errorPage(
+              target || 'about:blank',
+              timedOut ? 'The site took too long to respond' : "This site can't be reached",
+              timedOut
+                ? 'The page did not answer within 12 seconds. It may be slow, or it may not allow embedded browsers.'
+                : 'The address could not be resolved or the connection was refused.',
+              timedOut ? 'ERR_TIMED_OUT' : 'ERR_NAME_NOT_RESOLVED'
+            )
+          );
         }
       });
       server.middlewares.use('/api/search', async (req, res) => {

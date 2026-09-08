@@ -43,8 +43,10 @@ the Finder behaves like the real one rather than a list of links.
 - **Trash with Put Back**: trashed items return to the folder they came from.
 - **Portfolio apps**: About, Experience, Skills, Contact, Location (Mapbox), CV, GitHub and a Chrome-style browser with a
   server-side proxy.
-- **Ask Claude**: a chat assistant behind a mock "Sign in to Claude" sheet. Guests get answers built from the portfolio
-  data in the browser (free, offline); with `ANTHROPIC_API_KEY` set, signed-in visitors are answered by Claude.
+- **Ask Claude**: a chat assistant. Visitors can bring their own Anthropic API key (kept in their browser, forwarded only
+  to this site's `/api/ask` route for their messages, never stored) to talk to Claude itself, or continue as a guest and
+  get answers built from the portfolio data in the browser (free, offline). With `ANTHROPIC_API_KEY` set on the server,
+  the site's own key is used when a visitor has none.
 - **Toys**: Apple-style Calculator (with a scientific pad on wide windows), Terminal, a Nokia 3310 running Snake with a
   personal high-score table (and a hidden Space Impact), DOOM via js-dos and Rubber Duck.
 - **iOS home screen**: blurred wallpaper, 2×2 clock widget, 4×4 pages with scroll-snap swiping and page dots, iOS-style
@@ -105,9 +107,11 @@ ANTHROPIC_API_KEY="your_anthropic_api_key"
 VITE_MAPBOX_TOKEN="your_mapbox_access_token"
 ```
 
-Ask Claude answers guests from the portfolio data in the browser, so it works with no backend at all. If `ANTHROPIC_API_KEY`
-is set, visitors who pick Apple or Google on the (mock) sign-in sheet are answered by Claude through `/api/ask`; when it
-isn't set, everyone gets the offline answers and no error is shown.
+Ask Claude answers guests from the portfolio data in the browser, so it works with no backend at all. Visitors who enter
+their own Anthropic API key are answered by Claude through `/api/ask` with that key (sent as a request header, never
+logged or stored). If `ANTHROPIC_API_KEY` is set, it is used for visitors without a key; when neither is available,
+everyone gets the offline answers and no error is shown. There is no public "Sign in with Claude" for third-party sites,
+which is why the key is the way in.
 
 The Snake high-score table is personal: it keeps the visitor's own best runs in `localStorage`, so there is no database.
 

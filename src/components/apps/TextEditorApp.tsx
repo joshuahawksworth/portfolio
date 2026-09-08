@@ -792,8 +792,10 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
           {dirty && <span className={styles.tabDot} />}
           {filename}
         </div>
-        {/* Saved flash */}
-        {savedFlash && <span className={styles.savedFlash}>{savedFlash} ✓</span>}
+        {/* Saved flash lives in a fixed-width slot so the buttons never move */}
+        <span className={styles.flashSlot} aria-live="polite">
+          {savedFlash && <span className={styles.savedFlash}>{savedFlash} ✓</span>}
+        </span>
 
         {/* Save into the portfolio's file system (the desktop, Documents…) */}
         <button
@@ -816,7 +818,7 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
             <path d="M2.5 2.5h7l2 2v7h-9z" />
             <path d="M4.5 2.5v3h4v-3M4.5 11.5v-4h5v4" />
           </svg>
-          {boundId ? 'Save' : 'Save…'}
+          Save
         </button>
 
         {/* Export to disk */}
@@ -838,7 +840,7 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
             <path d="M7 2v7M4 6.5l3 3 3-3" />
             <path d="M2 12h10" />
           </svg>
-          Export
+          Download
         </button>
       </div>
 
@@ -924,7 +926,7 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
                   </svg>
                 </div>
                 <div className={styles.sheetSuccessTitle}>
-                  {sheetMode === 'save' ? 'Saved' : 'File exported'}
+                  {sheetMode === 'save' ? 'Saved' : 'Downloaded'}
                 </div>
                 <div className={styles.sheetSuccessName}>{saveName}</div>
                 {sheetMode === 'save' ? (
@@ -961,7 +963,7 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
                   </div>
                   <div>
                     <div className={styles.sheetTitle}>
-                      {sheetMode === 'save' ? 'Save' : 'Export File'}
+                      {sheetMode === 'save' ? 'Save' : 'Download'}
                     </div>
                     <div className={styles.sheetSubtitle}>
                       {sheetMode === 'save'
@@ -1057,7 +1059,7 @@ export default function TextEditorApp({ props }: { props?: Record<string, unknow
                           <path d="M7 2v8M4 7l3 3 3-3" />
                           <path d="M2 12h10" />
                         </svg>
-                        Export File
+                        Download
                       </>
                     )}
                   </button>

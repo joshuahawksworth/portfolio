@@ -19,7 +19,7 @@ describe('AskJoshApp', () => {
     const user = userEvent.setup();
     render(<AskJoshApp />);
 
-    expect(screen.getByRole('dialog', { name: 'Sign in to Claude' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Chat with Claude' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Continue as guest' }));
 
     // The mock hand-off takes a beat before the sheet goes away

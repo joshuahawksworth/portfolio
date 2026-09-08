@@ -161,7 +161,7 @@ function sendJson(res: VercelResponse, status: number, body: Record<string, unkn
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Anthropic-Key');
 
   if (req.method === 'OPTIONS') {
     res.statusCode = 204;
@@ -169,7 +169,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   if (req.method !== 'POST') return sendJson(res, 405, { error: 'method_not_allowed' });
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  // Visitors may bring their own key (never logged or stored); otherwise use the site's.
+  const headerKey = req.headers['x-anthropic-key'];
+  const visitorKey = (Array.isArray(headerKey) ? headerKey[0] : headerKey)?.trim();
+  if (visitorKey && !/^sk-ant-[A-Za-z0-9_-]{20,}$/.test(visitorKey)) {
+    return sendJson(res, 401, { error: 'invalid_key' });
+  }
+  const apiKey = visitorKey || process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return sendJson(res, 503, { error: 'assistant_unconfigured' });
 
   if (isRateLimited(clientIp(req))) {
@@ -227,7 +233,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       err instanceof Anthropic.AuthenticationError ||
       err instanceof Anthropic.PermissionDeniedError
     ) {
-      return sendJson(res, 503, { error: 'assistant_unavailable' });
+      return sendJson(res, visitorKey ? 401 : 503, {
+        error: visitorKey ? 'invalid_key' : 'assistant_unavailable',
+      });
     }
     if (err instanceof Anthropic.RateLimitError) {
       return sendJson(res, 429, { error: 'rate_limited' });

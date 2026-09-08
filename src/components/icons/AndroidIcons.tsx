@@ -103,16 +103,23 @@ export function GmailIcon() {
 }
 
 export function GoogleMapsIcon() {
+  // The Google Maps pin: four colour bands clipped to the pin, white dot in the middle.
   return (
     <AndroidDisc title="Maps">
-      <path d="M22 9q8 0 8 8.2Q30 24 22 35q-8-11-8-17.8Q14 9 22 9z" fill="#4285f4" />
-      <path d="M22 9q8 0 8 8.2c0 2-.6 4-1.6 6.2L17.5 12.3Q19.4 9 22 9z" fill="#34a853" />
-      <path d="M14.4 20.4Q14 18.9 14 17.2q0-2.6 1.1-4.7L28.4 23.4q-.9 2-2.2 4.2z" fill="#fbbc04" />
-      <path
-        d="M22 35q-4.6-6.3-6.7-10.8l10.9-8.2Q27.7 17 27.7 17.2q0 6.5-5.7 17.8z"
-        fill="#ea4335"
-      />
-      <circle cx="22" cy="17.2" r="3.4" fill="#fff" />
+      <defs>
+        <clipPath id="gmapsPin">
+          <path d="M22 8q8.5 0 8.5 8.6Q30.5 24 22 36q-8.5-12-8.5-19.4Q13.5 8 22 8z" />
+        </clipPath>
+      </defs>
+      <g clipPath="url(#gmapsPin)">
+        <rect x="8" y="4" width="28" height="36" fill="#4285f4" />
+        <path d="M8 4h28L8 32z" fill="#34a853" />
+        <path d="M8 4h13L8 17z" fill="#1a73e8" />
+        <path d="M36 12v28H14z" fill="#ea4335" />
+        <path d="M8 26l14-10 8 8-8 16H8z" fill="#fbbc04" />
+        <path d="M8 4h28v12L22 24 8 16z" fill="#4285f4" opacity="0.001" />
+      </g>
+      <circle cx="22" cy="17" r="3.4" fill="#fff" />
     </AndroidDisc>
   );
 }

@@ -35,12 +35,16 @@ const ERROR_TEXT: Record<ErrorKind, string> = {
 
 const SIGN_IN_KEY = 'portfolio.askclaude.account';
 
-type Provider = 'apple' | 'google' | 'guest';
+type Provider = 'key' | 'guest';
 
 interface Account {
   name: string;
   provider: Provider;
+  /** The visitor's own Anthropic API key. Kept in this browser only. */
+  apiKey?: string;
 }
+
+const KEY_PATTERN = /^sk-ant-[A-Za-z0-9_-]{20,}$/;
 
 function loadAccount(): Account | null {
   try {
@@ -228,50 +232,30 @@ function SendIcon() {
   );
 }
 
-function AppleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M16.6 12.7c0-2.5 2-3.7 2.1-3.8-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.7.9-.8 0-2-.9-3.2-.8-1.7 0-3.2 1-4.1 2.4-1.7 3-.4 7.5 1.3 9.9.8 1.2 1.8 2.5 3.1 2.5 1.2 0 1.7-.8 3.2-.8s1.9.8 3.2.8c1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8 0 0-2.6-1-2.6-3.9zM14.2 5.3c.7-.8 1.1-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4z" />
-    </svg>
-  );
-}
+/**
+ * The sign-in sheet shown over the app. There is no public "Sign in with Claude" for
+ * third-party sites, so visitors who want real answers use their own Anthropic API key;
+ * everyone else continues as a guest and gets answers built from the portfolio data.
+ */
+function SignInGate({
+  onSignIn,
+  error,
+}: {
+  onSignIn: (account: Account) => void;
+  error?: string | null;
+}) {
+  const [mode, setMode] = useState<'choose' | 'key'>('choose');
+  const [key, setKey] = useState('');
+  const [busy, setBusy] = useState(false);
+  const valid = KEY_PATTERN.test(key.trim());
 
-function GoogleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        fill="#4285F4"
-        d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.7-2.4 3.6v3h3.9c2.3-2.1 3.5-5.2 3.5-8.8z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 24c3.2 0 6-1.1 8-2.9l-3.9-3c-1.1.7-2.5 1.2-4.1 1.2-3.1 0-5.8-2.1-6.7-5H1.2v3.1C3.2 21.3 7.3 24 12 24z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M5.3 14.3c-.2-.7-.4-1.5-.4-2.3s.1-1.6.4-2.3V6.6H1.2C.4 8.2 0 10 0 12s.4 3.8 1.2 5.4l4.1-3.1z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4C18 1.2 15.2 0 12 0 7.3 0 3.2 2.7 1.2 6.6l4.1 3.1c.9-2.9 3.6-4.9 6.7-4.9z"
-      />
-    </svg>
-  );
-}
-
-/** The sign-in sheet shown over the app until the visitor "signs in" (a local mock). */
-function SignInGate({ onSignIn }: { onSignIn: (account: Account) => void }) {
-  const [busy, setBusy] = useState<Provider | null>(null);
-
-  function go(provider: Provider) {
-    if (busy) return;
-    setBusy(provider);
-    // A short beat so it feels like a real hand-off, then straight back in.
-    window.setTimeout(() => {
-      const name =
-        provider === 'apple' ? 'Apple ID' : provider === 'google' ? 'Google account' : 'Guest';
-      onSignIn({ name, provider });
-    }, 700);
+  function submitKey() {
+    if (!valid || busy) return;
+    setBusy(true);
+    window.setTimeout(
+      () => onSignIn({ name: 'Your Claude API key', provider: 'key', apiKey: key.trim() }),
+      300
+    );
   }
 
   return (
@@ -279,40 +263,80 @@ function SignInGate({ onSignIn }: { onSignIn: (account: Account) => void }) {
       <div className={styles.gateCard}>
         <img className={styles.gateIcon} src="/icons/claude.png" alt="" draggable={false} />
         <h2 id="askclaude-signin" className={styles.gateTitle}>
-          Sign in to Claude
+          {mode === 'key' ? 'Use your Claude API key' : 'Chat with Claude'}
         </h2>
-        <p className={styles.gateText}>
-          Sign in to chat with Claude about Josh's work, experience and projects.
-        </p>
-        <button
-          type="button"
-          className={`${styles.gateBtn} ${styles.gateBtnPrimary}`}
-          onClick={() => go('apple')}
-          disabled={busy !== null}
-        >
-          {busy === 'apple' ? <span className={styles.gateBusy} /> : <AppleIcon />}
-          Continue with Apple
-        </button>
-        <button
-          type="button"
-          className={styles.gateBtn}
-          onClick={() => go('google')}
-          disabled={busy !== null}
-        >
-          {busy === 'google' ? <span className={styles.gateBusy} /> : <GoogleIcon />}
-          Continue with Google
-        </button>
-        <button
-          type="button"
-          className={styles.gateBtn}
-          onClick={() => go('guest')}
-          disabled={busy !== null}
-        >
-          Continue as guest
-        </button>
-        <p className={styles.gateFoot}>
-          This is a portfolio demo: nothing is sent anywhere and no account is created.
-        </p>
+        {mode === 'choose' ? (
+          <>
+            <p className={styles.gateText}>
+              Ask about Josh's work, experience and projects. Bring your own Anthropic API key to
+              talk to Claude itself, or continue as a guest for answers built from the portfolio.
+            </p>
+            {error && <p className={styles.gateError}>{error}</p>}
+            <button
+              type="button"
+              className={`${styles.gateBtn} ${styles.gateBtnPrimary}`}
+              onClick={() => setMode('key')}
+            >
+              <img src="/icons/claude-symbol.png" alt="" width={16} height={16} draggable={false} />
+              Use my Claude API key
+            </button>
+            <button
+              type="button"
+              className={styles.gateBtn}
+              onClick={() => onSignIn({ name: 'Guest', provider: 'guest' })}
+            >
+              Continue as guest
+            </button>
+            <p className={styles.gateFoot}>
+              Guests never send anything to a model. Keys are stored only in this browser.
+            </p>
+          </>
+        ) : (
+          <>
+            <p className={styles.gateText}>
+              Paste a key from{' '}
+              <a
+                href="https://console.anthropic.com/settings/keys"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                console.anthropic.com
+              </a>
+              . It stays in this browser and is only forwarded to this site's Claude route for your
+              own messages; it is never stored on the server.
+            </p>
+            <input
+              className={styles.gateInput}
+              type="password"
+              value={key}
+              onChange={(e) => setKey(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && submitKey()}
+              placeholder="sk-ant-…"
+              autoComplete="off"
+              spellCheck={false}
+              autoFocus
+              aria-label="Anthropic API key"
+            />
+            {key && !valid && (
+              <p className={styles.gateError}>
+                That doesn't look like an Anthropic key (they start with sk-ant-).
+              </p>
+            )}
+            <button
+              type="button"
+              className={`${styles.gateBtn} ${styles.gateBtnPrimary}`}
+              onClick={submitKey}
+              disabled={!valid || busy}
+            >
+              {busy ? <span className={styles.gateBusy} /> : null}
+              Start chatting
+            </button>
+            <button type="button" className={styles.gateBtn} onClick={() => setMode('choose')}>
+              Back
+            </button>
+            <p className={styles.gateFoot}>Usage is billed to your own Anthropic account.</p>
+          </>
+        )}
       </div>
     </div>
   );
@@ -321,11 +345,13 @@ function SignInGate({ onSignIn }: { onSignIn: (account: Account) => void }) {
 // ── App ────────────────────────────────────────────────────────────────────────
 export default function AskJoshApp() {
   const [account, setAccount] = useState<Account | null>(loadAccount);
+  const [gateError, setGateError] = useState<string | null>(null);
   // Once /api/ask reports it has no key, stay offline for the session instead of retrying.
   const offlineRef = useRef(false);
   function signIn(next: Account) {
     saveAccount(next);
     setAccount(next);
+    setGateError(null);
   }
   function signOut() {
     saveAccount(null);
@@ -431,7 +457,10 @@ export default function AskJoshApp() {
 
         const res = await fetch('/api/ask', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(account?.apiKey ? { 'X-Anthropic-Key': account.apiKey } : {}),
+          },
           body: JSON.stringify({ messages: history }),
           signal: controller.signal,
         });
@@ -446,6 +475,12 @@ export default function AskJoshApp() {
           if (res.status === 503 && code === 'assistant_unconfigured') {
             offlineRef.current = true;
             await answerOffline();
+          } else if (res.status === 401 && code === 'invalid_key') {
+            // Their key was rejected: drop it and send them back to the gate to try again.
+            saveAccount(null);
+            setAccount(null);
+            setGateError('Anthropic rejected that API key. Check it and try again.');
+            fail('generic');
           } else if (res.status === 429) fail('rate_limited');
           else fail('generic');
           return;
@@ -510,7 +545,7 @@ export default function AskJoshApp() {
 
   return (
     <div className={styles.root}>
-      {!account && <SignInGate onSignIn={signIn} />}
+      {!account && <SignInGate onSignIn={signIn} error={gateError} />}
       <aside className={styles.sidebar}>
         <button type="button" className={styles.newChat} onClick={startNewChat}>
           <span className={styles.rowIcon}>
@@ -553,7 +588,7 @@ export default function AskJoshApp() {
         {account && (
           <div className={styles.account}>
             <span className={styles.accountAvatar} aria-hidden="true">
-              {account.provider === 'guest' ? 'G' : 'JH'}
+              {account.provider === 'guest' ? 'G' : 'K'}
             </span>
             <span className={styles.accountName}>{account.name}</span>
             <button type="button" className={styles.signOut} onClick={signOut}>
