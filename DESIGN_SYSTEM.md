@@ -29,8 +29,10 @@ Rules for platform-aware work:
 - Names differ per OS: use `appTitleFor` / `appLabelFor` / `nodeDisplayName` instead of hard-coding "Finder" or "Trash".
 - Space above and below windows comes from `shellInsets(os)`; never hard-code the menu bar or dock height.
 - Wallpapers are per OS (`WALLPAPERS_FOR_OS`); Windows and Android sets are SVGs in `public/wallpapers/`.
-- Boot and lock screens live in `Boot/` and `Login/` and branch on `os`. Power actions (lock, log out, restart, shut
-  down) come from `useSession()`.
+- Boot, shutdown and lock screens live in `Boot/` and `Login/` and branch on `os`. Power actions (lock, log out, restart,
+  shut down, `switchPlatform`) come from `useSession()`; restart and shut down play `Boot/Shutdown.tsx` for the current
+  OS first, and `switchPlatform` shuts the old OS down before the new one boots. With no saved settings the platform is
+  chosen by `detectPlatform()` from the user agent (Windows / Android → `windows`, everything else → `apple`).
 - `src/theme/platform.css` re-dresses shared primitives (buttons, text fields, menus, scrollbars, focus rings, headings)
   inside app roots to WinUI 3 on Windows and Material 3 on Android. It keys off `[class*='_root_']`, so give every app a
   `.root` class and keep icon-only buttons on `*Btn` classes (toolBtn, viewBtn, uploadBtn) so they stay flat. App-specific

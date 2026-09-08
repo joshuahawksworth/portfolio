@@ -25,7 +25,9 @@ the Finder behaves like the real one rather than a list of links.
   shape, brightness, Night Shift, volume and a test tone, Wi-Fi networks, Bluetooth, Do Not Disturb, 24-hour clock, seconds
   in the clock, reduce motion / transparency / contrast, user name, lock / log out / restart / shut down, About and Storage
   (with Empty Trash) and a full reset. Everything persists in `localStorage`, so it survives a reload.
-- **Platform switch**: Apple (macOS + iOS) or Windows + Android. The boot screen, lock screen, wallpaper, window chrome,
+- **Platform switch**: Apple (macOS + iOS) or Windows + Android. First visits start on whichever platform matches the
+  visitor's device (Windows PCs and Android phones get Windows / Android; iPhones, Macs and everything else get Apple), and
+  switching plays the current OS's shutdown screen before the new one boots to its lock screen. The boot screen, lock screen, wallpaper, window chrome,
   icons, dock or taskbar, Start menu, quick settings and notification centre are all remade for the platform: Fluent icons,
   Recycle Bin, File Explorer and a Windows 11 sign-in on the desktop; Material discs, an At a Glance row, the Google search
   bar and a Pixel lock screen on phones. iOS gets an iPhone-style lock screen (swipe up, flashlight, camera).

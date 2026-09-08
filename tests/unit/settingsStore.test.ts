@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   DEFAULT_SETTINGS,
   SETTINGS_STORAGE_KEY,
+  detectPlatform,
   initialsOf,
   loadSettings,
   resolveOs,
@@ -84,5 +85,36 @@ describe('clock formatting', () => {
 
   it('can show seconds', () => {
     expect(formatTime(nine41, { clock24h: true, showSeconds: true })).toBe('21:41:07');
+  });
+});
+
+describe('device detection', () => {
+  const WIN =
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/128.0 Safari/537.36';
+  const ANDROID =
+    'Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 Chrome/128.0 Mobile Safari/537.36';
+  const IPHONE =
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1';
+  const MAC = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/605.1.15 Safari/605.1.15';
+  const LINUX = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/128.0 Safari/537.36';
+
+  it('starts Windows PCs and Android phones on the Windows / Android side', () => {
+    expect(detectPlatform(WIN, '')).toBe('windows');
+    expect(detectPlatform(ANDROID, '')).toBe('windows');
+    expect(detectPlatform('', 'Windows')).toBe('windows');
+    expect(detectPlatform('', 'Android')).toBe('windows');
+  });
+
+  it('falls back to Apple for iPhones, Macs and anything unknown', () => {
+    expect(detectPlatform(IPHONE, '')).toBe('apple');
+    expect(detectPlatform(MAC, '')).toBe('apple');
+    expect(detectPlatform(LINUX, '')).toBe('apple');
+    expect(detectPlatform('', '')).toBe('apple');
+  });
+
+  it('only applies on a first visit, never over a saved choice', () => {
+    localStorage.clear();
+    saveSettings({ ...DEFAULT_SETTINGS, platform: 'apple' });
+    expect(loadSettings().platform).toBe('apple');
   });
 });

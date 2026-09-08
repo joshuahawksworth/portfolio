@@ -11,6 +11,7 @@ import {
   ACCENTS,
   DEFAULT_SETTINGS,
   clearSettings,
+  detectPlatform,
   loadSettings,
   resolveOs,
   saveSettings,
@@ -96,7 +97,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   const reset = useCallback(() => {
     clearSettings();
-    setSettings({ ...DEFAULT_SETTINGS, wallpaper: {} });
+    setSettings({ ...DEFAULT_SETTINGS, platform: detectPlatform(), wallpaper: {} });
   }, []);
 
   const wallpaper = wallpaperFor(os, settings.wallpaper);

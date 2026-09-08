@@ -156,6 +156,12 @@ function PlatformPreview({ platform }: { platform: Platform }) {
 
 export function PlatformSection() {
   const { settings, update, os, isMobile } = useSettings();
+  const session = useSession();
+  function choose(platform: Platform) {
+    if (platform === settings.platform) return;
+    if (session.switchPlatform) session.switchPlatform(platform);
+    else update({ platform });
+  }
   const options: { value: Platform; name: string; desc: string; renders: string }[] = [
     {
       value: 'apple',
@@ -173,7 +179,7 @@ export function PlatformSection() {
   return (
     <Group
       title="Platform"
-      footer={`Every screen re-themes instantly: boot, lock screen, icons, windows and system panels. Your choice is saved on this device, so it comes back after a reload. Right now you're on ${OS_LABELS[os]}.`}
+      footer={`Switching shuts ${OS_LABELS[os]} down and boots the other platform: lock screen, wallpaper, icons, windows and system panels all change. Your choice is saved on this device, so it comes back after a reload. First visits start on whichever platform matches your device.`}
     >
       <div className={styles.platformGrid} role="radiogroup" aria-label="Platform">
         {options.map((o) => {
@@ -185,7 +191,7 @@ export function PlatformSection() {
               role="radio"
               aria-checked={on}
               className={`${styles.platformCard} ${on ? styles.platformCardOn : ''}`}
-              onClick={() => update({ platform: o.value })}
+              onClick={() => choose(o.value)}
             >
               <PlatformPreview platform={o.value} />
               <span className={styles.platformName}>

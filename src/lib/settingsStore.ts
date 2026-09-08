@@ -111,6 +111,24 @@ export const DEFAULT_SETTINGS: Settings = {
 
 export const SETTINGS_STORAGE_KEY = 'portfolio.settings.v1';
 
+/**
+ * Pick the platform that matches the visitor's own device: Android phones and Windows
+ * PCs start on the Windows / Android side; iPhones, Macs and anything unknown start on
+ * Apple. Only used until the visitor saves a choice of their own.
+ */
+export function detectPlatform(
+  userAgent: string = typeof navigator === 'undefined' ? '' : navigator.userAgent,
+  uaPlatform: string = typeof navigator === 'undefined'
+    ? ''
+    : ((navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData
+        ?.platform ?? '')
+): Platform {
+  const s = `${uaPlatform} ${userAgent}`.toLowerCase();
+  if (s.includes('android')) return 'windows';
+  if (s.includes('windows')) return 'windows';
+  return 'apple';
+}
+
 /** Which OS a platform renders as on the current device. */
 export function resolveOs(platform: Platform, isMobile: boolean): OsName {
   if (platform === 'apple') return isMobile ? 'ios' : 'macos';
@@ -170,12 +188,18 @@ export function sanitizeSettings(raw: unknown): Settings {
 
 export function loadSettings(): Settings {
   let settings: Settings = { ...DEFAULT_SETTINGS, wallpaper: {} };
+  let saved = false;
   try {
     const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
-    if (raw) settings = sanitizeSettings(JSON.parse(raw));
+    if (raw) {
+      settings = sanitizeSettings(JSON.parse(raw));
+      saved = true;
+    }
   } catch {
     /* private mode or corrupt data: fall back to defaults */
   }
+  // First visit: match the device the visitor is actually on.
+  if (!saved) settings.platform = detectPlatform();
   // Older builds saved only the wallpaper; carry that choice over to the Apple surfaces.
   if (!settings.wallpaper.macos) {
     const legacy = loadLegacyWallpaper();

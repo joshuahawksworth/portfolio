@@ -218,3 +218,94 @@
   font-size: 12px;
   font-family: var(--font-ui);
 }
+
+/* ── Shutdown / restart ─────────────────────────────────── */
+.shutdown {
+  animation: shutdownIn 0.35s ease both;
+  gap: 28px;
+}
+
+@keyframes shutdownIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.shutdownLogo {
+  animation: logoDim 2.4s ease both;
+}
+
+@keyframes logoDim {
+  0% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
+.shutdownText {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  letter-spacing: 0.01em;
+}
+
+.shutdownTextDroid {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Apple progress wheel: 8 bars fading in turn */
+.appleSpinner {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  display: block;
+}
+
+.appleSpinner > span {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 3px;
+  height: 9px;
+  margin-left: -1.5px;
+  border-radius: 1.5px;
+  background: #fff;
+  transform-origin: 1.5px 15px;
+  opacity: 0.25;
+  animation: appleSpin 1s linear infinite;
+}
+
+@keyframes appleSpin {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.25;
+  }
+}
+
+/* Material indeterminate ring */
+.droidSpinner {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 4px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #3ddc84;
+  animation: droidSpin 0.9s linear infinite;
+}
+
+@keyframes droidSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}

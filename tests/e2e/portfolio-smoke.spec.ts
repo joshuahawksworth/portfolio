@@ -2,7 +2,11 @@ import { expect, test, type Page } from '@playwright/test';
 
 async function enterPortfolio(page: Page) {
   await page.goto('/');
-  await expect(page.getByText('Joshua')).toBeVisible({ timeout: 7_000 });
+  // First visits boot the platform that matches the device: the macOS login shows the
+  // user's name, while the Pixel project lands on the Android lock screen.
+  await expect(page.getByText(/Joshua|Swipe up to unlock/).first()).toBeVisible({
+    timeout: 7_000,
+  });
   await page.keyboard.press('Enter');
 }
 
