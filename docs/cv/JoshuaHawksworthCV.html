@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Joshua Hawksworth CV</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet" />
+<style>
+  /* A4, matching the margins of the original Google Docs export (~20pt sides). */
+  @page { size: A4; margin: 36pt 0 34pt 0; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Lora', Georgia, serif;
+    font-size: 9pt;
+    line-height: 13.25pt;
+    color: #262626;
+    background: #fff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .page-margins { padding: 0 19.5pt; }
+  .page-top { padding-top: 2pt; }
+  a { color: #0a66c2; text-decoration: underline; }
+
+  /* Header */
+  .header { position: relative; }
+  .name { font-size: 25pt; font-weight: 600; line-height: 31pt; letter-spacing: 0.15pt; margin: 0; }
+  .contact { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 1pt; }
+  .contact .left { padding-bottom: 0; }
+  .contact .right { text-align: right; }
+  .header-rule { border: 0; border-top: 1.6pt solid #262626; margin: 6.5pt 0 0 0; }
+
+  .summary { font-style: italic; text-align: justify; margin-top: 15pt; }
+
+  /* Section headings: title followed by a rule sitting just above the baseline. */
+  .section { display: flex; align-items: baseline; margin-top: 18pt; margin-bottom: 4pt; }
+  .section h2 { font-size: 14pt; font-weight: 600; line-height: 19pt; margin: 0; letter-spacing: 0.1pt; }
+  .section .rule { flex: 1; border-top: 1.6pt solid #262626; margin-left: 1.5pt; margin-right: 5pt; position: relative; top: -1.5pt; }
+
+  .skills p { margin: 0; }
+  .skills b { font-weight: 600; }
+  .skills i { font-style: italic; }
+
+  /* Work experience entries */
+  .entry { margin-top: 10pt; break-inside: avoid; }
+  .entry:first-of-type { margin-top: 8pt; }
+  .entry .row { display: flex; justify-content: space-between; }
+  .entry .company, .entry .location { font-weight: 600; }
+  .entry .role { font-style: italic; }
+  .entry .dates { font-style: italic; font-weight: 600; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { position: relative; padding-left: 22.5pt; text-align: justify; }
+  li::before {
+    content: '\25CF';
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+    position: absolute;
+    left: 4.5pt;
+    top: 0;
+  }
+
+  .edu .row { display: flex; justify-content: space-between; margin-top: 8pt; }
+  .edu .uni { font-weight: 600; }
+  .edu .dates { font-style: italic; font-weight: 600; }
+  .edu .degree { font-style: italic; }
+
+  .info { margin-top: 4pt; }
+  .info .row { display: flex; }
+  .info .label { width: 94.5pt; font-style: italic; padding-left: 3pt; }
+</style>
+</head>
+<body>
+<div class="page-margins page-top">
+
+  <div class="header">
+    <h1 class="name">JOSHUA HAWKSWORTH</h1>
+    <div class="contact">
+      <div class="left">+44 7999 577194 &nbsp;|&nbsp; <a href="mailto:joshuahawksworth@me.com">joshuahawksworth@me.com</a></div>
+      <div class="right">Salford, Manchester<br />7 Bankside Boulevard, Apt. #404</div>
+    </div>
+    <hr class="header-rule" />
+  </div>
+
+  <p class="summary">
+    Senior Mobile Developer with 7 years building React and React Native applications. Currently building AI-driven
+    solutions on the Innovation team at ArcusFM, including a React Native app that helps field engineers complete their
+    day-to-day work orders. Previously led development of an email management platform for architects, architecting a
+    monorepo that connects Outlook with SharePoint, and built a mobile loyalty app that gained 150K users in its first
+    year. Experienced in TypeScript, Microsoft Graph API, establishing CI/CD and testing practices, and mentoring developers.
+  </p>
+
+  <div class="section"><h2>SKILLS</h2><div class="rule"></div></div>
+  <div class="skills">
+    <p><b>Languages:</b> <i>JavaScript, TypeScript, HTML5, CSS3, PHP</i></p>
+    <p><b>Libraries &amp; Frameworks:</b> <i>React, React Native, Expo, Bootstrap, Swift, Node, Angular, VueJS, NestJS, NextJS, Jest, Vitest, PHPUnit, jQuery</i></p>
+    <p><b>Tools:</b> <i>Git + Github, Postman, Figma, Vite, Adobe Suite, Microsoft 365, Docker, Jira, Azure DevOps, Azure Portal, LLM APIs</i></p>
+  </div>
+
+  <div class="section"><h2>WORK EXPERIENCE</h2><div class="rule"></div></div>
+
+  <div class="entry">
+    <div class="row"><span class="company">ArcusFM</span><span class="location">Remote</span></div>
+    <div class="row"><span class="role">Senior Mobile Developer - Innovation Team</span><span class="dates">November 2025 - Present</span></div>
+    <ul>
+      <li>Built a React Native mobile app that helps Arcus engineers complete their day-to-day work orders in the field</li>
+      <li>Designed and delivered AI-driven solutions as part of the Innovation team, embedding LLM-powered features into engineer workflows</li>
+      <li>Led the mobile architecture using TypeScript, Expo and React Native, from initial prototype through to production release</li>
+      <li>Collaborated with engineers and operations stakeholders to define requirements and iterate on UX for on-site use</li>
+      <li>Integrated the app with backend work order services, handling authentication, state management and data caching</li>
+      <li>Established CI/CD pipelines, automated testing and release processes for iOS and Android builds</li>
+      <li>Mentored developers and conducted code reviews to maintain code standards across the Innovation team</li>
+    </ul>
+  </div>
+
+  <div class="entry">
+    <div class="row"><span class="company">CMap Software</span><span class="location">Manchester, Salford</span></div>
+    <div class="row"><span class="role">Senior Frontend Software Developer - CMap Mail</span><span class="dates">March 2024 - October 2025</span></div>
+    <ul>
+      <li>Architected and maintained a monorepo containing four interconnected applications</li>
+      <li>Developed an Outlook Add-in enabling users to file emails directly into SharePoint sites via Microsoft Graph API</li>
+      <li>Built a discovery web app using TypeScript and React.js for email retrieval and management</li>
+      <li>Created an Admin portal for project migration and user management across SharePoint sites</li>
+      <li>Engineered an install web app for automated SharePoint hub site provisioning, including search schemas, site designs, and granular permission management</li>
+      <li>Designed intuitive UI/UX workflows in Figma across all four applications</li>
+      <li>Established CI/CD pipelines and TDD practices across the team, reducing deployment time by over 35% and regressions by almost 60%</li>
+    </ul>
+  </div>
+
+  <div class="entry">
+    <div class="row"><span class="company">17 Oranges</span><span class="location">Remote</span></div>
+    <div class="row"><span class="role">Frontend Mobile Developer - Kwando</span><span class="dates">February 2023 - March 2024</span></div>
+    <ul>
+      <li>Designed and implemented UI/UX workflows for iOS and Android devices</li>
+      <li>Participated in workshop sessions with customers to define product requirements</li>
+      <li>Utilised Expo, React Native, and TypeScript to build, deploy, and maintain app versioning</li>
+      <li>Established Git workflows and deployment processes</li>
+      <li>Managed application state and data caching for optimization purposes</li>
+      <li>Created API service modules for REST endpoint consumption</li>
+      <li>Designed and documented API endpoint requirements in collaboration with backend developers</li>
+    </ul>
+  </div>
+
+  <div class="entry">
+    <div class="row"><span class="company">The Access Group</span><span class="location">Remote</span></div>
+    <div class="row"><span class="role">Web &amp; Mobile Developer - Orderbee</span><span class="dates">September 2022 - February 2023</span></div>
+    <ul>
+      <li>Developed features for Orderbee’s web application using VueJS and TypeScript, working with other Frontend developers</li>
+      <li>Built mobile functionality for Orderbee using React Native within a separate mobile development team</li>
+      <li>Participated in daily standups, sprint planning, and retrospectives following Scrum methodology with both teams</li>
+      <li>Coordinated development workflows through Azure DevOps</li>
+      <li>Prioritized triage issues to maintain a smoother user experience and development cycle</li>
+      <li>Delivered features in iterative sprints while managing parallel workstreams</li>
+    </ul>
+  </div>
+
+  <div class="entry">
+    <div class="row"><span class="company">The Drawing Room Creative</span><span class="location">Remote</span></div>
+    <div class="row"><span class="role">Mobile Developer - The Original Factory Shop app</span><span class="dates">December 2021 - September 2022</span></div>
+    <ul>
+      <li>Architected and implemented a loyalty badge system with reward and referral mechanics</li>
+      <li>Created an interactive daily scratchcard game to drive user engagement</li>
+      <li>Integrated a push notification system using Firebase for real-time user updates</li>
+      <li>Collaborated with the backend team to implement our microservices architecture</li>
+      <li>Mentored junior developers and conducted code reviews to maintain code standards</li>
+      <li>Developed, deployed, and maintained the TOFS application on both iOS and Android using React Native</li>
+      <li>Worked under tight deadlines in a high-pressure agency environment</li>
+      <li>Successfully onboarded over 150K users within its first year of launch</li>
+    </ul>
+  </div>
+
+  <div class="entry">
+    <div class="row"><span class="company">Langley Foxall</span><span class="location">Stafford, Dyson Way</span></div>
+    <div class="row"><span class="role">Web &amp; Mobile Developer - CicloZone</span><span class="dates">April 2021 - December 2021</span></div>
+    <ul>
+      <li>Developed Laravel-based CMS solutions for a diverse range of clients, including osteopathy clinics and a door manufacturing sales company</li>
+      <li>Contributed to React Native app development with Bluetooth connectivity for exercise bikes</li>
+      <li>Designed and implemented RESTful APIs using PHP Laravel</li>
+      <li>Worked on a Laravel-based video content management system for bike workout videos</li>
+      <li>Practiced pair programming to ensure code quality and knowledge sharing</li>
+    </ul>
+  </div>
+
+  <div class="entry">
+    <div class="row"><span class="company">eDynamix</span><span class="location">Derbyshire, Pride Park</span></div>
+    <div class="row"><span class="role">Junior Web Developer &amp; Designer - Web Master</span><span class="dates">October 2019 - April 2021</span></div>
+    <ul>
+      <li>Developed Web Master, a CRM platform for car dealership website creation and management</li>
+      <li>Designed and implemented UI/UX workflows for the Web Master CRM interface using Laravel</li>
+      <li>Built a custom WordPress plugin as an early prototype of Web Master using jQuery</li>
+      <li>Maintained and updated existing dealership websites through the CRM platform</li>
+    </ul>
+  </div>
+
+  <div class="section"><h2>EDUCATION</h2><div class="rule"></div></div>
+  <div class="edu">
+    <div class="row"><span class="uni">University of Derby - Upper Second-Class Honours</span><span class="dates">September 2016 - September 2019</span></div>
+    <div class="degree">Computer Games Programming BSc. Hons</div>
+  </div>
+
+  <div class="section"><h2>ADDITIONAL INFORMATION</h2><div class="rule"></div></div>
+  <div class="info">
+    <div class="row"><span class="label">Website:</span><a href="https://hawksworth.dev">hawksworth.dev</a></div>
+    <div class="row"><span class="label">LinkedIn:</span><a href="https://www.linkedin.com/in/joshua-hawksworth-9741aa209">linkedin.com/in/joshua-hawksworth-9741aa209</a></div>
+    <div class="row"><span class="label">GitHub:</span><a href="https://github.com/joshuahawksworth">github.com/joshuahawksworth</a></div>
+  </div>
+
+</div>
+</body>
+</html>
