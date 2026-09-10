@@ -162,27 +162,46 @@
 }
 
 /* ── Android boot ───────────────────────────────────── */
-.droidLogo {
+/* "Powered by android" sits at the foot of the screen, as on a Samsung boot. */
+.poweredBy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(48px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  justify-content: center;
+  animation: barAppear 0.3s ease 0.8s both;
+}
+
+.poweredByInner {
+  display: flex;
   flex-direction: column;
-  gap: 14px;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.poweredByLabel {
+  font-family: Roboto, 'Google Sans', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: #fff;
+  padding-left: 2px;
+}
+
+.poweredByRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .droidWord {
   font-family: Roboto, 'Google Sans', system-ui, sans-serif;
-  font-size: 30px;
+  font-size: 34px;
   font-weight: 400;
   letter-spacing: 0.02em;
+  line-height: 1;
   color: #fff;
-}
-
-.barTrackDroid {
-  width: 220px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.16);
-}
-
-.barFillDroid {
-  background: #3ddc84;
 }
 
 /* ── Powered off ────────────────────────────────────── */
