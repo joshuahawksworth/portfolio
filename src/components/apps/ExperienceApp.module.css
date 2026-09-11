@@ -3,7 +3,8 @@
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background: var(--panel);
+  /* A near-solid sheet: the glass panel left the body copy hard to read over the wallpaper */
+  background: color-mix(in srgb, var(--panel-solid) 92%, transparent);
   color: var(--text);
   font-family: var(--font-ui);
 }

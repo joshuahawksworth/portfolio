@@ -7,6 +7,7 @@
 import { useId, type ReactNode } from 'react';
 import { MicrosoftStoreIcon } from './DevAppIcons';
 import { BrandIcon } from '../Dock/dockIcons';
+import { DocumentIcon } from './FileSystemIcons';
 
 function Svg({ children, title }: { children: ReactNode; title?: string }) {
   return (
@@ -347,7 +348,8 @@ export const WINDOWS_ICONS = {
   location: <WinMapsIcon />,
   terminal: <WinTerminalIcon />,
   calculator: <WinCalculatorIcon />,
-  cv: <WordIcon />,
+  // The CV is a PDF; Word is its own app now, so the shortcut wears the document icon
+  cv: <DocumentIcon name="CV.pdf" />,
   appstore: <BrandIcon src="/icons/microsoft-store.png" fallback={<MicrosoftStoreIcon />} />,
   imageviewer: <WinPhotosIcon />,
   settings: <WinSettingsIcon />,
