@@ -150,12 +150,15 @@ const SEEDS: Seed[] = [
   folder('doc-proj', 'documents', 'Projects'),
   file('doc-notes', 'documents'),
 
+  folder('proj-arcus', 'doc-proj', 'arcus-work-orders'),
   folder('proj-cmap', 'doc-proj', 'cmap-mail'),
   folder('proj-kwando', 'doc-proj', 'kwando'),
   folder('proj-orderbee', 'doc-proj', 'orderbee'),
   folder('proj-tofs', 'doc-proj', 'tofs-app'),
   folder('proj-ciclo', 'doc-proj', 'ciclozone'),
   folder('proj-web', 'doc-proj', 'webmaster'),
+
+  file('arcus-readme', 'proj-arcus'),
 
   file('cmap-readme', 'proj-cmap'),
   file('cmap-pkg', 'proj-cmap'),

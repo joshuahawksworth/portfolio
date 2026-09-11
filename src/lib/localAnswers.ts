@@ -17,6 +17,7 @@ const CONTACT = {
 
 /** What each employer does, for "which industries" style questions. */
 const INDUSTRIES: Record<string, string> = {
+  'arcus-fm': 'facilities management (field service tooling and applied AI)',
   'cmap-software': 'architecture and engineering software (document and email management)',
   '17-oranges': 'consumer social apps',
   'the-access-group': 'hospitality ordering',
@@ -80,6 +81,7 @@ const SKILL_ALIASES: Array<[RegExp, string]> = [
   [/figma|ui\/?ux|design/, 'ui'],
   [/ci\/?cd|pipeline|devops|azure/, 'ci/cd'],
   [/tdd|test/, 'tdd'],
+  [/\bai\b|llm|claude|bedrock|agent/, 'llm'],
   [/mentor|lead|senior|management/, 'mentor'],
   [/cms/, 'cms'],
 ];
@@ -99,6 +101,7 @@ const SKILL_LABELS: Record<string, string> = {
   'ci/cd': 'CI/CD and DevOps',
   tdd: 'testing and TDD',
   mentor: 'leadership and mentoring',
+  llm: 'AI and LLM tooling',
   cms: 'CMS development',
 };
 
@@ -170,7 +173,7 @@ export function answerLocally(question: string): string {
       `Josh is a **Senior Full Stack Developer** with ${YEARS_EXPERIENCE}+ years building React and React Native applications across several industries. His roles so far:`,
       ...jobsContent.map(jobLine),
       ``,
-      `Most recently he led the architecture of an email management ecosystem at CMap Software, and before that he was the sole frontend developer on a social planning app and led the frontend of a loyalty app that onboarded 150,000+ users in its first year.`,
+      `Right now he's on the Innovation team at Arcus FM, where he took an AI-driven React Native app from prototype to production so field engineers can complete their day-to-day work orders on site. Before that he led the architecture of an email management ecosystem at CMap Software, was the sole frontend developer on a social planning app and led the frontend of a loyalty app that onboarded 150,000+ users in its first year.`,
     ].join('\n');
   }
 
@@ -252,7 +255,7 @@ export function answerLocally(question: string): string {
     `- What has Josh built with React Native?`,
     `- Summarise Josh's experience`,
     `- Which industries has Josh worked in?`,
-    `- What did Josh do at CMap Software?`,
+    `- What is Josh doing at Arcus FM?`,
     `- How do I contact Josh?`,
   ].join('\n');
 }

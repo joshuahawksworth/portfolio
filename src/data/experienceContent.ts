@@ -13,6 +13,40 @@ export type JobContent = Omit<Job, 'logo' | 'projects'> & {
 
 export const jobsContent: JobContent[] = [
   {
+    id: 'arcus-fm',
+    company: 'Arcus FM',
+    role: 'Senior Mobile Developer - Innovation Team',
+    period: 'November 2025 - Present',
+    skills: [
+      'React Native',
+      'Expo',
+      'TypeScript',
+      'AI & LLM Integration',
+      'AWS Bedrock',
+      'Claude',
+      'CI/CD',
+      'Mentoring & AI Coaching',
+    ],
+    summary:
+      'Part of the Innovation team at Arcus FM, a UK facilities management company, building AI-driven tools that change how field engineers get their work done. Took a React Native app from first prototype to production so engineers can complete their day-to-day work orders on site, and helped the wider development team make Claude a normal part of how they build software.',
+    responsibilities: [
+      'Took a React Native work order app from prototype to production release, giving field engineers one place to see, complete and close out their day-to-day jobs on site',
+      'Embedded LLM-powered features into engineer workflows, turning Innovation team experiments into tools engineers rely on every day',
+      'Shaped the on-site experience with engineers and operations stakeholders, so the app fits how work actually happens in the field',
+      'Owned the mobile architecture (TypeScript, Expo, React Native) and its integration with backend work order services, covering authentication, state management and data caching',
+      'Put CI/CD, automated testing and release processes in place so iOS and Android builds ship reliably and often',
+      "Coached colleagues in adopting Claude via AWS Bedrock, making AI-assisted development part of the team's day-to-day rather than a side experiment",
+      'Built standardised AI skills and harnesses that give every developer consistent, reusable agent workflows instead of one-off prompts',
+    ],
+    projects: [
+      {
+        name: 'Field Engineer Work Order App',
+        description:
+          "A React Native app that puts Arcus FM field engineers' day-to-day work orders in their pocket: what is scheduled, what was done and closing jobs out on site. Built on the Innovation team with LLM-powered features woven into the workflow, backed by Arcus work order services, and shipped to iOS and Android through automated pipelines.",
+      },
+    ],
+  },
+  {
     id: 'cmap-software',
     company: 'CMap Software',
     logoKey: 'cmapLogo',

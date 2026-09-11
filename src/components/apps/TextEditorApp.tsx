@@ -117,6 +117,30 @@ RANDOM THOUGHTS:
 - Dark mode is a personality trait at this point
 `,
   },
+  'arcus-readme': {
+    filename: 'README.md',
+    content: `# arcus-work-orders
+
+Mobile app for Arcus FM field engineers, built by the
+Innovation team.
+
+## Overview
+Puts an engineer's day-to-day work orders on their
+phone: see what is scheduled, capture what was done
+and close jobs out on site. AI features sit inside
+the workflow rather than in a separate tool.
+
+## Tech Stack
+- React Native + Expo + TypeScript
+- Arcus work order services (auth, state, caching)
+- Claude via AWS Bedrock
+- CI/CD with automated tests and iOS/Android releases
+
+## Team
+Shared AI skills and harnesses live in /ai so every
+developer gets the same agent workflows.
+`,
+  },
   'cmap-readme': {
     filename: 'README.md',
     content: `# cmap-mail
