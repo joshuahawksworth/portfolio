@@ -6,10 +6,9 @@
 import type { OsName } from '../lib/settingsStore';
 
 export const WALLPAPERS = {
-  // "The Beach" is Apple's dynamic Big Sur wallpaper and therefore copyrighted, so it is
-  // not shipped either: drop the-beach.jpg (day) and, optionally, the-beach-night.jpg into
-  // public/wallpapers/ and it becomes the default on macOS and iOS. Without the file
-  // both fall back to Golden Gate, so the desktop and the phone always match.
+  // "The Beach", Apple's dynamic Big Sur wallpaper: the-beach.jpg (day) and, optionally,
+  // the-beach-night.jpg in public/wallpapers/. It is the default on macOS and iOS; until
+  // the file is committed both fall back to Golden Gate, so desktop and phone always match.
   beach: '/wallpapers/the-beach.jpg',
   gold: '/wallpapers/golden-gate.jpg',
   catalina: '/wallpapers/catalina-night.jpg',

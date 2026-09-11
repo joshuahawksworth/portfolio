@@ -36,7 +36,3 @@ test-results
 # Optional extra Windows backgrounds: keep local copies out of the repo
 public/wallpapers/windows-7-harmony.jpg
 public/wallpapers/windows-xp-bliss.jpg
-
-# Apple's dynamic "The Beach" wallpaper is copyrighted too: keep local copies out
-public/wallpapers/the-beach.jpg
-public/wallpapers/the-beach-night.jpg
