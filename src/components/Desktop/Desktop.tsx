@@ -544,6 +544,18 @@ function toItem(node: FsNode): DesktopItem {
 // columns grow leftwards.
 const GRID_START_Y = 54;
 const GRID_RIGHT_PAD = 20;
+// The macOS desktop widgets (DesktopWidgets.module.css: two 150px tiles from 27,57) own the
+// top-left corner; no icon is placed over them. Windows has no widgets on the desktop.
+const WIDGETS_RIGHT = 27 + 150 + 16 + 150 + 16;
+const WIDGETS_BOTTOM = 57 + 155 + 12;
+function cellCovered(x: number, y: number): boolean {
+  return (
+    currentOs() !== 'windows' &&
+    x < WIDGETS_RIGHT &&
+    y < WIDGETS_BOTTOM &&
+    y + ICON_H > GRID_START_Y
+  );
+}
 function gridColX(col: number): number {
   const colW = ICON_W + ICON_GAP + 4;
   if (currentOs() === 'windows') return GRID_RIGHT_PAD + col * colW;
@@ -564,6 +576,7 @@ function findEmptyGridCell(taken: Record<string, IconPos>): IconPos {
     for (let row = 0; row < maxRows; row++) {
       const gx = gridColX(col);
       const gy = startY + row * rowH;
+      if (cellCovered(gx, gy)) continue;
       const hit = occupied.some(
         (p) => Math.abs(p.x - gx) < ICON_W * 0.7 && Math.abs(p.y - gy) < ICON_H * 0.7
       );
@@ -578,17 +591,30 @@ function findEmptyGridCell(taken: Record<string, IconPos>): IconPos {
   };
 }
 
-// All icons stack down the RIGHT side in as many columns as needed
+// All icons stack down the RIGHT side in as many columns as needed, skipping any cell
+// the desktop widgets cover.
 function initPositions(items: DesktopItem[]): Record<string, IconPos> {
   const startY = GRID_START_Y;
-  const maxRows = Math.max(1, Math.floor((window.innerHeight - startY - 80) / (ICON_H + ICON_GAP)));
+  const rowH = ICON_H + ICON_GAP;
+  const maxRows = Math.max(1, Math.floor((window.innerHeight - startY - 80) / rowH));
   const result: Record<string, IconPos> = {};
-  items.forEach((item, i) => {
-    result[item.id] = {
-      x: gridColX(Math.floor(i / maxRows)),
-      y: startY + (i % maxRows) * (ICON_H + ICON_GAP),
-    };
-  });
+  let col = 0;
+  let row = 0;
+  for (const item of items) {
+    while (cellCovered(gridColX(col), startY + row * rowH)) {
+      row++;
+      if (row >= maxRows) {
+        row = 0;
+        col++;
+      }
+    }
+    result[item.id] = { x: gridColX(col), y: startY + row * rowH };
+    row++;
+    if (row >= maxRows) {
+      row = 0;
+      col++;
+    }
+  }
   return result;
 }
 
