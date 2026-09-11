@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSettings } from '../../context/SettingsContext';
 import { WindowsLogo } from '../icons/WindowsIcons';
 import { BugdroidIcon } from '../icons/AndroidIcons';
@@ -92,10 +92,15 @@ function AndroidBoot() {
 export default function Boot({ onComplete }: Props) {
   const { os } = useSettings();
 
+  // The boot lasts 4.2 s from mount, full stop. The timer must not restart when the
+  // parent re-renders (a resize across the phone breakpoint hands us a new onComplete),
+  // or a visitor resizing the window during boot would never leave the black screen.
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
   useEffect(() => {
-    const t = setTimeout(onComplete, 4200);
+    const t = setTimeout(() => onCompleteRef.current(), 4200);
     return () => clearTimeout(t);
-  }, [onComplete]);
+  }, []);
 
   // Match the page background to the boot screen so a stale viewport never shows
   // the desktop colour under it.
