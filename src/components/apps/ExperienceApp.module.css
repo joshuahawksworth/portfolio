@@ -367,6 +367,12 @@
     flex-direction: column;
   }
 
+  /* The timeline becomes a strip above the role, not a column beside it */
+  .split {
+    flex-direction: column;
+    min-height: 0;
+  }
+
   .sidebar {
     width: 100%;
     height: auto;
