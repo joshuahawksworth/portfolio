@@ -15,6 +15,7 @@ export const jobsContent: JobContent[] = [
   {
     id: 'arcus-fm',
     company: 'Arcus FM',
+    logoKey: 'arcusLogo',
     role: 'Senior Mobile Developer - Innovation Team',
     period: 'November 2025 - Present',
     skills: [

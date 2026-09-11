@@ -1,5 +1,6 @@
 import type { Job } from '../types/experience';
 import { jobsContent } from './experienceContent';
+import arcusLogo from '../assets/company-logos/arcusfm.png';
 import cmapMailImage from '../assets/cmap-mail.png';
 import cmapLogo from '../assets/company-logos/cmap.svg';
 import orangesLogo from '../assets/company-logos/17oranges.jpg';
@@ -13,6 +14,7 @@ import edynamixLogo from '../assets/company-logos/edynamix.svg';
 import webMasterImage from '../assets/webmaster.webp';
 
 const ASSETS: Record<string, string> = {
+  arcusLogo,
   cmapMailImage,
   cmapLogo,
   orangesLogo,
