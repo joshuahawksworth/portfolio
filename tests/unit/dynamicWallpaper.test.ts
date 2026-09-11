@@ -34,3 +34,17 @@ describe('default wallpapers', () => {
     expect(wallpaperFor('ios', {})).toBe(wallpaperFor('macos', {}));
   });
 });
+
+describe('wallpaperChoiceFor', () => {
+  it('shares an Apple wallpaper between the Mac and the iPhone', async () => {
+    const { wallpaperChoiceFor } = await import('../../src/data/wallpapers');
+    expect(wallpaperChoiceFor('macos', 'tahoe')).toEqual({ macos: 'tahoe', ios: 'tahoe' });
+    expect(wallpaperChoiceFor('ios', 'catalina')).toEqual({ ios: 'catalina', macos: 'catalina' });
+  });
+
+  it('keeps a choice to one OS when the sibling has no such wallpaper', async () => {
+    const { wallpaperChoiceFor } = await import('../../src/data/wallpapers');
+    expect(wallpaperChoiceFor('windows', 'win11')).toEqual({ windows: 'win11' });
+    expect(wallpaperChoiceFor('android', 'pixelDark')).toEqual({ android: 'pixelDark' });
+  });
+});

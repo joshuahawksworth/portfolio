@@ -111,6 +111,22 @@ export function loadLegacyWallpaper(): WallpaperKey | null {
   }
 }
 
+/**
+ * The choice-map update for picking `key` on `os`. The phone and desktop of a platform
+ * share one wallpaper, so picking on macOS also sets iOS (and vice versa); Windows and
+ * Android do the same for the keys their sets have in common.
+ */
+export function wallpaperChoiceFor(
+  os: OsName,
+  key: WallpaperKey
+): Partial<Record<OsName, WallpaperKey>> {
+  const out: Partial<Record<OsName, WallpaperKey>> = { [os]: key };
+  const sibling: OsName =
+    os === 'macos' ? 'ios' : os === 'ios' ? 'macos' : os === 'windows' ? 'android' : 'windows';
+  if (WALLPAPERS_FOR_OS[sibling].includes(key)) out[sibling] = key;
+  return out;
+}
+
 /** Resolve the wallpaper to show for an OS from a (possibly partial) choice map. */
 export function wallpaperFor(
   os: OsName,
