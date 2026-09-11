@@ -62,8 +62,7 @@ describe('settings store', () => {
     const loaded = loadSettings();
     expect(loaded.wallpaper.macos).toBe('tahoe');
     expect(loaded.wallpaper.ios).toBe('tahoe');
-    // No real Windows image is on the server in jsdom, so Windows uses the shipped fallback.
-    expect(wallpaperFor('windows', loaded.wallpaper)).toBe('wave');
+    expect(wallpaperFor('windows', loaded.wallpaper)).toBe('win11');
     expect(wallpaperFor('android', loaded.wallpaper)).toBe('pixel');
   });
 

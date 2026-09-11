@@ -18,12 +18,11 @@ export const WALLPAPERS = {
   pixel: '/wallpapers/android-pixel.svg',
   pixelDark: '/wallpapers/android-pixel-dark.svg',
   pixelCoral: '/wallpapers/android-pixel-coral.svg',
-  // Real Windows backgrounds. Microsoft's wallpapers are copyrighted, so they are not
-  // shipped with the repo: drop your own copies into public/wallpapers/ under these names
-  // and they appear in the Windows set automatically (see OPTIONAL_WALLPAPERS). With none
-  // present Windows falls back to Sequoia so the desktop is never blank.
-  win11: '/wallpapers/windows-11-bloom.jpg',
-  win10: '/wallpapers/windows-10-hero.jpg',
+  // The Windows 11 and 10 backgrounds ship with the repo. Windows 7 and XP are optional:
+  // drop your own copies into public/wallpapers/ under these names and they join the
+  // Windows set automatically (see OPTIONAL_WALLPAPERS).
+  win11: '/wallpapers/windows-11.jpg',
+  win10: '/wallpapers/windows-10.jpg',
   win7: '/wallpapers/windows-7-harmony.jpg',
   winxp: '/wallpapers/windows-xp-bliss.jpg',
 } as const;
@@ -31,8 +30,6 @@ export const WALLPAPERS = {
 /** Wallpapers that only show up when the file actually exists on the server. */
 export const OPTIONAL_WALLPAPERS: ReadonlySet<WallpaperKey> = new Set<WallpaperKey>([
   'beach',
-  'win11',
-  'win10',
   'win7',
   'winxp',
 ]);
@@ -92,7 +89,7 @@ export const DEFAULT_WALLPAPER: Record<OsName, WallpaperKey> = {
 const FALLBACK_WALLPAPER: Record<OsName, WallpaperKey> = {
   macos: 'gold',
   ios: 'gold',
-  windows: 'wave',
+  windows: 'win11',
   android: 'pixel',
 };
 
