@@ -16,6 +16,9 @@ import { FINDER_DRAG_TYPE } from '../apps/FinderApp';
 import MenuBar from '../MenuBar/MenuBar';
 import Taskbar from '../Taskbar/Taskbar';
 import SystemPanels from '../SystemUI/SystemPanels';
+import NotificationBanners from '../SystemUI/NotificationBanners';
+import DynamicWallpaper, { isDynamicDark, useDynamicLook } from './DynamicWallpaper';
+import { useWelcomeNotifications } from '../../hooks/useWelcomeNotifications';
 import { SystemUIProvider } from '../../context/SystemUIContext';
 import { useSettings } from '../../context/SettingsContext';
 import { currentOs, nodeDisplayName } from '../../theme/platform';
@@ -762,6 +765,7 @@ function DesktopSurface() {
   const {
     windows,
     focusedId,
+    blurWindows,
     openApp,
     childrenOf,
     createFolder,
@@ -774,15 +778,20 @@ function DesktopSurface() {
 
   const { settings, os, wallpaper, setWallpaper } = useSettings();
   const isWindows = os === 'windows';
+  useWelcomeNotifications();
+  const dynamicLook = useDynamicLook(wallpaper);
 
-  // Desktop icons are simply the children of the Desktop folder.
+  // Desktop icons are simply the children of the Desktop folder. Xcode only ships on
+  // a Mac, so its shortcut stays off the Windows desktop.
   const items = useMemo(
     () =>
-      childrenOf(ROOT_IDS.desktop).map((node) => {
-        const item = toItem(node);
-        return { ...item, label: nodeDisplayName(node.id, item.label, os) };
-      }),
-    [childrenOf, os]
+      childrenOf(ROOT_IDS.desktop)
+        .filter((node) => !(isWindows && node.id === 'shortcut-xcode'))
+        .map((node) => {
+          const item = toItem(node);
+          return { ...item, label: nodeDisplayName(node.id, item.label, os) };
+        }),
+    [childrenOf, os, isWindows]
   );
 
   const [iconPos, setIconPos] = useState<Record<string, IconPos>>(() => initPositions(items));
@@ -987,8 +996,9 @@ function DesktopSurface() {
     if (renamingId) commitRename();
     e.preventDefault();
     setCtxMenu(null);
-    // Clear selection immediately on bare-desktop mousedown
+    // Clear selection immediately on bare-desktop mousedown; the desktop is frontmost now.
     setSelectedIcons(new Set());
+    blurWindows();
 
     const x1 = e.clientX,
       y1 = e.clientY;
@@ -1187,7 +1197,7 @@ function DesktopSurface() {
 
   // ── Dock item activate (bounce + delayed open) ────────────────────────
   function handleDockActivate(key: string, action: () => void) {
-    if (key === 'finder' || key === 'trash' || key === 'github' || key === 'cv') {
+    if (key === 'finder' || key === 'trash' || key === 'cv') {
       action();
       return;
     }
@@ -1224,7 +1234,7 @@ function DesktopSurface() {
     <div
       className={[
         styles.desktop,
-        DARK_WALLPAPERS.has(wallpaper) ? styles.desktopDark : '',
+        DARK_WALLPAPERS.has(wallpaper) || isDynamicDark(dynamicLook) ? styles.desktopDark : '',
         isWindows ? styles.desktopWin : '',
       ].join(' ')}
       data-os={os}
@@ -1246,6 +1256,7 @@ function DesktopSurface() {
           aria-hidden
         />
       ))}
+      <DynamicWallpaper wallpaper={wallpaper} className={styles.wallpaperLayer} />
       {!isWindows && <DesktopWidgets />}
       {isWindows ? <Taskbar /> : <MenuBar />}
 
@@ -1282,6 +1293,7 @@ function DesktopSurface() {
               styles.icon,
               selected ? styles.iconSelected : '',
               selected ? styles.iconFocused : '',
+              selected && focusedId === null ? styles.iconFrontmost : '',
               cleaning ? styles.iconCleaning : '',
               isDraggingMe ? styles.iconDragging : '',
               isFolderTarget ? styles.iconFolderTarget : '',
@@ -1329,6 +1341,7 @@ function DesktopSurface() {
             }}
             onClick={(e) => {
               e.stopPropagation();
+              blurWindows();
               if (e.shiftKey || e.metaKey || e.ctrlKey) {
                 // Modifier-click toggles individual icon in selection
                 setSelectedIcons((prev) => {
@@ -1359,12 +1372,14 @@ function DesktopSurface() {
               }
             }}
           >
-            <NodeIcon
-              node={item.node}
-              size={50}
-              trashFull={trashFull}
-              trashGlow={item.appId === 'trash' && nearTrashTarget === 'desktop'}
-            />
+            <span className={styles.iconArt}>
+              <NodeIcon
+                node={item.node}
+                size={50}
+                trashFull={trashFull}
+                trashGlow={item.appId === 'trash' && nearTrashTarget === 'desktop'}
+              />
+            </span>
 
             {renaming ? (
               <input
@@ -1418,6 +1433,7 @@ function DesktopSurface() {
         />
       )}
 
+      <NotificationBanners />
       <SystemPanels />
 
       {/* Context menu */}

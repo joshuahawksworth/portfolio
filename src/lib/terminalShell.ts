@@ -969,10 +969,7 @@ export class Shell {
         }
         const appId = APP_ALIASES[target.toLowerCase().replace(/\.(app|exe)$/, '')];
         if (appId) {
-          this.host.openApp(
-            appId === 'githubapp' ? 'githubapp' : appId,
-            appId === 'githubapp' ? { url: 'https://github.com/joshuahawksworth' } : undefined
-          );
+          this.host.openApp(appId, undefined);
           say(`Opening ${target}…`);
           break;
         }
@@ -1275,7 +1272,6 @@ const APP_ALIASES: Record<string, string> = {
   skills: 'skills',
   contact: 'contact',
   mail: 'contact',
-  outlook: 'contact',
   gmail: 'contact',
   location: 'location',
   maps: 'location',
@@ -1288,7 +1284,18 @@ const APP_ALIASES: Record<string, string> = {
   chrome: 'safari',
   edge: 'safari',
   browser: 'safari',
-  github: 'githubapp',
+  github: 'githubdesktop',
+  'github desktop': 'githubdesktop',
+  outlook: 'outlook',
+  postman: 'postman',
+  xcode: 'xcode',
+  'android studio': 'androidstudio',
+  androidstudio: 'androidstudio',
+  spotify: 'spotify',
+  word: 'word',
+  'app store': 'appstore',
+  appstore: 'appstore',
+  store: 'appstore',
   terminal: 'terminal',
   calculator: 'calculator',
   calc: 'calculator',
@@ -1296,6 +1303,9 @@ const APP_ALIASES: Record<string, string> = {
   'system settings': 'settings',
   texteditor: 'texteditor',
   textedit: 'texteditor',
+  code: 'texteditor',
+  vscode: 'texteditor',
+  'visual studio code': 'texteditor',
   notepad: 'texteditor',
   keep: 'texteditor',
   preview: 'imageviewer',

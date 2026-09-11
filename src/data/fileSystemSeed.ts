@@ -5,8 +5,8 @@
  * folders nest arbitrarily, items can be moved between any two folders, and the Trash
  * remembers where each item came from.
  */
-import { jobsData } from './experienceData';
 import { FINDER_FILE_CONTENTS } from '../components/apps/TextEditorApp';
+import { CV_URL } from '../lib/cv';
 
 export type FsNodeType = 'folder' | 'file' | 'image' | 'app' | 'job';
 
@@ -136,15 +136,20 @@ const SEEDS: Seed[] = [
   {
     id: 'shortcut-cv',
     parentId: 'desktop',
-    name: 'CV',
+    name: 'My CV',
     type: 'app',
     appId: 'cv',
-    url: '/JoshuaHawksworthCV.pdf',
+    url: CV_URL,
+  },
+  { id: 'shortcut-xcode', parentId: 'desktop', name: 'Xcode', type: 'app', appId: 'xcode' },
+  {
+    id: 'shortcut-androidstudio',
+    parentId: 'desktop',
+    name: 'Android Studio',
+    type: 'app',
+    appId: 'androidstudio',
   },
   folder('trickster', 'desktop', 'My Flaws', { locked: true }),
-  ...jobsData.map(
-    (j): Seed => ({ id: j.id, parentId: 'desktop', name: j.company, type: 'job', jobId: j.id })
-  ),
 
   // ── Documents ──────────────────────────────────────────────────────────
   file('doc-readme', 'documents'),
@@ -201,7 +206,15 @@ const SEEDS: Seed[] = [
   app('app-loc', 'location', 'Location.app'),
   app('app-term', 'terminal', 'Terminal.app'),
   app('app-calc', 'calculator', 'Calculator.app'),
-  app('app-editor', 'texteditor', 'TextEditor.app'),
+  app('app-editor', 'texteditor', 'Visual Studio Code.app'),
+  app('app-githubdesktop', 'githubdesktop', 'GitHub Desktop.app'),
+  app('app-outlook', 'outlook', 'Outlook.app'),
+  app('app-postman', 'postman', 'Postman.app'),
+  app('app-xcode', 'xcode', 'Xcode.app'),
+  app('app-androidstudio', 'androidstudio', 'Android Studio.app'),
+  app('app-spotify', 'spotify', 'Spotify.app'),
+  app('app-word', 'word', 'Microsoft Word.app'),
+  app('app-appstore', 'appstore', 'App Store.app'),
   app('app-preview', 'imageviewer', 'Preview.app'),
   app('app-safari', 'safari', 'Google Chrome.app'),
   app('app-askjosh', 'askjosh', 'Ask Claude.app'),

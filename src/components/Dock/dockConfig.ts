@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { DOCK_ICONS } from './dockIcons';
+import { openCv } from '../../lib/cv';
 
 export const DOCK_DEFAULT_ORDER = [
   'github',
@@ -9,11 +10,16 @@ export const DOCK_DEFAULT_ORDER = [
   'experience',
   'skills',
   'contact',
+  'outlook',
   'location',
   'terminal',
-  'calculator',
   'texteditor',
+  'postman',
+  'word',
+  'calculator',
   'imageviewer',
+  'spotify',
+  'appstore',
   'cv',
   'settings',
 ] as const;
@@ -24,11 +30,13 @@ export type DockKey =
   | 'trash'
   | 'doom'
   | 'snake'
+  | 'xcode'
+  | 'androidstudio'
   | 'wallpaper';
 
 export const DOCK_LABELS: Record<string, string> = {
   finder: 'Finder',
-  github: 'GitHub',
+  github: 'GitHub Desktop',
   safari: 'Google Chrome',
   askjosh: 'Ask Claude',
   about: 'About',
@@ -38,9 +46,16 @@ export const DOCK_LABELS: Record<string, string> = {
   location: 'Location',
   terminal: 'Terminal',
   calculator: 'Calculator',
-  texteditor: 'Text Editor',
+  texteditor: 'Visual Studio Code',
+  outlook: 'Outlook',
+  postman: 'Postman',
+  xcode: 'Xcode',
+  androidstudio: 'Android Studio',
+  spotify: 'Spotify',
+  word: 'Word',
+  appstore: 'App Store',
   imageviewer: 'Image Viewer',
-  cv: 'CV',
+  cv: 'My CV',
   doom: 'DOOM',
   snake: 'Snake',
   trash: 'Trash',
@@ -51,9 +66,9 @@ export const DOCK_LABELS: Record<string, string> = {
 };
 
 /** Apps that live on the desktop as shortcuts — only appear in dock when running */
-export const DOCK_DESKTOP_ONLY = new Set(['doom', 'snake']);
+export const DOCK_DESKTOP_ONLY = new Set(['doom', 'snake', 'xcode', 'androidstudio']);
 
-export const DOCK_KEY_TO_APPID: Record<string, string> = { github: 'githubapp' };
+export const DOCK_KEY_TO_APPID: Record<string, string> = { github: 'githubdesktop' };
 
 export function dockAppId(key: string): string {
   return DOCK_KEY_TO_APPID[key] ?? key;
@@ -65,11 +80,11 @@ export function getDockAction(
 ): () => void {
   switch (key) {
     case 'github':
-      return () => openApp('githubapp', { url: 'https://github.com/joshuahawksworth' });
+      return () => openApp('githubdesktop');
     case 'safari':
       return () => openApp('safari');
     case 'cv':
-      return () => window.open('/JoshuaHawksworthCV.pdf', '_blank');
+      return openCv;
     case 'texteditor':
       return () => openApp('texteditor');
     case 'imageviewer':

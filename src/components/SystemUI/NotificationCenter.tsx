@@ -1,6 +1,7 @@
 import { useDesktop } from '../../context/DesktopContext';
 import { useSystemUI } from '../../context/SystemUIContext';
 import { useSettings } from '../../context/SettingsContext';
+import { NotificationList } from './NotificationBanners';
 import styles from './SystemUI.module.css';
 
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -63,6 +64,10 @@ export default function NotificationCenter() {
             Notifications are silenced while Do Not Disturb is on.
           </div>
         )}
+
+        <section className={styles.ncNotifications} aria-label="Notifications">
+          <NotificationList variant={isWindows ? 'windows' : 'macos'} />
+        </section>
 
         <section className={`${styles.card} ${styles.ncCard}`} aria-label="Today">
           <div className={styles.ncCardHead}>

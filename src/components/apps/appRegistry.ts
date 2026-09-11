@@ -14,7 +14,15 @@ import SafariApp from './SafariApp';
 import SettingsApp from './SettingsApp';
 import SkillsApp from './SkillsApp';
 import TerminalApp from './TerminalApp';
-import TextEditorApp from './TextEditorApp';
+import VSCodeApp from './VSCodeApp';
+import GitHubDesktopApp from './GitHubDesktopApp';
+import OutlookApp from './OutlookApp';
+import PostmanApp from './PostmanApp';
+import XcodeApp from './XcodeApp';
+import AndroidStudioApp from './AndroidStudioApp';
+import SpotifyApp from './SpotifyApp';
+import WordApp from './WordApp';
+import AppStoreApp from './AppStoreApp';
 import TrashApp from './TrashApp';
 
 type Size = { width: number; height: number };
@@ -29,7 +37,14 @@ export type PortfolioAppId =
   | 'finder'
   | 'trash'
   | 'safari'
-  | 'githubapp'
+  | 'githubdesktop'
+  | 'outlook'
+  | 'postman'
+  | 'xcode'
+  | 'androidstudio'
+  | 'spotify'
+  | 'word'
+  | 'appstore'
   | 'doom'
   | 'snake'
   | 'rubberduck'
@@ -124,13 +139,69 @@ export const PORTFOLIO_APPS = {
     minSize: { width: 600, height: 400 },
     maxSize: { width: 900, height: 620 },
   },
-  githubapp: {
-    id: 'githubapp',
-    title: 'GitHub',
-    component: SafariApp,
-    defaultSize: { width: 900, height: 620 },
-    minSize: { width: 600, height: 400 },
-    maxSize: { width: 900, height: 620 },
+  githubdesktop: {
+    id: 'githubdesktop',
+    title: 'GitHub Desktop',
+    component: GitHubDesktopApp,
+    defaultSize: { width: 960, height: 620 },
+    minSize: { width: 640, height: 420 },
+    maxSize: { width: 1200, height: 800 },
+  },
+  outlook: {
+    id: 'outlook',
+    title: 'Outlook',
+    component: OutlookApp,
+    defaultSize: { width: 1040, height: 640 },
+    minSize: { width: 720, height: 440 },
+    maxSize: { width: 1280, height: 820 },
+  },
+  postman: {
+    id: 'postman',
+    title: 'Postman',
+    component: PostmanApp,
+    defaultSize: { width: 960, height: 620 },
+    minSize: { width: 640, height: 420 },
+    maxSize: { width: 1200, height: 800 },
+  },
+  xcode: {
+    id: 'xcode',
+    title: 'Xcode',
+    component: XcodeApp,
+    defaultSize: { width: 1080, height: 680 },
+    minSize: { width: 760, height: 520 },
+    maxSize: { width: 1320, height: 860 },
+  },
+  androidstudio: {
+    id: 'androidstudio',
+    title: 'Android Studio',
+    component: AndroidStudioApp,
+    defaultSize: { width: 1080, height: 680 },
+    minSize: { width: 760, height: 520 },
+    maxSize: { width: 1320, height: 860 },
+  },
+  spotify: {
+    id: 'spotify',
+    title: 'Spotify',
+    component: SpotifyApp,
+    defaultSize: { width: 980, height: 640 },
+    minSize: { width: 640, height: 440 },
+    maxSize: { width: 1240, height: 820 },
+  },
+  word: {
+    id: 'word',
+    title: 'Word',
+    component: WordApp,
+    defaultSize: { width: 900, height: 660 },
+    minSize: { width: 560, height: 420 },
+    maxSize: { width: 1200, height: 860 },
+  },
+  appstore: {
+    id: 'appstore',
+    title: 'App Store',
+    component: AppStoreApp,
+    defaultSize: { width: 920, height: 620 },
+    minSize: { width: 600, height: 420 },
+    maxSize: { width: 1200, height: 800 },
   },
   doom: {
     id: 'doom',
@@ -166,11 +237,11 @@ export const PORTFOLIO_APPS = {
   },
   texteditor: {
     id: 'texteditor',
-    title: 'Text Editor',
-    component: TextEditorApp,
-    defaultSize: { width: 780, height: 540 },
-    minSize: { width: 480, height: 340 },
-    maxSize: { width: 1060, height: 740 },
+    title: 'Visual Studio Code',
+    component: VSCodeApp,
+    defaultSize: { width: 960, height: 620 },
+    minSize: { width: 620, height: 400 },
+    maxSize: { width: 1240, height: 820 },
   },
   imageviewer: {
     id: 'imageviewer',

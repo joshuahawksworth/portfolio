@@ -6,6 +6,7 @@ import { useSession } from '../../context/SessionContext';
 import { useTime } from '../../hooks/useTime';
 import { formatTime } from '../../lib/clock';
 import { appTitleFor } from '../../theme/platform';
+import { openCv } from '../../lib/cv';
 import styles from './MenuBar.module.css';
 
 type MenuName = 'apple' | 'File' | 'Edit' | 'View' | 'Go' | 'Window' | 'Help';
@@ -83,9 +84,9 @@ export default function MenuBar() {
         shortcut: '⌘N',
         action: () => openApp('finder', { menuOpenedAt: Date.now() }),
       },
-      { label: 'New Text Document', shortcut: '⇧⌘N', action: () => openApp('texteditor') },
+      { label: 'New File in VS Code', shortcut: '⇧⌘N', action: () => openApp('texteditor') },
       { label: 'Open Google Chrome', action: () => openApp('safari'), divider: true },
-      { label: 'Open CV', action: () => window.open('/JoshuaHawksworthCV.pdf', '_blank') },
+      { label: 'Open My CV', action: openCv },
       {
         label: 'Close Window',
         shortcut: '⌘W',
@@ -118,10 +119,14 @@ export default function MenuBar() {
       { label: 'Skills & Tech', action: () => openApp('skills') },
       { label: 'Location', action: () => openApp('location') },
       { label: 'Contact', divider: true, action: () => openApp('contact') },
-      {
-        label: 'GitHub',
-        action: () => openApp('githubapp', { url: 'https://github.com/joshuahawksworth' }),
-      },
+      { label: 'GitHub Desktop', action: () => openApp('githubdesktop') },
+      { label: 'Outlook', action: () => openApp('outlook') },
+      { label: 'Postman', action: () => openApp('postman') },
+      { label: 'Xcode', action: () => openApp('xcode') },
+      { label: 'Android Studio', action: () => openApp('androidstudio') },
+      { label: 'Word', action: () => openApp('word') },
+      { label: 'Spotify', action: () => openApp('spotify') },
+      { label: 'App Store', action: () => openApp('appstore') },
       { label: 'Terminal', shortcut: '⌥⌘T', divider: true, action: () => openApp('terminal') },
       { label: 'Play Snake', action: () => openApp('snake') },
       { label: 'Play DOOM', action: () => openApp('doom') },
@@ -140,7 +145,7 @@ export default function MenuBar() {
       },
       { label: 'Bring All to Front', disabled: true, divider: true, action: () => {} },
       { label: 'Calculator', action: () => openApp('calculator') },
-      { label: 'Text Editor', action: () => openApp('texteditor') },
+      { label: 'Visual Studio Code', action: () => openApp('texteditor') },
       { label: 'System Settings', action: () => openApp('settings') },
     ],
     Help: [
@@ -311,7 +316,6 @@ export default function MenuBar() {
           className={`${styles.statusBtn} ${systemUI.panel === 'notificationCenter' ? styles.statusActive : ''}`}
           aria-label="Open Notification Center"
           onClick={() => systemUI.toggle('notificationCenter')}
-          style={{ padding: 0, margin: 0 }}
         >
           <Clock />
         </button>

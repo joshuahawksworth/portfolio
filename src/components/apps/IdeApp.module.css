@@ -1,0 +1,392 @@
+/* ── Shared IDE chrome for Xcode (light) and Android Studio (dark) ───── */
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  overflow: hidden;
+}
+
+.xcode {
+  --ide-bar: #f3f3f3;
+  --ide-bg: #ffffff;
+  --ide-side: #f7f7f7;
+  --ide-line: #dcdcdc;
+  --ide-text: #1d1d1f;
+  --ide-muted: #6e6e73;
+  --ide-accent: #0a84ff;
+  --ide-editor: #ffffff;
+  --ide-code: #1d1d1f;
+  background: var(--ide-bg);
+  color: var(--ide-text);
+}
+
+.studio {
+  --ide-bar: #2b2d30;
+  --ide-bg: #1e1f22;
+  --ide-side: #2b2d30;
+  --ide-line: #393b40;
+  --ide-text: #dfe1e5;
+  --ide-muted: #8c8f96;
+  --ide-accent: #3574f0;
+  --ide-editor: #1e1f22;
+  --ide-code: #bcbec4;
+  background: var(--ide-bg);
+  color: var(--ide-text);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  padding: 0 12px;
+  background: var(--ide-bar);
+  border-bottom: 1px solid var(--ide-line);
+  flex-shrink: 0;
+}
+
+.runBtn,
+.stopBtn {
+  width: 30px;
+  height: 26px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--ide-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.studio .runBtn,
+.studio .stopBtn {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.runBtn svg {
+  fill: #34c759;
+}
+
+.studio .runBtn svg {
+  fill: #59a869;
+}
+
+.stopBtn svg {
+  fill: #ff3b30;
+}
+
+.scheme {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.06);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.studio .scheme {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.schemeSep {
+  opacity: 0.5;
+}
+
+.activity {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.05);
+  font-size: 12px;
+  color: var(--ide-muted);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.studio .activity {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.activityBar {
+  width: 120px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.activityFill {
+  height: 100%;
+  background: var(--ide-accent);
+  transition: width 200ms linear;
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.navigator {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--ide-side);
+  border-right: 1px solid var(--ide-line);
+}
+
+.navHead {
+  padding: 8px 12px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ide-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tree {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 8px;
+}
+
+.treeRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  height: 24px;
+  padding: 0 10px;
+  border: none;
+  background: none;
+  color: var(--ide-text);
+  font: inherit;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.treeRow:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.studio .treeRow:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.treeActive {
+  background: rgba(10, 132, 255, 0.16) !important;
+}
+
+.studio .treeActive {
+  background: rgba(53, 116, 240, 0.28) !important;
+}
+
+.treeGlyph {
+  width: 14px;
+  color: var(--ide-accent);
+  font-size: 11px;
+  text-align: center;
+}
+
+.editor {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--ide-editor);
+}
+
+.editorTabs {
+  display: flex;
+  height: 30px;
+  border-bottom: 1px solid var(--ide-line);
+  background: var(--ide-side);
+  flex-shrink: 0;
+}
+
+.editorTab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  border-right: 1px solid var(--ide-line);
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--ide-editor);
+}
+
+.jumpBar {
+  height: 24px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--ide-muted);
+  border-bottom: 1px solid var(--ide-line);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.code {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 8px 0;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 19px;
+  color: var(--ide-code);
+  counter-reset: line;
+}
+
+.code div {
+  display: flex;
+  white-space: pre;
+}
+
+.code div::before {
+  counter-increment: line;
+  content: counter(line);
+  width: 44px;
+  padding-right: 14px;
+  text-align: right;
+  color: var(--ide-muted);
+  opacity: 0.7;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.code :global(.kw) {
+  color: #ad3da4;
+}
+.code :global(.st) {
+  color: #d12f1b;
+}
+.code :global(.nm) {
+  color: #272ad8;
+}
+.code :global(.cm) {
+  color: #5d6c79;
+  font-style: italic;
+}
+.code :global(.tp) {
+  color: #3f6e74;
+}
+
+.studio .code :global(.kw) {
+  color: #cf8e6d;
+}
+.studio .code :global(.st) {
+  color: #6aab73;
+}
+.studio .code :global(.nm) {
+  color: #2aacb8;
+}
+.studio .code :global(.cm) {
+  color: #7a7e85;
+}
+.studio .code :global(.tp) {
+  color: #c77dbb;
+}
+
+.console {
+  height: 110px;
+  flex-shrink: 0;
+  border-top: 1px solid var(--ide-line);
+  background: var(--ide-side);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.55;
+  padding: 8px 12px;
+  overflow-y: auto;
+  color: var(--ide-muted);
+}
+
+.console strong {
+  color: var(--ide-text);
+}
+
+.simPane {
+  width: 360px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+  border-left: 1px solid var(--ide-line);
+  background: var(--ide-side);
+  overflow: hidden;
+}
+
+.simHead {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 30px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border-bottom: 1px solid var(--ide-line);
+  flex-shrink: 0;
+}
+
+.simHint {
+  padding: 8px 14px 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ide-muted);
+  text-align: center;
+}
+
+.simStage {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  padding-top: 12px;
+}
+
+.statusBar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 22px;
+  padding: 0 12px;
+  border-top: 1px solid var(--ide-line);
+  background: var(--ide-bar);
+  font-size: 11px;
+  color: var(--ide-muted);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.statusFill {
+  flex: 1;
+}
+
+@media (max-width: 1000px) {
+  .navigator {
+    display: none;
+  }
+}

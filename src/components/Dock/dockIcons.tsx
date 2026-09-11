@@ -3,6 +3,16 @@ import { AboutLogoIcon } from '../icons/AboutLogoIcon';
 import { CalculatorLogoIcon } from '../icons/CalculatorLogoIcon';
 import { TrashBinIcon } from '../icons/FileSystemIcons';
 import { SnakeLcdIcon } from '../icons/SnakeLcdIcon';
+import {
+  AndroidStudioIcon,
+  AppStoreIcon,
+  GitHubDesktopIcon,
+  PostmanIcon,
+  SpotifyIcon,
+  VSCodeIcon,
+  XcodeIcon,
+} from '../icons/DevAppIcons';
+import { OutlookIcon, WordIcon } from '../icons/WindowsIcons';
 
 export function MacIcon({
   top,
@@ -61,19 +71,7 @@ const DRAWN_ICONS = {
       />
     </MacIcon>
   ),
-  github: (
-    <svg viewBox="0 0 44 44" width="44" height="44" fill="none">
-      <rect width="44" height="44" rx="11" fill="#1b1f24" />
-      <rect width="44" height="20" rx="11" fill="rgba(255,255,255,0.07)" />
-      <g transform="translate(6,6) scale(1.333)">
-        <path
-          d="M12 .297c-6.63 0-12 5.373-12 12c0 5.303 3.438 9.8 8.205 11.385c.6.113.82-.258.82-.577c0-.285-.01-1.04-.015-2.04c-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729c1.205.084 1.838 1.236 1.838 1.236c1.07 1.835 2.809 1.305 3.495.998c.108-.776.417-1.305.76-1.605c-2.665-.3-5.466-1.332-5.466-5.93c0-1.31.465-2.38 1.235-3.22c-.135-.303-.54-1.523.105-3.176c0 0 1.005-.322 3.3 1.23c.96-.267 1.98-.399 3-.405c1.02.006 2.04.138 3 .405c2.28-1.552 3.285-1.23 3.285-1.23c.645 1.653.24 2.873.12 3.176c.765.84 1.23 1.91 1.23 3.22c0 4.61-2.805 5.625-5.475 5.92c.42.36.81 1.096.81 2.22c0 1.606-.015 2.896-.015 3.286c0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
-          fill="white"
-          opacity="0.92"
-        />
-      </g>
-    </svg>
-  ),
+  github: <GitHubDesktopIcon />,
   about: <AboutLogoIcon size={44} style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.35)' }} />,
   experience: (
     <MacIcon top="#ffa030" bottom="#c25c00">
@@ -255,21 +253,14 @@ const DRAWN_ICONS = {
       <path d="M10 19.5 Q6.5 20.5 8.5 22.5 Q11 23 12.5 21.5 Z" fill="#ff7a1a" />
     </MacIcon>
   ),
-  texteditor: (
-    // Sublime Text-inspired icon — dark with coloured accent bar
-    <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
-      <rect width="44" height="44" rx="11" fill="#272822" />
-      <rect width="44" height="20" rx="11" fill="rgba(255,255,255,0.04)" />
-      {/* Sublime accent stripe */}
-      <rect x="0" y="0" width="4" height="44" rx="2" fill="#4c96d7" />
-      {/* Code lines */}
-      <rect x="9" y="12" width="22" height="2.5" rx="1.25" fill="#f92672" opacity="0.9" />
-      <rect x="9" y="17" width="14" height="2.5" rx="1.25" fill="#a6e22e" opacity="0.85" />
-      <rect x="9" y="22" width="18" height="2.5" rx="1.25" fill="#e6db74" opacity="0.85" />
-      <rect x="9" y="27" width="10" height="2.5" rx="1.25" fill="#66d9e8" opacity="0.85" />
-      <rect x="9" y="32" width="20" height="2.5" rx="1.25" fill="#ae81ff" opacity="0.85" />
-    </svg>
-  ),
+  texteditor: <VSCodeIcon />,
+  outlook: <OutlookIcon />,
+  postman: <PostmanIcon />,
+  xcode: <XcodeIcon />,
+  androidstudio: <AndroidStudioIcon />,
+  spotify: <SpotifyIcon />,
+  word: <WordIcon />,
+  appstore: <AppStoreIcon />,
 };
 
 export type DockIconKey = keyof typeof DOCK_ICONS;

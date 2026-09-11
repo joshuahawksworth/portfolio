@@ -1216,3 +1216,8 @@
   border: 1px solid rgba(0, 0, 0, 0.1);
   background: rgba(243, 243, 243, 0.96);
 }
+
+/* Notifications sit above the widgets in Notification Center */
+.ncNotifications {
+  margin-bottom: 14px;
+}

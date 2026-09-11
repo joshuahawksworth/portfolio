@@ -26,9 +26,14 @@ import { useSettings } from '../../context/SettingsContext';
 import { appIconFor } from '../../theme/platformIcons';
 import { appLabelFor, appTitleFor } from '../../theme/platform';
 import { formatShortDate } from '../../lib/clock';
+import { openCv } from '../../lib/cv';
 import { describeWeather, useWeather } from '../Desktop/DesktopWidgets';
 import { DisplayOverlays } from '../SystemUI/SystemPanels';
+import DynamicWallpaper, { isDynamicDark, useDynamicLook } from '../Desktop/DynamicWallpaper';
 import StatusBar from './StatusBar';
+import NotificationShade from './NotificationShade';
+import NotificationBanners from '../SystemUI/NotificationBanners';
+import { useWelcomeNotifications } from '../../hooks/useWelcomeNotifications';
 import styles from './MobileDesktop.module.css';
 import { DARK_WALLPAPERS, WALLPAPERS } from '../../data/wallpapers';
 
@@ -482,7 +487,7 @@ const APP_LABELS: Record<string, string> = {
   location: 'Location',
   terminal: 'Terminal',
   finder: 'Finder',
-  cv: 'CV',
+  cv: 'My CV',
   github: 'GitHub',
   safari: 'Chrome',
   snake: 'Snake',
@@ -619,6 +624,20 @@ function MobileInner() {
       : NO_WIDGET_SLOTS
     : IOS_WIDGET_SLOTS;
   const dockApps = android ? DOCK_APPS_ANDROID : DOCK_APPS_IOS;
+  useWelcomeNotifications();
+  const dynamicLook = useDynamicLook(wallpaper);
+  const darkWall = DARK_WALLPAPERS.has(wallpaper) || isDynamicDark(dynamicLook);
+
+  // Notification shade: tap the status bar or drag down from the top edge to open it.
+  const [shadeOpen, setShadeOpen] = useState(false);
+  const edgeDrag = useRef<number | null>(null);
+  function onScreenPointerDown(e: React.PointerEvent) {
+    edgeDrag.current = e.clientY < 44 && !shadeOpen ? e.clientY : null;
+  }
+  function onScreenPointerUp(e: React.PointerEvent) {
+    if (edgeDrag.current !== null && e.clientY - edgeDrag.current > 60) setShadeOpen(true);
+    edgeDrag.current = null;
+  }
 
   // Pages of icons. The trickster lives in one of the empty slots of the last page
   // (or on a fresh page if the last one is full) and hops whenever it's touched.
@@ -734,7 +753,7 @@ function MobileInner() {
     if (id === 'github') {
       openApp('safari', { url: 'https://github.com/joshuahawksworth' });
     } else if (id === 'cv') {
-      window.open('/JoshuaHawksworthCV.pdf', '_blank');
+      openCv();
     } else {
       openApp(id);
     }
@@ -812,8 +831,10 @@ function MobileInner() {
 
   return (
     <div
-      className={`${styles.screen} ${android ? styles.android : ''} ${DARK_WALLPAPERS.has(wallpaper) ? styles.darkWall : ''}`}
+      className={`${styles.screen} ${android ? styles.android : ''} ${darkWall ? styles.darkWall : ''}`}
       data-os={os}
+      onPointerDown={onScreenPointerDown}
+      onPointerUp={onScreenPointerUp}
     >
       {/* Wallpaper sits in its own layer so it can be blurred without blurring the UI */}
       <div
@@ -821,8 +842,11 @@ function MobileInner() {
         style={{ backgroundImage: `url(${WALLPAPERS[wallpaper]})` }}
         aria-hidden="true"
       />
+      <DynamicWallpaper wallpaper={wallpaper} className={styles.wallpaper} />
       <DisplayOverlays />
-      <StatusBar />
+      <StatusBar onTap={() => setShadeOpen((o) => !o)} />
+      <NotificationBanners />
+      <NotificationShade open={shadeOpen} onClose={() => setShadeOpen(false)} />
 
       <div
         className={`${styles.pager} ${dragging ? styles.pagerDragging : ''}`}
@@ -929,7 +953,7 @@ function MobileInner() {
         {android && <div className={styles.googleRow}>{searchBar}</div>}
       </div>
       <div
-        className={`${styles.homeIndicator} ${DARK_WALLPAPERS.has(wallpaper) || android ? styles.homeIndicatorLight : ''}`}
+        className={`${styles.homeIndicator} ${darkWall || android ? styles.homeIndicatorLight : ''}`}
         aria-hidden="true"
       />
 

@@ -6,6 +6,11 @@
 import type { OsName } from '../lib/settingsStore';
 
 export const WALLPAPERS = {
+  // "The Beach" is Apple's dynamic Big Sur wallpaper and therefore copyrighted, so it is
+  // not shipped either: drop the-beach.jpg (day) and, optionally, the-beach-night.jpg into
+  // public/wallpapers/ and it becomes the default on macOS and iOS. Without the file
+  // both fall back to Golden Gate, so the desktop and the phone always match.
+  beach: '/wallpapers/the-beach.jpg',
   gold: '/wallpapers/golden-gate.jpg',
   catalina: '/wallpapers/catalina-night.jpg',
   tahoe: '/wallpapers/tahoe-day.jpg',
@@ -27,6 +32,7 @@ export const WALLPAPERS = {
 
 /** Wallpapers that only show up when the file actually exists on the server. */
 export const OPTIONAL_WALLPAPERS: ReadonlySet<WallpaperKey> = new Set<WallpaperKey>([
+  'beach',
   'win11',
   'win10',
   'win7',
@@ -38,6 +44,7 @@ export type WallpaperKey = keyof typeof WALLPAPERS;
 export const WALLPAPER_KEYS = Object.keys(WALLPAPERS) as WallpaperKey[];
 
 export const WALLPAPER_LABELS: Record<WallpaperKey, string> = {
+  beach: 'The Beach (Dynamic)',
   gold: 'Golden Gate',
   catalina: 'Catalina',
   tahoe: 'Tahoe',
@@ -63,7 +70,15 @@ export const DARK_WALLPAPERS: ReadonlySet<WallpaperKey> = new Set<WallpaperKey>(
   'win10',
 ]);
 
-const APPLE_SET: WallpaperKey[] = ['gold', 'catalina', 'tahoe', 'wave'];
+const APPLE_SET: WallpaperKey[] = ['beach', 'gold', 'catalina', 'tahoe', 'wave'];
+
+/** Wallpapers that follow the time of day, like macOS dynamic desktops. */
+export const DYNAMIC_WALLPAPERS: ReadonlySet<WallpaperKey> = new Set<WallpaperKey>(['beach']);
+
+/** Night-time companion image for a dynamic wallpaper (optional, cross-faded in after dusk). */
+export const DYNAMIC_NIGHT_IMAGES: Partial<Record<WallpaperKey, string>> = {
+  beach: '/wallpapers/the-beach-night.jpg',
+};
 
 export const WALLPAPERS_FOR_OS: Record<OsName, WallpaperKey[]> = {
   macos: APPLE_SET,
@@ -73,11 +88,24 @@ export const WALLPAPERS_FOR_OS: Record<OsName, WallpaperKey[]> = {
 };
 
 export const DEFAULT_WALLPAPER: Record<OsName, WallpaperKey> = {
-  macos: 'gold',
-  ios: 'catalina',
+  macos: 'beach',
+  ios: 'beach',
   windows: 'bloom',
   android: 'pixel',
 };
+
+/** Used when the preferred default is an optional file that isn't on the server. */
+const FALLBACK_WALLPAPER: Record<OsName, WallpaperKey> = {
+  macos: 'gold',
+  ios: 'gold',
+  windows: 'bloom',
+  android: 'pixel',
+};
+
+export function defaultWallpaperFor(os: OsName): WallpaperKey {
+  const preferred = DEFAULT_WALLPAPER[os];
+  return isWallpaperAvailable(preferred) ? preferred : FALLBACK_WALLPAPER[os];
+}
 
 const LEGACY_STORAGE_KEY = 'portfolio.wallpaper';
 
@@ -97,7 +125,7 @@ export function wallpaperFor(
   chosen: Partial<Record<OsName, WallpaperKey>>
 ): WallpaperKey {
   const key = chosen[os];
-  return key && key in WALLPAPERS && isWallpaperAvailable(key) ? key : DEFAULT_WALLPAPER[os];
+  return key && key in WALLPAPERS && isWallpaperAvailable(key) ? key : defaultWallpaperFor(os);
 }
 
 const available = new Map<WallpaperKey, boolean>();

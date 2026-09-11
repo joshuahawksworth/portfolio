@@ -17,13 +17,6 @@ export function openTargetFor(node: FsNode): OpenTarget {
     };
   }
   if (node.type === 'app') {
-    if (node.appId === 'githubapp') {
-      return {
-        kind: 'app',
-        appId: 'githubapp',
-        props: { url: 'https://github.com/joshuahawksworth' },
-      };
-    }
     return { kind: 'app', appId: node.appId ?? 'finder' };
   }
   if (node.type === 'image') {

@@ -25,16 +25,23 @@ const ENTRIES: Entry[] = [
   { id: 'finder', dockKey: 'finder' },
   { id: 'settings', dockKey: 'settings' },
   { id: 'safari', dockKey: 'safari' },
-  { id: 'githubapp', dockKey: 'github' },
+  { id: 'githubdesktop', dockKey: 'github' },
   { id: 'about', dockKey: 'about' },
   { id: 'askjosh', dockKey: 'askjosh' },
   { id: 'experience', dockKey: 'experience' },
   { id: 'skills', dockKey: 'skills' },
   { id: 'contact', dockKey: 'contact' },
+  { id: 'outlook', dockKey: 'outlook' },
   { id: 'location', dockKey: 'location' },
   { id: 'terminal', dockKey: 'terminal' },
   { id: 'calculator', dockKey: 'calculator' },
   { id: 'texteditor', dockKey: 'texteditor' },
+  { id: 'postman', dockKey: 'postman' },
+  { id: 'xcode', dockKey: 'xcode' },
+  { id: 'androidstudio', dockKey: 'androidstudio' },
+  { id: 'word', dockKey: 'word' },
+  { id: 'spotify', dockKey: 'spotify' },
+  { id: 'appstore', dockKey: 'appstore' },
   { id: 'imageviewer', dockKey: 'imageviewer' },
   { id: 'doom', dockKey: 'doom' },
   { id: 'snake', dockKey: 'snake' },
@@ -57,8 +64,16 @@ export function systemAppsFor(os: OsName): SystemApp[] {
   });
 }
 
-/** Default catalogue (macOS artwork) for callers outside React. */
-export const SYSTEM_APPS: SystemApp[] = systemAppsFor('macos');
+let defaultCatalogue: SystemApp[] | null = null;
+/**
+ * Default catalogue (macOS artwork) for callers outside React. Built on first use rather
+ * than at import time: the App Store lists these apps, so this module and the app
+ * registry import each other.
+ */
+export function systemApps(): SystemApp[] {
+  defaultCatalogue ??= systemAppsFor('macos');
+  return defaultCatalogue;
+}
 
 export function useSystemApps(): SystemApp[] {
   const os = useOs();
@@ -77,7 +92,7 @@ export function launchSystemApp(app: SystemApp, openApp: OpenApp) {
 }
 
 /** Rank apps against a query: prefix > substring > subsequence. Empty query keeps catalogue order. */
-export function searchSystemApps(query: string, apps: SystemApp[] = SYSTEM_APPS): SystemApp[] {
+export function searchSystemApps(query: string, apps: SystemApp[] = systemApps()): SystemApp[] {
   const q = query.trim().toLowerCase();
   if (!q) return apps;
 
