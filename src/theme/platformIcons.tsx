@@ -12,7 +12,7 @@ import { useOs } from '../context/SettingsContext';
 
 export type AppIconKey = keyof typeof DOCK_ICONS;
 
-const ALIASES: Record<string, AppIconKey> = { githubdesktop: 'github', trash: 'trashEmpty' };
+const ALIASES: Record<string, AppIconKey> = { trash: 'trashEmpty' };
 
 export function appIconFor(key: string, os: OsName): ReactNode {
   const k = (ALIASES[key] ?? key) as AppIconKey;

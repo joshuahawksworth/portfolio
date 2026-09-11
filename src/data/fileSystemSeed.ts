@@ -143,6 +143,16 @@ const SEEDS: Seed[] = [
     appId: 'cv',
     url: CV_URL,
   },
+  {
+    id: 'shortcut-githubdesktop',
+    parentId: 'desktop',
+    name: 'GitHub Desktop',
+    type: 'app',
+    appId: 'githubdesktop',
+  },
+  { id: 'shortcut-outlook', parentId: 'desktop', name: 'Outlook', type: 'app', appId: 'outlook' },
+  { id: 'shortcut-postman', parentId: 'desktop', name: 'Postman', type: 'app', appId: 'postman' },
+  { id: 'shortcut-word', parentId: 'desktop', name: 'Word', type: 'app', appId: 'word' },
   { id: 'shortcut-xcode', parentId: 'desktop', name: 'Xcode', type: 'app', appId: 'xcode' },
   {
     id: 'shortcut-androidstudio',

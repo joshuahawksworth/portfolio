@@ -54,6 +54,56 @@ export function MacIcon({
   );
 }
 
+/** The JH tile at the surface's icon size (dock, taskbar, Launchpad, Start, notifications). */
+function AboutTile() {
+  return (
+    <AboutLogoIcon
+      size={44}
+      style={{
+        width: 'var(--app-icon-size, 44px)',
+        height: 'var(--app-icon-size, 44px)',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
+      }}
+    />
+  );
+}
+
+function GitHubAppIcon() {
+  // The GitHub app icon: the official white Invertocat on GitHub's dark tile
+  return (
+    <span
+      style={{
+        width: 'var(--app-icon-size, 50px)',
+        height: 'var(--app-icon-size, 50px)',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+      }}
+    >
+      <span
+        style={{
+          width: 'calc(var(--app-icon-size, 50px) * 0.82)',
+          height: 'calc(var(--app-icon-size, 50px) * 0.82)',
+          borderRadius: '22.5%',
+          background: '#0d1117',
+          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <img
+          src="/icons/github-mark-white.png"
+          alt=""
+          draggable={false}
+          style={{ width: '68%', height: '68%', display: 'block' }}
+        />
+      </span>
+    </span>
+  );
+}
+
 const DRAWN_ICONS = {
   finder: (
     <MacIcon top="#5ecfff" bottom="#1a7aff">
@@ -71,8 +121,9 @@ const DRAWN_ICONS = {
       />
     </MacIcon>
   ),
-  github: <BrandIcon src="/icons/github-desktop.png" fallback={<GitHubDesktopIcon />} />,
-  about: <AboutLogoIcon size={44} style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.35)' }} />,
+  github: <GitHubAppIcon />,
+  githubdesktop: <BrandIcon src="/icons/github-desktop.png" fallback={<GitHubDesktopIcon />} />,
+  about: <AboutTile />,
   experience: (
     <MacIcon top="#ffa030" bottom="#c25c00">
       <rect x="8" y="17" width="28" height="18" rx="3" fill="rgba(255,255,255,0.92)" />
@@ -346,7 +397,8 @@ export function BrandIcon({
 }
 
 const REAL_ICONS = {
-  finder: <RealIcon src="/icons/finder.png" />,
+  // Apple's current Finder render is full-bleed, so it takes the squircle like the iOS icons
+  finder: <RealIcon src="/icons/finder.png" rounded />,
   safari: <RealIcon src="/icons/chrome.png" scale={0.82} />,
   askjosh: <RealIcon src="/icons/claude.png" rounded />,
   contact: <RealIcon src="/icons/mail.png" rounded />,
@@ -354,7 +406,6 @@ const REAL_ICONS = {
   terminal: <RealIcon src="/icons/terminal.png" />,
   calculator: <RealIcon src="/icons/calculator.png" rounded />,
   cv: <RealIcon src="/icons/pages.png" rounded />,
-  texteditor: <RealIcon src="/icons/textedit.png" />,
   // Preview's render is full-bleed, unlike the other macOS icons, so it gets the squircle
   imageviewer: <RealIcon src="/icons/preview.png" rounded />,
   experience: <RealIcon src="/icons/reminders.png" rounded />,

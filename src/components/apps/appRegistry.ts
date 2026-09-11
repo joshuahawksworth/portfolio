@@ -37,6 +37,7 @@ export type PortfolioAppId =
   | 'finder'
   | 'trash'
   | 'safari'
+  | 'githubapp'
   | 'githubdesktop'
   | 'outlook'
   | 'postman'
@@ -134,6 +135,14 @@ export const PORTFOLIO_APPS = {
   safari: {
     id: 'safari',
     title: 'Google Chrome',
+    component: SafariApp,
+    defaultSize: { width: 900, height: 620 },
+    minSize: { width: 600, height: 400 },
+    maxSize: { width: 900, height: 620 },
+  },
+  githubapp: {
+    id: 'githubapp',
+    title: 'GitHub',
     component: SafariApp,
     defaultSize: { width: 900, height: 620 },
     minSize: { width: 600, height: 400 },

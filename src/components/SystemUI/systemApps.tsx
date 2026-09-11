@@ -25,7 +25,7 @@ const ENTRIES: Entry[] = [
   { id: 'finder', dockKey: 'finder' },
   { id: 'settings', dockKey: 'settings' },
   { id: 'safari', dockKey: 'safari' },
-  { id: 'githubdesktop', dockKey: 'github' },
+  { id: 'githubdesktop', dockKey: 'githubdesktop' },
   { id: 'about', dockKey: 'about' },
   { id: 'askjosh', dockKey: 'askjosh' },
   { id: 'experience', dockKey: 'experience' },
