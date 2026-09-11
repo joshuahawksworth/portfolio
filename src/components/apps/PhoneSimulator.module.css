@@ -171,13 +171,10 @@
   background: #4a4646;
 }
 
-/* The logo PNG carries a hairline border and the heart's tail sits low, so it is zoomed
-   past the edge and nudged up to sit optically centred in the tile. */
 .arcusIcon img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.08) translateY(-3%);
 }
 
 .appLabel {

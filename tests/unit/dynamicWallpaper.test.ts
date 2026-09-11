@@ -48,3 +48,14 @@ describe('wallpaperChoiceFor', () => {
     expect(wallpaperChoiceFor('android', 'pixelDark')).toEqual({ android: 'pixelDark' });
   });
 });
+
+describe('wallpaperFor with a choice made on the other device', () => {
+  it('shows the Mac choice on the iPhone when the phone has none of its own', () => {
+    expect(wallpaperFor('ios', { macos: 'tahoe' })).toBe('tahoe');
+    expect(wallpaperFor('macos', { ios: 'catalina' })).toBe('catalina');
+  });
+
+  it('still prefers the OS default when the sibling choice is not in this set', () => {
+    expect(wallpaperFor('android', { windows: 'win11' })).toBe(defaultWallpaperFor('android'));
+  });
+});

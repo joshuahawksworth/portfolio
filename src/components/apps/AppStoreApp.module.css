@@ -80,6 +80,9 @@
   min-width: 0;
   overflow-y: auto;
   padding: 18px 22px 24px;
+  /* The real App Store's content area is a solid sheet; the glass panel left the muted
+     copy unreadable over whatever window sat behind it. */
+  background: color-mix(in srgb, var(--panel-solid) 92%, transparent);
 }
 
 .kicker {

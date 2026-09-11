@@ -121,19 +121,32 @@ export function wallpaperChoiceFor(
   key: WallpaperKey
 ): Partial<Record<OsName, WallpaperKey>> {
   const out: Partial<Record<OsName, WallpaperKey>> = { [os]: key };
-  const sibling: OsName =
-    os === 'macos' ? 'ios' : os === 'ios' ? 'macos' : os === 'windows' ? 'android' : 'windows';
+  const sibling = siblingOf(os);
   if (WALLPAPERS_FOR_OS[sibling].includes(key)) out[sibling] = key;
   return out;
 }
 
-/** Resolve the wallpaper to show for an OS from a (possibly partial) choice map. */
+function siblingOf(os: OsName): OsName {
+  return os === 'macos' ? 'ios' : os === 'ios' ? 'macos' : os === 'windows' ? 'android' : 'windows';
+}
+
+/**
+ * Resolve the wallpaper to show for an OS from a (possibly partial) choice map. A choice
+ * made on the platform's other device (the Mac for the iPhone, and vice versa) counts
+ * when this OS has none of its own, so a wallpaper picked before choices were shared
+ * still shows on both.
+ */
 export function wallpaperFor(
   os: OsName,
   chosen: Partial<Record<OsName, WallpaperKey>>
 ): WallpaperKey {
-  const key = chosen[os];
-  return key && key in WALLPAPERS && isWallpaperAvailable(key) ? key : defaultWallpaperFor(os);
+  const usable = (key: WallpaperKey | undefined): key is WallpaperKey =>
+    !!key && key in WALLPAPERS && WALLPAPERS_FOR_OS[os].includes(key) && isWallpaperAvailable(key);
+  const own = chosen[os];
+  if (usable(own)) return own;
+  const shared = chosen[siblingOf(os)];
+  if (usable(shared)) return shared;
+  return defaultWallpaperFor(os);
 }
 
 const available = new Map<WallpaperKey, boolean>();
