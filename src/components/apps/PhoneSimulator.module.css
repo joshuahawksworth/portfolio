@@ -1,0 +1,535 @@
+/* ── Phone frames ────────────────────────────────────────────────────── */
+.device {
+  --w: 300px;
+  --h: 620px;
+  width: var(--w);
+  height: var(--h);
+  padding: 12px;
+  border-radius: 52px;
+  background: #1b1b1d;
+  box-shadow:
+    0 0 0 2px #3a3a3d,
+    0 24px 60px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  transform-origin: top center;
+  font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.pixel {
+  border-radius: 40px;
+  padding: 10px;
+  background: #101114;
+  font-family: Roboto, 'Google Sans', system-ui, Arial, sans-serif;
+}
+
+.screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 42px;
+  overflow: hidden;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+}
+
+.pixel .screen {
+  border-radius: 32px;
+}
+
+.off {
+  flex: 1;
+  background: #0a0a0a;
+}
+
+.boot {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+
+.apple {
+  width: 54px;
+  height: 64px;
+  background: #fff;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M16.4 12.7c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.2 1-4 2.4-1.7 3-.4 7.4 1.2 9.8.8 1.2 1.8 2.5 3.1 2.4 1.2 0 1.7-.8 3.2-.8s1.9.8 3.2.8c1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.4-2.8-.1 0-2.8-1.1-2.8-3.9zM14 5.5c.7-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1.1.1 2.1-.6 2.8-1.4z'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M16.4 12.7c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.2 1-4 2.4-1.7 3-.4 7.4 1.2 9.8.8 1.2 1.8 2.5 3.1 2.4 1.2 0 1.7-.8 3.2-.8s1.9.8 3.2.8c1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.4-2.8-.1 0-2.8-1.1-2.8-3.9zM14 5.5c.7-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1.1.1 2.1-.6 2.8-1.4z'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+
+.droidBoot {
+  color: #3ddc84;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.statusBar {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 26px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  z-index: 2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.statusRight {
+  font-size: 11px;
+}
+
+.island {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  width: 90px;
+  height: 26px;
+  transform: translateX(-50%);
+  border-radius: 14px;
+  background: #000;
+  z-index: 3;
+}
+
+.punch {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: #000;
+  z-index: 3;
+}
+
+.home {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 26px 14px 30px;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255, 190, 120, 0.55), transparent 55%),
+    radial-gradient(circle at 80% 70%, rgba(120, 140, 255, 0.55), transparent 50%),
+    linear-gradient(180deg, #1c2a4a, #3a2340);
+}
+
+.pixel .home {
+  background:
+    radial-gradient(circle at 20% 15%, rgba(200, 220, 255, 0.9), transparent 55%),
+    radial-gradient(circle at 80% 85%, rgba(255, 210, 190, 0.9), transparent 50%),
+    linear-gradient(180deg, #d9e4f7, #f1e6f4);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px 6px;
+}
+
+.app,
+.dockApp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+}
+
+.appIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+.pixel .appIcon {
+  border-radius: 50%;
+}
+
+.appIcon > svg,
+.appIcon > img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.arcusIcon {
+  background: #4a4646;
+}
+
+.arcusIcon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.appLabel {
+  font-size: 10px;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+}
+
+.pixel .appLabel {
+  color: #1c1b1f;
+  text-shadow: none;
+}
+
+.dock {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 8px;
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.pixel .dock {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.homeBar {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  width: 110px;
+  height: 5px;
+  transform: translateX(-50%);
+  border: none;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 0;
+  z-index: 4;
+}
+
+.pixel .homeBar {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.stock {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 30px 24px;
+  background: #f2f2f7;
+  color: #1c1c1e;
+  text-align: center;
+}
+
+.pixel .stock {
+  background: #fef7ff;
+}
+
+.stockGlyph {
+  font-size: 44px;
+}
+
+.stock h4 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.stock p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #6e6e73;
+}
+
+.stockBack {
+  margin-top: 8px;
+  height: 36px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 18px;
+  background: #007aff;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+}
+
+.pixel .stockBack {
+  background: #6750a4;
+}
+
+/* ── Arcus Engineer ───────────────────────────────────────────────────── */
+.arcus {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #f2f2f7;
+  color: #1c1c1e;
+}
+
+.arcusDroid {
+  background: #fef7ff;
+  color: #1c1b1f;
+}
+
+.arcusBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 14px;
+  background: rgba(242, 242, 247, 0.92);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  font-weight: 600;
+}
+
+.arcusDroid .arcusBar {
+  height: 52px;
+  background: #4a4646;
+  color: #fff;
+  border: none;
+}
+
+.arcusBack {
+  border: none;
+  background: none;
+  color: #007aff;
+  font: inherit;
+  font-size: 15px;
+  padding: 0;
+  min-width: 24px;
+  text-align: left;
+}
+
+.arcusDroid .arcusBack {
+  color: #fff;
+  font-size: 18px;
+}
+
+.arcusTitle {
+  flex: 1;
+  text-align: center;
+  font-size: 15px;
+}
+
+.arcusDroid .arcusTitle {
+  text-align: left;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.arcusAvatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #f7df1e;
+  color: #1a1a1a;
+  font-size: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arcusBody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 12px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.summary {
+  font-size: 12px;
+  color: #6e6e73;
+  padding: 0 2px;
+}
+
+.wo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.arcusDroid .wo {
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.woDone {
+  opacity: 0.6;
+}
+
+.woRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #6e6e73;
+}
+
+.woId {
+  font-family: var(--font-mono);
+}
+
+.woDue {
+  margin-left: auto;
+  font-weight: 600;
+}
+
+.woSite {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.woSub {
+  font-size: 12px;
+  color: #6e6e73;
+}
+
+.woTask {
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+.woHead {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 2px 8px;
+}
+
+.woSection {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6e6e73;
+  padding: 0 2px;
+}
+
+.prio {
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.prio_P1 {
+  background: #d93025;
+}
+.prio_P2 {
+  background: #f29900;
+}
+.prio_P3 {
+  background: #1a73e8;
+}
+
+.status {
+  margin-top: 4px;
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.status_scheduled {
+  background: #e5e5ea;
+  color: #3a3a3c;
+}
+.status_in-progress {
+  background: #fff1cc;
+  color: #7a5200;
+}
+.status_complete {
+  background: #dff5e5;
+  color: #1e6b3f;
+}
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.step input {
+  margin-top: 2px;
+  width: 18px;
+  height: 18px;
+  accent-color: #34c759;
+}
+
+.arcusDroid .step input {
+  accent-color: #0d9c5a;
+}
+
+.cta {
+  margin-top: 6px;
+  height: 44px;
+  border: none;
+  border-radius: 12px;
+  background: #007aff;
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.arcusDroid .cta {
+  border-radius: 22px;
+  background: #0d9c5a;
+}
+
+.cta:disabled {
+  background: #c7c7cc;
+  color: #fff;
+}
+
+.doneNote {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #dff5e5;
+  color: #1e6b3f;
+  font-size: 12.5px;
+  text-align: center;
+}
+
+.arcusFoot {
+  margin-top: 8px;
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: #8e8e93;
+  text-align: center;
+}

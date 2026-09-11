@@ -254,58 +254,27 @@
     filter 150ms ease;
 }
 
-/* macOS launch bounce — 4 decreasing bounces over ~1.8 s */
+/* macOS launch bounce: the icon leaps three times, each hop a parabola (decelerating on
+   the way up, accelerating on the way down) and landing before the next. Desktop clears
+   `.bouncing` on animationend, so the icon is never pulled back mid-air. */
 .bouncing {
-  animation: dockBounce 1800ms both;
+  animation: dockBounce 620ms 2;
 }
 
 @keyframes dockBounce {
   0% {
     transform: translateY(0);
-    animation-timing-function: ease-out;
+    animation-timing-function: cubic-bezier(0.2, 0.55, 0.4, 1);
   }
-  12% {
-    transform: translateY(-26px);
-    animation-timing-function: ease-in;
-  }
-  24% {
-    transform: translateY(0);
-    animation-timing-function: ease-out;
-  }
-  36% {
-    transform: translateY(-22px);
-    animation-timing-function: ease-in;
-  }
-  48% {
-    transform: translateY(0);
-    animation-timing-function: ease-out;
-  }
-  60% {
-    transform: translateY(-16px);
-    animation-timing-function: ease-in;
-  }
-  70% {
-    transform: translateY(0);
-    animation-timing-function: ease-out;
-  }
-  80% {
-    transform: translateY(-8px);
-    animation-timing-function: ease-in;
-  }
-  88% {
-    transform: translateY(0);
-    animation-timing-function: ease-out;
-  }
-  94% {
-    transform: translateY(-3px);
-    animation-timing-function: ease-in;
+  50% {
+    transform: translateY(-34px);
+    animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.45);
   }
   100% {
     transform: translateY(0);
   }
 }
 
-/* ── Spring-in animation when a running app icon enters the dock ─── */
 @keyframes dockSpring {
   0% {
     transform: scale(0) translateY(24px);

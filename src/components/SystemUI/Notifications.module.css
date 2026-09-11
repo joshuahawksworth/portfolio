@@ -1,0 +1,585 @@
+/* ── Notification banners and the notification lists ─────────────────────
+   One markup, four looks: macOS banner (top-right, glass), Windows toast
+   (bottom-right, Mica), iOS banner and Android heads-up (top, full width). */
+
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: 9640;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+  padding: 39px 12px 0;
+}
+
+.layer > * {
+  pointer-events: auto;
+}
+
+/* Windows toasts stack upward from the bottom-right corner, above the taskbar */
+.layerWindows {
+  justify-content: flex-end;
+  padding: 0 12px 60px;
+}
+
+/* Phones: full-width banners under the status bar */
+.layerPhone {
+  align-items: stretch;
+  padding: calc(env(safe-area-inset-top, 0px) + 8px) 8px 0;
+  gap: 6px;
+}
+
+.banner {
+  --banner-w: 344px;
+  position: relative;
+  display: grid;
+  grid-template-columns: 38px 1fr auto;
+  column-gap: 12px;
+  align-items: center;
+  width: var(--banner-w);
+  max-width: calc(100vw - 24px);
+  padding: 11px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 12px;
+  background: var(--glass-strong);
+  backdrop-filter: blur(40px) saturate(1.6);
+  -webkit-backdrop-filter: blur(40px) saturate(1.6);
+  box-shadow:
+    0 12px 40px rgba(60, 40, 10, 0.22),
+    0 1px 4px rgba(0, 0, 0, 0.12),
+    inset 0 1px rgba(255, 255, 255, 0.7);
+  color: var(--text);
+  font-family: var(--font-ui);
+  text-align: left;
+  cursor: pointer;
+  /* Dragging sets transform inline; letting go short of the threshold springs back */
+  transition:
+    transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 260ms ease;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  /* macOS: slides in from the right edge and settles without a bounce */
+  animation: bannerInRight 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.banner:hover {
+  background: var(--glass-strong);
+  filter: brightness(0.99);
+}
+
+.bannerLeaving {
+  animation: bannerOutRight 220ms ease-in forwards;
+}
+
+/* Thrown off by a swipe: carry on from wherever the drag left it */
+.bannerSwiped {
+  animation: bannerOutRight 180ms ease-out forwards;
+}
+
+.icon {
+  --app-icon-size: 38px;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon > svg,
+.icon > span,
+.icon > img {
+  width: 100%;
+  height: 100%;
+}
+
+.text {
+  min-width: 0;
+}
+
+.app {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+  line-height: 1.2;
+}
+
+.age {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--muted-2);
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-strong);
+  line-height: 1.25;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.body {
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.close {
+  position: absolute;
+  top: -7px;
+  left: -7px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(240, 236, 228, 0.98);
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  opacity: 0;
+  transition: opacity 120ms ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.banner:hover .close,
+.banner:focus-within .close {
+  opacity: 1;
+}
+
+.action {
+  align-self: center;
+  padding: 5px 10px;
+  border: none;
+  border-radius: var(--radius-control);
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text-strong);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.action:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* ── Windows 11 toast ───────────────────────────────────────────────── */
+.bannerWindows {
+  --banner-w: 364px;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'app close'
+    'main main';
+  row-gap: 8px;
+  padding: 12px 14px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(243, 243, 243, 0.96);
+  backdrop-filter: blur(60px) saturate(1.4);
+  -webkit-backdrop-filter: blur(60px) saturate(1.4);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+  /* Windows 11: the toast slides in from the right, a touch faster than macOS */
+  animation: bannerInRight 300ms cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+.bannerWindows .icon {
+  grid-area: main;
+  --app-icon-size: 44px;
+  width: 44px;
+  height: 44px;
+  align-self: start;
+}
+
+.bannerWindows .text {
+  grid-area: main;
+  padding-left: 56px;
+}
+
+.bannerWindows .app {
+  grid-area: app;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.winAppIcon {
+  --app-icon-size: 16px;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  margin-right: 6px;
+  vertical-align: -3px;
+}
+
+.winAppIcon > svg,
+.winAppIcon > span,
+.winAppIcon > img {
+  width: 100%;
+  height: 100%;
+}
+
+.bannerWindows .title {
+  font-size: 14px;
+  white-space: normal;
+}
+
+.bannerWindows .body {
+  font-size: 13px;
+}
+
+.bannerWindows .close {
+  grid-area: close;
+  position: static;
+  opacity: 1;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  box-shadow: none;
+  font-size: 14px;
+  justify-self: end;
+  margin: -6px -8px 0 0;
+}
+
+.bannerWindows .close:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.bannerWindows .action {
+  grid-area: main;
+  justify-self: end;
+  align-self: end;
+  display: none;
+}
+
+/* ── iOS banner ─────────────────────────────────────────────────────── */
+.bannerIos {
+  --banner-w: 100%;
+  grid-template-columns: 38px 1fr;
+  column-gap: 10px;
+  padding: 12px 14px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: rgba(250, 247, 242, 0.82);
+  backdrop-filter: blur(30px) saturate(1.8);
+  -webkit-backdrop-filter: blur(30px) saturate(1.8);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  /* iOS: drops in from under the status bar with a soft spring */
+  animation: bannerInTop 480ms cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+
+.bannerIos.bannerLeaving {
+  animation: bannerOutTop 220ms ease-in forwards;
+}
+
+.bannerIos.bannerSwiped {
+  animation: bannerOutTop 160ms ease-out forwards;
+}
+
+.bannerIos .icon > svg,
+.bannerIos .icon > span,
+.bannerIos .icon > img {
+  border-radius: 9px;
+}
+
+.bannerIos .app {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.bannerIos .title {
+  font-size: 15px;
+  margin-top: 0;
+}
+
+.bannerIos .body {
+  font-size: 14px;
+}
+
+.bannerIos .close,
+.bannerIos .action {
+  display: none;
+}
+
+/* ── Android heads-up notification ──────────────────────────────────── */
+.bannerAndroid {
+  --banner-w: 100%;
+  grid-template-columns: 1fr;
+  grid-template-areas: 'app' 'text' 'action';
+  row-gap: 4px;
+  padding: 12px 16px 10px;
+  border-radius: 28px;
+  border: none;
+  background: #f2f4fb;
+  box-shadow: 0 6px 24px rgba(20, 30, 60, 0.22);
+  font-family: var(--font-ui);
+  /* Android: Material's emphasized decelerate, straight down from the top */
+  animation: bannerInTop 350ms cubic-bezier(0.05, 0.7, 0.1, 1);
+}
+
+.bannerAndroid.bannerLeaving {
+  animation: bannerOutTop 200ms ease-in forwards;
+}
+
+.bannerAndroid.bannerSwiped {
+  animation: bannerOutTop 160ms ease-out forwards;
+}
+
+.bannerAndroid .icon {
+  display: none;
+}
+
+.bannerAndroid .app {
+  grid-area: app;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 6px;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #444746;
+}
+
+.bannerAndroid .age::before {
+  content: '·';
+  margin: 0 4px 0 0;
+}
+
+.droidIcon {
+  --app-icon-size: 18px;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.droidIcon > svg,
+.droidIcon > span,
+.droidIcon > img {
+  width: 100%;
+  height: 100%;
+}
+
+.bannerAndroid .text {
+  grid-area: text;
+}
+
+.bannerAndroid .title {
+  font-size: 15px;
+  font-weight: 500;
+  color: #1c1b1f;
+  white-space: normal;
+}
+
+.bannerAndroid .body {
+  font-size: 14px;
+  color: #444746;
+}
+
+.bannerAndroid .close {
+  display: none;
+}
+
+.bannerAndroid .action {
+  grid-area: action;
+  justify-self: start;
+  margin-top: 4px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: transparent;
+  color: #0b57d0;
+  font-weight: 600;
+}
+
+@keyframes bannerInRight {
+  from {
+    opacity: 0;
+    transform: translateX(110%);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes bannerOutRight {
+  to {
+    opacity: 0;
+    transform: translateX(110%);
+  }
+}
+
+@keyframes bannerInTop {
+  from {
+    opacity: 0;
+    transform: translateY(-120%);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes bannerOutTop {
+  to {
+    opacity: 0;
+    transform: translateY(-120%);
+  }
+}
+
+/* ── Notification lists (Notification Center, Windows centre, phone shades) ── */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.listHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-strong);
+  margin-bottom: 2px;
+}
+
+.clearAll {
+  border: none;
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 3px 10px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.clearAll:hover {
+  background: rgba(0, 0, 0, 0.09);
+}
+
+.item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  column-gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.7);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.item:hover {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.item .icon {
+  --app-icon-size: 34px;
+  width: 34px;
+  height: 34px;
+}
+
+.item .close {
+  top: 6px;
+  left: auto;
+  right: 6px;
+  width: 18px;
+  height: 18px;
+  font-size: 11px;
+}
+
+.item:hover .close {
+  opacity: 1;
+}
+
+.empty {
+  padding: 18px 0 8px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Windows notification centre rows: square, Mica */
+.listWindows .item {
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: none;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.listWindows .clearAll {
+  border-radius: 4px;
+}
+
+/* Phone shades: darker glass rows on the wallpaper */
+.listPhone .item {
+  background: rgba(250, 247, 242, 0.82);
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  border-radius: 20px;
+  padding: 12px 14px;
+}
+
+.listPhone .item .close {
+  opacity: 1;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.08);
+  border: none;
+  box-shadow: none;
+}
+
+.listPhone .item .app {
+  padding-right: 26px;
+}
+
+.listPhone .empty {
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.listAndroid .item {
+  border-radius: 24px;
+  background: #f2f4fb;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}

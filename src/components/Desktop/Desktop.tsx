@@ -16,6 +16,9 @@ import { FINDER_DRAG_TYPE } from '../apps/FinderApp';
 import MenuBar from '../MenuBar/MenuBar';
 import Taskbar from '../Taskbar/Taskbar';
 import SystemPanels from '../SystemUI/SystemPanels';
+import NotificationBanners from '../SystemUI/NotificationBanners';
+import DynamicWallpaper, { isDynamicDark, useDynamicLook } from './DynamicWallpaper';
+import { useWelcomeNotifications } from '../../hooks/useWelcomeNotifications';
 import { SystemUIProvider } from '../../context/SystemUIContext';
 import { useSettings } from '../../context/SettingsContext';
 import { currentOs, nodeDisplayName } from '../../theme/platform';
@@ -32,9 +35,9 @@ import type { OsName } from '../../lib/settingsStore';
 import Dock from '../Dock/Dock';
 import Window from '../Window/Window';
 import SnakeApp from '../apps/SnakeApp';
+import DoomWindow from './DoomWindow';
 import RubberDuckApp from '../apps/RubberDuckApp';
 import { APP_COMPONENTS } from '../apps/appRegistry';
-import { jobsData } from '../../data/experienceData';
 import styles from './Desktop.module.css';
 
 type SpacePhase = 'ready' | 'playing' | 'hit';
@@ -506,7 +509,6 @@ interface DesktopItem {
   id: string;
   type: FsNode['type'];
   label: string;
-  jobId?: string;
   appId?: string;
   node: FsNode;
 }
@@ -521,14 +523,15 @@ interface CtxMenu {
 const ICON_W = 76;
 const ICON_H = 84;
 const ICON_GAP = 8;
-const BOUNCE_MS = 700; // short decorative bounce; windows open immediately
+// The dock reports when its launch bounce ends; this only clears a bounce whose animationend
+// never arrived (animations disabled, tab hidden). Windows open immediately regardless.
+const BOUNCE_MS = 4000;
 
 function toItem(node: FsNode): DesktopItem {
   return {
     id: node.id,
     type: node.type,
     label: node.name,
-    jobId: node.jobId,
     appId: node.appId,
     node,
   };
@@ -542,6 +545,18 @@ function toItem(node: FsNode): DesktopItem {
 // columns grow leftwards.
 const GRID_START_Y = 54;
 const GRID_RIGHT_PAD = 20;
+// The macOS desktop widgets (DesktopWidgets.module.css: two 150px tiles from 27,57) own the
+// top-left corner; no icon is placed over them. Windows has no widgets on the desktop.
+const WIDGETS_RIGHT = 27 + 150 + 16 + 150 + 16;
+const WIDGETS_BOTTOM = 57 + 155 + 12;
+function cellCovered(x: number, y: number): boolean {
+  return (
+    currentOs() !== 'windows' &&
+    x < WIDGETS_RIGHT &&
+    y < WIDGETS_BOTTOM &&
+    y + ICON_H > GRID_START_Y
+  );
+}
 function gridColX(col: number): number {
   const colW = ICON_W + ICON_GAP + 4;
   if (currentOs() === 'windows') return GRID_RIGHT_PAD + col * colW;
@@ -562,6 +577,7 @@ function findEmptyGridCell(taken: Record<string, IconPos>): IconPos {
     for (let row = 0; row < maxRows; row++) {
       const gx = gridColX(col);
       const gy = startY + row * rowH;
+      if (cellCovered(gx, gy)) continue;
       const hit = occupied.some(
         (p) => Math.abs(p.x - gx) < ICON_W * 0.7 && Math.abs(p.y - gy) < ICON_H * 0.7
       );
@@ -576,17 +592,30 @@ function findEmptyGridCell(taken: Record<string, IconPos>): IconPos {
   };
 }
 
-// All icons stack down the RIGHT side in as many columns as needed
+// All icons stack down the RIGHT side in as many columns as needed, skipping any cell
+// the desktop widgets cover.
 function initPositions(items: DesktopItem[]): Record<string, IconPos> {
   const startY = GRID_START_Y;
-  const maxRows = Math.max(1, Math.floor((window.innerHeight - startY - 80) / (ICON_H + ICON_GAP)));
+  const rowH = ICON_H + ICON_GAP;
+  const maxRows = Math.max(1, Math.floor((window.innerHeight - startY - 80) / rowH));
   const result: Record<string, IconPos> = {};
-  items.forEach((item, i) => {
-    result[item.id] = {
-      x: gridColX(Math.floor(i / maxRows)),
-      y: startY + (i % maxRows) * (ICON_H + ICON_GAP),
-    };
-  });
+  let col = 0;
+  let row = 0;
+  for (const item of items) {
+    while (cellCovered(gridColX(col), startY + row * rowH)) {
+      row++;
+      if (row >= maxRows) {
+        row = 0;
+        col++;
+      }
+    }
+    result[item.id] = { x: gridColX(col), y: startY + row * rowH };
+    row++;
+    if (row >= maxRows) {
+      row = 0;
+      col++;
+    }
+  }
   return result;
 }
 
@@ -607,10 +636,6 @@ function GetInfoModal({
   const isDesktop = target === 'desktop';
   const name = isDesktop ? 'Desktop' : (target as DesktopItem).label;
   const kind = isDesktop ? 'Folder' : nodeKind((target as DesktopItem).node);
-  const jobInfo =
-    !isDesktop && (target as DesktopItem).jobId
-      ? jobsData.find((j) => j.id === (target as DesktopItem).jobId)
-      : null;
   const ua = navigator.userAgent;
   const browser = /Firefox/.test(ua)
     ? 'Firefox'
@@ -672,17 +697,6 @@ function GetInfoModal({
                   <tr>
                     <td>Bundler:</td>
                     <td>Vite</td>
-                  </tr>
-                </>
-              ) : jobInfo ? (
-                <>
-                  <tr>
-                    <td>Role:</td>
-                    <td>{jobInfo.role}</td>
-                  </tr>
-                  <tr>
-                    <td>Period:</td>
-                    <td>{jobInfo.period}</td>
                   </tr>
                 </>
               ) : (
@@ -762,6 +776,7 @@ function DesktopSurface() {
   const {
     windows,
     focusedId,
+    blurWindows,
     openApp,
     childrenOf,
     createFolder,
@@ -774,6 +789,8 @@ function DesktopSurface() {
 
   const { settings, os, wallpaper, setWallpaper } = useSettings();
   const isWindows = os === 'windows';
+  useWelcomeNotifications();
+  const dynamicLook = useDynamicLook(wallpaper);
 
   // Desktop icons are simply the children of the Desktop folder.
   const items = useMemo(
@@ -951,6 +968,15 @@ function DesktopSurface() {
   }
 
   // ── Open with bounce animation ─────────────────────────────────────────
+  function clearBounce(dockKey: string) {
+    setBouncingKeys((prev) => {
+      if (!prev.has(dockKey)) return prev;
+      const n = new Set(prev);
+      n.delete(dockKey);
+      return n;
+    });
+  }
+
   function openWithBounce(dockKey: string, appId: string, props?: Record<string, unknown>) {
     // Skip animation entirely when an instance of this app is already running
     const alreadyRunning = windows.some((w) => w.appId === appId && !w.minimized);
@@ -987,8 +1013,9 @@ function DesktopSurface() {
     if (renamingId) commitRename();
     e.preventDefault();
     setCtxMenu(null);
-    // Clear selection immediately on bare-desktop mousedown
+    // Clear selection immediately on bare-desktop mousedown; the desktop is frontmost now.
     setSelectedIcons(new Set());
+    blurWindows();
 
     const x1 = e.clientX,
       y1 = e.clientY;
@@ -1187,7 +1214,7 @@ function DesktopSurface() {
 
   // ── Dock item activate (bounce + delayed open) ────────────────────────
   function handleDockActivate(key: string, action: () => void) {
-    if (key === 'finder' || key === 'trash' || key === 'github' || key === 'cv') {
+    if (key === 'finder' || key === 'trash' || key === 'cv') {
       action();
       return;
     }
@@ -1224,7 +1251,7 @@ function DesktopSurface() {
     <div
       className={[
         styles.desktop,
-        DARK_WALLPAPERS.has(wallpaper) ? styles.desktopDark : '',
+        DARK_WALLPAPERS.has(wallpaper) || isDynamicDark(dynamicLook) ? styles.desktopDark : '',
         isWindows ? styles.desktopWin : '',
       ].join(' ')}
       data-os={os}
@@ -1237,8 +1264,9 @@ function DesktopSurface() {
       onDragOver={onDesktopDragOver}
       onDrop={onDesktopDrop}
     >
-      {/* Every wallpaper for this OS stays mounted so switching is instant */}
-      {availableWallpapersFor(os).map((key) => (
+      {/* Every wallpaper for this OS stays mounted so switching is instant. The current one
+          is always included: a fallback from another OS's set still has to render. */}
+      {[...new Set([...availableWallpapersFor(os), wallpaper])].map((key) => (
         <div
           key={key}
           className={`${styles.wallpaper} ${key === wallpaper ? styles.wallpaperActive : ''}`}
@@ -1246,6 +1274,7 @@ function DesktopSurface() {
           aria-hidden
         />
       ))}
+      <DynamicWallpaper wallpaper={wallpaper} className={styles.wallpaperLayer} />
       {!isWindows && <DesktopWidgets />}
       {isWindows ? <Taskbar /> : <MenuBar />}
 
@@ -1282,6 +1311,7 @@ function DesktopSurface() {
               styles.icon,
               selected ? styles.iconSelected : '',
               selected ? styles.iconFocused : '',
+              selected && focusedId === null ? styles.iconFrontmost : '',
               cleaning ? styles.iconCleaning : '',
               isDraggingMe ? styles.iconDragging : '',
               isFolderTarget ? styles.iconFolderTarget : '',
@@ -1329,6 +1359,7 @@ function DesktopSurface() {
             }}
             onClick={(e) => {
               e.stopPropagation();
+              blurWindows();
               if (e.shiftKey || e.metaKey || e.ctrlKey) {
                 // Modifier-click toggles individual icon in selection
                 setSelectedIcons((prev) => {
@@ -1359,12 +1390,14 @@ function DesktopSurface() {
               }
             }}
           >
-            <NodeIcon
-              node={item.node}
-              size={50}
-              trashFull={trashFull}
-              trashGlow={item.appId === 'trash' && nearTrashTarget === 'desktop'}
-            />
+            <span className={styles.iconArt}>
+              <NodeIcon
+                node={item.node}
+                size={50}
+                trashFull={trashFull}
+                trashGlow={item.appId === 'trash' && nearTrashTarget === 'desktop'}
+              />
+            </span>
 
             {renaming ? (
               <input
@@ -1400,6 +1433,7 @@ function DesktopSurface() {
       {/* Open windows */}
       {windows.map((win) => {
         if (win.appId === 'snake') return <NokiaWindow key={win.id} win={win} />;
+        if (win.appId === 'doom') return <DoomWindow key={win.id} win={win} />;
         if (win.appId === 'rubberduck') return <DuckWindow key={win.id} win={win} />;
         const Comp = APP_COMPONENTS[win.appId];
         if (!Comp) return null;
@@ -1413,11 +1447,13 @@ function DesktopSurface() {
       {!isWindows && (
         <Dock
           bouncingKeys={bouncingKeys}
+          onBounceEnd={clearBounce}
           onItemActivate={handleDockActivate}
           trashHighlighted={nearTrashTarget === 'dock'}
         />
       )}
 
+      <NotificationBanners />
       <SystemPanels />
 
       {/* Context menu */}

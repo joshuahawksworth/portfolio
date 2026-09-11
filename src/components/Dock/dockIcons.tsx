@@ -1,8 +1,18 @@
-import { useId } from 'react';
+import { useId, useState, type ReactNode } from 'react';
 import { AboutLogoIcon } from '../icons/AboutLogoIcon';
 import { CalculatorLogoIcon } from '../icons/CalculatorLogoIcon';
-import { TrashBinIcon } from '../icons/FileSystemIcons';
+import { MacTrashIcon } from '../icons/MacTrashIcon';
 import { SnakeLcdIcon } from '../icons/SnakeLcdIcon';
+import {
+  AndroidStudioIcon,
+  AppStoreIcon,
+  GitHubDesktopIcon,
+  PostmanIcon,
+  SpotifyIcon,
+  VSCodeIcon,
+  XcodeIcon,
+} from '../icons/DevAppIcons';
+import { OutlookIcon, WordIcon } from '../icons/WindowsIcons';
 
 export function MacIcon({
   top,
@@ -44,6 +54,69 @@ export function MacIcon({
   );
 }
 
+/** The JH tile at the surface's icon size (dock, taskbar, Launchpad, Start, notifications). */
+function AboutTile() {
+  // Same 82% inset as RealIcon's full-bleed squircles, so it reads the same size as Mail or Maps
+  return (
+    <span
+      style={{
+        width: 'var(--app-icon-size, 50px)',
+        height: 'var(--app-icon-size, 50px)',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+      }}
+    >
+      <AboutLogoIcon
+        size={44}
+        style={{
+          width: 'calc(var(--app-icon-size, 50px) * 0.82)',
+          height: 'calc(var(--app-icon-size, 50px) * 0.82)',
+          borderRadius: '22.5%',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
+        }}
+      />
+    </span>
+  );
+}
+
+function GitHubAppIcon() {
+  // The GitHub app icon: the official white Invertocat on GitHub's dark tile
+  return (
+    <span
+      style={{
+        width: 'var(--app-icon-size, 50px)',
+        height: 'var(--app-icon-size, 50px)',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+      }}
+    >
+      <span
+        style={{
+          width: 'calc(var(--app-icon-size, 50px) * 0.82)',
+          height: 'calc(var(--app-icon-size, 50px) * 0.82)',
+          borderRadius: '22.5%',
+          background: '#0d1117',
+          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <img
+          src="/icons/github-mark-white.png"
+          alt=""
+          draggable={false}
+          style={{ width: '68%', height: '68%', display: 'block' }}
+        />
+      </span>
+    </span>
+  );
+}
+
 const DRAWN_ICONS = {
   finder: (
     <MacIcon top="#5ecfff" bottom="#1a7aff">
@@ -61,20 +134,9 @@ const DRAWN_ICONS = {
       />
     </MacIcon>
   ),
-  github: (
-    <svg viewBox="0 0 44 44" width="44" height="44" fill="none">
-      <rect width="44" height="44" rx="11" fill="#1b1f24" />
-      <rect width="44" height="20" rx="11" fill="rgba(255,255,255,0.07)" />
-      <g transform="translate(6,6) scale(1.333)">
-        <path
-          d="M12 .297c-6.63 0-12 5.373-12 12c0 5.303 3.438 9.8 8.205 11.385c.6.113.82-.258.82-.577c0-.285-.01-1.04-.015-2.04c-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729c1.205.084 1.838 1.236 1.838 1.236c1.07 1.835 2.809 1.305 3.495.998c.108-.776.417-1.305.76-1.605c-2.665-.3-5.466-1.332-5.466-5.93c0-1.31.465-2.38 1.235-3.22c-.135-.303-.54-1.523.105-3.176c0 0 1.005-.322 3.3 1.23c.96-.267 1.98-.399 3-.405c1.02.006 2.04.138 3 .405c2.28-1.552 3.285-1.23 3.285-1.23c.645 1.653.24 2.873.12 3.176c.765.84 1.23 1.91 1.23 3.22c0 4.61-2.805 5.625-5.475 5.92c.42.36.81 1.096.81 2.22c0 1.606-.015 2.896-.015 3.286c0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
-          fill="white"
-          opacity="0.92"
-        />
-      </g>
-    </svg>
-  ),
-  about: <AboutLogoIcon size={44} style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.35)' }} />,
+  github: <GitHubAppIcon />,
+  githubdesktop: <BrandIcon src="/icons/github-desktop.png" fallback={<GitHubDesktopIcon />} />,
+  about: <AboutTile />,
   experience: (
     <MacIcon top="#ffa030" bottom="#c25c00">
       <rect x="8" y="17" width="28" height="18" rx="3" fill="rgba(255,255,255,0.92)" />
@@ -187,8 +249,8 @@ const DRAWN_ICONS = {
     </svg>
   ),
   // The real macOS bin (no tile), same artwork as the desktop and Finder
-  trashEmpty: <TrashBinIcon size={44} />,
-  trashFull: <TrashBinIcon size={44} full />,
+  trashEmpty: <MacTrashIcon size={44} />,
+  trashFull: <MacTrashIcon size={44} full />,
   // The DOOM render has its own dark margin, so it sits a little larger than the
   // squircle-scaled apps to read the same size.
   doom: <RealIcon src="/doom-icon.png" rounded scale={0.92} />,
@@ -255,21 +317,16 @@ const DRAWN_ICONS = {
       <path d="M10 19.5 Q6.5 20.5 8.5 22.5 Q11 23 12.5 21.5 Z" fill="#ff7a1a" />
     </MacIcon>
   ),
-  texteditor: (
-    // Sublime Text-inspired icon — dark with coloured accent bar
-    <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
-      <rect width="44" height="44" rx="11" fill="#272822" />
-      <rect width="44" height="20" rx="11" fill="rgba(255,255,255,0.04)" />
-      {/* Sublime accent stripe */}
-      <rect x="0" y="0" width="4" height="44" rx="2" fill="#4c96d7" />
-      {/* Code lines */}
-      <rect x="9" y="12" width="22" height="2.5" rx="1.25" fill="#f92672" opacity="0.9" />
-      <rect x="9" y="17" width="14" height="2.5" rx="1.25" fill="#a6e22e" opacity="0.85" />
-      <rect x="9" y="22" width="18" height="2.5" rx="1.25" fill="#e6db74" opacity="0.85" />
-      <rect x="9" y="27" width="10" height="2.5" rx="1.25" fill="#66d9e8" opacity="0.85" />
-      <rect x="9" y="32" width="20" height="2.5" rx="1.25" fill="#ae81ff" opacity="0.85" />
-    </svg>
-  ),
+  texteditor: <BrandIcon src="/icons/vscode.png" fallback={<VSCodeIcon />} />,
+  outlook: <BrandIcon src="/icons/outlook.png" fallback={<OutlookIcon />} />,
+  postman: <BrandIcon src="/icons/postman.png" fallback={<PostmanIcon />} />,
+  // Apple's Xcode render carries its own margin (and the hammer overhangs the tile), so it
+  // is not squircle-clipped like the full-bleed brand icons.
+  xcode: <BrandIcon src="/icons/xcode.png" fallback={<XcodeIcon />} rounded={false} />,
+  androidstudio: <BrandIcon src="/icons/android-studio.png" fallback={<AndroidStudioIcon />} />,
+  spotify: <BrandIcon src="/icons/spotify.png" fallback={<SpotifyIcon />} />,
+  word: <BrandIcon src="/icons/word.png" fallback={<WordIcon />} />,
+  appstore: <BrandIcon src="/icons/app-store.png" fallback={<AppStoreIcon />} />,
 };
 
 export type DockIconKey = keyof typeof DOCK_ICONS;
@@ -284,10 +341,12 @@ export function RealIcon({
   src,
   rounded = false,
   scale = rounded ? 0.82 : 1,
+  onError,
 }: {
   src: string;
   rounded?: boolean;
   scale?: number;
+  onError?: () => void;
 }) {
   const size = `calc(var(--app-icon-size, 50px) * ${scale})`;
   return (
@@ -306,6 +365,7 @@ export function RealIcon({
         src={src}
         alt=""
         draggable={false}
+        onError={onError}
         style={{
           width: size,
           height: size,
@@ -318,53 +378,47 @@ export function RealIcon({
   );
 }
 
-function GitHubAppIcon() {
-  // The GitHub app icon: the official white Invertocat on GitHub's dark tile
+const missingArtwork = new Set<string>();
+
+/**
+ * Brand artwork for a third-party app. Renders the official render from public/icons when
+ * the file is there and falls back to the drawn tile when it isn't, so the desktop never
+ * shows a broken image. Add the PNG (a square, full-bleed render like mail.png) and the
+ * real icon appears with no code change.
+ */
+export function BrandIcon({
+  src,
+  fallback,
+  rounded = true,
+}: {
+  src: string;
+  fallback: ReactNode;
+  rounded?: boolean;
+}) {
+  const [missing, setMissing] = useState(() => missingArtwork.has(src));
+  if (missing) return <>{fallback}</>;
   return (
-    <span
-      style={{
-        width: 'var(--app-icon-size, 50px)',
-        height: 'var(--app-icon-size, 50px)',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
+    <RealIcon
+      src={src}
+      rounded={rounded}
+      onError={() => {
+        missingArtwork.add(src);
+        setMissing(true);
       }}
-    >
-      <span
-        style={{
-          width: 'calc(var(--app-icon-size, 50px) * 0.82)',
-          height: 'calc(var(--app-icon-size, 50px) * 0.82)',
-          borderRadius: '22.5%',
-          background: '#0d1117',
-          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <img
-          src="/icons/github-mark-white.png"
-          alt=""
-          draggable={false}
-          style={{ width: '68%', height: '68%', display: 'block' }}
-        />
-      </span>
-    </span>
+    />
   );
 }
 
 const REAL_ICONS = {
-  finder: <RealIcon src="/icons/finder.png" />,
+  // Apple's current Finder render is full-bleed, so it takes the squircle like the iOS icons
+  finder: <RealIcon src="/icons/finder.png" rounded />,
   safari: <RealIcon src="/icons/chrome.png" scale={0.82} />,
-  github: <GitHubAppIcon />,
   askjosh: <RealIcon src="/icons/claude.png" rounded />,
   contact: <RealIcon src="/icons/mail.png" rounded />,
   location: <RealIcon src="/icons/maps.png" rounded />,
   terminal: <RealIcon src="/icons/terminal.png" />,
   calculator: <RealIcon src="/icons/calculator.png" rounded />,
   cv: <RealIcon src="/icons/pages.png" rounded />,
-  texteditor: <RealIcon src="/icons/textedit.png" />,
   // Preview's render is full-bleed, unlike the other macOS icons, so it gets the squircle
   imageviewer: <RealIcon src="/icons/preview.png" rounded />,
   experience: <RealIcon src="/icons/reminders.png" rounded />,

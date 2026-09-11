@@ -16,6 +16,8 @@ import styles from './Dock.module.css';
 /* ─── Types ───────────────────────────────────────────────────────────── */
 interface DockProps {
   bouncingKeys?: Set<string>;
+  /** The launch bounce for `key` has played out. */
+  onBounceEnd?: (key: string) => void;
   onItemActivate?: (key: string, action: () => void) => void;
   trashHighlighted?: boolean;
 }
@@ -74,7 +76,12 @@ function MinimizedSlot({ win }: { win: WindowInstance }) {
 
 /* ─── Default reorderable key order (Finder & Trash excluded) ────────── */
 /* ─── Dock ────────────────────────────────────────────────────────────── */
-export default function Dock({ bouncingKeys, onItemActivate, trashHighlighted }: DockProps = {}) {
+export default function Dock({
+  bouncingKeys,
+  onBounceEnd,
+  onItemActivate,
+  trashHighlighted,
+}: DockProps = {}) {
   const { openApp, windows, trashCount } = useDesktop();
   const { os } = useSettings();
   const trashHasItems = trashCount > 0;
@@ -201,6 +208,9 @@ export default function Dock({ bouncingKeys, onItemActivate, trashHighlighted }:
         <button
           className={`${styles.iconBtn} ${isBouncing ? styles.bouncing : ''} ${highlighted ? styles.trashHighlight : ''}`}
           onClick={() => handleClick(key)}
+          onAnimationEnd={(e) => {
+            if (e.animationName.includes('dockBounce')) onBounceEnd?.(key);
+          }}
           aria-label={label}
           style={draggable ? { cursor: isDragging ? 'grabbing' : 'grab' } : undefined}
         >

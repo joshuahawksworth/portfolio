@@ -10,6 +10,24 @@ import {
   processHtml,
 } from './api/browser-utils';
 
+/**
+ * The context modules export providers alongside their hooks, so Fast Refresh cannot
+ * swap them in place: a hot update re-creates the context object while parts of the
+ * tree keep the old one, which surfaces as "useDesktop outside DesktopProvider" until
+ * the page is refreshed. Reload the page instead whenever one of them changes.
+ */
+function contextReloadPlugin(): Plugin {
+  return {
+    name: 'context-full-reload',
+    handleHotUpdate({ file, server }) {
+      if (/[\\/]src[\\/]context[\\/][^\\/]+\.tsx?$/.test(file)) {
+        server.ws.send({ type: 'full-reload' });
+        return [];
+      }
+    },
+  };
+}
+
 function browserProxyPlugin(): Plugin {
   return {
     name: 'browser-proxy-dev',
@@ -137,5 +155,5 @@ function browserProxyPlugin(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [react(), browserProxyPlugin()],
+  plugins: [react(), contextReloadPlugin(), browserProxyPlugin()],
 });

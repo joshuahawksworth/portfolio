@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { DOCK_ICONS } from './dockIcons';
+import { openCv } from '../../lib/cv';
 
 export const DOCK_DEFAULT_ORDER = [
   'github',
@@ -11,9 +12,11 @@ export const DOCK_DEFAULT_ORDER = [
   'contact',
   'location',
   'terminal',
-  'calculator',
   'texteditor',
+  'calculator',
   'imageviewer',
+  'spotify',
+  'appstore',
   'cv',
   'settings',
 ] as const;
@@ -24,11 +27,18 @@ export type DockKey =
   | 'trash'
   | 'doom'
   | 'snake'
+  | 'xcode'
+  | 'androidstudio'
+  | 'githubdesktop'
+  | 'outlook'
+  | 'postman'
+  | 'word'
   | 'wallpaper';
 
 export const DOCK_LABELS: Record<string, string> = {
   finder: 'Finder',
   github: 'GitHub',
+  githubdesktop: 'GitHub Desktop',
   safari: 'Google Chrome',
   askjosh: 'Ask Claude',
   about: 'About',
@@ -38,9 +48,16 @@ export const DOCK_LABELS: Record<string, string> = {
   location: 'Location',
   terminal: 'Terminal',
   calculator: 'Calculator',
-  texteditor: 'Text Editor',
+  texteditor: 'Visual Studio Code',
+  outlook: 'Outlook',
+  postman: 'Postman',
+  xcode: 'Xcode',
+  androidstudio: 'Android Studio',
+  spotify: 'Spotify',
+  word: 'Word',
+  appstore: 'App Store',
   imageviewer: 'Image Viewer',
-  cv: 'CV',
+  cv: 'My CV',
   doom: 'DOOM',
   snake: 'Snake',
   trash: 'Trash',
@@ -51,8 +68,18 @@ export const DOCK_LABELS: Record<string, string> = {
 };
 
 /** Apps that live on the desktop as shortcuts — only appear in dock when running */
-export const DOCK_DESKTOP_ONLY = new Set(['doom', 'snake']);
+export const DOCK_DESKTOP_ONLY = new Set([
+  'doom',
+  'snake',
+  'xcode',
+  'androidstudio',
+  'githubdesktop',
+  'outlook',
+  'postman',
+  'word',
+]);
 
+/** The dock's GitHub button opens Josh's profile in a browser window, not GitHub Desktop. */
 export const DOCK_KEY_TO_APPID: Record<string, string> = { github: 'githubapp' };
 
 export function dockAppId(key: string): string {
@@ -69,7 +96,7 @@ export function getDockAction(
     case 'safari':
       return () => openApp('safari');
     case 'cv':
-      return () => window.open('/JoshuaHawksworthCV.pdf', '_blank');
+      return openCv;
     case 'texteditor':
       return () => openApp('texteditor');
     case 'imageviewer':

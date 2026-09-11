@@ -31,9 +31,10 @@ const APP_TITLES: Partial<Record<string, Partial<Record<OsName, string>>>> = {
   finder: { windows: 'File Explorer', android: 'Files', ios: 'Files' },
   trash: { windows: 'Recycle Bin', android: 'Bin', ios: 'Recently Deleted' },
   settings: { macos: 'System Settings', windows: 'Settings', android: 'Settings', ios: 'Settings' },
-  texteditor: { windows: 'Notepad', android: 'Keep Notes' },
+  texteditor: { android: 'Keep Notes' },
   imageviewer: { windows: 'Photos', android: 'Photos', ios: 'Photos' },
   shortcuts: { windows: 'Keyboard Shortcuts' },
+  appstore: { windows: 'Microsoft Store' },
 };
 
 export function appTitleFor(appId: string, fallback: string, os: OsName): string {
@@ -45,11 +46,11 @@ const APP_LABELS: Partial<Record<string, Partial<Record<OsName, string>>>> = {
   finder: { windows: 'File Explorer', android: 'Files', ios: 'Files' },
   trash: { windows: 'Recycle Bin', android: 'Bin' },
   settings: { macos: 'System Settings' },
-  texteditor: { windows: 'Notepad', android: 'Keep' },
+  texteditor: { android: 'Keep' },
   imageviewer: { windows: 'Photos', android: 'Photos' },
-  contact: { windows: 'Outlook', android: 'Gmail' },
+  contact: { windows: 'Mail', android: 'Gmail' },
+  appstore: { windows: 'Microsoft Store' },
   location: { windows: 'Maps', android: 'Maps' },
-  cv: { windows: 'Word', android: 'Docs' },
 };
 
 export function appLabelFor(appId: string, fallback: string, os: OsName): string {

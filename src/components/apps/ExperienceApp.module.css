@@ -1,10 +1,105 @@
 .root {
   display: flex;
+  flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background: var(--panel);
+  /* A near-solid sheet: the glass panel left the body copy hard to read over the wallpaper */
+  background: color-mix(in srgb, var(--panel-solid) 92%, transparent);
   color: var(--text);
   font-family: var(--font-ui);
+}
+
+/* ── Toolbar: who this is, and the CV one click away at all times ── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 16px;
+  background: var(--glass);
+  backdrop-filter: blur(36px) saturate(1.6);
+  -webkit-backdrop-filter: blur(36px) saturate(1.6);
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.toolbarText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.toolbarTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-strong);
+  line-height: 1.2;
+}
+
+.toolbarSub {
+  font-size: 11.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toolbarActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.primaryBtn,
+.secondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: var(--radius-control);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.primaryBtn {
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.primaryBtn:hover {
+  filter: brightness(1.06);
+}
+
+.secondaryBtn {
+  border: 1px solid var(--line-strong);
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--text);
+}
+
+.secondaryBtn:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.split {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 560px) {
+  .toolbarSub {
+    display: none;
+  }
+  .secondaryBtn {
+    display: none;
+  }
 }
 
 /* ── Sidebar ──────────────────────────────── */
@@ -49,14 +144,12 @@
 .sidebarItem.active { background: rgba(0, 0, 0, 0.06); }
 .sidebarItem.active .sidebarCompany { color: var(--text-strong); font-weight: 600; }
 
+/* Company marks sit straight on the glass, rounded like app icons (no white tile) */
 .sidebarLogo {
   width: 28px;
   height: 28px;
-  border-radius: 6px;
+  border-radius: 7px;
   object-fit: contain;
-  background: #fff;
-  border: 1px solid var(--line);
-  padding: 2px;
   flex-shrink: 0;
 }
 
@@ -121,20 +214,16 @@
 .jobLogoWrap {
   width: 56px;
   height: 56px;
-  border-radius: 12px;
-  background: #fff;
-  border: 1px solid var(--line);
-  box-shadow: 0 1px 3px rgba(87, 52, 10, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
   flex-shrink: 0;
 }
 
 .jobLogo {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
+  border-radius: 13px;
   object-fit: contain;
 }
 
@@ -359,4 +448,44 @@
   .projectImage {
     height: 130px;
   }
+}
+
+/* Project card body (image on top, text below) */
+.projectBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.projectName {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.jobFooter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.linkBtn {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--accent);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.linkBtn:hover {
+  text-decoration: underline;
 }

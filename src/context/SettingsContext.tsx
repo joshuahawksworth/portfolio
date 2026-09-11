@@ -23,6 +23,7 @@ import {
   WALLPAPERS,
   probeOptionalWallpapers,
   subscribeWallpaperAvailability,
+  wallpaperChoiceFor,
   wallpaperFor,
   type WallpaperKey,
 } from '../data/wallpapers';
@@ -102,7 +103,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const setWallpaper = useCallback(
     (key: WallpaperKey) => {
       if (!(key in WALLPAPERS)) return;
-      setSettings((prev) => ({ ...prev, wallpaper: { ...prev.wallpaper, [os]: key } }));
+      setSettings((prev) => ({
+        ...prev,
+        wallpaper: { ...prev.wallpaper, ...wallpaperChoiceFor(os, key) },
+      }));
     },
     [os]
   );

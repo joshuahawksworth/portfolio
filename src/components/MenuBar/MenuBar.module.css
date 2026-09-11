@@ -175,6 +175,7 @@
   display: block;
 }
 
+/* The clock sits inside a status button, which provides the hover / open highlight */
 .clock {
   font-size: 13px;
   color: inherit;
@@ -182,13 +183,8 @@
   white-space: nowrap;
   display: inline-flex;
   gap: 10px;
-  padding: 4px 6px;
-  margin: 0 -6px;
-  border-radius: 5px;
+  padding: 0 1px;
   cursor: default;
-}
-.clock:hover {
-  background: var(--menubar-hover, rgba(255, 255, 255, 0.3));
 }
 
 @media (max-width: 900px) {

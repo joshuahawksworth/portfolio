@@ -5,10 +5,11 @@
  * folders nest arbitrarily, items can be moved between any two folders, and the Trash
  * remembers where each item came from.
  */
-import { jobsData } from './experienceData';
 import { FINDER_FILE_CONTENTS } from '../components/apps/TextEditorApp';
+import { CV_URL } from '../lib/cv';
+import { currentOs, isAppleOs } from '../theme/platform';
 
-export type FsNodeType = 'folder' | 'file' | 'image' | 'app' | 'job';
+export type FsNodeType = 'folder' | 'file' | 'image' | 'app';
 
 export interface FsNode {
   id: string;
@@ -22,7 +23,6 @@ export interface FsNode {
   /** Opens in a new tab instead of an app (CV.pdf). */
   url?: string;
   appId?: string;
-  jobId?: string;
   /** System items: can't be renamed, trashed or moved (Macintosh HD, Trash, the roots). */
   locked?: boolean;
   /** Joke files that were "always" in the Trash. */
@@ -88,8 +88,10 @@ function folder(
   return { id, parentId, name, type: 'folder', ...extra };
 }
 
+/** Apps in /Applications. Finder and the Trash are part of the system; the rest can be binned. */
 function app(id: string, appId: string, name: string): Seed {
-  return { id, parentId: 'applications', name, type: 'app', appId, locked: true };
+  const system = appId === 'finder' || appId === 'trash';
+  return { id, parentId: 'applications', name, type: 'app', appId, locked: system || undefined };
 }
 
 const SECRET_CODES = {
@@ -136,15 +138,30 @@ const SEEDS: Seed[] = [
   {
     id: 'shortcut-cv',
     parentId: 'desktop',
-    name: 'CV',
+    name: 'My CV',
     type: 'app',
     appId: 'cv',
-    url: '/JoshuaHawksworthCV.pdf',
+    url: CV_URL,
+  },
+  {
+    id: 'shortcut-githubdesktop',
+    parentId: 'desktop',
+    name: 'GitHub Desktop',
+    type: 'app',
+    appId: 'githubdesktop',
+  },
+  { id: 'shortcut-outlook', parentId: 'desktop', name: 'Outlook', type: 'app', appId: 'outlook' },
+  { id: 'shortcut-postman', parentId: 'desktop', name: 'Postman', type: 'app', appId: 'postman' },
+  { id: 'shortcut-word', parentId: 'desktop', name: 'Word', type: 'app', appId: 'word' },
+  { id: 'shortcut-xcode', parentId: 'desktop', name: 'Xcode', type: 'app', appId: 'xcode' },
+  {
+    id: 'shortcut-androidstudio',
+    parentId: 'desktop',
+    name: 'Android Studio',
+    type: 'app',
+    appId: 'androidstudio',
   },
   folder('trickster', 'desktop', 'My Flaws', { locked: true }),
-  ...jobsData.map(
-    (j): Seed => ({ id: j.id, parentId: 'desktop', name: j.company, type: 'job', jobId: j.id })
-  ),
 
   // ── Documents ──────────────────────────────────────────────────────────
   file('doc-readme', 'documents'),
@@ -201,7 +218,15 @@ const SEEDS: Seed[] = [
   app('app-loc', 'location', 'Location.app'),
   app('app-term', 'terminal', 'Terminal.app'),
   app('app-calc', 'calculator', 'Calculator.app'),
-  app('app-editor', 'texteditor', 'TextEditor.app'),
+  app('app-editor', 'texteditor', 'Visual Studio Code.app'),
+  app('app-githubdesktop', 'githubdesktop', 'GitHub Desktop.app'),
+  app('app-outlook', 'outlook', 'Outlook.app'),
+  app('app-postman', 'postman', 'Postman.app'),
+  app('app-xcode', 'xcode', 'Xcode.app'),
+  app('app-androidstudio', 'androidstudio', 'Android Studio.app'),
+  app('app-spotify', 'spotify', 'Spotify.app'),
+  app('app-word', 'word', 'Microsoft Word.app'),
+  app('app-appstore', 'appstore', 'App Store.app'),
   app('app-preview', 'imageviewer', 'Preview.app'),
   app('app-safari', 'safari', 'Google Chrome.app'),
   app('app-askjosh', 'askjosh', 'Ask Claude.app'),
@@ -221,9 +246,17 @@ const SEEDS: Seed[] = [
   ),
 ];
 
+/** Xcode ships with a Mac and Android Studio with the Windows PC: each platform gets its own IDE. */
+const APPLE_ONLY = new Set(['shortcut-xcode', 'app-xcode']);
+const WINDOWS_ONLY = new Set(['shortcut-androidstudio', 'app-androidstudio']);
+
+export function seedsForOs(apple: boolean): Seed[] {
+  return SEEDS.filter((s) => (apple ? !WINDOWS_ONLY.has(s.id) : !APPLE_ONLY.has(s.id)));
+}
+
 export function buildSeedFileSystem(): Record<string, FsNode> {
   const nodes: Record<string, FsNode> = {};
-  SEEDS.forEach((s, i) => {
+  seedsForOs(isAppleOs(currentOs())).forEach((s, i) => {
     const { at, ...rest } = s;
     // Spread creation times by a few ms so insertion order survives sorting by date.
     const stamp = (at ?? INSTALLED) + i;

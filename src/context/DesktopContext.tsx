@@ -48,16 +48,21 @@ function cascadePosition(idx: number, w: number, h: number) {
 
 // ── File-system rules (shared by Finder, the desktop and the Trash) ────────
 
-/** Files, images and user folders can go to the Trash; apps, jobs and system items can't. */
+/**
+ * Anything that isn't a system item can go to the Trash and come back with Put Back:
+ * files, folders, images and app shortcuts alike. Only locked nodes (Macintosh HD,
+ * the Trash, Finder, the roots) stay where they are.
+ */
 export function canTrashNode(node: FsNode): boolean {
-  return !node.locked && (node.type === 'folder' || node.type === 'file' || node.type === 'image');
+  return !node.locked;
 }
 
+/** Apps keep their names; everything else unlocked can be renamed. */
 export function canRenameNode(node: FsNode): boolean {
-  return !node.locked && node.type !== 'app' && node.type !== 'job';
+  return !node.locked && node.type !== 'app';
 }
 
-/** Anything unlocked can be dragged into another folder (jobs and desktop app shortcuts too). */
+/** Anything unlocked can be dragged into another folder (desktop app shortcuts too). */
 export function canMoveNode(node: FsNode): boolean {
   return !node.locked;
 }
@@ -132,6 +137,8 @@ interface DesktopCtx {
   closeWindow: (id: string) => void;
   minimizeWindow: (id: string) => void;
   focusWindow: (id: string) => void;
+  /** Take focus off every window (the desktop / Finder is frontmost). */
+  blurWindows: () => void;
   moveWindow: (id: string, x: number, y: number) => void;
   resizeWindow: (id: string, x: number, y: number, w: number, h: number) => void;
   toggleMaximize: (id: string) => void;
@@ -413,6 +420,8 @@ export function DesktopProvider({
     setFocusedId(id);
   }, []);
 
+  const blurWindows = useCallback(() => setFocusedId(null), []);
+
   const openApp = useCallback((appId: string, props?: Record<string, unknown>) => {
     const defaults = APP_DEFAULTS[appId];
     if (!defaults) return;
@@ -553,6 +562,7 @@ export function DesktopProvider({
         closeWindow,
         minimizeWindow,
         focusWindow,
+        blurWindows,
         moveWindow,
         resizeWindow,
         toggleMaximize,

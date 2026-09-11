@@ -1,0 +1,281 @@
+/* ── DOOM's window: gunmetal frame, red accents, the game at a fixed 16:10 ───── */
+.frame {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #2b2b2e, #161618);
+  border: 1px solid #0b0b0c;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 24px 60px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(0, 0, 0, 0.5);
+  color: #d8d4cc;
+  font-family: var(--font-ui);
+  user-select: none;
+  overflow: hidden;
+}
+
+.frame.frameWin {
+  border-radius: 8px;
+}
+
+.focused {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 0 1px rgba(196, 24, 24, 0.5),
+    0 28px 70px rgba(0, 0, 0, 0.7);
+}
+
+/* Title bar: brushed metal strip with the wordmark */
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 38px;
+  padding: 0 12px 0 14px;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 2px, transparent 2px 4px),
+    linear-gradient(180deg, #3a3a3e, #232326);
+  border-bottom: 1px solid #0a0a0b;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+  cursor: default;
+}
+
+.wordmark {
+  font-family: 'Impact', 'Arial Black', 'Helvetica Neue', sans-serif;
+  font-size: 19px;
+  letter-spacing: 0.12em;
+  color: #e0231a;
+  text-shadow:
+    0 1px 0 #5a0b08,
+    0 0 12px rgba(224, 35, 26, 0.45);
+  line-height: 1;
+}
+
+.barSub {
+  font-size: 11px;
+  color: #8f8b84;
+  white-space: nowrap;
+}
+
+.barFill {
+  flex: 1;
+}
+
+.barBtn {
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 5px;
+  border: 1px solid #0a0a0b;
+  background: linear-gradient(180deg, #454549, #2a2a2d);
+  color: #d8d4cc;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+
+.barBtn:hover {
+  background: linear-gradient(180deg, #55555a, #333337);
+}
+
+.barBtnOn {
+  color: #fff;
+  background: linear-gradient(180deg, #b8191b, #7d0f11);
+  border-color: #3d0607;
+}
+
+.barBtnOn:hover {
+  background: linear-gradient(180deg, #cc1e20, #8d1214);
+}
+
+.closeMac {
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  background: #ff5f57;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.closeMac:hover {
+  background: #ff7b74;
+}
+
+.closeWin {
+  width: 32px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #d8d4cc;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.closeWin:hover {
+  background: #c42b1c;
+  color: #fff;
+}
+
+.body {
+  display: flex;
+  align-items: stretch;
+}
+
+/* The DOSBox frame is 320×200; shown at 2.5× it never letterboxes or stretches */
+.game {
+  width: 800px;
+  height: 500px;
+  flex-shrink: 0;
+  background: #000;
+  box-shadow: inset 0 0 0 1px #000;
+}
+
+/* ── Controls guide ───────────────────────────────────────────────────── */
+.guide {
+  width: 252px;
+  height: 500px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px;
+  background: linear-gradient(180deg, #1c1c1f, #121214);
+  border-left: 1px solid #0a0a0b;
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.05);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* Move and Look sit side by side, like the two halves of a keyboard */
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.heading {
+  margin: 0;
+  font-family: 'Impact', 'Arial Black', 'Helvetica Neue', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #e0231a;
+}
+
+.cluster {
+  display: grid;
+  grid-template-columns: repeat(3, 30px);
+  gap: 3px;
+  justify-content: start;
+}
+
+.row {
+  display: flex;
+  gap: 4px;
+}
+
+.keyGap {
+  width: 30px;
+  height: 28px;
+}
+
+.key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 28px;
+  padding: 0 7px;
+  border-radius: 5px;
+  border: 1px solid #0a0a0b;
+  border-bottom-width: 3px;
+  background: linear-gradient(180deg, #3f3f44, #27272a);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: #ece8df;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  transition:
+    transform 60ms ease,
+    background 60ms ease,
+    box-shadow 60ms ease;
+}
+
+.row .key {
+  min-width: 26px;
+  padding: 0;
+  flex: 1;
+}
+
+.keyWide {
+  min-width: 58px;
+}
+
+.keyDown {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
+  background: linear-gradient(180deg, #d0221f, #8a1214);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 12px rgba(224, 35, 26, 0.6);
+  color: #fff;
+}
+
+.note {
+  margin: 0;
+  font-size: 10.5px;
+  line-height: 1.35;
+  color: #9a968f;
+}
+
+.note b {
+  color: #ece8df;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.actions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.does {
+  font-size: 12px;
+  color: #d8d4cc;
+}
+
+.hint {
+  margin: auto 0 0;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  font-size: 11px;
+  color: #8f8b84;
+}

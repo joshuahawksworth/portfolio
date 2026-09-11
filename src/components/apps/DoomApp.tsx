@@ -46,22 +46,15 @@ const K = {
   d7: 55,
 };
 
-const CONTROLS = [
-  { keys: 'W / S', action: 'Move forward / back' },
-  { keys: 'A / D', action: 'Strafe left / right' },
-  { keys: '← →', action: 'Turn camera' },
-  { keys: 'Space', action: 'Shoot' },
-  { keys: 'F', action: 'Use / Open door' },
-  { keys: 'Shift', action: 'Run' },
-  { keys: '1 – 7', action: 'Select weapon' },
-  { keys: '↑ ↓', action: 'Navigate menu' },
-  { keys: 'Enter', action: 'Confirm' },
-  { keys: 'Escape', action: 'Pause / Menu' },
-];
-
 type Status = 'loading' | 'ready' | 'error';
 
-export default function DoomApp() {
+/**
+ * The game surface only: DOSBox boots into the canvas and the keyboard drives it while
+ * the DOOM window is focused. Mute and the controls guide live in DoomWindow, which
+ * frames this on the desktop.
+ */
+export default function DoomApp({ props }: { props?: Record<string, unknown> }) {
+  const muted = props?.muted === true;
   // Only drive the game while its window is the focused one; otherwise every other app
   // (the Terminal, text fields) would lose Space, Enter, the arrows and WASD to DOOM.
   const { windows, focusedId } = useDesktop();
@@ -75,8 +68,11 @@ export default function DoomApp() {
   const mutedRef = useRef(false);
 
   const [status, setStatus] = useState<Status>('loading');
-  const [panelOpen, setPanelOpen] = useState(false);
-  const [muted, setMuted] = useState(false);
+
+  useEffect(() => {
+    mutedRef.current = muted;
+    if (!muted && audioRef.current?.state === 'suspended') audioRef.current.resume();
+  }, [muted]);
 
   // ── Boot DOSBox ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -326,21 +322,6 @@ export default function DoomApp() {
     };
   }, []);
 
-  function toggleMute(e: React.MouseEvent) {
-    e.stopPropagation();
-    const next = !mutedRef.current;
-    mutedRef.current = next;
-    setMuted(next);
-    if (!next && audioRef.current?.state === 'suspended') {
-      audioRef.current.resume();
-    }
-  }
-
-  function togglePanel(e: React.MouseEvent) {
-    e.stopPropagation();
-    setPanelOpen((v) => !v);
-  }
-
   return (
     <div className={styles.root}>
       {/* Loading / error splash */}
@@ -362,96 +343,6 @@ export default function DoomApp() {
         className={`${styles.canvas} ${status === 'ready' ? styles.show : ''}`}
         style={{ cursor: 'default' }}
       />
-
-      {/* Controls panel — slides in from the right, isolated from game */}
-      <div
-        className={`${styles.panel} ${panelOpen ? styles.panelOpen : ''}`}
-        onMouseDown={(e) => e.stopPropagation()}
-        onMouseUp={(e) => e.stopPropagation()}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className={styles.panelInner}>
-          {/* Mute button */}
-          <button
-            className={`${styles.muteBtn} ${muted ? styles.muteBtnMuted : ''}`}
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={toggleMute}
-          >
-            {muted ? (
-              <>
-                <MuteIcon /> <span>Unmute</span>
-              </>
-            ) : (
-              <>
-                <SoundIcon /> <span>Mute</span>
-              </>
-            )}
-          </button>
-
-          <p className={styles.panelTitle}>Controls</p>
-
-          <table className={styles.tbl}>
-            <tbody>
-              {CONTROLS.map(({ keys, action }) => (
-                <tr key={action}>
-                  <td className={styles.tblKey}>{keys}</td>
-                  <td className={styles.tblVal}>{action}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Toggle tab — permanently visible on right edge */}
-      <button
-        className={`${styles.tab} ${panelOpen ? styles.tabOpen : ''}`}
-        onMouseDown={(e) => e.stopPropagation()}
-        onMouseUp={(e) => e.stopPropagation()}
-        onClick={togglePanel}
-        aria-label="Toggle controls"
-      >
-        <span className={styles.tabArrow}>{panelOpen ? '›' : '‹'}</span>
-        <span className={styles.tabLabel}>Controls</span>
-      </button>
     </div>
-  );
-}
-
-function SoundIcon() {
-  return (
-    <svg
-      width="13"
-      height="13"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-      <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-    </svg>
-  );
-}
-
-function MuteIcon() {
-  return (
-    <svg
-      width="13"
-      height="13"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-      <line x1="23" y1="9" x2="17" y2="15" />
-      <line x1="17" y1="9" x2="23" y2="15" />
-    </svg>
   );
 }

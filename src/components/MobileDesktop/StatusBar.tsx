@@ -7,7 +7,7 @@ import styles from './MobileDesktop.module.css';
  * Phone status bar. iOS: time left, cellular / Wi-Fi / battery glyphs right.
  * Android: time left, Wi-Fi / signal / battery (with percentage) right, Material glyphs.
  */
-export default function StatusBar() {
+export default function StatusBar({ onTap }: { onTap?: () => void } = {}) {
   const now = useTime();
   const { settings, os } = useSettings();
   const time = formatTime(now, { clock24h: settings.clock24h });
@@ -16,7 +16,9 @@ export default function StatusBar() {
   return (
     <div
       className={`${styles.statusBar} ${android ? styles.statusBarDroid : ''}`}
-      role="presentation"
+      role={onTap ? 'button' : 'presentation'}
+      aria-label={onTap ? 'Open notifications' : undefined}
+      onClick={onTap}
     >
       <span className={styles.statusTime}>{time}</span>
       <div className={styles.statusIcons} aria-hidden="true">

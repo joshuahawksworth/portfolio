@@ -1,0 +1,240 @@
+.root {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  background: var(--panel);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 10px;
+  background: var(--glass);
+  backdrop-filter: blur(36px) saturate(1.6);
+  -webkit-backdrop-filter: blur(36px) saturate(1.6);
+  border-right: 1px solid var(--line);
+}
+
+.search {
+  height: 28px;
+  margin-bottom: 8px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.6);
+  font: inherit;
+  outline: none;
+}
+
+.navBtn {
+  height: 30px;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--radius-control);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+}
+
+.navBtn:hover {
+  background: var(--hover);
+}
+
+.navActive {
+  background: var(--accent);
+  color: #fff;
+}
+
+.sideFoot {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #f7df1e;
+  color: #1a1a1a;
+  font-size: 10px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 18px 22px 24px;
+  /* The real App Store's content area is a solid sheet; the glass panel left the muted
+     copy unreadable over whatever window sat behind it. */
+  background: color-mix(in srgb, var(--panel-solid) 92%, transparent);
+}
+
+.kicker {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 6px 0 10px;
+}
+
+.featured {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.4));
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  box-shadow: 0 4px 14px rgba(87, 52, 10, 0.08);
+}
+
+.card:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.cardIcon,
+.rowIcon {
+  --app-icon-size: 56px;
+  width: 56px;
+  height: 56px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cardIcon > svg,
+.cardIcon > span,
+.cardIcon > img,
+.rowIcon > svg,
+.rowIcon > span,
+.rowIcon > img {
+  width: 100%;
+  height: 100%;
+}
+
+.cardText,
+.rowText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.cardKicker {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.cardTitle,
+.rowTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.cardBlurb,
+.rowBlurb {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 6px 22px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.rowIcon {
+  --app-icon-size: 48px;
+  width: 48px;
+  height: 48px;
+}
+
+.rowMeta {
+  font-size: 11px;
+  color: var(--muted-2);
+  margin-top: 2px;
+}
+
+.openBtn {
+  height: 28px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.07);
+  color: var(--accent);
+  font: inherit;
+  font-weight: 700;
+}
+
+.openBtn:hover {
+  background: rgba(0, 0, 0, 0.11);
+}
+
+.empty {
+  color: var(--muted);
+  padding: 20px 0;
+}
+
+.foot {
+  margin-top: 22px;
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+/* Microsoft Store: squarer, flatter */
+.win .navActive {
+  background: var(--selected);
+  color: var(--text-strong);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.win .card {
+  border-radius: 8px;
+}
+
+.win .openBtn {
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+}

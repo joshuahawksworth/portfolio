@@ -28,10 +28,10 @@ Rules for platform-aware work:
   (GitHub, Chrome, Claude, DOOM, Snake) fall through to the macOS art. Folders, drives and bins use `PlatformFileIcons`.
 - Names differ per OS: use `appTitleFor` / `appLabelFor` / `nodeDisplayName` instead of hard-coding "Finder" or "Trash".
 - Space above and below windows comes from `shellInsets(os)`; never hard-code the menu bar or dock height.
-- Wallpapers are per OS (`WALLPAPERS_FOR_OS`); Windows and Android sets are SVGs in `public/wallpapers/`.
-  Microsoft's real wallpapers are copyrighted, so they are not committed. Drop `windows-11-bloom.jpg`,
-  `windows-10-hero.jpg`, `windows-7-harmony.jpg` and `windows-xp-bliss.jpg` into `public/wallpapers/` (they are
-  git-ignored) and the Windows picker lists them automatically; `probeOptionalWallpapers` hides any that are missing.
+- Wallpapers are per OS (`WALLPAPERS_FOR_OS`); the Android set is SVGs in `public/wallpapers/`, and the
+  Windows 11 and 10 images ship with the repo, as does Apple's dynamic `the-beach.jpg` (with an optional
+  `the-beach-night.jpg`) once committed. `windows-7-harmony.jpg` and `windows-xp-bliss.jpg` are git-ignored extras:
+  drop them into `public/wallpapers/` and the picker lists them; `probeOptionalWallpapers` hides any that are missing.
 - The Terminal's commands live in `lib/terminalShell.ts`: one `Shell` class with a zsh, PowerShell or bash personality
   chosen by `shellFor(os)`. Add commands there, not in `TerminalApp.tsx`; keep error messages in each shell's own wording.
 - Boot, shutdown and lock screens live in `Boot/` and `Login/` and branch on `os`. Power actions (lock, log out, restart,

@@ -67,7 +67,7 @@ function highlightHTML(code: string): string {
     .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="cm">$1</span>');
 }
 
-function highlight(code: string, ext: string): string {
+export function highlight(code: string, ext: string): string {
   if (['js', 'jsx', 'ts', 'tsx'].includes(ext)) return highlightJS(code);
   if (ext === 'md') return highlightMD(code);
   if (ext === 'html' || ext === 'htm') return highlightHTML(code);

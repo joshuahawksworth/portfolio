@@ -5,6 +5,9 @@
  * them the same way.
  */
 import { useId, type ReactNode } from 'react';
+import { MicrosoftStoreIcon } from './DevAppIcons';
+import { BrandIcon } from '../Dock/dockIcons';
+import { DocumentIcon } from './FileSystemIcons';
 
 function Svg({ children, title }: { children: ReactNode; title?: string }) {
   return (
@@ -100,6 +103,22 @@ export function OutlookIcon() {
       <rect x="3" y="13" width="20" height="20" rx="3" fill="#0f5cbf" />
       <ellipse cx="13" cy="23" rx="6" ry="6.5" fill="none" stroke="#fff" strokeWidth="3" />
     </Svg>
+  );
+}
+
+/** Windows Mail: the blue envelope tile. */
+export function WinMailIcon() {
+  return (
+    <WinTile top="#3f9bff" bottom="#0f5cbf">
+      <rect x="9" y="13" width="26" height="19" rx="3" fill="#fff" opacity="0.95" />
+      <path
+        d="M9 16l13 9 13-9"
+        stroke="#1b62c7"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+        fill="none"
+      />
+    </WinTile>
   );
 }
 
@@ -324,12 +343,14 @@ export const WINDOWS_ICONS = {
   finder: <ExplorerIcon />,
   experience: <BriefcaseIcon />,
   skills: <SkillsIcon />,
-  contact: <OutlookIcon />,
+  contact: <WinMailIcon />,
+  outlook: <BrandIcon src="/icons/outlook.png" fallback={<OutlookIcon />} />,
   location: <WinMapsIcon />,
   terminal: <WinTerminalIcon />,
   calculator: <WinCalculatorIcon />,
-  cv: <WordIcon />,
-  texteditor: <NotepadIcon />,
+  // The CV is a PDF; Word is its own app now, so the shortcut wears the document icon
+  cv: <DocumentIcon name="CV.pdf" />,
+  appstore: <BrandIcon src="/icons/microsoft-store.png" fallback={<MicrosoftStoreIcon />} />,
   imageviewer: <WinPhotosIcon />,
   settings: <WinSettingsIcon />,
   shortcuts: <WinKeyboardIcon />,

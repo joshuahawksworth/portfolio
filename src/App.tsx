@@ -7,6 +7,7 @@ import Desktop from './components/Desktop/Desktop';
 import MobileDesktop from './components/MobileDesktop/MobileDesktop';
 import { SettingsProvider, useSettings } from './context/SettingsContext';
 import { SessionProvider, type SessionValue } from './context/SessionContext';
+import { NotificationProvider } from './context/NotificationContext';
 import { useAppHeight } from './hooks/useAppHeight';
 import type { OsName, Platform } from './lib/settingsStore';
 import './App.css';
@@ -84,7 +85,11 @@ function AppInner() {
     screen = isMobile ? <MobileDesktop key="mobile" /> : <Desktop key="desktop" />;
   }
 
-  return <SessionProvider value={session}>{screen}</SessionProvider>;
+  return (
+    <SessionProvider value={session}>
+      <NotificationProvider>{screen}</NotificationProvider>
+    </SessionProvider>
+  );
 }
 
 export default function App() {

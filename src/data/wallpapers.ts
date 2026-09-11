@@ -6,29 +6,29 @@
 import type { OsName } from '../lib/settingsStore';
 
 export const WALLPAPERS = {
+  // "The Beach", Apple's dynamic Big Sur wallpaper: the-beach.jpg (day) and, optionally,
+  // the-beach-night.jpg in public/wallpapers/. It is the default on macOS and iOS; until
+  // the file is committed both fall back to Golden Gate, so desktop and phone always match.
+  beach: '/wallpapers/the-beach.jpg',
   gold: '/wallpapers/golden-gate.jpg',
   catalina: '/wallpapers/catalina-night.jpg',
   tahoe: '/wallpapers/tahoe-day.jpg',
   wave: '/wallpapers/blue-wave.jpg',
-  bloom: '/wallpapers/windows-bloom.svg',
-  bloomDark: '/wallpapers/windows-bloom-dark.svg',
-  spectrum: '/wallpapers/windows-spectrum.svg',
   pixel: '/wallpapers/android-pixel.svg',
   pixelDark: '/wallpapers/android-pixel-dark.svg',
   pixelCoral: '/wallpapers/android-pixel-coral.svg',
-  // Optional real Windows backgrounds. Microsoft's wallpapers are copyrighted, so they are
-  // not shipped with the repo: drop your own copies into public/wallpapers/ under these
-  // names and they appear in the Windows set automatically (see OPTIONAL_WALLPAPERS).
-  win11: '/wallpapers/windows-11-bloom.jpg',
-  win10: '/wallpapers/windows-10-hero.jpg',
+  // The Windows 11 and 10 backgrounds ship with the repo. Windows 7 and XP are optional:
+  // drop your own copies into public/wallpapers/ under these names and they join the
+  // Windows set automatically (see OPTIONAL_WALLPAPERS).
+  win11: '/wallpapers/windows-11.jpg',
+  win10: '/wallpapers/windows-10.jpg',
   win7: '/wallpapers/windows-7-harmony.jpg',
   winxp: '/wallpapers/windows-xp-bliss.jpg',
 } as const;
 
 /** Wallpapers that only show up when the file actually exists on the server. */
 export const OPTIONAL_WALLPAPERS: ReadonlySet<WallpaperKey> = new Set<WallpaperKey>([
-  'win11',
-  'win10',
+  'beach',
   'win7',
   'winxp',
 ]);
@@ -38,13 +38,11 @@ export type WallpaperKey = keyof typeof WALLPAPERS;
 export const WALLPAPER_KEYS = Object.keys(WALLPAPERS) as WallpaperKey[];
 
 export const WALLPAPER_LABELS: Record<WallpaperKey, string> = {
+  beach: 'The Beach (Dynamic)',
   gold: 'Golden Gate',
   catalina: 'Catalina',
   tahoe: 'Tahoe',
   wave: 'Sequoia',
-  bloom: 'Bloom',
-  bloomDark: 'Bloom (Dark)',
-  spectrum: 'Spectrum',
   pixel: 'Minimal',
   pixelDark: 'Minimal (Dark)',
   pixelCoral: 'Coral',
@@ -58,26 +56,48 @@ export const WALLPAPER_LABELS: Record<WallpaperKey, string> = {
 export const DARK_WALLPAPERS: ReadonlySet<WallpaperKey> = new Set<WallpaperKey>([
   'catalina',
   'wave',
-  'bloomDark',
   'pixelDark',
   'win10',
 ]);
 
-const APPLE_SET: WallpaperKey[] = ['gold', 'catalina', 'tahoe', 'wave'];
+const APPLE_SET: WallpaperKey[] = ['beach', 'gold', 'catalina', 'tahoe', 'wave'];
+
+/** Wallpapers that follow the time of day, like macOS dynamic desktops. */
+export const DYNAMIC_WALLPAPERS: ReadonlySet<WallpaperKey> = new Set<WallpaperKey>(['beach']);
+
+/** Night-time companion image for a dynamic wallpaper (optional, cross-faded in after dusk). */
+export const DYNAMIC_NIGHT_IMAGES: Partial<Record<WallpaperKey, string>> = {
+  beach: '/wallpapers/the-beach-night.jpg',
+};
 
 export const WALLPAPERS_FOR_OS: Record<OsName, WallpaperKey[]> = {
   macos: APPLE_SET,
   ios: APPLE_SET,
-  windows: ['win11', 'win10', 'win7', 'winxp', 'bloom', 'bloomDark', 'spectrum'],
+  windows: ['win11', 'win10', 'win7', 'winxp'],
   android: ['pixel', 'pixelDark', 'pixelCoral'],
 };
 
 export const DEFAULT_WALLPAPER: Record<OsName, WallpaperKey> = {
-  macos: 'gold',
-  ios: 'catalina',
-  windows: 'bloom',
+  macos: 'beach',
+  ios: 'beach',
+  windows: 'win11',
   android: 'pixel',
 };
+
+/** Used when the preferred default is an optional file that isn't on the server. */
+const FALLBACK_WALLPAPER: Record<OsName, WallpaperKey> = {
+  macos: 'gold',
+  ios: 'gold',
+  windows: 'win11',
+  android: 'pixel',
+};
+
+export function defaultWallpaperFor(os: OsName): WallpaperKey {
+  // The first of the OS's set that is actually on the server, else the shipped fallback.
+  const preferred = DEFAULT_WALLPAPER[os];
+  if (isWallpaperAvailable(preferred)) return preferred;
+  return WALLPAPERS_FOR_OS[os].find(isWallpaperAvailable) ?? FALLBACK_WALLPAPER[os];
+}
 
 const LEGACY_STORAGE_KEY = 'portfolio.wallpaper';
 
@@ -91,13 +111,42 @@ export function loadLegacyWallpaper(): WallpaperKey | null {
   }
 }
 
-/** Resolve the wallpaper to show for an OS from a (possibly partial) choice map. */
+/**
+ * The choice-map update for picking `key` on `os`. The phone and desktop of a platform
+ * share one wallpaper, so picking on macOS also sets iOS (and vice versa); Windows and
+ * Android do the same for the keys their sets have in common.
+ */
+export function wallpaperChoiceFor(
+  os: OsName,
+  key: WallpaperKey
+): Partial<Record<OsName, WallpaperKey>> {
+  const out: Partial<Record<OsName, WallpaperKey>> = { [os]: key };
+  const sibling = siblingOf(os);
+  if (WALLPAPERS_FOR_OS[sibling].includes(key)) out[sibling] = key;
+  return out;
+}
+
+function siblingOf(os: OsName): OsName {
+  return os === 'macos' ? 'ios' : os === 'ios' ? 'macos' : os === 'windows' ? 'android' : 'windows';
+}
+
+/**
+ * Resolve the wallpaper to show for an OS from a (possibly partial) choice map. A choice
+ * made on the platform's other device (the Mac for the iPhone, and vice versa) counts
+ * when this OS has none of its own, so a wallpaper picked before choices were shared
+ * still shows on both.
+ */
 export function wallpaperFor(
   os: OsName,
   chosen: Partial<Record<OsName, WallpaperKey>>
 ): WallpaperKey {
-  const key = chosen[os];
-  return key && key in WALLPAPERS && isWallpaperAvailable(key) ? key : DEFAULT_WALLPAPER[os];
+  const usable = (key: WallpaperKey | undefined): key is WallpaperKey =>
+    !!key && key in WALLPAPERS && WALLPAPERS_FOR_OS[os].includes(key) && isWallpaperAvailable(key);
+  const own = chosen[os];
+  if (usable(own)) return own;
+  const shared = chosen[siblingOf(os)];
+  if (usable(shared)) return shared;
+  return defaultWallpaperFor(os);
 }
 
 const available = new Map<WallpaperKey, boolean>();

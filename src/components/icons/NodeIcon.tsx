@@ -4,8 +4,7 @@
  */
 import type { CSSProperties } from 'react';
 import type { FsNode } from '../../context/DesktopContext';
-import { jobsData } from '../../data/experienceData';
-import { DocumentIcon, PictureIcon } from './FileSystemIcons';
+import { DocumentIcon, FolderIcon, PictureIcon } from './FileSystemIcons';
 import { NokiaIcon } from './NokiaIcon';
 import { PlatformBinIcon, PlatformDriveIcon, PlatformFolderIcon } from './PlatformFileIcons';
 import { appIconFor } from '../../theme/platformIcons';
@@ -23,7 +22,11 @@ export function NodeIcon({
   trashGlow?: boolean;
 }) {
   const os = useOs();
-  if (node.id === 'shortcut-mycomputer') return <PlatformDriveIcon os={os} size={size} />;
+  if (node.id === 'shortcut-mycomputer') {
+    // On the Mac the startup volume sits on the desktop as a plain blue folder
+    if (os === 'macos') return <FolderIcon size={size} />;
+    return <PlatformDriveIcon os={os} size={size} />;
+  }
   if (node.appId === 'trash') {
     return <PlatformBinIcon os={os} size={size} full={trashFull} glow={trashGlow} />;
   }
@@ -47,40 +50,6 @@ export function NodeIcon({
       );
     }
     return <PlatformFolderIcon os={os} size={size} />;
-  }
-
-  if (node.type === 'job') {
-    const job = jobsData.find((j) => j.id === node.jobId);
-    const tile: CSSProperties = {
-      width: size,
-      height: size,
-      borderRadius: Math.round(size * 0.22),
-      background: 'rgba(255,255,255,0.92)',
-      border: '1px solid rgba(255,255,255,0.7)',
-      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), 0 3px 8px rgba(70,40,10,0.18)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      overflow: 'hidden',
-      flexShrink: 0,
-      boxSizing: 'border-box',
-    };
-    return (
-      <span style={tile}>
-        {job?.logo ? (
-          <img
-            src={job.logo}
-            alt=""
-            draggable={false}
-            style={{ width: '80%', height: '80%', objectFit: 'contain', display: 'block' }}
-          />
-        ) : (
-          <span style={{ fontWeight: 700, color: '#262422', fontSize: size * 0.4 }}>
-            {node.name[0]}
-          </span>
-        )}
-      </span>
-    );
   }
 
   if (node.type === 'app') {
@@ -159,8 +128,6 @@ export function nodeKind(node: FsNode): string {
       return 'Folder';
     case 'app':
       return 'Application';
-    case 'job':
-      return 'Work Experience';
     case 'image':
       return 'Image';
     default: {
