@@ -1,7 +1,7 @@
 import { useId, useState, type ReactNode } from 'react';
 import { AboutLogoIcon } from '../icons/AboutLogoIcon';
 import { CalculatorLogoIcon } from '../icons/CalculatorLogoIcon';
-import { TrashBinIcon } from '../icons/FileSystemIcons';
+import { MacTrashIcon } from '../icons/MacTrashIcon';
 import { SnakeLcdIcon } from '../icons/SnakeLcdIcon';
 import {
   AndroidStudioIcon,
@@ -56,15 +56,28 @@ export function MacIcon({
 
 /** The JH tile at the surface's icon size (dock, taskbar, Launchpad, Start, notifications). */
 function AboutTile() {
+  // Same 82% inset as RealIcon's full-bleed squircles, so it reads the same size as Mail or Maps
   return (
-    <AboutLogoIcon
-      size={44}
+    <span
       style={{
-        width: 'var(--app-icon-size, 44px)',
-        height: 'var(--app-icon-size, 44px)',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
+        width: 'var(--app-icon-size, 50px)',
+        height: 'var(--app-icon-size, 50px)',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
       }}
-    />
+    >
+      <AboutLogoIcon
+        size={44}
+        style={{
+          width: 'calc(var(--app-icon-size, 50px) * 0.82)',
+          height: 'calc(var(--app-icon-size, 50px) * 0.82)',
+          borderRadius: '22.5%',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
+        }}
+      />
+    </span>
   );
 }
 
@@ -236,8 +249,8 @@ const DRAWN_ICONS = {
     </svg>
   ),
   // The real macOS bin (no tile), same artwork as the desktop and Finder
-  trashEmpty: <TrashBinIcon size={44} />,
-  trashFull: <TrashBinIcon size={44} full />,
+  trashEmpty: <MacTrashIcon size={44} />,
+  trashFull: <MacTrashIcon size={44} full />,
   // The DOOM render has its own dark margin, so it sits a little larger than the
   // squircle-scaled apps to read the same size.
   doom: <RealIcon src="/doom-icon.png" rounded scale={0.92} />,

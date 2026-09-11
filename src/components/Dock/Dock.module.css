@@ -254,36 +254,21 @@
     filter 150ms ease;
 }
 
-/* macOS launch bounce: two hops, the second smaller, settling with a soft landing.
-   Runs 1000 ms; Desktop clears `.bouncing` after BOUNCE_MS so it always completes. */
+/* macOS launch bounce: the icon leaps three times, each hop a parabola (decelerating on
+   the way up, accelerating on the way down) and landing before the next. Desktop clears
+   `.bouncing` on animationend, so the icon is never pulled back mid-air. */
 .bouncing {
-  animation: dockBounce 1000ms both;
+  animation: dockBounce 620ms 3;
 }
 
 @keyframes dockBounce {
   0% {
     transform: translateY(0);
-    animation-timing-function: cubic-bezier(0.33, 0, 0.67, 0.4);
+    animation-timing-function: cubic-bezier(0.2, 0.55, 0.4, 1);
   }
-  22% {
-    transform: translateY(-30px);
-    animation-timing-function: cubic-bezier(0.33, 0.6, 0.67, 1);
-  }
-  44% {
-    transform: translateY(0);
-    animation-timing-function: cubic-bezier(0.33, 0, 0.67, 0.4);
-  }
-  62% {
-    transform: translateY(-14px);
-    animation-timing-function: cubic-bezier(0.33, 0.6, 0.67, 1);
-  }
-  80% {
-    transform: translateY(0);
-    animation-timing-function: cubic-bezier(0.33, 0, 0.67, 0.4);
-  }
-  90% {
-    transform: translateY(-4px);
-    animation-timing-function: cubic-bezier(0.33, 0.6, 0.67, 1);
+  50% {
+    transform: translateY(-34px);
+    animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.45);
   }
   100% {
     transform: translateY(0);
