@@ -6,6 +6,7 @@
  */
 import { useMemo, useState } from 'react';
 import { useDesktop } from '../../context/DesktopContext';
+import cmapLogo from '../../assets/company-logos/cmap.svg';
 import styles from './OutlookApp.module.css';
 
 interface Mail {
@@ -116,7 +117,7 @@ export default function OutlookApp() {
   const [selectedId, setSelectedId] = useState<string>(INBOX[0].id);
   const [read, setRead] = useState<Set<string>>(new Set());
   const [filed, setFiled] = useState<Record<string, { project: string; docType: string }>>({});
-  const [paneOpen, setPaneOpen] = useState(true);
+  const [paneOpen, setPaneOpen] = useState(false);
   const [project, setProject] = useState(PROJECTS[0].code);
   const [docType, setDocType] = useState(DOC_TYPES[0]);
   const [search, setSearch] = useState('');
@@ -194,7 +195,7 @@ export default function OutlookApp() {
           onClick={() => setPaneOpen((o) => !o)}
           aria-pressed={paneOpen}
         >
-          <span className={styles.addinGlyph} aria-hidden="true" />
+          <img className={styles.addinGlyph} src={cmapLogo} alt="" aria-hidden="true" />
           File to project
         </button>
         <span className={styles.ribbonFill} />
@@ -391,7 +392,7 @@ export default function OutlookApp() {
         {paneOpen && (
           <aside className={styles.pane} aria-label="CMap Mail add-in">
             <div className={styles.paneHead}>
-              <span className={styles.addinGlyph} aria-hidden="true" />
+              <img className={styles.addinGlyph} src={cmapLogo} alt="" aria-hidden="true" />
               <span className={styles.paneTitle}>CMap Mail</span>
               <button
                 type="button"
