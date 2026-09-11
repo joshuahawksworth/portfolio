@@ -1,7 +1,7 @@
 import { createContext, use, useState, useCallback, useRef, useMemo } from 'react';
-import { APP_DEFAULTS, APP_MAX, APP_MIN } from '../components/apps/appRegistry';
+import { APP_DEFAULTS, APP_MIN } from '../components/apps/appRegistry';
 import { buildSeedFileSystem, ROOT_IDS, type FsNode } from '../data/fileSystemSeed';
-import { currentOs, shellInsets } from '../theme/platform';
+import { shellInsets } from '../theme/platform';
 
 export type { FsNode, FsNodeType } from '../data/fileSystemSeed';
 
@@ -525,16 +525,13 @@ export function DesktopProvider({
             height: w.savedH,
           };
         }
-        const maxDef = APP_MAX[w.appId] ?? { width: 900, height: 600 };
         const { top: menuH, bottom: dockH } = shellInsets();
-        // Windows maximises to the whole work area; macOS "zooms" to the app's ideal size.
-        const fill = currentOs() === 'windows';
-        const newW = fill ? window.innerWidth : Math.min(maxDef.width, window.innerWidth - 60);
-        const newH = fill
-          ? window.innerHeight - dockH
-          : Math.min(maxDef.height, window.innerHeight - menuH - dockH - 40);
-        const nx = fill ? 0 : Math.round((window.innerWidth - newW) / 2);
-        const ny = fill ? 0 : menuH + Math.round((window.innerHeight - menuH - dockH - newH) / 2);
+        // Both platforms fill the work area: under the menu bar and above the Dock on
+        // macOS, above the taskbar on Windows.
+        const newW = window.innerWidth;
+        const newH = window.innerHeight - menuH - dockH;
+        const nx = 0;
+        const ny = menuH;
         return {
           ...w,
           maximized: true,

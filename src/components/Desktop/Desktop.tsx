@@ -21,7 +21,7 @@ import DynamicWallpaper, { isDynamicDark, useDynamicLook } from './DynamicWallpa
 import { useWelcomeNotifications } from '../../hooks/useWelcomeNotifications';
 import { SystemUIProvider } from '../../context/SystemUIContext';
 import { useSettings } from '../../context/SettingsContext';
-import { currentOs, nodeDisplayName } from '../../theme/platform';
+import { currentOs, nodeDisplayName, shellInsets } from '../../theme/platform';
 import DesktopWidgets from './DesktopWidgets';
 import {
   DARK_WALLPAPERS,
@@ -318,6 +318,7 @@ function NokiaWindow({ win }: { win: WindowInstance }) {
 
   return (
     <div
+      data-window=""
       style={{ position: 'fixed', left: pos.x, top: pos.y, zIndex: win.zIndex, userSelect: 'none' }}
       onMouseDown={(e) => {
         e.stopPropagation();
@@ -484,6 +485,7 @@ function DuckWindow({ win }: { win: WindowInstance }) {
 
   return (
     <div
+      data-window=""
       className={styles.duckWindow}
       style={{ left: pos.x, top: pos.y, zIndex: win.zIndex }}
       onMouseDown={(e) => {
@@ -584,12 +586,30 @@ function findEmptyGridCell(taken: Record<string, IconPos>): IconPos {
       if (!hit) return { x: gx, y: gy };
     }
   }
-  // All cells full — overflow below the grid
+  // Every cell is taken: pile the rest on the grid's last cell, each a little offset,
+  // so nothing is ever placed past the edge of the screen.
   const n = Object.keys(taken).length;
+  const step = (n % 6) * 10;
   return {
-    x: gridColX(0),
-    y: startY + (n % maxRows) * rowH + maxRows * rowH,
+    x: Math.max(0, gridColX(Math.max(0, maxCols - 1)) - step),
+    y: Math.max(startY, startY + (maxRows - 1) * rowH - step),
   };
+}
+
+/** The lowest an icon's top edge can sit and stay clear of the Dock / taskbar. */
+function iconMaxY(): number {
+  return window.innerHeight - shellInsets().bottom - ICON_H;
+}
+
+/** Does an icon placed at (x, y) overlap the macOS desktop widgets? */
+function overlapsWidgets(x: number, y: number): boolean {
+  return (
+    currentOs() !== 'windows' &&
+    x < WIDGETS_RIGHT &&
+    x + ICON_W > 27 &&
+    y < WIDGETS_BOTTOM &&
+    y + ICON_H > 57
+  );
 }
 
 // All icons stack down the RIGHT side in as many columns as needed, skipping any cell
@@ -872,12 +892,15 @@ function DesktopSurface() {
     function onResize() {
       setIconPos((prev) => {
         const next = { ...prev };
-        for (const id in next) {
-          next[id] = {
-            x: Math.min(next[id].x, window.innerWidth - ICON_W - 4),
-            y: Math.min(next[id].y, window.innerHeight - ICON_H - 4),
-          };
-        }
+        const maxX = window.innerWidth - ICON_W - 4;
+        const maxY = iconMaxY();
+        // Icons the smaller window no longer has room for move to a free cell of the new
+        // grid rather than piling up on the edge.
+        const displaced = Object.keys(next).filter(
+          (id) => next[id].x > maxX || next[id].y > maxY || next[id].x < 0
+        );
+        for (const id of displaced) delete next[id];
+        for (const id of displaced) next[id] = findEmptyGridCell(next);
         return next;
       });
     }
@@ -887,7 +910,7 @@ function DesktopSurface() {
 
   useEffect(() => {
     if (renamingId) {
-      renameRef.current?.focus();
+      renameRef.current?.focus({ preventScroll: true });
       renameRef.current?.select();
     }
   }, [renamingId]);
@@ -1129,6 +1152,24 @@ function DesktopSurface() {
         return;
       }
 
+      // Dropped over the widgets or past the work area: spring back to where it started
+      const stray = dragIds.filter((did) => {
+        const p = iconPosRef.current[did];
+        if (!p) return false;
+        return (
+          overlapsWidgets(p.x, p.y) ||
+          p.x > window.innerWidth - ICON_W / 2 ||
+          p.y > iconMaxY() + ICON_H / 2
+        );
+      });
+      if (stray.length > 0) {
+        setIconPos((prev) => {
+          const next = { ...prev };
+          for (const did of stray) next[did] = origins[did];
+          return next;
+        });
+      }
+
       // Drop into trash?
       if (getHoveredTrash(ev.clientX, ev.clientY) !== null) {
         const trashable = dragIds.filter((did) => {
@@ -1153,6 +1194,12 @@ function DesktopSurface() {
 
   // ── Context menu ──────────────────────────────────────────────────────
   function onDesktopCtx(e: React.MouseEvent) {
+    const target = e.target as HTMLElement;
+    if (target.closest('[data-window]')) {
+      // Inside an app: no desktop menu. Text fields keep the browser's own menu (paste).
+      if (!target.closest('input, textarea, [contenteditable="true"]')) e.preventDefault();
+      return;
+    }
     e.preventDefault();
     setCtxMenu({ x: e.clientX, y: e.clientY });
   }
@@ -1341,6 +1388,7 @@ function DesktopSurface() {
                 for (let row = 0; row < maxRows; row++) {
                   const gx = gridColX(col);
                   const gy = startY + row * rowH;
+                  if (cellCovered(gx, gy)) continue;
                   // Skip if another icon is already close to this grid cell
                   const taken = occupied.some(
                     (p) => Math.abs(p.x - gx) < ICON_W * 0.7 && Math.abs(p.y - gy) < ICON_H * 0.7

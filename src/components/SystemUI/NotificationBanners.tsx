@@ -28,6 +28,20 @@ export function notificationAppName(appId: string, os: OsName): string {
   return appLabelFor(appId, DOCK_LABELS[appId] ?? appId, os);
 }
 
+/** A centred cross for the close buttons (the × character sits low in its box). */
+function CloseGlyph() {
+  return (
+    <svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true">
+      <path
+        d="M1.5 1.5l7 7M8.5 1.5l-7 7"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 /** The artwork a notification carries: the app's icon on the OS being rendered. */
 export function notificationIcon(appId: string, os: OsName): ReactNode {
   return appIconFor(appId, os);
@@ -180,7 +194,7 @@ function Banner({ n, os }: { n: AppNotification; os: OsName }) {
           leave('auto', () => dismissBanner(n.id));
         }}
       >
-        ×
+        <CloseGlyph />
       </button>
     </div>
   );
@@ -269,7 +283,7 @@ export function NotificationList({
                 remove(n.id);
               }}
             >
-              ×
+              <CloseGlyph />
             </button>
           </div>
         ))

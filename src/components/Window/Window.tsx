@@ -303,6 +303,7 @@ export default function Window({ win, children }: Props) {
 
   return (
     <div
+      data-window=""
       className={[
         styles.outer,
         isWindows ? styles.win : '',

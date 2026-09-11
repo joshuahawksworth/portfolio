@@ -129,6 +129,7 @@ export default function DoomWindow({ win }: { win: WindowInstance }) {
 
   return (
     <div
+      data-window=""
       className={`${styles.frame} ${focused ? styles.focused : ''} ${os === 'windows' ? styles.frameWin : ''}`}
       style={{ left: pos.x, top: pos.y, zIndex: win.zIndex }}
       onMouseDown={(e) => {
