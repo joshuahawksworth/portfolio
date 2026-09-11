@@ -131,7 +131,7 @@ export function answerLocally(question: string): string {
     return [
       `Here's how to reach Josh:`,
       `- **Email**: ${CONTACT.email}`,
-      `- **LinkedIn**: [linkedin.com/in/joshua-hawksworth](${CONTACT.linkedin})`,
+      `- **LinkedIn**: [linkedin.com/in/joshua-hawksworth-9741aa209](${CONTACT.linkedin})`,
       `- **GitHub**: [github.com/joshuahawksworth](${CONTACT.github})`,
       `- **CV**: [Download the PDF](${CONTACT.cv})`,
       ``,

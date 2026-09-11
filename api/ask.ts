@@ -22,7 +22,7 @@ const RATE_WINDOW_MS = 10 * 60 * 1000;
 const CONTACT = {
   email: 'joshuahawksworth@me.com',
   github: 'github.com/joshuahawksworth',
-  linkedin: 'linkedin.com/in/joshuahawksworth',
+  linkedin: 'linkedin.com/in/joshua-hawksworth-9741aa209',
   location: 'Manchester, UK',
 };
 

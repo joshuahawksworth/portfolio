@@ -104,7 +104,7 @@ export default function AboutApp() {
             GitHub
           </a>
           <a
-            href="https://linkedin.com/in/joshuahawksworth"
+            href="https://www.linkedin.com/in/joshua-hawksworth-9741aa209"
             target="_blank"
             rel="noreferrer"
             className={styles.socialBtn}

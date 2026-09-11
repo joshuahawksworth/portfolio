@@ -89,7 +89,7 @@ and mobile development.
 ## Contact
 - Email: joshuahawksworth@me.com
 - GitHub: github.com/joshuahawksworth
-- LinkedIn: linkedin.com/in/joshuahawksworth
+- LinkedIn: linkedin.com/in/joshua-hawksworth-9741aa209
 
 ## Tech Stack
 - **Frontend**: React, React Native, TypeScript, Vue.js
