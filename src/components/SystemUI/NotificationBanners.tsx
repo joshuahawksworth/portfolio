@@ -22,20 +22,14 @@ import { appIconFor } from '../../theme/platformIcons';
 import { appLabelFor } from '../../theme/platform';
 import { DOCK_LABELS } from '../Dock/dockConfig';
 import type { OsName } from '../../lib/settingsStore';
-import { DocumentIcon } from '../icons/FileSystemIcons';
 import styles from './Notifications.module.css';
 
 export function notificationAppName(appId: string, os: OsName): string {
   return appLabelFor(appId, DOCK_LABELS[appId] ?? appId, os);
 }
 
-/**
- * The artwork a notification carries. Windows files the CV reminder under the PDF
- * document (the same icon as the "My CV" desktop shortcut) rather than Word, which is
- * only the app that opens it; every other platform keeps its app icon.
- */
+/** The artwork a notification carries: the app's icon on the OS being rendered. */
 export function notificationIcon(appId: string, os: OsName): ReactNode {
-  if (os === 'windows' && appId === 'cv') return <DocumentIcon name="CV.pdf" />;
   return appIconFor(appId, os);
 }
 
