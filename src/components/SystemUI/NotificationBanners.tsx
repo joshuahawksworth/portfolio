@@ -4,7 +4,13 @@
  * Clicking (or the action button) runs the notification's action; hovering shows a
  * close control on desktop, and phones swipe the banner up to dismiss it.
  */
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from 'react';
 import {
   notificationAge,
   useNotifications,
@@ -15,10 +21,21 @@ import { appIconFor } from '../../theme/platformIcons';
 import { appLabelFor } from '../../theme/platform';
 import { DOCK_LABELS } from '../Dock/dockConfig';
 import type { OsName } from '../../lib/settingsStore';
+import { DocumentIcon } from '../icons/FileSystemIcons';
 import styles from './Notifications.module.css';
 
 export function notificationAppName(appId: string, os: OsName): string {
   return appLabelFor(appId, DOCK_LABELS[appId] ?? appId, os);
+}
+
+/**
+ * The artwork a notification carries. Windows files the CV reminder under the PDF
+ * document (the same icon as the "My CV" desktop shortcut) rather than Word, which is
+ * only the app that opens it; every other platform keeps its app icon.
+ */
+export function notificationIcon(appId: string, os: OsName): ReactNode {
+  if (os === 'windows' && appId === 'cv') return <DocumentIcon name="CV.pdf" />;
+  return appIconFor(appId, os);
 }
 
 const OS_CLASS: Record<OsName, string> = {
@@ -34,7 +51,7 @@ function Banner({ n, os }: { n: AppNotification; os: OsName }) {
   const leaveTimer = useRef<number | undefined>(undefined);
   const startY = useRef<number | null>(null);
   const appName = notificationAppName(n.appId, os);
-  const icon = appIconFor(n.appId, os);
+  const icon = notificationIcon(n.appId, os);
   const phone = os === 'ios' || os === 'android';
 
   function leave(then: () => void) {
@@ -183,7 +200,7 @@ export function NotificationList({
             }}
           >
             <span className={styles.icon} aria-hidden="true">
-              {appIconFor(n.appId, os)}
+              {notificationIcon(n.appId, os)}
             </span>
             <div className={styles.text}>
               <div className={styles.app}>

@@ -84,3 +84,18 @@ describe('notificationAge', () => {
     expect(notificationAge(now - 3 * 86_400_000, now)).toBe('3d ago');
   });
 });
+
+describe('notificationIcon', () => {
+  it('shows the PDF document for the CV reminder on Windows only', async () => {
+    const { notificationIcon } = await import('../../src/components/SystemUI/NotificationBanners');
+    const { render } = await import('@testing-library/react');
+    const win = render(<>{notificationIcon('cv', 'windows')}</>);
+    expect(win.container.querySelector('svg')).not.toBeNull();
+    expect(win.container.textContent).toContain('PDF');
+    win.unmount();
+
+    const mac = render(<>{notificationIcon('cv', 'macos')}</>);
+    expect(mac.container.querySelector('img')?.getAttribute('src')).toBe('/icons/pages.png');
+    expect(mac.container.textContent).not.toContain('PDF');
+  });
+});
