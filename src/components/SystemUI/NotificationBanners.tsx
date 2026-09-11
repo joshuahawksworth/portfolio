@@ -8,6 +8,7 @@ import {
   useEffect,
   useRef,
   useState,
+  type CSSProperties,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react';
@@ -45,46 +46,100 @@ const OS_CLASS: Record<OsName, string> = {
   android: styles.bannerAndroid,
 };
 
+/** How far a banner has to be dragged before letting go dismisses it. */
+const DISMISS_PX = 56;
+
 function Banner({ n, os }: { n: AppNotification; os: OsName }) {
   const { activate, dismissBanner } = useNotifications();
-  const [leaving, setLeaving] = useState(false);
+  const [leaving, setLeaving] = useState<null | 'swipe' | 'auto'>(null);
+  const [drag, setDrag] = useState<{ offset: number; live: boolean }>({ offset: 0, live: false });
   const leaveTimer = useRef<number | undefined>(undefined);
-  const startY = useRef<number | null>(null);
+  const gesture = useRef<{ id: number; start: number; moved: boolean } | null>(null);
   const appName = notificationAppName(n.appId, os);
   const icon = notificationIcon(n.appId, os);
   const phone = os === 'ios' || os === 'android';
+  // Phones swipe the banner up off the top edge; desktops slide it out to the right,
+  // the way macOS banners and Windows toasts leave.
+  const axis: 'x' | 'y' = phone ? 'y' : 'x';
 
-  function leave(then: () => void) {
+  function leave(kind: 'swipe' | 'auto', then: () => void) {
     if (leaving) return;
-    setLeaving(true);
-    leaveTimer.current = window.setTimeout(then, 200);
+    setLeaving(kind);
+    leaveTimer.current = window.setTimeout(then, 220);
   }
 
   useEffect(() => () => window.clearTimeout(leaveTimer.current), []);
 
-  // Phones: a short upward swipe puts the banner away, like the real thing.
-  function onPointerDown(e: ReactPointerEvent) {
-    if (!phone) return;
-    startY.current = e.clientY;
+  function onPointerDown(e: ReactPointerEvent<HTMLDivElement>) {
+    if (e.button !== 0 || leaving) return;
+    gesture.current = {
+      id: e.pointerId,
+      start: axis === 'y' ? e.clientY : e.clientX,
+      moved: false,
+    };
+    e.currentTarget.setPointerCapture(e.pointerId);
   }
-  function onPointerUp(e: ReactPointerEvent) {
-    if (!phone || startY.current === null) return;
-    const dy = e.clientY - startY.current;
-    startY.current = null;
-    if (dy < -28) {
-      e.preventDefault();
-      leave(() => dismissBanner(n.id));
+
+  function onPointerMove(e: ReactPointerEvent<HTMLDivElement>) {
+    const g = gesture.current;
+    if (!g || g.id !== e.pointerId) return;
+    const raw = (axis === 'y' ? e.clientY : e.clientX) - g.start;
+    // Only the dismissing direction moves the banner; the other way gives a little resistance.
+    const offset =
+      axis === 'y'
+        ? Math.min(raw, 0) + Math.max(raw, 0) * 0.15
+        : Math.max(raw, 0) + Math.min(raw, 0) * 0.15;
+    if (!g.moved && Math.abs(raw) > 6) g.moved = true;
+    if (g.moved) setDrag({ offset, live: true });
+  }
+
+  function onPointerUp(e: ReactPointerEvent<HTMLDivElement>) {
+    const g = gesture.current;
+    if (!g || g.id !== e.pointerId) return;
+    gesture.current = null;
+    if (!g.moved) return;
+    const raw = (axis === 'y' ? e.clientY : e.clientX) - g.start;
+    const past = axis === 'y' ? raw < -DISMISS_PX : raw > DISMISS_PX;
+    if (past) {
+      leave('swipe', () => dismissBanner(n.id));
+    } else {
+      setDrag({ offset: 0, live: false });
     }
   }
 
+  function onClick() {
+    // A drag that ended short of the threshold is not a tap.
+    if (drag.live || drag.offset !== 0) return;
+    leave('auto', () => activate(n.id));
+  }
+
+  const style: CSSProperties | undefined = drag.live
+    ? {
+        transform: axis === 'y' ? `translateY(${drag.offset}px)` : `translateX(${drag.offset}px)`,
+        opacity: Math.max(0.35, 1 - Math.abs(drag.offset) / 220),
+        transition: 'none',
+      }
+    : undefined;
+
   return (
     <div
-      className={`${styles.banner} ${OS_CLASS[os]} ${leaving ? styles.bannerLeaving : ''}`}
+      className={[
+        styles.banner,
+        OS_CLASS[os],
+        leaving ? styles.bannerLeaving : '',
+        leaving === 'swipe' ? styles.bannerSwiped : '',
+      ].join(' ')}
+      style={style}
       role="status"
       aria-live="polite"
-      onClick={() => leave(() => activate(n.id))}
+      onClick={onClick}
       onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
+      onPointerCancel={() => {
+        gesture.current = null;
+        setDrag({ offset: 0, live: false });
+      }}
     >
       <span className={styles.icon} aria-hidden="true">
         {icon}
@@ -115,19 +170,20 @@ function Banner({ n, os }: { n: AppNotification; os: OsName }) {
           className={styles.action}
           onClick={(e) => {
             e.stopPropagation();
-            leave(() => activate(n.id));
+            leave('auto', () => activate(n.id));
           }}
         >
-          {os === 'android' ? 'Open' : 'Open'}
+          Open
         </button>
       )}
       <button
         type="button"
         className={styles.close}
         aria-label="Close notification"
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
-          leave(() => dismissBanner(n.id));
+          leave('auto', () => dismissBanner(n.id));
         }}
       >
         ×
