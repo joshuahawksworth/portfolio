@@ -37,7 +37,6 @@ import Window from '../Window/Window';
 import SnakeApp from '../apps/SnakeApp';
 import RubberDuckApp from '../apps/RubberDuckApp';
 import { APP_COMPONENTS } from '../apps/appRegistry';
-import { jobsData } from '../../data/experienceData';
 import styles from './Desktop.module.css';
 
 type SpacePhase = 'ready' | 'playing' | 'hit';
@@ -509,7 +508,6 @@ interface DesktopItem {
   id: string;
   type: FsNode['type'];
   label: string;
-  jobId?: string;
   appId?: string;
   node: FsNode;
 }
@@ -531,7 +529,6 @@ function toItem(node: FsNode): DesktopItem {
     id: node.id,
     type: node.type,
     label: node.name,
-    jobId: node.jobId,
     appId: node.appId,
     node,
   };
@@ -610,10 +607,6 @@ function GetInfoModal({
   const isDesktop = target === 'desktop';
   const name = isDesktop ? 'Desktop' : (target as DesktopItem).label;
   const kind = isDesktop ? 'Folder' : nodeKind((target as DesktopItem).node);
-  const jobInfo =
-    !isDesktop && (target as DesktopItem).jobId
-      ? jobsData.find((j) => j.id === (target as DesktopItem).jobId)
-      : null;
   const ua = navigator.userAgent;
   const browser = /Firefox/.test(ua)
     ? 'Firefox'
@@ -675,17 +668,6 @@ function GetInfoModal({
                   <tr>
                     <td>Bundler:</td>
                     <td>Vite</td>
-                  </tr>
-                </>
-              ) : jobInfo ? (
-                <>
-                  <tr>
-                    <td>Role:</td>
-                    <td>{jobInfo.role}</td>
-                  </tr>
-                  <tr>
-                    <td>Period:</td>
-                    <td>{jobInfo.period}</td>
                   </tr>
                 </>
               ) : (
@@ -781,17 +763,14 @@ function DesktopSurface() {
   useWelcomeNotifications();
   const dynamicLook = useDynamicLook(wallpaper);
 
-  // Desktop icons are simply the children of the Desktop folder. Xcode only ships on
-  // a Mac, so its shortcut stays off the Windows desktop.
+  // Desktop icons are simply the children of the Desktop folder.
   const items = useMemo(
     () =>
-      childrenOf(ROOT_IDS.desktop)
-        .filter((node) => !(isWindows && node.id === 'shortcut-xcode'))
-        .map((node) => {
-          const item = toItem(node);
-          return { ...item, label: nodeDisplayName(node.id, item.label, os) };
-        }),
-    [childrenOf, os, isWindows]
+      childrenOf(ROOT_IDS.desktop).map((node) => {
+        const item = toItem(node);
+        return { ...item, label: nodeDisplayName(node.id, item.label, os) };
+      }),
+    [childrenOf, os]
   );
 
   const [iconPos, setIconPos] = useState<Record<string, IconPos>>(() => initPositions(items));
@@ -1247,8 +1226,9 @@ function DesktopSurface() {
       onDragOver={onDesktopDragOver}
       onDrop={onDesktopDrop}
     >
-      {/* Every wallpaper for this OS stays mounted so switching is instant */}
-      {availableWallpapersFor(os).map((key) => (
+      {/* Every wallpaper for this OS stays mounted so switching is instant. The current one
+          is always included: a fallback from another OS's set still has to render. */}
+      {[...new Set([...availableWallpapersFor(os), wallpaper])].map((key) => (
         <div
           key={key}
           className={`${styles.wallpaper} ${key === wallpaper ? styles.wallpaperActive : ''}`}

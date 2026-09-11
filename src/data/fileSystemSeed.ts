@@ -7,8 +7,9 @@
  */
 import { FINDER_FILE_CONTENTS } from '../components/apps/TextEditorApp';
 import { CV_URL } from '../lib/cv';
+import { currentOs, isAppleOs } from '../theme/platform';
 
-export type FsNodeType = 'folder' | 'file' | 'image' | 'app' | 'job';
+export type FsNodeType = 'folder' | 'file' | 'image' | 'app';
 
 export interface FsNode {
   id: string;
@@ -22,7 +23,6 @@ export interface FsNode {
   /** Opens in a new tab instead of an app (CV.pdf). */
   url?: string;
   appId?: string;
-  jobId?: string;
   /** System items: can't be renamed, trashed or moved (Macintosh HD, Trash, the roots). */
   locked?: boolean;
   /** Joke files that were "always" in the Trash. */
@@ -88,8 +88,10 @@ function folder(
   return { id, parentId, name, type: 'folder', ...extra };
 }
 
+/** Apps in /Applications. Finder and the Trash are part of the system; the rest can be binned. */
 function app(id: string, appId: string, name: string): Seed {
-  return { id, parentId: 'applications', name, type: 'app', appId, locked: true };
+  const system = appId === 'finder' || appId === 'trash';
+  return { id, parentId: 'applications', name, type: 'app', appId, locked: system || undefined };
 }
 
 const SECRET_CODES = {
@@ -234,9 +236,17 @@ const SEEDS: Seed[] = [
   ),
 ];
 
+/** Xcode ships with a Mac and Android Studio with the Windows PC: each platform gets its own IDE. */
+const APPLE_ONLY = new Set(['shortcut-xcode', 'app-xcode']);
+const WINDOWS_ONLY = new Set(['shortcut-androidstudio', 'app-androidstudio']);
+
+export function seedsForOs(apple: boolean): Seed[] {
+  return SEEDS.filter((s) => (apple ? !WINDOWS_ONLY.has(s.id) : !APPLE_ONLY.has(s.id)));
+}
+
 export function buildSeedFileSystem(): Record<string, FsNode> {
   const nodes: Record<string, FsNode> = {};
-  SEEDS.forEach((s, i) => {
+  seedsForOs(isAppleOs(currentOs())).forEach((s, i) => {
     const { at, ...rest } = s;
     // Spread creation times by a few ms so insertion order survives sorting by date.
     const stamp = (at ?? INSTALLED) + i;

@@ -4,7 +4,6 @@
  */
 import type { CSSProperties } from 'react';
 import type { FsNode } from '../../context/DesktopContext';
-import { jobsData } from '../../data/experienceData';
 import { DocumentIcon, PictureIcon } from './FileSystemIcons';
 import { NokiaIcon } from './NokiaIcon';
 import { PlatformBinIcon, PlatformDriveIcon, PlatformFolderIcon } from './PlatformFileIcons';
@@ -47,44 +46,6 @@ export function NodeIcon({
       );
     }
     return <PlatformFolderIcon os={os} size={size} />;
-  }
-
-  if (node.type === 'job') {
-    const job = jobsData.find((j) => j.id === node.jobId);
-    // No white tile: the company mark itself is rounded like an app icon.
-    const tile: CSSProperties = {
-      width: size,
-      height: size,
-      borderRadius: Math.round(size * 0.22),
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      overflow: 'hidden',
-      flexShrink: 0,
-      boxSizing: 'border-box',
-    };
-    return (
-      <span style={tile}>
-        {job?.logo ? (
-          <img
-            src={job.logo}
-            alt=""
-            draggable={false}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              display: 'block',
-              borderRadius: Math.round(size * 0.22),
-            }}
-          />
-        ) : (
-          <span style={{ fontWeight: 700, color: '#262422', fontSize: size * 0.4 }}>
-            {node.name[0]}
-          </span>
-        )}
-      </span>
-    );
   }
 
   if (node.type === 'app') {
@@ -163,8 +124,6 @@ export function nodeKind(node: FsNode): string {
       return 'Folder';
     case 'app':
       return 'Application';
-    case 'job':
-      return 'Work Experience';
     case 'image':
       return 'Image';
     default: {

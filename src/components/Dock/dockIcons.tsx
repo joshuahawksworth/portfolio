@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useId, useState, type ReactNode } from 'react';
 import { AboutLogoIcon } from '../icons/AboutLogoIcon';
 import { CalculatorLogoIcon } from '../icons/CalculatorLogoIcon';
 import { TrashBinIcon } from '../icons/FileSystemIcons';
@@ -71,7 +71,7 @@ const DRAWN_ICONS = {
       />
     </MacIcon>
   ),
-  github: <GitHubDesktopIcon />,
+  github: <BrandIcon src="/icons/github-desktop.png" fallback={<GitHubDesktopIcon />} />,
   about: <AboutLogoIcon size={44} style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.35)' }} />,
   experience: (
     <MacIcon top="#ffa030" bottom="#c25c00">
@@ -253,14 +253,14 @@ const DRAWN_ICONS = {
       <path d="M10 19.5 Q6.5 20.5 8.5 22.5 Q11 23 12.5 21.5 Z" fill="#ff7a1a" />
     </MacIcon>
   ),
-  texteditor: <VSCodeIcon />,
-  outlook: <OutlookIcon />,
-  postman: <PostmanIcon />,
-  xcode: <XcodeIcon />,
-  androidstudio: <AndroidStudioIcon />,
-  spotify: <SpotifyIcon />,
-  word: <WordIcon />,
-  appstore: <AppStoreIcon />,
+  texteditor: <BrandIcon src="/icons/vscode.png" fallback={<VSCodeIcon />} />,
+  outlook: <BrandIcon src="/icons/outlook.png" fallback={<OutlookIcon />} />,
+  postman: <BrandIcon src="/icons/postman.png" fallback={<PostmanIcon />} />,
+  xcode: <BrandIcon src="/icons/xcode.png" fallback={<XcodeIcon />} />,
+  androidstudio: <BrandIcon src="/icons/android-studio.png" fallback={<AndroidStudioIcon />} />,
+  spotify: <BrandIcon src="/icons/spotify.png" fallback={<SpotifyIcon />} />,
+  word: <BrandIcon src="/icons/word.png" fallback={<WordIcon />} />,
+  appstore: <BrandIcon src="/icons/app-store.png" fallback={<AppStoreIcon />} />,
 };
 
 export type DockIconKey = keyof typeof DOCK_ICONS;
@@ -275,10 +275,12 @@ export function RealIcon({
   src,
   rounded = false,
   scale = rounded ? 0.82 : 1,
+  onError,
 }: {
   src: string;
   rounded?: boolean;
   scale?: number;
+  onError?: () => void;
 }) {
   const size = `calc(var(--app-icon-size, 50px) * ${scale})`;
   return (
@@ -297,6 +299,7 @@ export function RealIcon({
         src={src}
         alt=""
         draggable={false}
+        onError={onError}
         style={{
           width: size,
           height: size,
@@ -306,6 +309,37 @@ export function RealIcon({
         }}
       />
     </span>
+  );
+}
+
+const missingArtwork = new Set<string>();
+
+/**
+ * Brand artwork for a third-party app. Renders the official render from public/icons when
+ * the file is there and falls back to the drawn tile when it isn't, so the desktop never
+ * shows a broken image. Add the PNG (a square, full-bleed render like mail.png) and the
+ * real icon appears with no code change.
+ */
+export function BrandIcon({
+  src,
+  fallback,
+  rounded = true,
+}: {
+  src: string;
+  fallback: ReactNode;
+  rounded?: boolean;
+}) {
+  const [missing, setMissing] = useState(() => missingArtwork.has(src));
+  if (missing) return <>{fallback}</>;
+  return (
+    <RealIcon
+      src={src}
+      rounded={rounded}
+      onError={() => {
+        missingArtwork.add(src);
+        setMissing(true);
+      }}
+    />
   );
 }
 
