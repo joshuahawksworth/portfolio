@@ -91,7 +91,7 @@ export default function AppStoreApp() {
     return cat.ids.map((id) => byId.get(id)).filter((a): a is SystemApp => !!a);
   }, [apps, byId, category, query]);
 
-  const featured = ['experience', 'xcode', 'githubdesktop']
+  const featured = ['experience', win ? 'androidstudio' : 'xcode', 'githubdesktop']
     .map((id) => byId.get(id))
     .filter((a): a is SystemApp => !!a);
 

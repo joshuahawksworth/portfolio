@@ -6,6 +6,7 @@
  */
 import { useId, type ReactNode } from 'react';
 import { MicrosoftStoreIcon } from './DevAppIcons';
+import { BrandIcon } from '../Dock/dockIcons';
 
 function Svg({ children, title }: { children: ReactNode; title?: string }) {
   return (
@@ -342,12 +343,12 @@ export const WINDOWS_ICONS = {
   experience: <BriefcaseIcon />,
   skills: <SkillsIcon />,
   contact: <WinMailIcon />,
-  outlook: <OutlookIcon />,
+  outlook: <BrandIcon src="/icons/outlook.png" fallback={<OutlookIcon />} />,
   location: <WinMapsIcon />,
   terminal: <WinTerminalIcon />,
   calculator: <WinCalculatorIcon />,
   cv: <WordIcon />,
-  appstore: <MicrosoftStoreIcon />,
+  appstore: <BrandIcon src="/icons/microsoft-store.png" fallback={<MicrosoftStoreIcon />} />,
   imageviewer: <WinPhotosIcon />,
   settings: <WinSettingsIcon />,
   shortcuts: <WinKeyboardIcon />,

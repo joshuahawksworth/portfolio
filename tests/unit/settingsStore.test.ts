@@ -62,7 +62,7 @@ describe('settings store', () => {
     const loaded = loadSettings();
     expect(loaded.wallpaper.macos).toBe('tahoe');
     expect(loaded.wallpaper.ios).toBe('tahoe');
-    expect(wallpaperFor('windows', loaded.wallpaper)).toBe('bloom');
+    expect(wallpaperFor('windows', loaded.wallpaper)).toBe('win11');
     expect(wallpaperFor('android', loaded.wallpaper)).toBe('pixel');
   });
 

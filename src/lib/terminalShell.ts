@@ -1359,7 +1359,6 @@ function tokenize(line: string): string[] {
 
 function fileText(node: FsNode): string {
   if (node.type === 'app') return `<application bundle: ${node.name}>`;
-  if (node.type === 'job') return `<work experience: ${node.name} — open it from the desktop>`;
   if (node.type === 'image') return '<binary image data>';
   if (node.url) return `<PDF document: ${node.name}>`;
   return node.content ?? '';

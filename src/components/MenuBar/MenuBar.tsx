@@ -123,7 +123,6 @@ export default function MenuBar() {
       { label: 'Outlook', action: () => openApp('outlook') },
       { label: 'Postman', action: () => openApp('postman') },
       { label: 'Xcode', action: () => openApp('xcode') },
-      { label: 'Android Studio', action: () => openApp('androidstudio') },
       { label: 'Word', action: () => openApp('word') },
       { label: 'Spotify', action: () => openApp('spotify') },
       { label: 'App Store', action: () => openApp('appstore') },

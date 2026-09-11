@@ -6,26 +6,22 @@
 import type { OsName } from '../lib/settingsStore';
 
 export const WALLPAPERS = {
-  // "The Beach" is Apple's dynamic Big Sur wallpaper and therefore copyrighted, so it is
-  // not shipped either: drop the-beach.jpg (day) and, optionally, the-beach-night.jpg into
-  // public/wallpapers/ and it becomes the default on macOS and iOS. Without the file
-  // both fall back to Golden Gate, so the desktop and the phone always match.
+  // "The Beach", Apple's dynamic Big Sur wallpaper: the-beach.jpg (day) and, optionally,
+  // the-beach-night.jpg in public/wallpapers/. It is the default on macOS and iOS; until
+  // the file is committed both fall back to Golden Gate, so desktop and phone always match.
   beach: '/wallpapers/the-beach.jpg',
   gold: '/wallpapers/golden-gate.jpg',
   catalina: '/wallpapers/catalina-night.jpg',
   tahoe: '/wallpapers/tahoe-day.jpg',
   wave: '/wallpapers/blue-wave.jpg',
-  bloom: '/wallpapers/windows-bloom.svg',
-  bloomDark: '/wallpapers/windows-bloom-dark.svg',
-  spectrum: '/wallpapers/windows-spectrum.svg',
   pixel: '/wallpapers/android-pixel.svg',
   pixelDark: '/wallpapers/android-pixel-dark.svg',
   pixelCoral: '/wallpapers/android-pixel-coral.svg',
-  // Optional real Windows backgrounds. Microsoft's wallpapers are copyrighted, so they are
-  // not shipped with the repo: drop your own copies into public/wallpapers/ under these
-  // names and they appear in the Windows set automatically (see OPTIONAL_WALLPAPERS).
-  win11: '/wallpapers/windows-11-bloom.jpg',
-  win10: '/wallpapers/windows-10-hero.jpg',
+  // The Windows 11 and 10 backgrounds ship with the repo. Windows 7 and XP are optional:
+  // drop your own copies into public/wallpapers/ under these names and they join the
+  // Windows set automatically (see OPTIONAL_WALLPAPERS).
+  win11: '/wallpapers/windows-11.jpg',
+  win10: '/wallpapers/windows-10.jpg',
   win7: '/wallpapers/windows-7-harmony.jpg',
   winxp: '/wallpapers/windows-xp-bliss.jpg',
 } as const;
@@ -33,8 +29,6 @@ export const WALLPAPERS = {
 /** Wallpapers that only show up when the file actually exists on the server. */
 export const OPTIONAL_WALLPAPERS: ReadonlySet<WallpaperKey> = new Set<WallpaperKey>([
   'beach',
-  'win11',
-  'win10',
   'win7',
   'winxp',
 ]);
@@ -49,9 +43,6 @@ export const WALLPAPER_LABELS: Record<WallpaperKey, string> = {
   catalina: 'Catalina',
   tahoe: 'Tahoe',
   wave: 'Sequoia',
-  bloom: 'Bloom',
-  bloomDark: 'Bloom (Dark)',
-  spectrum: 'Spectrum',
   pixel: 'Minimal',
   pixelDark: 'Minimal (Dark)',
   pixelCoral: 'Coral',
@@ -65,7 +56,6 @@ export const WALLPAPER_LABELS: Record<WallpaperKey, string> = {
 export const DARK_WALLPAPERS: ReadonlySet<WallpaperKey> = new Set<WallpaperKey>([
   'catalina',
   'wave',
-  'bloomDark',
   'pixelDark',
   'win10',
 ]);
@@ -83,14 +73,14 @@ export const DYNAMIC_NIGHT_IMAGES: Partial<Record<WallpaperKey, string>> = {
 export const WALLPAPERS_FOR_OS: Record<OsName, WallpaperKey[]> = {
   macos: APPLE_SET,
   ios: APPLE_SET,
-  windows: ['win11', 'win10', 'win7', 'winxp', 'bloom', 'bloomDark', 'spectrum'],
+  windows: ['win11', 'win10', 'win7', 'winxp'],
   android: ['pixel', 'pixelDark', 'pixelCoral'],
 };
 
 export const DEFAULT_WALLPAPER: Record<OsName, WallpaperKey> = {
   macos: 'beach',
   ios: 'beach',
-  windows: 'bloom',
+  windows: 'win11',
   android: 'pixel',
 };
 
@@ -98,13 +88,15 @@ export const DEFAULT_WALLPAPER: Record<OsName, WallpaperKey> = {
 const FALLBACK_WALLPAPER: Record<OsName, WallpaperKey> = {
   macos: 'gold',
   ios: 'gold',
-  windows: 'bloom',
+  windows: 'win11',
   android: 'pixel',
 };
 
 export function defaultWallpaperFor(os: OsName): WallpaperKey {
+  // The first of the OS's set that is actually on the server, else the shipped fallback.
   const preferred = DEFAULT_WALLPAPER[os];
-  return isWallpaperAvailable(preferred) ? preferred : FALLBACK_WALLPAPER[os];
+  if (isWallpaperAvailable(preferred)) return preferred;
+  return WALLPAPERS_FOR_OS[os].find(isWallpaperAvailable) ?? FALLBACK_WALLPAPER[os];
 }
 
 const LEGACY_STORAGE_KEY = 'portfolio.wallpaper';

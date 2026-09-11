@@ -4,7 +4,7 @@ import { useMemo, type ReactNode } from 'react';
 import { PORTFOLIO_APPS, type PortfolioAppId } from '../apps/appRegistry';
 import { DOCK_LABELS, getDockAction } from '../Dock/dockConfig';
 import { appIconFor } from '../../theme/platformIcons';
-import { appLabelFor, appTitleFor } from '../../theme/platform';
+import { appLabelFor, appTitleFor, isAppleOs } from '../../theme/platform';
 import type { OsName } from '../../lib/settingsStore';
 import { useOs } from '../../context/SettingsContext';
 
@@ -50,8 +50,15 @@ const ENTRIES: Entry[] = [
   { id: 'trash' },
 ];
 
+/** Xcode is a Mac app and Android Studio lives on the Windows PC. */
+function shipsOn(id: PortfolioAppId, os: OsName): boolean {
+  if (id === 'xcode') return isAppleOs(os);
+  if (id === 'androidstudio') return !isAppleOs(os);
+  return true;
+}
+
 export function systemAppsFor(os: OsName): SystemApp[] {
-  return ENTRIES.map(({ id, dockKey }) => {
+  return ENTRIES.filter(({ id }) => shipsOn(id, os)).map(({ id, dockKey }) => {
     const baseTitle = PORTFOLIO_APPS[id].title;
     const baseLabel = (dockKey && DOCK_LABELS[dockKey]) || DOCK_LABELS[id] || baseTitle;
     return {

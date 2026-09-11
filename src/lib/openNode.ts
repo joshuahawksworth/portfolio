@@ -9,13 +9,6 @@ export type OpenTarget =
 export function openTargetFor(node: FsNode): OpenTarget {
   if (node.type === 'folder') return { kind: 'folder', id: node.id };
   if (node.url) return { kind: 'url', url: node.url };
-  if (node.type === 'job') {
-    return {
-      kind: 'app',
-      appId: 'experience',
-      props: { jobId: node.jobId, title: node.name },
-    };
-  }
   if (node.type === 'app') {
     return { kind: 'app', appId: node.appId ?? 'finder' };
   }
