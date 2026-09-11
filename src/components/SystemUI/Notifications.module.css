@@ -527,6 +527,11 @@
   font-size: 11px;
 }
 
+/* Leave room for that close button so it never sits over the age ("now", "3m ago") */
+.item .app {
+  padding-right: 22px;
+}
+
 .item:hover .close {
   opacity: 1;
 }
