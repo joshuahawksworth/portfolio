@@ -325,7 +325,8 @@ function IconFrame({
 // Real app artwork (see public/icons). macOS-style icons carry their own margin,
 // so they're scaled up to fill the iOS squircle; iOS-style ones fit as-is.
 const ICON_IMAGES: Record<string, { src: string; scale?: number; bg?: string }> = {
-  finder: { src: '/icons/finder.png', scale: 1.28 },
+  // The phone's file manager is Files, not Finder
+  finder: { src: '/icons/files.png' },
   terminal: { src: '/icons/terminal.png', scale: 1.28 },
   texteditor: { src: '/icons/textedit.png', scale: 1.28 },
   imageviewer: { src: '/icons/preview.png' },

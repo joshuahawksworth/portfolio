@@ -8,12 +8,7 @@ export interface AboutLogoIconProps {
   style?: React.CSSProperties;
 }
 
-export function AboutLogoIcon({
-  size = 44,
-  alt = 'About',
-  className,
-  style,
-}: AboutLogoIconProps) {
+export function AboutLogoIcon({ size = 44, alt = 'About', className, style }: AboutLogoIconProps) {
   const radius = Math.round(size * 0.25);
 
   return (
@@ -32,7 +27,12 @@ export function AboutLogoIcon({
       }}
     >
       <rect width="211.6694" height="211.66731" fill="#f7df1e" />
-      <path fill="#1a1a1a" d={JH_PATH} />
+      {/* Inset so the H clears the rounded corner at every radius */}
+      <path
+        fill="#1a1a1a"
+        d={JH_PATH}
+        transform="translate(105.83 105.83) scale(0.84) translate(-105.83 -105.83)"
+      />
     </svg>
   );
 }

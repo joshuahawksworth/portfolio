@@ -3,7 +3,8 @@
  * home screen with a handful of stock apps (which explain that they're props) and one
  * working app: Arcus Engineer, a light mock of the work-order app Josh built at Arcus FM.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { ANDROID_ICONS } from '../icons/AndroidIcons';
 import arcusLogo from '../../assets/company-logos/arcusfm.png';
 import styles from './PhoneSimulator.module.css';
 
@@ -67,27 +68,56 @@ const WORK_ORDERS: WorkOrder[] = [
   },
 ];
 
-const STOCK_APPS: Record<SimPlatform, { id: string; label: string; bg: string; glyph: string }[]> =
-  {
-    ios: [
-      { id: 'messages', label: 'Messages', bg: '#34c759', glyph: '💬' },
-      { id: 'safari', label: 'Safari', bg: '#1b8cff', glyph: '🧭' },
-      { id: 'photos', label: 'Photos', bg: '#ffffff', glyph: '🌸' },
-      { id: 'maps', label: 'Maps', bg: '#4cd964', glyph: '🗺️' },
-      { id: 'camera', label: 'Camera', bg: '#8e8e93', glyph: '📷' },
-      { id: 'settings', label: 'Settings', bg: '#8e8e93', glyph: '⚙️' },
-      { id: 'testflight', label: 'TestFlight', bg: '#1b8cff', glyph: '✈️' },
-    ],
-    android: [
-      { id: 'messages', label: 'Messages', bg: '#1a73e8', glyph: '💬' },
-      { id: 'chrome', label: 'Chrome', bg: '#ffffff', glyph: '🌐' },
-      { id: 'photos', label: 'Photos', bg: '#ffffff', glyph: '🌸' },
-      { id: 'maps', label: 'Maps', bg: '#ffffff', glyph: '🗺️' },
-      { id: 'camera', label: 'Camera', bg: '#ffffff', glyph: '📷' },
-      { id: 'settings', label: 'Settings', bg: '#e8eaed', glyph: '⚙️' },
-      { id: 'play', label: 'Play Store', bg: '#ffffff', glyph: '▶️' },
-    ],
-  };
+/**
+ * The stock apps on the simulator's home screen wear the same artwork as the rest of
+ * the site: the iPhone the iOS renders in public/icons, the Pixel the Material discs.
+ */
+interface StockApp {
+  id: string;
+  label: string;
+  icon: ReactNode;
+}
+
+function IosIcon({ src, scale = 1 }: { src: string; scale?: number }) {
+  return (
+    <img
+      src={src}
+      alt=""
+      draggable={false}
+      style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }}
+    />
+  );
+}
+
+const STOCK_APPS: Record<SimPlatform, StockApp[]> = {
+  ios: [
+    { id: 'messages', label: 'Messages', icon: <IosIcon src="/icons/messages.png" /> },
+    { id: 'safari', label: 'Safari', icon: <IosIcon src="/icons/safari.png" /> },
+    { id: 'photos', label: 'Photos', icon: <IosIcon src="/icons/photos.png" /> },
+    { id: 'maps', label: 'Maps', icon: <IosIcon src="/icons/maps.png" /> },
+    { id: 'mail', label: 'Mail', icon: <IosIcon src="/icons/mail.png" /> },
+    { id: 'notes', label: 'Notes', icon: <IosIcon src="/icons/notes.png" /> },
+    { id: 'files', label: 'Files', icon: <IosIcon src="/icons/files.png" /> },
+    { id: 'settings', label: 'Settings', icon: <IosIcon src="/icons/settings.png" scale={1.28} /> },
+    { id: 'testflight', label: 'TestFlight', icon: <IosIcon src="/icons/testflight.png" /> },
+  ],
+  android: [
+    { id: 'gmail', label: 'Gmail', icon: ANDROID_ICONS.contact },
+    { id: 'maps', label: 'Maps', icon: ANDROID_ICONS.location },
+    { id: 'chrome', label: 'Chrome', icon: ANDROID_ICONS.safari },
+    { id: 'photos', label: 'Photos', icon: ANDROID_ICONS.imageviewer },
+    { id: 'calculator', label: 'Calculator', icon: ANDROID_ICONS.calculator },
+    { id: 'keep', label: 'Keep', icon: ANDROID_ICONS.texteditor },
+    { id: 'files', label: 'Files', icon: ANDROID_ICONS.finder },
+    { id: 'settings', label: 'Settings', icon: ANDROID_ICONS.settings },
+  ],
+};
+
+/** The four the home-screen dock keeps. */
+const DOCK_IDS: Record<SimPlatform, string[]> = {
+  ios: ['messages', 'safari', 'mail', 'settings'],
+  android: ['gmail', 'maps', 'chrome', 'settings'],
+};
 
 type Screen = { kind: 'home' } | { kind: 'stock'; id: string } | { kind: 'arcus' };
 
@@ -169,35 +199,39 @@ export default function PhoneSimulator({
                       className={styles.app}
                       onClick={() => setScreen({ kind: 'stock', id: a.id })}
                     >
-                      <span className={styles.appIcon} style={{ background: a.bg }}>
-                        <span aria-hidden="true">{a.glyph}</span>
+                      <span className={styles.appIcon} aria-hidden="true">
+                        {a.icon}
                       </span>
                       <span className={styles.appLabel}>{a.label}</span>
                     </button>
                   ))}
                 </div>
                 <div className={styles.dock}>
-                  {STOCK_APPS[platform].slice(0, 4).map((a) => (
-                    <button
-                      key={a.id}
-                      type="button"
-                      className={styles.dockApp}
-                      onClick={() => setScreen({ kind: 'stock', id: a.id })}
-                      aria-label={a.label}
-                    >
-                      <span className={styles.appIcon} style={{ background: a.bg }}>
-                        <span aria-hidden="true">{a.glyph}</span>
-                      </span>
-                    </button>
-                  ))}
+                  {DOCK_IDS[platform].map((id) => {
+                    const a = STOCK_APPS[platform].find((s) => s.id === id);
+                    if (!a) return null;
+                    return (
+                      <button
+                        key={a.id}
+                        type="button"
+                        className={styles.dockApp}
+                        onClick={() => setScreen({ kind: 'stock', id: a.id })}
+                        aria-label={a.label}
+                      >
+                        <span className={styles.appIcon} aria-hidden="true">
+                          {a.icon}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
 
             {screen.kind === 'stock' && (
               <div className={styles.stock}>
-                <div className={styles.stockGlyph} aria-hidden="true">
-                  {STOCK_APPS[platform].find((a) => a.id === screen.id)?.glyph}
+                <div className={`${styles.appIcon} ${styles.stockGlyph}`} aria-hidden="true">
+                  {STOCK_APPS[platform].find((a) => a.id === screen.id)?.icon}
                 </div>
                 <h4>{STOCK_APPS[platform].find((a) => a.id === screen.id)?.label}</h4>
                 <p>
