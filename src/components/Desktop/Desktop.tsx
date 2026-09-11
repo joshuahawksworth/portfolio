@@ -522,7 +522,9 @@ interface CtxMenu {
 const ICON_W = 76;
 const ICON_H = 84;
 const ICON_GAP = 8;
-const BOUNCE_MS = 1100; // matches dockBounce in Dock.module.css; windows open immediately
+// The dock reports when its launch bounce ends; this only clears a bounce whose animationend
+// never arrived (animations disabled, tab hidden). Windows open immediately regardless.
+const BOUNCE_MS = 4000;
 
 function toItem(node: FsNode): DesktopItem {
   return {
@@ -939,6 +941,15 @@ function DesktopSurface() {
   }
 
   // ── Open with bounce animation ─────────────────────────────────────────
+  function clearBounce(dockKey: string) {
+    setBouncingKeys((prev) => {
+      if (!prev.has(dockKey)) return prev;
+      const n = new Set(prev);
+      n.delete(dockKey);
+      return n;
+    });
+  }
+
   function openWithBounce(dockKey: string, appId: string, props?: Record<string, unknown>) {
     // Skip animation entirely when an instance of this app is already running
     const alreadyRunning = windows.some((w) => w.appId === appId && !w.minimized);
@@ -1408,6 +1419,7 @@ function DesktopSurface() {
       {!isWindows && (
         <Dock
           bouncingKeys={bouncingKeys}
+          onBounceEnd={clearBounce}
           onItemActivate={handleDockActivate}
           trashHighlighted={nearTrashTarget === 'dock'}
         />

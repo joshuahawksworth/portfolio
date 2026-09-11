@@ -5,18 +5,15 @@
   /* transform-origin is set inline to the dock's position (used when minimising) */
   /* No fill mode: a persisting opacity animation would make this element a backdrop
      root, so the window's backdrop-filter would stop blurring the windows behind it. */
-  animation: windowIn 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: windowIn 340ms cubic-bezier(0.25, 0.7, 0.3, 1);
 }
 
-/* macOS: the window grows out of its dock icon (transform-origin is set inline) and
-   fades in on the way, decelerating smoothly with no overshoot. */
+/* macOS: the window eases up from its dock icon (transform-origin is set inline),
+   fading in on the way, with a gentle deceleration and no overshoot. */
 @keyframes windowIn {
   from {
     opacity: 0;
-    transform: scale(0.35);
-  }
-  35% {
-    opacity: 1;
+    transform: scale(0.82);
   }
   to {
     opacity: 1;
