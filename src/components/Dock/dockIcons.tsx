@@ -256,7 +256,9 @@ const DRAWN_ICONS = {
   texteditor: <BrandIcon src="/icons/vscode.png" fallback={<VSCodeIcon />} />,
   outlook: <BrandIcon src="/icons/outlook.png" fallback={<OutlookIcon />} />,
   postman: <BrandIcon src="/icons/postman.png" fallback={<PostmanIcon />} />,
-  xcode: <BrandIcon src="/icons/xcode.png" fallback={<XcodeIcon />} />,
+  // Apple's Xcode render carries its own margin (and the hammer overhangs the tile), so it
+  // is not squircle-clipped like the full-bleed brand icons.
+  xcode: <BrandIcon src="/icons/xcode.png" fallback={<XcodeIcon />} rounded={false} />,
   androidstudio: <BrandIcon src="/icons/android-studio.png" fallback={<AndroidStudioIcon />} />,
   spotify: <BrandIcon src="/icons/spotify.png" fallback={<SpotifyIcon />} />,
   word: <BrandIcon src="/icons/word.png" fallback={<WordIcon />} />,
@@ -343,46 +345,9 @@ export function BrandIcon({
   );
 }
 
-function GitHubAppIcon() {
-  // The GitHub app icon: the official white Invertocat on GitHub's dark tile
-  return (
-    <span
-      style={{
-        width: 'var(--app-icon-size, 50px)',
-        height: 'var(--app-icon-size, 50px)',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
-      }}
-    >
-      <span
-        style={{
-          width: 'calc(var(--app-icon-size, 50px) * 0.82)',
-          height: 'calc(var(--app-icon-size, 50px) * 0.82)',
-          borderRadius: '22.5%',
-          background: '#0d1117',
-          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <img
-          src="/icons/github-mark-white.png"
-          alt=""
-          draggable={false}
-          style={{ width: '68%', height: '68%', display: 'block' }}
-        />
-      </span>
-    </span>
-  );
-}
-
 const REAL_ICONS = {
   finder: <RealIcon src="/icons/finder.png" />,
   safari: <RealIcon src="/icons/chrome.png" scale={0.82} />,
-  github: <GitHubAppIcon />,
   askjosh: <RealIcon src="/icons/claude.png" rounded />,
   contact: <RealIcon src="/icons/mail.png" rounded />,
   location: <RealIcon src="/icons/maps.png" rounded />,
