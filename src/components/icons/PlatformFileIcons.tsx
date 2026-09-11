@@ -4,7 +4,8 @@
  */
 import type { CSSProperties, ReactNode } from 'react';
 import type { OsName } from '../../lib/settingsStore';
-import { FolderIcon, MacintoshHDIcon, TrashBinIcon } from './FileSystemIcons';
+import { FolderIcon, MacintoshHDIcon } from './FileSystemIcons';
+import { MacTrashIcon } from './MacTrashIcon';
 import { RecycleBinIcon, ThisPcIcon, WinFolderIcon } from './WindowsIcons';
 import { AndroidBinIcon, AndroidFolderIcon, AndroidStorageIcon } from './AndroidIcons';
 
@@ -78,5 +79,5 @@ export function PlatformBinIcon({
       </span>
     );
   }
-  return <TrashBinIcon size={size} full={full} glow={glow} style={style} />;
+  return <MacTrashIcon size={size} full={full} glow={glow} style={style} />;
 }

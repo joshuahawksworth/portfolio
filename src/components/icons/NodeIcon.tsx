@@ -4,7 +4,7 @@
  */
 import type { CSSProperties } from 'react';
 import type { FsNode } from '../../context/DesktopContext';
-import { DocumentIcon, PictureIcon } from './FileSystemIcons';
+import { DocumentIcon, FolderIcon, PictureIcon } from './FileSystemIcons';
 import { NokiaIcon } from './NokiaIcon';
 import { PlatformBinIcon, PlatformDriveIcon, PlatformFolderIcon } from './PlatformFileIcons';
 import { appIconFor } from '../../theme/platformIcons';
@@ -22,7 +22,11 @@ export function NodeIcon({
   trashGlow?: boolean;
 }) {
   const os = useOs();
-  if (node.id === 'shortcut-mycomputer') return <PlatformDriveIcon os={os} size={size} />;
+  if (node.id === 'shortcut-mycomputer') {
+    // On the Mac the startup volume sits on the desktop as a plain blue folder
+    if (os === 'macos') return <FolderIcon size={size} />;
+    return <PlatformDriveIcon os={os} size={size} />;
+  }
   if (node.appId === 'trash') {
     return <PlatformBinIcon os={os} size={size} full={trashFull} glow={trashGlow} />;
   }
