@@ -51,13 +51,11 @@ export function NodeIcon({
 
   if (node.type === 'job') {
     const job = jobsData.find((j) => j.id === node.jobId);
+    // No white tile: the company mark itself is rounded like an app icon.
     const tile: CSSProperties = {
       width: size,
       height: size,
       borderRadius: Math.round(size * 0.22),
-      background: 'rgba(255,255,255,0.92)',
-      border: '1px solid rgba(255,255,255,0.7)',
-      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), 0 3px 8px rgba(70,40,10,0.18)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -72,7 +70,13 @@ export function NodeIcon({
             src={job.logo}
             alt=""
             draggable={false}
-            style={{ width: '80%', height: '80%', objectFit: 'contain', display: 'block' }}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              display: 'block',
+              borderRadius: Math.round(size * 0.22),
+            }}
           />
         ) : (
           <span style={{ fontWeight: 700, color: '#262422', fontSize: size * 0.4 }}>

@@ -49,14 +49,12 @@
 .sidebarItem.active { background: rgba(0, 0, 0, 0.06); }
 .sidebarItem.active .sidebarCompany { color: var(--text-strong); font-weight: 600; }
 
+/* Company marks sit straight on the glass, rounded like app icons (no white tile) */
 .sidebarLogo {
   width: 28px;
   height: 28px;
-  border-radius: 6px;
+  border-radius: 7px;
   object-fit: contain;
-  background: #fff;
-  border: 1px solid var(--line);
-  padding: 2px;
   flex-shrink: 0;
 }
 
@@ -121,20 +119,16 @@
 .jobLogoWrap {
   width: 56px;
   height: 56px;
-  border-radius: 12px;
-  background: #fff;
-  border: 1px solid var(--line);
-  box-shadow: 0 1px 3px rgba(87, 52, 10, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
   flex-shrink: 0;
 }
 
 .jobLogo {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
+  border-radius: 13px;
   object-fit: contain;
 }
 
