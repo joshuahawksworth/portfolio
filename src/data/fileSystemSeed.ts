@@ -144,6 +144,14 @@ const SEEDS: Seed[] = [
     url: CV_URL,
   },
   {
+    id: 'shortcut-experience',
+    parentId: 'desktop',
+    name: 'Work Experience',
+    type: 'app',
+    appId: 'experience',
+  },
+  { id: 'shortcut-skills', parentId: 'desktop', name: 'Skills', type: 'app', appId: 'skills' },
+  {
     id: 'shortcut-githubdesktop',
     parentId: 'desktop',
     name: 'GitHub Desktop',

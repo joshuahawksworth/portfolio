@@ -75,9 +75,9 @@
 }
 
 .appIcon {
-  --app-icon-size: 24px;
-  width: 24px;
-  height: 24px;
+  --app-icon-size: 26px;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -87,8 +87,8 @@
 .appIcon > svg,
 .appIcon > img,
 .appIcon > span {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   display: block;
 }
 
