@@ -133,6 +133,14 @@ const SEEDS: Seed[] = [
   },
   { id: 'shortcut-doom', parentId: 'desktop', name: 'DOOM', type: 'app', appId: 'doom' },
   { id: 'shortcut-snake', parentId: 'desktop', name: 'Snake', type: 'app', appId: 'snake' },
+  {
+    id: 'shortcut-cv',
+    parentId: 'desktop',
+    name: 'CV',
+    type: 'app',
+    appId: 'cv',
+    url: '/JoshuaHawksworthCV.pdf',
+  },
   folder('trickster', 'desktop', 'My Flaws', { locked: true }),
   ...jobsData.map(
     (j): Seed => ({ id: j.id, parentId: 'desktop', name: j.company, type: 'job', jobId: j.id })

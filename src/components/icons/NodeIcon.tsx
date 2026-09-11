@@ -84,6 +84,8 @@ export function NodeIcon({
   }
 
   if (node.type === 'app') {
+    // The CV shortcut opens the PDF, so it wears the PDF document icon on every platform.
+    if (node.appId === 'cv') return <DocumentIcon name="CV.pdf" size={size} />;
     if (node.appId === 'doom') {
       return (
         <img

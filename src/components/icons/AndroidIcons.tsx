@@ -90,36 +90,48 @@ export function SkillsDiscIcon() {
 }
 
 export function GmailIcon() {
+  // Google's current Gmail "M": blue and green uprights, red middle, yellow and dark
+  // red flaps, drawn from the official artwork so nothing looks pieced together.
   return (
     <AndroidDisc title="Gmail">
-      <rect x="9" y="13" width="26" height="18" rx="2" fill="#fff" />
-      <path d="M9 16v13q0 2 2 2h2.5V19.5z" fill="#4285f4" />
-      <path d="M35 16v13q0 2-2 2h-2.5V19.5z" fill="#34a853" />
-      <path d="M13.5 19.5L22 26l8.5-6.5V15l-8.5 6.5L13.5 15z" fill="#ea4335" />
-      <path d="M9 16l4.5 3.5V15z" fill="#c5221f" />
-      <path d="M35 16l-4.5 3.5V15z" fill="#fbbc04" />
+      <svg x="9" y="12.25" width="26" height="19.5" viewBox="52 42 88 66">
+        <path fill="#4285f4" d="M58 108h14V74L52 59v43c0 3.32 2.69 6 6 6" />
+        <path fill="#34a853" d="M120 108h14c3.32 0 6-2.69 6-6V59l-20 15" />
+        <path fill="#fbbc04" d="M120 48v26l20-15v-8c0-7.42-8.47-11.65-14.4-7.2" />
+        <path fill="#ea4335" d="M72 74V48l24 18 24-18v26L96 92" />
+        <path fill="#c5221f" d="M52 51v8l20 15V48l-5.6-4.2c-5.94-4.45-14.4-.22-14.4 7.2" />
+      </svg>
     </AndroidDisc>
   );
 }
 
 export function GoogleMapsIcon() {
-  // The Google Maps pin: four colour bands clipped to the pin, white dot in the middle.
+  // Google's current Maps pin: five interlocking colour panels around an open centre,
+  // drawn from the official artwork.
   return (
     <AndroidDisc title="Maps">
-      <defs>
-        <clipPath id="gmapsPin">
-          <path d="M22 8q8.5 0 8.5 8.6Q30.5 24 22 36q-8.5-12-8.5-19.4Q13.5 8 22 8z" />
-        </clipPath>
-      </defs>
-      <g clipPath="url(#gmapsPin)">
-        <rect x="8" y="4" width="28" height="36" fill="#4285f4" />
-        <path d="M8 4h28L8 32z" fill="#34a853" />
-        <path d="M8 4h13L8 17z" fill="#1a73e8" />
-        <path d="M36 12v28H14z" fill="#ea4335" />
-        <path d="M8 26l14-10 8 8-8 16H8z" fill="#fbbc04" />
-        <path d="M8 4h28v12L22 24 8 16z" fill="#4285f4" opacity="0.001" />
-      </g>
-      <circle cx="22" cy="17" r="3.4" fill="#fff" />
+      <svg x="12.23" y="8" width="19.54" height="28" viewBox="0 0 92.3 132.3">
+        <path
+          fill="#1a73e8"
+          d="M60.2 2.2C55.8.8 51 0 46.1 0 32 0 19.3 6.4 10.8 16.5l21.8 18.3L60.2 2.2z"
+        />
+        <path
+          fill="#ea4335"
+          d="M10.8 16.5C4.1 24.5 0 34.9 0 46.1c0 8.7 1.7 15.7 4.6 22l28-33.3-21.8-18.3z"
+        />
+        <path
+          fill="#4285f4"
+          d="M46.2 28.5c9.8 0 17.7 7.9 17.7 17.7 0 4.3-1.6 8.3-4.2 11.4 0 0 13.9-16.6 27.5-32.7-5.6-10.8-15.3-19-27-22.7L32.6 34.8c3.3-3.8 8.1-6.3 13.6-6.3"
+        />
+        <path
+          fill="#fbbc04"
+          d="M46.2 63.8c-9.8 0-17.7-7.9-17.7-17.7 0-4.3 1.5-8.3 4.1-11.3l-28 33.3c4.8 10.6 12.8 19.2 21 29.9l34.1-40.5c-3.3 3.9-8.1 6.3-13.5 6.3"
+        />
+        <path
+          fill="#34a853"
+          d="M59.1 109.2c15.4-24.1 33.3-35 33.3-63 0-7.7-1.9-14.9-5.2-21.3L25.6 98c2.6 3.4 5.3 7.3 7.9 11.3 9.4 14.5 6.8 23.1 12.8 23.1s3.4-8.7 12.8-23.2"
+        />
+      </svg>
     </AndroidDisc>
   );
 }
