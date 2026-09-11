@@ -30,7 +30,7 @@ export default function ExperienceApp({ props }: Props) {
         <div className={styles.toolbarText}>
           <span className={styles.toolbarTitle}>Joshua Hawksworth</span>
           <span className={styles.toolbarSub}>
-            {jobsData.length} roles · {years}+ years · React, React Native &amp; TypeScript
+            {years}+ years · React, React Native &amp; TypeScript
           </span>
         </div>
         <div className={styles.toolbarActions}>

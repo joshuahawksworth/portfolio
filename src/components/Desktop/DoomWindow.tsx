@@ -139,7 +139,7 @@ export default function DoomWindow({ win }: { win: WindowInstance }) {
       <div className={styles.bar} onMouseDown={onBarMouseDown}>
         {os !== 'windows' && closeBtn}
         <span className={styles.wordmark}>DOOM</span>
-        <span className={styles.barSub}>DOSBox · keyboard only</span>
+        <span className={styles.barSub}>DOSBox</span>
         <span className={styles.barFill} />
         <button
           type="button"
@@ -215,12 +215,7 @@ export default function DoomWindow({ win }: { win: WindowInstance }) {
             <section className={styles.section}>
               <h3 className={styles.heading}>Weapons</h3>
               <div className={styles.row}>{WEAPONS.map(cap)}</div>
-              <p className={styles.note}>Pick a weapon you are carrying</p>
             </section>
-
-            <p className={styles.hint}>
-              {focused ? 'Keys go to the game.' : 'Click the window to give it the keyboard.'}
-            </p>
           </aside>
         )}
       </div>
