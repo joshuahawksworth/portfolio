@@ -34,6 +34,8 @@ function AppInner() {
     setBootCount((n) => n + 1);
     setPhase('boot');
   }, []);
+  const toLogin = useCallback(() => setPhase('login'), []);
+  const toDesktop = useCallback(() => setPhase('desktop'), []);
 
   const session = useMemo<SessionValue>(
     () => ({
@@ -78,9 +80,9 @@ function AppInner() {
   } else if (phase === 'off') {
     screen = <PowerOff onPowerOn={boot} />;
   } else if (phase === 'boot') {
-    screen = <Boot key={`boot-${bootCount}`} onComplete={() => setPhase('login')} />;
+    screen = <Boot key={`boot-${bootCount}`} onComplete={toLogin} />;
   } else if (phase === 'login') {
-    screen = <Login key="login" onLogin={() => setPhase('desktop')} />;
+    screen = <Login key="login" onLogin={toDesktop} />;
   } else {
     screen = isMobile ? <MobileDesktop key="mobile" /> : <Desktop key="desktop" />;
   }

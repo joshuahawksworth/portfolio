@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { OsName } from '../../lib/settingsStore';
 import { WindowsLogo } from '../icons/WindowsIcons';
 import styles from './Boot.module.css';
@@ -36,10 +36,14 @@ function AppleSpinner() {
  * platform is switched (the old OS shuts down, the new one boots).
  */
 export default function Shutdown({ os, mode, onDone }: Props) {
+  // Same guard as Boot: the timer runs from mount and ignores re-renders, so a resize
+  // during the shutdown animation cannot restart it.
+  const onDoneRef = useRef(onDone);
+  onDoneRef.current = onDone;
   useEffect(() => {
-    const t = setTimeout(onDone, DURATION);
+    const t = setTimeout(() => onDoneRef.current(), DURATION);
     return () => clearTimeout(t);
-  }, [onDone]);
+  }, []);
 
   useEffect(() => {
     const html = document.documentElement;
