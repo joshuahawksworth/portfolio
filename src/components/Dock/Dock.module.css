@@ -254,58 +254,42 @@
     filter 150ms ease;
 }
 
-/* macOS launch bounce — 4 decreasing bounces over ~1.8 s */
+/* macOS launch bounce: two hops, the second smaller, settling with a soft landing.
+   Runs 1000 ms; Desktop clears `.bouncing` after BOUNCE_MS so it always completes. */
 .bouncing {
-  animation: dockBounce 1800ms both;
+  animation: dockBounce 1000ms both;
 }
 
 @keyframes dockBounce {
   0% {
     transform: translateY(0);
-    animation-timing-function: ease-out;
+    animation-timing-function: cubic-bezier(0.33, 0, 0.67, 0.4);
   }
-  12% {
-    transform: translateY(-26px);
-    animation-timing-function: ease-in;
+  22% {
+    transform: translateY(-30px);
+    animation-timing-function: cubic-bezier(0.33, 0.6, 0.67, 1);
   }
-  24% {
+  44% {
     transform: translateY(0);
-    animation-timing-function: ease-out;
+    animation-timing-function: cubic-bezier(0.33, 0, 0.67, 0.4);
   }
-  36% {
-    transform: translateY(-22px);
-    animation-timing-function: ease-in;
-  }
-  48% {
-    transform: translateY(0);
-    animation-timing-function: ease-out;
-  }
-  60% {
-    transform: translateY(-16px);
-    animation-timing-function: ease-in;
-  }
-  70% {
-    transform: translateY(0);
-    animation-timing-function: ease-out;
+  62% {
+    transform: translateY(-14px);
+    animation-timing-function: cubic-bezier(0.33, 0.6, 0.67, 1);
   }
   80% {
-    transform: translateY(-8px);
-    animation-timing-function: ease-in;
-  }
-  88% {
     transform: translateY(0);
-    animation-timing-function: ease-out;
+    animation-timing-function: cubic-bezier(0.33, 0, 0.67, 0.4);
   }
-  94% {
-    transform: translateY(-3px);
-    animation-timing-function: ease-in;
+  90% {
+    transform: translateY(-4px);
+    animation-timing-function: cubic-bezier(0.33, 0.6, 0.67, 1);
   }
   100% {
     transform: translateY(0);
   }
 }
 
-/* ── Spring-in animation when a running app icon enters the dock ─── */
 @keyframes dockSpring {
   0% {
     transform: scale(0) translateY(24px);

@@ -522,7 +522,7 @@ interface CtxMenu {
 const ICON_W = 76;
 const ICON_H = 84;
 const ICON_GAP = 8;
-const BOUNCE_MS = 700; // short decorative bounce; windows open immediately
+const BOUNCE_MS = 1100; // matches dockBounce in Dock.module.css; windows open immediately
 
 function toItem(node: FsNode): DesktopItem {
   return {
