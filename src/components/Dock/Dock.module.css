@@ -258,7 +258,7 @@
    the way up, accelerating on the way down) and landing before the next. Desktop clears
    `.bouncing` on animationend, so the icon is never pulled back mid-air. */
 .bouncing {
-  animation: dockBounce 620ms 3;
+  animation: dockBounce 620ms 2;
 }
 
 @keyframes dockBounce {
