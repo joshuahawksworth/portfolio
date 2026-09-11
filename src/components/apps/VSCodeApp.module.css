@@ -425,6 +425,21 @@
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
+/* platform.css re-dresses every textarea as a WinUI / Material text box; the editor
+   surface is a code canvas, so it keeps VS Code's own look on every platform. */
+:global(html[data-os]) .root .textarea,
+:global(html[data-os]) .root .textarea:focus {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: transparent;
+  min-height: 0;
+  padding: 4px 16px 4px 0;
+  font-family: var(--font-mono);
+  box-shadow: none;
+  outline: none;
+}
+
 .textarea::selection {
   background: rgba(38, 79, 120, 0.9);
 }
