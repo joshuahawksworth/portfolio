@@ -44,7 +44,7 @@ jobs:
             --jq '"head=\(.headRefName)\nbase=\(.baseRefName)\nsha=\(.headRefOid)\nlabels=\([.labels[].name] | join(","))"' \
             >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ steps.pr.outputs.sha }}
           fetch-depth: 0
@@ -66,8 +66,9 @@ jobs:
           if [ "$RECORD_ALL" = "true" ]; then
             files=$(ls tests/demo/*.demo.ts 2>/dev/null || true)
           else
-            git fetch --no-tags --depth=1 origin "$BASE"
-            files=$(git diff --name-only --diff-filter=AMR "origin/$BASE...HEAD" -- 'tests/demo/*.demo.ts' || true)
+            # The checkout above fetched the full history, so origin/$BASE and the merge base
+            # are already present; a shallow re-fetch here would remove the merge base.
+            files=$(git diff --name-only --diff-filter=AMR "origin/$BASE...HEAD" -- 'tests/demo/*.demo.ts')
           fi
           files=$(echo "$files" | sed '/^$/d' | tr '\n' ' ')
           echo "files=$files" >> "$GITHUB_OUTPUT"
@@ -77,7 +78,7 @@ jobs:
             echo "Recording: $files"
           fi
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         if: steps.demos.outputs.files != ''
         with:
           node-version: 22
@@ -103,7 +104,7 @@ jobs:
 
       - name: Keep the clips as a workflow artifact
         if: steps.demos.outputs.files != '' && always() && hashFiles('demo-videos/manifest.json') != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: pr-${{ env.PR_NUMBER }}-demo-videos
           path: demo-videos
