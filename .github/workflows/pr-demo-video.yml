@@ -98,6 +98,17 @@ jobs:
           CI: 'true'
         run: npx playwright test -c playwright.demo.config.ts ${{ steps.demos.outputs.files }}
 
+      - name: Make sure ffmpeg can encode H.264
+        if: steps.demos.outputs.files != '' && always() && hashFiles('demo-results/report.json') != ''
+        run: |
+          if command -v ffmpeg >/dev/null && ffmpeg -hide_banner -encoders 2>/dev/null | grep -q libx264; then
+            echo "ffmpeg with libx264 already present"
+          else
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq --no-install-recommends ffmpeg
+          fi
+          ffmpeg -version | head -1
+
       - name: Convert to mp4
         if: steps.demos.outputs.files != '' && always() && hashFiles('demo-results/report.json') != ''
         run: node scripts/demo-video/convert.mjs
@@ -154,4 +165,12 @@ jobs:
         env:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body "Demo clips were recorded but could not be attached to the description because the \`PR_DEMO_VIDEO_TOKEN\` secret is not set. Download them from the workflow artifact: $RUN_URL"
+          # One comment per PR is enough; later pushes only update the artifact link in it.
+          existing=$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json comments \
+            --jq '[.comments[] | select(.author.login == "github-actions" and (.body | contains("PR_DEMO_VIDEO_TOKEN")))] | last | .url // empty')
+          body="Demo clips were recorded but could not be attached to the description because the \`PR_DEMO_VIDEO_TOKEN\` secret is not set (see docs/pr-demo-video.md). Download them from the workflow artifact: $RUN_URL"
+          if [ -n "$existing" ]; then
+            gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --edit-last --body "$body"
+          else
+            gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body "$body"
+          fi

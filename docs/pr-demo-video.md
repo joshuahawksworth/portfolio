@@ -35,7 +35,8 @@ the attach step needs a personal token:
 
 Without the secret the workflow still records and keeps the clips as a workflow artifact for
 30 days, and leaves a comment on the PR pointing at it. The upload also needs GitHub CLI 2.99
-or newer; the workflow installs a newer release if the runner image is behind.
+or newer, and the mp4 conversion an ffmpeg with libx264; the workflow installs either when the
+runner image lacks it.
 
 Attachment size limits depend on the account plan (roughly 10 MB on free, more on paid), so
 keep clips short: a demo should be a few pauses and clicks, not a full tour.
