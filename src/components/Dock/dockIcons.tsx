@@ -421,7 +421,7 @@ const REAL_ICONS = {
   cv: <RealIcon src="/icons/pages.png" rounded />,
   // Preview's render is full-bleed, unlike the other macOS icons, so it gets the squircle
   imageviewer: <RealIcon src="/icons/preview.png" rounded />,
-  experience: <RealIcon src="/icons/reminders.png" rounded />,
+  // Work Experience has no Apple counterpart, so it keeps the drawn briefcase tile
   shortcuts: <RealIcon src="/icons/shortcuts.png" rounded />,
   settings: <RealIcon src="/icons/settings.png" />,
 };

@@ -335,7 +335,6 @@ const ICON_IMAGES: Record<string, { src: string; scale?: number; bg?: string }> 
   calculator: { src: '/icons/calculator.png' },
   cv: { src: '/icons/pages.png' },
   askjosh: { src: '/icons/claude.png' },
-  experience: { src: '/icons/reminders.png' },
   shortcuts: { src: '/icons/shortcuts.png' },
   settings: { src: '/icons/settings.png', scale: 1.28 },
   safari: { src: '/icons/chrome.png', scale: 0.72, bg: '#ffffff' },

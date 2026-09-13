@@ -122,6 +122,39 @@ export function initPositions(os: OsName, items: { id: string }[]): Record<strin
   return result;
 }
 
+/**
+ * Re-anchor every icon after the viewport changes size. Positions are stored as `left`/`top`
+ * pixels, but macOS icons belong to the right edge of the screen (the grid grows leftwards
+ * from it), so when the window gets wider or narrower they move with that edge and keep
+ * their offset from it, the way macOS keeps the desktop relative to its top-right corner.
+ * Windows icons belong to the left edge and stay put. Any icon the new size has no room
+ * for (off-screen, under the Dock or taskbar, or pushed over the macOS widgets) moves to a
+ * free cell of the new grid rather than piling up on the edge.
+ *
+ * `prevWidth` is the viewport width the positions were laid out for; the Desktop mounts at
+ * the mobile/desktop breakpoint, so without this shift the icons would stay glued to
+ * wherever that breakpoint's right edge was.
+ */
+export function reflowPositions(
+  os: OsName,
+  prev: Record<string, IconPos>,
+  prevWidth: number
+): Record<string, IconPos> {
+  const dx = os === 'windows' ? 0 : window.innerWidth - prevWidth;
+  const next: Record<string, IconPos> = {};
+  for (const id in prev) next[id] = dx === 0 ? prev[id] : { x: prev[id].x + dx, y: prev[id].y };
+
+  const maxX = window.innerWidth - ICON_W - 4;
+  const maxY = iconMaxY(os);
+  const displaced = Object.keys(next).filter((id) => {
+    const p = next[id];
+    return p.x > maxX || p.y > maxY || p.x < 0 || overlapsWidgets(os, p.x, p.y);
+  });
+  for (const id of displaced) delete next[id];
+  for (const id of displaced) next[id] = findEmptyGridCell(os, next);
+  return next;
+}
+
 export function computeCleanPositions(
   os: OsName,
   items: { id: string; label: string }[],
