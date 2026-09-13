@@ -50,6 +50,9 @@ not pad the line, decorate it or explain it; it is a check, not a summary.
   debt, so a clean diff is the bar, not a clean tree.
 - Check new UI in the browser (Playwright with the bundled Chromium) on desktop and the Pixel
   profile, and on both platforms (Apple and Windows/Android) when the change touches shared UI.
+- If a reviewer should see the change move (UI, a flow, an animation), add a
+  `tests/demo/<feature>.demo.ts` recording as described in `.claude/skills/pr-demo-video/SKILL.md`;
+  the PR demo video workflow records it and attaches the clip to the PR description.
 
 ## Project conventions
 

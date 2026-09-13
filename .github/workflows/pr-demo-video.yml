@@ -1,0 +1,156 @@
+# Records Playwright demo clips for a pull request and attaches them to its description.
+# See docs/pr-demo-video.md for how it works and the one secret it needs.
+name: PR demo video
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Pull request number to record for
+        required: true
+        type: number
+      all:
+        description: Record every demo, not only those the PR changes
+        required: false
+        type: boolean
+        default: true
+
+concurrency:
+  group: pr-demo-video-${{ github.event.pull_request.number || inputs.pr }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  record:
+    name: Record and attach
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Fork PRs cannot read the secret the upload needs, and their token is read-only anyway.
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr }}
+    steps:
+      - name: Resolve pull request
+        id: pr
+        run: |
+          gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" \
+            --json headRefName,baseRefName,headRefOid,labels \
+            --jq '"head=\(.headRefName)\nbase=\(.baseRefName)\nsha=\(.headRefOid)\nlabels=\([.labels[].name] | join(","))"' \
+            >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr.outputs.sha }}
+          fetch-depth: 0
+
+      - name: Pick the demos to record
+        id: demos
+        env:
+          BASE: ${{ steps.pr.outputs.base }}
+          LABELS: ${{ steps.pr.outputs.labels }}
+          RECORD_ALL: ${{ inputs.all == true || contains(steps.pr.outputs.labels, 'demo-video') }}
+          OTHER_LABEL: ${{ github.event.action == 'labeled' && github.event.label.name != 'demo-video' }}
+        run: |
+          set -euo pipefail
+          if [ "$OTHER_LABEL" = "true" ]; then
+            echo "files=" >> "$GITHUB_OUTPUT"
+            echo "A label other than demo-video was added; nothing to record."
+            exit 0
+          fi
+          if [ "$RECORD_ALL" = "true" ]; then
+            files=$(ls tests/demo/*.demo.ts 2>/dev/null || true)
+          else
+            git fetch --no-tags --depth=1 origin "$BASE"
+            files=$(git diff --name-only --diff-filter=AMR "origin/$BASE...HEAD" -- 'tests/demo/*.demo.ts' || true)
+          fi
+          files=$(echo "$files" | sed '/^$/d' | tr '\n' ' ')
+          echo "files=$files" >> "$GITHUB_OUTPUT"
+          if [ -z "$files" ]; then
+            echo "No demo specs changed on this PR and the demo-video label is not set; nothing to record."
+          else
+            echo "Recording: $files"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.demos.outputs.files != ''
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.demos.outputs.files != ''
+        run: npm ci --no-audit --no-fund
+
+      - name: Install Chromium
+        if: steps.demos.outputs.files != ''
+        run: npx playwright install --with-deps chromium
+
+      - name: Record demos
+        if: steps.demos.outputs.files != ''
+        env:
+          CI: 'true'
+        run: npx playwright test -c playwright.demo.config.ts ${{ steps.demos.outputs.files }}
+
+      - name: Convert to mp4
+        if: steps.demos.outputs.files != '' && always() && hashFiles('demo-results/report.json') != ''
+        run: node scripts/demo-video/convert.mjs
+
+      - name: Keep the clips as a workflow artifact
+        if: steps.demos.outputs.files != '' && always() && hashFiles('demo-videos/manifest.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-${{ env.PR_NUMBER }}-demo-videos
+          path: demo-videos
+          retention-days: 30
+
+      - name: Make sure gh can attach files (needs 2.99+)
+        if: steps.demos.outputs.files != ''
+        run: |
+          set -euo pipefail
+          need=2.99.0
+          have=$(gh --version | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+          if [ "$(printf '%s\n%s\n' "$need" "$have" | sort -V | head -1)" != "$need" ]; then
+            echo "gh $have is older than $need; installing a newer release"
+            latest=$(curl -fsSL https://api.github.com/repos/cli/cli/releases/latest | grep -oE '"tag_name": *"v[^"]+"' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+            curl -fsSL "https://github.com/cli/cli/releases/download/v${latest}/gh_${latest}_linux_amd64.tar.gz" | tar -xz -C /tmp
+            sudo install "/tmp/gh_${latest}_linux_amd64/bin/gh" /usr/local/bin/gh
+          fi
+          gh --version
+
+      - name: Attach the clips to the PR description
+        if: steps.demos.outputs.files != ''
+        env:
+          # The workflow's own GITHUB_TOKEN is rejected by the attachment upload endpoint, so
+          # this needs a fine-grained PAT (Contents + Pull requests: read and write).
+          GH_TOKEN: ${{ secrets.PR_DEMO_VIDEO_TOKEN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SHA: ${{ steps.pr.outputs.sha }}
+        run: |
+          set -euo pipefail
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning::PR_DEMO_VIDEO_TOKEN is not set; the clips are on the workflow artifact only."
+            echo "attached=false" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json body --jq .body > body.md
+          node scripts/demo-video/pr-body.mjs --body body.md --manifest demo-videos/manifest.json \
+            --run-url "$RUN_URL" --sha "$SHA" > new-body.md
+          attach_args=()
+          for f in $(node -e 'for (const m of require("./demo-videos/manifest.json")) console.log(m.file)'); do
+            attach_args+=(--attach "demo-videos/$f")
+          done
+          gh pr edit "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file new-body.md "${attach_args[@]}"
+          echo "attached=true" >> "$GITHUB_ENV"
+
+      - name: Point at the artifact when the clips could not be attached
+        if: steps.demos.outputs.files != '' && env.attached == 'false'
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body "Demo clips were recorded but could not be attached to the description because the \`PR_DEMO_VIDEO_TOKEN\` secret is not set. Download them from the workflow artifact: $RUN_URL"

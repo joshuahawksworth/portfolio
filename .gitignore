@@ -36,3 +36,7 @@ test-results
 # Optional extra Windows backgrounds: keep local copies out of the repo
 public/wallpapers/windows-7-harmony.jpg
 public/wallpapers/windows-xp-bliss.jpg
+
+# PR demo recordings (see docs/pr-demo-video.md)
+demo-results
+demo-videos
