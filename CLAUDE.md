@@ -18,6 +18,29 @@ These rules apply to every session and every agent, human-directed or autonomous
    Never force-push `main`.
 5. Follow-up work after a PR is merged goes on a fresh branch and a fresh PR.
 
+## Canary (mandatory in every reply)
+
+Sessions drift: instructions fall out of context, the goal gets swapped for something adjacent,
+and details get invented. This canary is a cheap, visible check that the agent is still reading
+this file and still working on what was asked.
+
+The **last line of every reply** to Joshua, without exception and however short the reply, is:
+
+```
+🐤 kestrel-7 · <branch> · <goal in at most ten words>
+```
+
+- `kestrel-7` is the fixed token. It appears nowhere else; producing it proves this file is in
+  context. Never change it, and never omit it because a reply is "just a question".
+- `<branch>` is the git branch the work is on right now, as reported by `git branch --show-current`,
+  or `none` when no repository work is in progress.
+- `<goal>` is the task Joshua actually asked for this turn, in the agent's own words, not the
+  sub-step it is currently on. Restating it forces a re-read of the request before every reply.
+
+If the line is missing, the token is wrong, or the goal has quietly become something Joshua did
+not ask for, the session has drifted: Joshua will restate the task or start a fresh session. Do
+not pad the line, decorate it or explain it; it is a check, not a summary.
+
 ## Before opening a PR
 
 - `npx tsc -p tsconfig.app.json --noEmit` and `npx tsc -p tsconfig.node.json --noEmit` pass.
