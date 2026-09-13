@@ -12,8 +12,10 @@ These rules apply to every session and every agent, human-directed or autonomous
 3. **Open a pull request** from the branch to `main` as soon as the work is ready for review.
    Describe what changed, how it was verified (tests, screenshots, Playwright), and anything
    the reviewer needs to configure (env vars, assets).
-4. **Do not merge.** The repository owner (Joshua) reviews the PR and says when to merge.
-   Never fast-forward, squash or merge into `main` yourself, and never force-push `main`.
+4. **Do not merge on your own initiative.** The repository owner (Joshua) reviews the PR and
+   says when to merge. Only push to or merge into `main` when Joshua explicitly tells you to
+   in the current session; a standing instruction or an earlier session does not count.
+   Never force-push `main`.
 5. Follow-up work after a PR is merged goes on a fresh branch and a fresh PR.
 
 ## Before opening a PR
