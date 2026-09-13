@@ -21,7 +21,24 @@ import DynamicWallpaper, { isDynamicDark, useDynamicLook } from './DynamicWallpa
 import { useWelcomeNotifications } from '../../hooks/useWelcomeNotifications';
 import { SystemUIProvider } from '../../context/SystemUIContext';
 import { useSettings } from '../../context/SettingsContext';
-import { currentOs, nodeDisplayName, shellInsets } from '../../theme/platform';
+import { currentOs, nodeDisplayName } from '../../theme/platform';
+import {
+  ICON_W,
+  ICON_H,
+  GRID_START_Y,
+  GRID_ROW_H,
+  ICON_GAP,
+  cellCovered,
+  gridColX,
+  gridMaxRows,
+  gridMaxCols,
+  findEmptyGridCell,
+  iconMaxY,
+  overlapsWidgets,
+  initPositions,
+  computeCleanPositions,
+  type IconPos,
+} from './iconGrid';
 import DesktopWidgets from './DesktopWidgets';
 import {
   DARK_WALLPAPERS,
@@ -501,11 +518,6 @@ function DuckWindow({ win }: { win: WindowInstance }) {
 }
 
 // ── Types ──────────────────────────────────────────────────────────────────
-interface IconPos {
-  x: number;
-  y: number;
-}
-
 /** A desktop icon: a thin view over a file-system node that lives in the Desktop folder. */
 interface DesktopItem {
   id: string;
@@ -522,9 +534,6 @@ interface CtxMenu {
 }
 
 // ── Constants ──────────────────────────────────────────────────────────────
-const ICON_W = 76;
-const ICON_H = 84;
-const ICON_GAP = 8;
 // The dock reports when its launch bounce ends; this only clears a bounce whose animationend
 // never arrived (animations disabled, tab hidden). Windows open immediately regardless.
 const BOUNCE_MS = 4000;
@@ -537,113 +546,6 @@ function toItem(node: FsNode): DesktopItem {
     appId: node.appId,
     node,
   };
-}
-
-// ── Grid helper ───────────────────────────────────────────────────────────
-// Returns the first grid cell not already occupied by any icon in `taken`.
-// `taken` is a snapshot of current iconPos — mutate a local copy to reserve
-// cells for multiple items being placed in the same batch.
-// Icons are laid out macOS-style: the first column hugs the right edge, then
-// columns grow leftwards.
-const GRID_START_Y = 54;
-const GRID_RIGHT_PAD = 20;
-// The macOS desktop widgets (DesktopWidgets.module.css: two 150px tiles from 27,57) own the
-// top-left corner; no icon is placed over them. Windows has no widgets on the desktop.
-const WIDGETS_RIGHT = 27 + 150 + 16 + 150 + 16;
-const WIDGETS_BOTTOM = 57 + 155 + 12;
-function cellCovered(x: number, y: number): boolean {
-  return (
-    currentOs() !== 'windows' &&
-    x < WIDGETS_RIGHT &&
-    y < WIDGETS_BOTTOM &&
-    y + ICON_H > GRID_START_Y
-  );
-}
-function gridColX(col: number): number {
-  const colW = ICON_W + ICON_GAP + 4;
-  if (currentOs() === 'windows') return GRID_RIGHT_PAD + col * colW;
-  return window.innerWidth - GRID_RIGHT_PAD - ICON_W - col * colW;
-}
-
-function findEmptyGridCell(taken: Record<string, IconPos>): IconPos {
-  const startX = GRID_RIGHT_PAD;
-  const startY = GRID_START_Y;
-  const colW = ICON_W + ICON_GAP + 4;
-  const rowH = ICON_H + ICON_GAP;
-  const maxRows = Math.max(1, Math.floor((window.innerHeight - startY - 80) / rowH));
-  const maxCols = Math.max(1, Math.floor((window.innerWidth - startX) / colW));
-
-  const occupied = Object.values(taken);
-
-  for (let col = 0; col < maxCols; col++) {
-    for (let row = 0; row < maxRows; row++) {
-      const gx = gridColX(col);
-      const gy = startY + row * rowH;
-      if (cellCovered(gx, gy)) continue;
-      const hit = occupied.some(
-        (p) => Math.abs(p.x - gx) < ICON_W * 0.7 && Math.abs(p.y - gy) < ICON_H * 0.7
-      );
-      if (!hit) return { x: gx, y: gy };
-    }
-  }
-  // Every cell is taken: pile the rest on the grid's last cell, each a little offset,
-  // so nothing is ever placed past the edge of the screen.
-  const n = Object.keys(taken).length;
-  const step = (n % 6) * 10;
-  return {
-    x: Math.max(0, gridColX(Math.max(0, maxCols - 1)) - step),
-    y: Math.max(startY, startY + (maxRows - 1) * rowH - step),
-  };
-}
-
-/** The lowest an icon's top edge can sit and stay clear of the Dock / taskbar. */
-function iconMaxY(): number {
-  return window.innerHeight - shellInsets().bottom - ICON_H;
-}
-
-/** Does an icon placed at (x, y) overlap the macOS desktop widgets? */
-function overlapsWidgets(x: number, y: number): boolean {
-  return (
-    currentOs() !== 'windows' &&
-    x < WIDGETS_RIGHT &&
-    x + ICON_W > 27 &&
-    y < WIDGETS_BOTTOM &&
-    y + ICON_H > 57
-  );
-}
-
-// All icons stack down the RIGHT side in as many columns as needed, skipping any cell
-// the desktop widgets cover.
-function initPositions(items: DesktopItem[]): Record<string, IconPos> {
-  const startY = GRID_START_Y;
-  const rowH = ICON_H + ICON_GAP;
-  const maxRows = Math.max(1, Math.floor((window.innerHeight - startY - 80) / rowH));
-  const result: Record<string, IconPos> = {};
-  let col = 0;
-  let row = 0;
-  for (const item of items) {
-    while (cellCovered(gridColX(col), startY + row * rowH)) {
-      row++;
-      if (row >= maxRows) {
-        row = 0;
-        col++;
-      }
-    }
-    result[item.id] = { x: gridColX(col), y: startY + row * rowH };
-    row++;
-    if (row >= maxRows) {
-      row = 0;
-      col++;
-    }
-  }
-  return result;
-}
-
-function computeCleanPositions(items: DesktopItem[], sortByName: boolean): Record<string, IconPos> {
-  const sorted = sortByName
-    ? [...items].sort((a, b) => a.label.localeCompare(b.label))
-    : [...items];
-  return initPositions(sorted);
 }
 
 function GetInfoModal({
@@ -822,7 +724,7 @@ function DesktopSurface() {
     [childrenOf, os]
   );
 
-  const [iconPos, setIconPos] = useState<Record<string, IconPos>>(() => initPositions(items));
+  const [iconPos, setIconPos] = useState<Record<string, IconPos>>(() => initPositions(os, items));
   const [selectedIcons, setSelectedIcons] = useState<Set<string>>(new Set());
   const [selRect, setSelRect] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(
     null
@@ -874,7 +776,7 @@ function DesktopSurface() {
       }
       for (const item of items) {
         if (!next[item.id]) {
-          next[item.id] = findEmptyGridCell(next);
+          next[item.id] = findEmptyGridCell(os, next);
           changed = true;
         }
       }
@@ -885,7 +787,7 @@ function DesktopSurface() {
       const kept = Array.from(prev).filter((id) => ids.has(id));
       return kept.length === prev.size ? prev : new Set(kept);
     });
-  }, [items]);
+  }, [items, os]);
 
   // Keep icons in viewport on resize
   useEffect(() => {
@@ -893,20 +795,20 @@ function DesktopSurface() {
       setIconPos((prev) => {
         const next = { ...prev };
         const maxX = window.innerWidth - ICON_W - 4;
-        const maxY = iconMaxY();
+        const maxY = iconMaxY(os);
         // Icons the smaller window no longer has room for move to a free cell of the new
         // grid rather than piling up on the edge.
         const displaced = Object.keys(next).filter(
           (id) => next[id].x > maxX || next[id].y > maxY || next[id].x < 0
         );
         for (const id of displaced) delete next[id];
-        for (const id of displaced) next[id] = findEmptyGridCell(next);
+        for (const id of displaced) next[id] = findEmptyGridCell(os, next);
         return next;
       });
     }
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-  }, []);
+  }, [os]);
 
   useEffect(() => {
     if (renamingId) {
@@ -1157,9 +1059,9 @@ function DesktopSurface() {
         const p = iconPosRef.current[did];
         if (!p) return false;
         return (
-          overlapsWidgets(p.x, p.y) ||
+          overlapsWidgets(os, p.x, p.y) ||
           p.x > window.innerWidth - ICON_W / 2 ||
-          p.y > iconMaxY() + ICON_H / 2
+          p.y > iconMaxY(os) + ICON_H / 2
         );
       });
       if (stray.length > 0) {
@@ -1254,7 +1156,7 @@ function DesktopSurface() {
   // ── Clean up with animation ───────────────────────────────────────────
   function cleanUp(byName = false) {
     setCleaning(true);
-    setIconPos(computeCleanPositions(items, byName));
+    setIconPos(computeCleanPositions(os, items, byName));
     setCtxMenu(null);
     setTimeout(() => setCleaning(false), 520);
   }
@@ -1339,7 +1241,7 @@ function DesktopSurface() {
 
       {/* Desktop icons */}
       {items.map((item, i) => {
-        const pos = iconPos[item.id] ?? { x: gridColX(0), y: GRID_START_Y + i * 92 };
+        const pos = iconPos[item.id] ?? { x: gridColX(os, 0), y: GRID_START_Y + i * 92 };
         const selected = selectedIcons.has(item.id);
         const renaming = renamingId === item.id;
 
@@ -1371,12 +1273,8 @@ function DesktopSurface() {
             onMouseEnter={() => {
               if (item.id !== 'trickster') return;
               // Compute every valid grid cell, exclude occupied ones, pick randomly
-              const startX = GRID_RIGHT_PAD;
-              const startY = GRID_START_Y;
-              const colW = ICON_W + ICON_GAP + 4;
-              const rowH = ICON_H + ICON_GAP;
-              const maxRows = Math.max(1, Math.floor((window.innerHeight - startY - 80) / rowH));
-              const maxCols = Math.max(1, Math.floor((window.innerWidth - startX) / colW));
+              const maxRows = gridMaxRows();
+              const maxCols = gridMaxCols();
 
               // Positions of all icons except the trickster itself
               const occupied = Object.entries(iconPosRef.current)
@@ -1386,9 +1284,9 @@ function DesktopSurface() {
               const empty: IconPos[] = [];
               for (let col = 0; col < maxCols; col++) {
                 for (let row = 0; row < maxRows; row++) {
-                  const gx = gridColX(col);
-                  const gy = startY + row * rowH;
-                  if (cellCovered(gx, gy)) continue;
+                  const gx = gridColX(os, col);
+                  const gy = GRID_START_Y + row * GRID_ROW_H;
+                  if (cellCovered(os, gx, gy)) continue;
                   // Skip if another icon is already close to this grid cell
                   const taken = occupied.some(
                     (p) => Math.abs(p.x - gx) < ICON_W * 0.7 && Math.abs(p.y - gy) < ICON_H * 0.7
