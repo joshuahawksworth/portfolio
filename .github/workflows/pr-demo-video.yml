@@ -148,6 +148,13 @@ jobs:
           if [ -z "$GH_TOKEN" ]; then
             echo "::warning::PR_DEMO_VIDEO_TOKEN is not set; the clips are on the workflow artifact only."
             echo "attached=false" >> "$GITHUB_ENV"
+            echo "token_problem=is not set" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          if ! gh api user --jq .login >/dev/null 2>&1; then
+            echo "::warning::GitHub rejected PR_DEMO_VIDEO_TOKEN (bad credentials or expired). The secret value must be the token itself, starting github_pat_, with nothing else."
+            echo "attached=false" >> "$GITHUB_ENV"
+            echo "token_problem=was rejected by GitHub (bad credentials or expired; the value must be the token itself, starting \`github_pat_\`)" >> "$GITHUB_ENV"
             exit 0
           fi
           gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json body --jq .body > body.md
@@ -168,7 +175,7 @@ jobs:
           # One comment per PR is enough; later pushes only update the artifact link in it.
           existing=$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json comments \
             --jq '[.comments[] | select(.author.login == "github-actions" and (.body | contains("PR_DEMO_VIDEO_TOKEN")))] | last | .url // empty')
-          body="Demo clips were recorded but could not be attached to the description because the \`PR_DEMO_VIDEO_TOKEN\` secret is not set (see docs/pr-demo-video.md). Download them from the workflow artifact: $RUN_URL"
+          body="Demo clips were recorded but could not be attached to the description because the \`PR_DEMO_VIDEO_TOKEN\` secret $token_problem (see docs/pr-demo-video.md). Download them from the workflow artifact: $RUN_URL"
           if [ -n "$existing" ]; then
             gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --edit-last --body "$body"
           else
