@@ -14,7 +14,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "demo:record": "playwright test -c playwright.demo.config.ts",
-    "demo:convert": "node scripts/demo-video/convert.mjs"
+    "demo:convert": "node scripts/demo-video/convert.mjs",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.124.0",

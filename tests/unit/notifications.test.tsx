@@ -25,7 +25,12 @@ describe('NotificationProvider', () => {
     const onActivate = vi.fn();
 
     act(() => {
-      result.current.notify({ appId: 'cv', title: 'CV ready', body: 'Tap to download', onActivate });
+      result.current.notify({
+        appId: 'cv',
+        title: 'CV ready',
+        body: 'Tap to download',
+        onActivate,
+      });
     });
     expect(result.current.banners).toHaveLength(1);
     expect(result.current.notifications).toHaveLength(1);

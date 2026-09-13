@@ -4,7 +4,17 @@ import { renderMarkdown } from '../../src/components/apps/WordApp';
 describe('renderMarkdown (Word print layout)', () => {
   it('renders headings, emphasis, lists, quotes and code fences', () => {
     const html = renderMarkdown(
-      ['# Title', '', 'Some **bold** and *italic* with `code`.', '- one', '- two', '> quoted', '```ts', 'const a = 1;', '```'].join('\n')
+      [
+        '# Title',
+        '',
+        'Some **bold** and *italic* with `code`.',
+        '- one',
+        '- two',
+        '> quoted',
+        '```ts',
+        'const a = 1;',
+        '```',
+      ].join('\n')
     );
     expect(html).toContain('<h1>Title</h1>');
     expect(html).toContain('<strong>bold</strong>');
