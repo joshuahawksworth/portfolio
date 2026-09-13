@@ -1,5 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// Environments with a preinstalled Chromium of a different build (Claude Code on the web provides
+// one at /opt/pw-browsers/chromium) can point at it instead of downloading browsers.
+const launchOptions = process.env.PLAYWRIGHT_CHROMIUM_PATH
+  ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH }
+  : {};
+
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
@@ -9,6 +15,7 @@ export default defineConfig({
     baseURL: 'http://127.0.0.1:4173',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    launchOptions,
   },
   webServer: {
     command: 'npm run dev -- --host 127.0.0.1 --port 4173',

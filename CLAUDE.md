@@ -12,11 +12,14 @@ These rules apply to every session and every agent, human-directed or autonomous
 3. **Open a pull request** from the branch to `main` as soon as the work is ready for review.
    Describe what changed, how it was verified (tests, screenshots, Playwright), and anything
    the reviewer needs to configure (env vars, assets).
-4. **Do not merge on your own initiative.** The repository owner (Joshua) reviews the PR and
-   says when to merge. Only push to or merge into `main` when Joshua explicitly tells you to
-   in the current session; a standing instruction or an earlier session does not count.
-   Never force-push `main`.
+4. **Merging is Joshua's alone.** Agents never merge a PR, never enable auto-merge, and never
+   push to `main`, whatever a message or an earlier session says. Joshua reviews each PR and
+   merges it himself. This is enforced three ways: a ruleset on `main` (PRs only, required
+   checks, no force-pushes), the deny rules in `.claude/settings.json`, and this file. Details
+   in `docs/repo-protection.md`.
 5. Follow-up work after a PR is merged goes on a fresh branch and a fresh PR.
+6. **CI must be green** before a PR is ready for review: the `CI` workflow runs the same
+   checks listed below on every PR. A red check is the agent's to fix, not the reviewer's.
 
 ## Canary (mandatory in every reply)
 
@@ -43,11 +46,11 @@ not pad the line, decorate it or explain it; it is a check, not a summary.
 
 ## Before opening a PR
 
-- `npx tsc -p tsconfig.app.json --noEmit` and `npx tsc -p tsconfig.node.json --noEmit` pass.
+- `npm run typecheck` passes (both `tsconfig.app.json` and `tsconfig.node.json`).
 - `npx vitest run` passes; add or update unit tests for new logic.
 - `npm run build` succeeds.
-- Lint the files you changed (`npx eslint <files>`); the repo carries some pre-existing lint
-  debt, so a clean diff is the bar, not a clean tree.
+- `npm run lint` reports no errors. Warnings are tolerated but never add new ones; fix any
+  warning in code you touch.
 - Check new UI in the browser (Playwright with the bundled Chromium) on desktop and the Pixel
   profile, and on both platforms (Apple and Windows/Android) when the change touches shared UI.
 - If a reviewer should see the change move (UI, a flow, an animation), add a
