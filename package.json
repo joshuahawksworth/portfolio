@@ -35,7 +35,7 @@
     "@types/node": "^25.9.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "@vercel/node": "^5.3.26",
+    "@vercel/node": "^12.0.3",
     "@vitejs/plugin-react": "^4.3.1",
     "@vitest/coverage-v8": "^4.1.8",
     "eslint": "^9.9.0",
