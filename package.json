@@ -38,7 +38,7 @@
     "@vercel/node": "^5.3.26",
     "@vitejs/plugin-react": "^4.3.1",
     "@vitest/coverage-v8": "^4.1.8",
-    "eslint": "^9.9.0",
+    "eslint": "^10.10.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
