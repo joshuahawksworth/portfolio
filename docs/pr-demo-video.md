@@ -30,11 +30,13 @@ the attach step needs a personal token:
    Generate new token.
 2. Repository access: only this repository. Permissions: **Contents: Read and write**,
    **Pull requests: Read and write** (Metadata: Read is added automatically).
-3. Repository → Settings → Secrets and variables → Actions → New repository secret, named
-   `PR_DEMO_VIDEO_TOKEN`.
+3. Repository → Settings → Secrets and variables → **Actions** (not Agents or Codespaces) →
+   New repository secret, named `PR_DEMO_VIDEO_TOKEN`. The value is the token string alone, the
+   one starting `github_pat_`, with no name, prefix or whitespace around it.
 
-Without the secret the workflow still records and keeps the clips as a workflow artifact for
-30 days, and leaves a comment on the PR pointing at it. The upload also needs GitHub CLI 2.99
+Without the secret, or with one GitHub rejects, the workflow still records and keeps the clips
+as a workflow artifact for 30 days, and leaves one comment on the PR saying what is wrong and
+pointing at the artifact. The upload also needs GitHub CLI 2.99
 or newer, and the mp4 conversion an ffmpeg with libx264; the workflow installs either when the
 runner image lacks it.
 
