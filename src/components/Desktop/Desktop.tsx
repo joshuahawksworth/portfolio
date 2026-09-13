@@ -37,6 +37,7 @@ import {
   overlapsWidgets,
   initPositions,
   computeCleanPositions,
+  reflowPositions,
   type IconPos,
 } from './iconGrid';
 import DesktopWidgets from './DesktopWidgets';
@@ -789,22 +790,16 @@ function DesktopSurface() {
     });
   }, [items, os]);
 
-  // Keep icons in viewport on resize
+  // Keep icons anchored to their edge of the screen on resize: macOS icons ride along with
+  // the right edge, Windows icons stay on the left, and anything the new size has no room
+  // for moves to a free cell. The width the layout was last made for lives in a ref so each
+  // resize event shifts by exactly how far that edge moved.
+  const laidOutWidthRef = useRef(window.innerWidth);
   useEffect(() => {
     function onResize() {
-      setIconPos((prev) => {
-        const next = { ...prev };
-        const maxX = window.innerWidth - ICON_W - 4;
-        const maxY = iconMaxY(os);
-        // Icons the smaller window no longer has room for move to a free cell of the new
-        // grid rather than piling up on the edge.
-        const displaced = Object.keys(next).filter(
-          (id) => next[id].x > maxX || next[id].y > maxY || next[id].x < 0
-        );
-        for (const id of displaced) delete next[id];
-        for (const id of displaced) next[id] = findEmptyGridCell(os, next);
-        return next;
-      });
+      const prevWidth = laidOutWidthRef.current;
+      laidOutWidthRef.current = window.innerWidth;
+      setIconPos((prev) => reflowPositions(os, prev, prevWidth));
     }
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);

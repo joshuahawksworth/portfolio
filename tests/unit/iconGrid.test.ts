@@ -10,6 +10,8 @@ import {
   iconMaxY,
   initPositions,
   computeCleanPositions,
+  reflowPositions,
+  overlapsWidgets,
 } from '../../src/components/Desktop/iconGrid';
 
 const items = [
@@ -90,5 +92,50 @@ describe('desktop icon grid', () => {
 
   it('reserves the taskbar on Windows and the Dock on macOS', () => {
     expect(iconMaxY('windows')).toBeGreaterThan(iconMaxY('macos'));
+  });
+
+  describe('reflow on resize', () => {
+    it('moves macOS icons with the right edge when the window gets wider', () => {
+      // The Desktop mounts at the mobile/desktop breakpoint; the icons must not stay glued
+      // to where the right edge was at that moment.
+      setViewport(768, 800);
+      const before = initPositions('macos', items);
+      setViewport(1440, 800);
+      const after = reflowPositions('macos', before, 768);
+      for (const id of Object.keys(before)) {
+        expect(after[id].x).toBe(before[id].x + (1440 - 768));
+        expect(after[id].y).toBe(before[id].y);
+      }
+      expect(after.a.x).toBe(gridColX('macos', 0));
+    });
+
+    it('keeps a dragged macOS icon at the same offset from the right edge', () => {
+      const dragged = { a: { x: 500, y: 300 } };
+      setViewport(1000, 800);
+      const after = reflowPositions('macos', dragged, 1280);
+      expect(after.a).toEqual({ x: 500 - 280, y: 300 });
+    });
+
+    it('leaves Windows icons on the left edge whatever the width', () => {
+      const before = initPositions('windows', items);
+      setViewport(1920, 800);
+      expect(reflowPositions('windows', before, 1280)).toEqual(before);
+    });
+
+    it('re-homes icons the narrower window pushes off-screen or over the widgets', () => {
+      const dragged = { a: { x: 40, y: 400 }, b: { x: 380, y: GRID_START_Y } };
+      setViewport(1000, 800);
+      const after = reflowPositions('macos', dragged, 1280);
+      // `a` would land at x = -240 and `b` on top of the widgets: both get a free grid cell
+      expect(after.a.x).toBeGreaterThanOrEqual(0);
+      expect(overlapsWidgets('macos', after.b.x, after.b.y)).toBe(false);
+      expect(after.a).not.toEqual(after.b);
+    });
+
+    it('is a no-op when only the height changes', () => {
+      const before = initPositions('macos', items);
+      setViewport(1280, 1000);
+      expect(reflowPositions('macos', before, 1280)).toEqual(before);
+    });
   });
 });
