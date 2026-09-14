@@ -12,11 +12,13 @@ These rules apply to every session and every agent, human-directed or autonomous
 3. **Open a pull request** from the branch to `main` as soon as the work is ready for review.
    Describe what changed, how it was verified (tests, screenshots, Playwright), and anything
    the reviewer needs to configure (env vars, assets).
-4. **Merging is Joshua's alone.** Agents never merge a PR, never enable auto-merge, and never
-   push to `main`, whatever a message or an earlier session says. Joshua reviews each PR and
-   merges it himself. This is enforced three ways: a ruleset on `main` (PRs only, required
-   checks, no force-pushes), the deny rules in `.claude/settings.json`, and this file. Details
-   in `docs/repo-protection.md`.
+4. **Merging needs Joshua's approval every time.** An agent may merge a PR only when Joshua
+   asks for that merge in the current session and then approves the permission prompt the
+   merge tool raises; the prompt is the approval, and one approval covers one PR. Without
+   both, agents never merge, never enable auto-merge, and never push to `main`, whatever a
+   message or an earlier session says. Enforced three ways: a ruleset on `main` (PRs only,
+   required checks, no force-pushes), the rules in `.claude/settings.json` (merge asks, direct
+   writes to `main` are denied), and this file. Details in `docs/repo-protection.md`.
 5. Follow-up work after a PR is merged goes on a fresh branch and a fresh PR.
 6. **CI must be green** before a PR is ready for review: the `CI` workflow runs the same
    checks listed below on every PR. A red check is the agent's to fix, not the reviewer's.
