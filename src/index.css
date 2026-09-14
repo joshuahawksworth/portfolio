@@ -118,20 +118,17 @@ button {
 }
 
 /* ── Reduced motion ──────────────────────────────────────────────────── */
-/* Both the OS preference and the Settings toggle make motion brief, not absent: transitions
-   and one-shot animations are cut to a fraction of their length, so nothing glides or zooms
-   across the screen but nothing snaps to its end state either (a hard cut reads as a glitch,
-   not as calm). Anything marked [data-essential-motion] keeps its own timing: activity
-   indicators (spinners, progress bars, the terminal cursor) whose motion is the information,
-   and the boot, shutdown and lock screens, whose fades are the gentle alternative to a cut. */
+/* Both the OS preference and the Settings toggle make motion brief, not absent. The work is
+   done at build time by scripts/reduceMotionPlugin.ts: every rule that declares a transition
+   or a one-shot animation gets a variant under `prefers-reduced-motion` and under
+   `html[data-reduce-motion='on']` that cuts the duration to a fraction. Elements that declare
+   no motion are left alone (a global duration would make every JavaScript-driven position,
+   such as a window being dragged, ease after the pointer), looping animations keep going
+   (a spinner's motion is the information), and anything inside [data-essential-motion]
+   keeps its own timing (the boot, shutdown and lock screens). Only scrolling is handled here. */
 @media (prefers-reduced-motion: reduce) {
-  :where(:not([data-essential-motion], [data-essential-motion] *)),
-  :where(:not([data-essential-motion], [data-essential-motion] *))::before,
-  :where(:not([data-essential-motion], [data-essential-motion] *))::after {
-    animation-duration: 0.16s !important;
-    animation-iteration-count: 1 !important;
+  html {
     scroll-behavior: auto !important;
-    transition-duration: 0.12s !important;
   }
 }
 
@@ -193,14 +190,8 @@ html[data-os='ios'] body {
 }
 
 /* ── Accessibility settings ─────────────────────────────────────────── */
-/* Same shape as the prefers-reduced-motion block above, driven by the Settings toggle. */
-html[data-reduce-motion='on'] :where(:not([data-essential-motion], [data-essential-motion] *)),
-html[data-reduce-motion='on'] :where(:not([data-essential-motion], [data-essential-motion] *))::before,
-html[data-reduce-motion='on'] :where(:not([data-essential-motion], [data-essential-motion] *))::after {
-  animation-duration: 0.16s !important;
-  animation-iteration-count: 1 !important;
+html[data-reduce-motion='on'] {
   scroll-behavior: auto !important;
-  transition-duration: 0.12s !important;
 }
 
 html[data-reduce-transparency='on'] {
