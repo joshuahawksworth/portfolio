@@ -138,10 +138,12 @@ translucent nav bars). The full token list and reference measurements live in
 - Menus and context menus should look native: compact rows, subtle hover states, no large explanatory copy.
 - Use icon buttons when a familiar icon exists; pair icon and text only when the command benefits from clarity.
 - Keyboard and pointer interactions should not fight each other. Any app with keyboard controls must keep focus management explicit.
-- Respect `prefers-reduced-motion`: the global rules in `src/index.css` (also driven by the Reduce motion setting)
-  cut every transition and one-shot animation to a fraction of its length rather than removing it, so nothing
-  snaps. Put `data-essential-motion` on an element whose motion is the information (a spinner, a progress bar,
-  a blinking cursor) so it keeps its own timing; never leave a loading indicator without it.
+- Respect `prefers-reduced-motion`: a PostCSS plugin (`scripts/reduceMotionPlugin.ts`, wired in `vite.config.ts`)
+  gives every rule that declares a transition or a one-shot animation a shortened variant under the OS preference
+  and under the Reduce motion setting, so nothing snaps and nothing glides for long. Elements with no declared
+  motion are never touched (so JavaScript-driven drags stay instant) and looping animations (spinners, progress,
+  a blinking cursor) keep going on their own. Put `data-essential-motion` on a one-shot animation whose motion is
+  the information, as the boot and lock screens do, to keep its full timing.
 
 ## Mobile Rules
 

@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import type { Plugin } from 'vite';
 import { searchWeb } from './api/search-utils';
 import { listPublicAssets } from './scripts/publicAssets';
+import { reduceMotionVariants } from './scripts/reduceMotionPlugin';
 import {
   FETCH_TIMEOUT_MS,
   STRIP_HEADERS,
@@ -159,6 +160,14 @@ export default defineConfig({
   define: {
     // Optional artwork present at build time; see src/lib/publicAssets.ts.
     __PUBLIC_ASSETS__: JSON.stringify(listPublicAssets()),
+  },
+  css: {
+    postcss: {
+      // Reduce Motion: a shortened variant of every declared transition / one-shot animation
+      // (scripts/reduceMotionPlugin.ts), so the global CSS never has to touch elements that
+      // declare no motion of their own.
+      plugins: [reduceMotionVariants()],
+    },
   },
   plugins: [react(), contextReloadPlugin(), browserProxyPlugin()],
 });
