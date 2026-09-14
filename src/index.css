@@ -118,18 +118,20 @@ button {
 }
 
 /* ── Reduced motion ──────────────────────────────────────────────────── */
-/* Both the OS preference and the Settings toggle flatten animations everywhere except
-   inside a [data-essential-motion] screen: the boot, shutdown and lock screens are short,
-   their motion is the status (a progress bar, a spinner), and their fades are the gentle
-   alternative to a hard cut, so they keep playing. */
+/* Both the OS preference and the Settings toggle make motion brief, not absent: transitions
+   and one-shot animations are cut to a fraction of their length, so nothing glides or zooms
+   across the screen but nothing snaps to its end state either (a hard cut reads as a glitch,
+   not as calm). Anything marked [data-essential-motion] keeps its own timing: activity
+   indicators (spinners, progress bars, the terminal cursor) whose motion is the information,
+   and the boot, shutdown and lock screens, whose fades are the gentle alternative to a cut. */
 @media (prefers-reduced-motion: reduce) {
   :where(:not([data-essential-motion], [data-essential-motion] *)),
   :where(:not([data-essential-motion], [data-essential-motion] *))::before,
   :where(:not([data-essential-motion], [data-essential-motion] *))::after {
-    animation-duration: 0.001ms !important;
+    animation-duration: 0.16s !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
-    transition-duration: 0.001ms !important;
+    transition-duration: 0.12s !important;
   }
 }
 
@@ -191,13 +193,14 @@ html[data-os='ios'] body {
 }
 
 /* ── Accessibility settings ─────────────────────────────────────────── */
+/* Same shape as the prefers-reduced-motion block above, driven by the Settings toggle. */
 html[data-reduce-motion='on'] :where(:not([data-essential-motion], [data-essential-motion] *)),
 html[data-reduce-motion='on'] :where(:not([data-essential-motion], [data-essential-motion] *))::before,
 html[data-reduce-motion='on'] :where(:not([data-essential-motion], [data-essential-motion] *))::after {
-  animation-duration: 0.001ms !important;
+  animation-duration: 0.16s !important;
   animation-iteration-count: 1 !important;
   scroll-behavior: auto !important;
-  transition-duration: 0.001ms !important;
+  transition-duration: 0.12s !important;
 }
 
 html[data-reduce-transparency='on'] {

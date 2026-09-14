@@ -28,7 +28,7 @@ function SendButton() {
     <button type="submit" className={styles.sendBtn} disabled={pending}>
       {pending ? (
         <>
-          <span className={styles.spinner} /> Sending…
+          <span className={styles.spinner} data-essential-motion="" /> Sending…
         </>
       ) : (
         <>

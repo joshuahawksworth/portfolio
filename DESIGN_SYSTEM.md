@@ -138,7 +138,10 @@ translucent nav bars). The full token list and reference measurements live in
 - Menus and context menus should look native: compact rows, subtle hover states, no large explanatory copy.
 - Use icon buttons when a familiar icon exists; pair icon and text only when the command benefits from clarity.
 - Keyboard and pointer interactions should not fight each other. Any app with keyboard controls must keep focus management explicit.
-- Respect `prefers-reduced-motion`; global CSS already shortens animations.
+- Respect `prefers-reduced-motion`: the global rules in `src/index.css` (also driven by the Reduce motion setting)
+  cut every transition and one-shot animation to a fraction of its length rather than removing it, so nothing
+  snaps. Put `data-essential-motion` on an element whose motion is the information (a spinner, a progress bar,
+  a blinking cursor) so it keeps its own timing; never leave a loading indicator without it.
 
 ## Mobile Rules
 
