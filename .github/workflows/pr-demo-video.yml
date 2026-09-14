@@ -44,7 +44,7 @@ jobs:
             --jq '"head=\(.headRefName)\nbase=\(.baseRefName)\nsha=\(.headRefOid)\nlabels=\([.labels[].name] | join(","))"' \
             >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           ref: ${{ steps.pr.outputs.sha }}
           fetch-depth: 0
