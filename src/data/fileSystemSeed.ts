@@ -243,15 +243,13 @@ const SEEDS: Seed[] = [
   app('app-trash', 'trash', 'Trash.app'),
 
   // ── Trash (the jokes were "always" here) ───────────────────────────────
-  ...Object.keys(JOKE_DATES).map(
-    (id): Seed => ({
-      ...file(id, 'trash', id === 'secret-game-codes' ? SECRET_CODES : undefined),
-      isJoke: true,
-      trashedFrom: 'desktop',
-      trashedAt: JOKE_DATES[id],
-      at: JOKE_DATES[id],
-    })
-  ),
+  ...Object.keys(JOKE_DATES).map((id): Seed => ({
+    ...file(id, 'trash', id === 'secret-game-codes' ? SECRET_CODES : undefined),
+    isJoke: true,
+    trashedFrom: 'desktop',
+    trashedAt: JOKE_DATES[id],
+    at: JOKE_DATES[id],
+  })),
 ];
 
 /** Xcode ships with a Mac and Android Studio with the Windows PC: each platform gets its own IDE. */
