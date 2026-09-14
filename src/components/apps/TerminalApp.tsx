@@ -871,7 +871,7 @@ export default function TerminalApp({ props }: { props?: Record<string, unknown>
           autoComplete="off"
           autoFocus={!isMobile}
         />
-        <span className={styles.cursor} />
+        <span className={styles.cursor} data-essential-motion="" />
       </div>
 
       {/* Space Invaders overlay */}

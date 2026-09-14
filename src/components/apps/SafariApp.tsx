@@ -317,7 +317,12 @@ function SearchResults({
 
       <main className={styles.serpMain}>
         {status === 'loading' && (
-          <div className={styles.serpSkeleton} role="status" aria-label="Searching">
+          <div
+            className={styles.serpSkeleton}
+            role="status"
+            aria-label="Searching"
+            data-essential-motion=""
+          >
             {[0, 1, 2, 3].map((i) => (
               <div key={i} className={styles.serpSkeletonItem}>
                 <span style={{ width: '38%' }} />
@@ -595,6 +600,7 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
               strokeLinecap="round"
               strokeLinejoin="round"
               className={loading ? styles.spin : ''}
+              data-essential-motion=""
             >
               <polyline points="23 4 23 10 17 10" />
               <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
@@ -653,14 +659,19 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
       </div>
 
       {loading && !showingSearch && (
-        <div className={styles.loadingBar}>
+        <div className={styles.loadingBar} data-essential-motion="">
           <div className={styles.loadingFill} />
         </div>
       )}
 
       <div className={styles.viewport}>
         {loading && !showingSearch && (
-          <div className={styles.loadingOverlay} role="status" aria-live="polite">
+          <div
+            className={styles.loadingOverlay}
+            role="status"
+            aria-live="polite"
+            data-essential-motion=""
+          >
             <span className={styles.loadingSpinner} aria-hidden="true" />
             <span className={styles.loadingText}>Loading {hostOf(currentUrl)}…</span>
           </div>

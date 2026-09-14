@@ -328,7 +328,7 @@ export default function DoomApp({ props }: { props?: Record<string, unknown> }) 
       {status !== 'ready' && (
         <div className={styles.splash}>
           <div className={styles.doomTitle}>DOOM</div>
-          <div className={styles.bar}>
+          <div className={styles.bar} data-essential-motion="">
             <div className={styles.fill} />
           </div>
           <p className={styles.sub}>

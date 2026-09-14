@@ -77,7 +77,7 @@ export default function LocationApp() {
           <div className={styles.overlay} role="status" aria-live="polite">
             {status === 'loading' ? (
               <>
-                <span className={styles.spinner} aria-hidden="true" />
+                <span className={styles.spinner} aria-hidden="true" data-essential-motion="" />
                 <span className={styles.overlayText}>Loading map…</span>
               </>
             ) : (

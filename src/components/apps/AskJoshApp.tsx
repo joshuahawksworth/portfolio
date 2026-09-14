@@ -328,7 +328,7 @@ function SignInGate({
               onClick={submitKey}
               disabled={!valid || busy}
             >
-              {busy ? <span className={styles.gateBusy} /> : null}
+              {busy ? <span className={styles.gateBusy} data-essential-motion="" /> : null}
               Start chatting
             </button>
             <button type="button" className={styles.gateBtn} onClick={() => setMode('choose')}>
@@ -671,7 +671,11 @@ export default function AskJoshApp() {
                       ) : m.content ? (
                         <div className={styles.markdown}>{renderMarkdown(m.content)}</div>
                       ) : (
-                        <div className={styles.typing} aria-label="Thinking">
+                        <div
+                          className={styles.typing}
+                          aria-label="Thinking"
+                          data-essential-motion=""
+                        >
                           <span />
                           <span />
                           <span />

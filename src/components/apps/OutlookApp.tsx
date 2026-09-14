@@ -455,7 +455,7 @@ export default function OutlookApp() {
                 >
                   {filing === 'busy' ? 'Filing…' : mailFiled ? 'File again' : 'File email'}
                 </button>
-                {filing === 'busy' && <div className={styles.progress} />}
+                {filing === 'busy' && <div className={styles.progress} data-essential-motion="" />}
                 {filing === 'done' && (
                   <div className={styles.paneSuccess}>
                     Filed to <strong>{projectName(project)}</strong> › {docType}. It now shows in

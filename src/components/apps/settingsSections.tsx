@@ -606,7 +606,7 @@ export function AccessibilitySection() {
     <Group title="Accessibility">
       <ToggleRow
         label="Reduce motion"
-        sub="Shortens animations and transitions"
+        sub="Shortens animations and transitions; spinners and progress keep moving"
         checked={settings.reduceMotion}
         onChange={(v) => update({ reduceMotion: v })}
       />
