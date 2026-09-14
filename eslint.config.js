@@ -21,7 +21,12 @@ export default tseslint.config(
       prettier: prettierPlugin,
     },
     rules: {
-      ...reactHooks.configs.recommended.rules,
+      // eslint-plugin-react-hooks 7 folds the React Compiler rules (refs, purity,
+      // set-state-in-effect, immutability) into its recommended preset. Those flag about fifty
+      // places in the app that need real code changes, so only the two classic rules are on
+      // until that clean-up is done; switch back to the preset when it is.
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       'prettier/prettier': 'error',
       ...prettierConfig.rules,

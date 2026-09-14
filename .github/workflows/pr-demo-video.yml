@@ -78,7 +78,7 @@ jobs:
             echo "Recording: $files"
           fi
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v7
         if: steps.demos.outputs.files != ''
         with:
           node-version: 22
@@ -115,7 +115,7 @@ jobs:
 
       - name: Keep the clips as a workflow artifact
         if: steps.demos.outputs.files != '' && always() && hashFiles('demo-videos/manifest.json') != ''
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: pr-${{ env.PR_NUMBER }}-demo-videos
           path: demo-videos

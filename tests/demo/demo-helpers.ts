@@ -43,6 +43,28 @@ export async function enterPortfolio(page: Page, platform?: Platform) {
   await beat(page);
 }
 
+/**
+ * Call once at the top of a spec whose change is static (a layout, a colour, a panel at rest):
+ * the run records no video and the PR gets the stills taken with `shot` instead. A spec that
+ * shows something moving keeps the default, video on, and may still take shots.
+ */
+export function screenshotsOnly() {
+  test.use({ video: 'off' });
+}
+
+/**
+ * Capture the current screen as a named still for the PR. The caption becomes the file name
+ * and the label in the PR description, so say what the reviewer should look at.
+ */
+export async function shot(page: Page, caption: string, opts: { fullPage?: boolean } = {}) {
+  const info = test.info();
+  // Written to a file rather than attached inline so the JSON report carries a path the
+  // converter can copy.
+  const file = info.outputPath(`shot-${caption.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.png`);
+  await page.screenshot({ path: file, fullPage: opts.fullPage ?? false });
+  await info.attach(`shot:${caption}`, { path: file, contentType: 'image/png' });
+}
+
 /** Skip a test unless it runs on the given project, keeping the demo files declarative. */
 export function onlyOn(project: 'desktop' | 'pixel') {
   test.beforeEach(() => {

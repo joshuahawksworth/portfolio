@@ -1,18 +1,29 @@
-# PR demo videos
+# PR demo videos and screenshots
 
-Every pull request that changes something a reviewer should see move gets a short screen
-recording in its description. The recording is made by Playwright in GitHub Actions, converted
-to mp4, and uploaded with `gh pr edit --attach`, so nothing is committed to the repository.
+Every pull request with a visible change gets a short screen recording, or a set of
+screenshots, in its description. Playwright produces them in GitHub Actions, videos are
+converted to mp4, and everything is uploaded with `gh pr edit --attach`, so nothing is
+committed to the repository.
 
-## How a PR gets a video
+## Video or screenshots
+
+The spec decides. A spec that calls `screenshotsOnly()` at the top records no video and the PR
+gets the stills it takes with `shot(page, caption)`; use that when the change is static (a
+layout, colour or text change, a panel at rest). Leave the default when the reviewer must see
+something move (a flow, an animation, drag and drop); a video spec may also take a `shot` of a
+key frame. `desktop-at-rest.demo.ts` is the screenshot template and `desktop-tour.demo.ts` the
+video one. The agent skill in `.claude/skills/pr-demo-video/SKILL.md` carries the same rule.
+
+## How a PR gets a video or screenshots
 
 1. Add a demo spec under `tests/demo/`, named `<feature>.demo.ts`. It is an ordinary Playwright
-   test written for a viewer: use `enterPortfolio`, `beat` and `typeSlowly` from
+   test written for a viewer: use `enterPortfolio`, `beat`, `typeSlowly` and `shot` from
    `tests/demo/demo-helpers.ts`, pause after each visible change, and end on the state that
-   proves the change. `desktop-tour.demo.ts` is the template.
+   proves the change.
 2. Push it on the PR branch. The **PR demo video** workflow (`.github/workflows/pr-demo-video.yml`)
    runs on every push, records the demo specs the PR adds or changes, and rewrites the end of the
-   PR description with a `## Demo` section followed by the clips.
+   PR description with a `## Demo` section followed by the clips and screenshots, in the order
+   listed.
 3. Re-record on demand by adding the `demo-video` label (records every demo) or from the Actions
    tab with _Run workflow_ and the PR number.
 
@@ -48,7 +59,7 @@ keep clips short: a demo should be a few pauses and clicks, not a full tour.
 ```sh
 npm run demo:record                   # records every tests/demo/*.demo.ts into demo-results/
 npm run demo:record -- tests/demo/x.demo.ts
-npm run demo:convert                  # writes demo-videos/*.mp4 (or .webm) and manifest.json
+npm run demo:convert                  # writes demo-videos/*.mp4 (or .webm), *.png and manifest.json
 ```
 
 Locally the clips stay webm unless an ffmpeg with libx264 is on `PATH` (the one Playwright

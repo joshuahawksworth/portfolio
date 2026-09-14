@@ -1,7 +1,8 @@
 # Repository protection and CI
 
-`main` only changes through pull requests that Joshua merges after review. Three layers make
-that hold for humans and agents alike.
+`main` only changes through pull requests that Joshua has reviewed. He merges them himself,
+or approves an agent's merge one PR at a time. Three layers make that hold for humans and
+agents alike.
 
 ## 1. Ruleset on `main` (GitHub, one-time setup)
 
@@ -31,16 +32,21 @@ Optional but worth turning on under Settings → Code security: **Dependabot ale
 **Dependabot security updates** and **CodeQL default setup**. Version updates are already
 configured in `.github/dependabot.yml`.
 
-## 2. Agent-side deny rules (`.claude/settings.json`)
+## 2. Agent-side permission rules (`.claude/settings.json`)
 
 Checked into the repo, so every Claude Code session on this project loads them:
 
-- The GitHub tools that merge a PR or enable auto-merge are denied.
+- The GitHub tool that merges a PR is an **ask** rule: calling it raises a permission prompt
+  in Joshua's session, and nothing happens until he approves it. That is the one-time merge
+  permission; an agent uses it only when Joshua asked for the merge in that session.
+- Enabling auto-merge is denied, because it would merge later without a prompt.
 - The GitHub tools that write files straight to a branch through the API are denied; agents
   commit with git on a feature branch instead.
 - `git push` forms that target `main` or force-push are denied.
 
-These stop an agent even before the ruleset would, and they cannot be lifted by a prompt.
+Deny rules stop an agent even before the ruleset would, and neither kind can be lifted by a
+prompt: the file is loaded when a session starts, so a change to it only takes effect in
+sessions started after it is merged.
 
 ## 3. The written rule (`CLAUDE.md`)
 
