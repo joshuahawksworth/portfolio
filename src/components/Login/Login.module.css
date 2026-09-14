@@ -15,7 +15,9 @@
   overflow: hidden;
   font-family: var(--font-ui);
 
-  background: #f1c367 center / cover no-repeat;
+  /* Black under the wallpaper: the screen fades in over the black boot, and if the image
+     is still loading the visitor sees black, not a flash of the desktop's amber. */
+  background: #000 center / cover no-repeat;
 }
 
 /* Soft blur + veil so the controls sit on the wallpaper like the macOS lock screen */

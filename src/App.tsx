@@ -29,18 +29,31 @@ function AppInner() {
   // Bumped on every boot so the boot screen (and its animation) mounts fresh.
   const [bootCount, setBootCount] = useState(0);
   const [transition, setTransition] = useState<Transition | null>(null);
+  // Unlocking mounts the desktop straight away and keeps the lock screen on top while it
+  // fades, so the two cross-fade instead of cutting through the page background.
+  const [loginLeaving, setLoginLeaving] = useState(false);
 
   const boot = useCallback(() => {
     setBootCount((n) => n + 1);
     setPhase('boot');
   }, []);
   const toLogin = useCallback(() => setPhase('login'), []);
-  const toDesktop = useCallback(() => setPhase('desktop'), []);
+  const unlock = useCallback(() => {
+    setLoginLeaving(true);
+    setPhase('desktop');
+  }, []);
+  const loginGone = useCallback(() => setLoginLeaving(false), []);
 
   const session = useMemo<SessionValue>(
     () => ({
-      lock: () => setPhase('login'),
-      logOut: () => setPhase('login'),
+      lock: () => {
+        setLoginLeaving(false);
+        setPhase('login');
+      },
+      logOut: () => {
+        setLoginLeaving(false);
+        setPhase('login');
+      },
       restart: () => {
         setTransition({ os, mode: 'restart' });
         setPhase('shutdown');
@@ -67,7 +80,7 @@ function AppInner() {
     setTransition(null);
   }, [transition, update, boot]);
 
-  let screen;
+  let screen = null;
   if (phase === 'shutdown' && transition) {
     screen = (
       <Shutdown
@@ -81,15 +94,22 @@ function AppInner() {
     screen = <PowerOff onPowerOn={boot} />;
   } else if (phase === 'boot') {
     screen = <Boot key={`boot-${bootCount}`} onComplete={toLogin} />;
-  } else if (phase === 'login') {
-    screen = <Login key="login" onLogin={toDesktop} />;
-  } else {
+  } else if (phase === 'desktop') {
     screen = isMobile ? <MobileDesktop key="mobile" /> : <Desktop key="desktop" />;
   }
+  // The lock screen always renders after (so above) the desktop, and stays in the same
+  // slot while it fades out over it, so React keeps the instance instead of remounting.
+  const login =
+    phase === 'login' || (phase === 'desktop' && loginLeaving) ? (
+      <Login key="login" onUnlock={unlock} onLogin={loginGone} />
+    ) : null;
 
   return (
     <SessionProvider value={session}>
-      <NotificationProvider>{screen}</NotificationProvider>
+      <NotificationProvider>
+        {screen}
+        {login}
+      </NotificationProvider>
     </SessionProvider>
   );
 }

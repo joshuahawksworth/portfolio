@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
 import type { OsName } from '../../lib/settingsStore';
+import { useElapsed } from '../../hooks/useElapsed';
+import { usePageBackground } from '../../hooks/usePageBackground';
 import { WindowsLogo } from '../icons/WindowsIcons';
+import { WinSpinner } from './WinSpinner';
 import styles from './Boot.module.css';
 
 export type ShutdownMode = 'restart' | 'shutdown';
@@ -36,6 +39,8 @@ function AppleSpinner() {
  * platform is switched (the old OS shuts down, the new one boots).
  */
 export default function Shutdown({ os, mode, onDone }: Props) {
+  const elapsed = useElapsed();
+
   // Same guard as Boot: the timer runs from mount and ignores re-renders, so a resize
   // during the shutdown animation cannot restart it.
   const onDoneRef = useRef(onDone);
@@ -45,30 +50,22 @@ export default function Shutdown({ os, mode, onDone }: Props) {
     return () => clearTimeout(t);
   }, []);
 
-  useEffect(() => {
-    const html = document.documentElement;
-    const prev = html.style.backgroundColor;
-    html.style.backgroundColor = '#000';
-    document.body.style.backgroundColor = '#000';
-    return () => {
-      html.style.backgroundColor = prev;
-      document.body.style.backgroundColor = '';
-    };
-  }, []);
+  usePageBackground('#000');
 
   const restarting = mode === 'restart';
 
   if (os === 'windows') {
     return (
-      <div className={`${styles.screen} ${styles.shutdown}`} role="status" aria-live="polite">
+      <div
+        className={`${styles.screen} ${styles.shutdown}`}
+        role="status"
+        aria-live="polite"
+        data-essential-motion=""
+      >
         <div className={styles.logoWrap}>
           <WindowsLogo size={72} color="#3aa0ff" />
         </div>
-        <div className={styles.winSpinner} aria-hidden="true">
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <span key={i} className={styles.winDot} style={{ animationDelay: `${i * 0.12}s` }} />
-          ))}
-        </div>
+        <WinSpinner elapsed={elapsed} />
         <p className={styles.shutdownText}>{restarting ? 'Restarting' : 'Shutting down'}</p>
       </div>
     );
@@ -76,7 +73,12 @@ export default function Shutdown({ os, mode, onDone }: Props) {
 
   if (os === 'android') {
     return (
-      <div className={`${styles.screen} ${styles.shutdown}`} role="status" aria-live="polite">
+      <div
+        className={`${styles.screen} ${styles.shutdown}`}
+        role="status"
+        aria-live="polite"
+        data-essential-motion=""
+      >
         <span className={styles.droidSpinner} aria-hidden="true" />
         <p className={`${styles.shutdownText} ${styles.shutdownTextDroid}`}>
           {restarting ? 'Restarting…' : 'Powering off…'}
@@ -92,6 +94,7 @@ export default function Shutdown({ os, mode, onDone }: Props) {
       role="status"
       aria-live="polite"
       aria-label={restarting ? 'Restarting' : 'Shutting down'}
+      data-essential-motion=""
     >
       <div className={`${styles.logoWrap} ${styles.shutdownLogo}`}>
         <svg

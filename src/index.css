@@ -117,10 +117,15 @@ button {
   }
 }
 
+/* ── Reduced motion ──────────────────────────────────────────────────── */
+/* Both the OS preference and the Settings toggle flatten animations everywhere except
+   inside a [data-essential-motion] screen: the boot, shutdown and lock screens are short,
+   their motion is the status (a progress bar, a spinner), and their fades are the gentle
+   alternative to a hard cut, so they keep playing. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  :where(:not([data-essential-motion], [data-essential-motion] *)),
+  :where(:not([data-essential-motion], [data-essential-motion] *))::before,
+  :where(:not([data-essential-motion], [data-essential-motion] *))::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
@@ -186,9 +191,9 @@ html[data-os='ios'] body {
 }
 
 /* ── Accessibility settings ─────────────────────────────────────────── */
-html[data-reduce-motion='on'] *,
-html[data-reduce-motion='on'] *::before,
-html[data-reduce-motion='on'] *::after {
+html[data-reduce-motion='on'] :where(:not([data-essential-motion], [data-essential-motion] *)),
+html[data-reduce-motion='on'] :where(:not([data-essential-motion], [data-essential-motion] *))::before,
+html[data-reduce-motion='on'] :where(:not([data-essential-motion], [data-essential-motion] *))::after {
   animation-duration: 0.001ms !important;
   animation-iteration-count: 1 !important;
   scroll-behavior: auto !important;

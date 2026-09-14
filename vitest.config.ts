@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import { listPublicAssets } from './scripts/publicAssets';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode ?? 'test', process.cwd(), '');
@@ -10,6 +11,8 @@ export default defineConfig(({ mode }) => {
     define: {
       'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(supabaseUrl),
       'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(supabaseKey),
+      // Same optional-artwork list the build bakes in, so unit tests see the real public/ folder.
+      __PUBLIC_ASSETS__: JSON.stringify(listPublicAssets()),
     },
     plugins: [react()],
     test: {

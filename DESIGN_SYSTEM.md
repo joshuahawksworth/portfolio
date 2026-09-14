@@ -29,12 +29,21 @@ Rules for platform-aware work:
 - Names differ per OS: use `appTitleFor` / `appLabelFor` / `nodeDisplayName` instead of hard-coding "Finder" or "Trash".
 - Space above and below windows comes from `shellInsets(os)`; never hard-code the menu bar or dock height.
 - Wallpapers are per OS (`WALLPAPERS_FOR_OS`); the Android set is SVGs in `public/wallpapers/`, and the
-  Windows 11 and 10 images ship with the repo, as does Apple's dynamic `the-beach.jpg` (with an optional
-  `the-beach-night.jpg`) once committed. `windows-7-harmony.jpg` and `windows-xp-bliss.jpg` are git-ignored extras:
-  drop them into `public/wallpapers/` and the picker lists them; `probeOptionalWallpapers` hides any that are missing.
+  Windows 11 and 10 images ship with the repo, as does Apple's dynamic "The Beach", the macOS / iOS default.
+  A dynamic wallpaper is a day picture plus dawn, dusk and night frames (`DYNAMIC_FRAME_IMAGES`) that
+  `DynamicWallpaper` cross-fades on the visitor's clock around that day's sunrise and sunset
+  (`lib/dynamicWallpaper.ts`); the lock screens show the dominant frame via `wallpaperImageFor`. The Beach frames
+  are rendered from the day image by `node scripts/wallpapers/beach-variants.mjs`. `windows-7-harmony.jpg` and
+  `windows-xp-bliss.jpg` are git-ignored extras: drop them into `public/wallpapers/` and the picker lists them.
+  Which optional files exist is baked in at build time (`__PUBLIC_ASSETS__`, see `lib/publicAssets.ts`), so
+  nothing is probed at runtime; restart the dev server after adding one.
 - The Terminal's commands live in `lib/terminalShell.ts`: one `Shell` class with a zsh, PowerShell or bash personality
   chosen by `shellFor(os)`. Add commands there, not in `TerminalApp.tsx`; keep error messages in each shell's own wording.
-- Boot, shutdown and lock screens live in `Boot/` and `Login/` and branch on `os`. Power actions (lock, log out, restart,
+- Boot, shutdown and lock screens live in `Boot/` and `Login/` and branch on `os`. Their progress (the boot bar,
+  logo fill and Windows spinner) is driven from the clock (`lib/bootProgress.ts`, `useElapsed`), not CSS
+  animations, and their roots carry `data-essential-motion` so the reduce-motion rules in `index.css` leave
+  them alone. They paint the page black with `usePageBackground` and fade over it; unlocking mounts the desktop
+  under the lock screen (`App.tsx`) so the two cross-fade. Power actions (lock, log out, restart,
   shut down, `switchPlatform`) come from `useSession()`; restart and shut down play `Boot/Shutdown.tsx` for the current
   OS first, and `switchPlatform` shuts the old OS down before the new one boots. With no saved settings the platform is
   chosen by `detectPlatform()` from the user agent (Windows / Android → `windows`, everything else → `apple`).
@@ -98,8 +107,9 @@ translucent nav bars). The full token list and reference measurements live in
   `0 24px 65px var(--warm-shadow)`.
 - Do not reintroduce the old dark navy palette (`#1a1c28`, `#06090f`, etc.). Highly themed apps such as
   Terminal, Snake and DOOM keep their own self-contained palettes.
-- Wallpapers are JPEGs in `public/wallpapers/` (Golden Gate, Catalina, Tahoe, Sequoia). Desktop defaults to Golden
-  Gate; mobile uses the dark Catalina image so iOS-style white labels read well.
+- Wallpapers are JPEGs in `public/wallpapers/` (The Beach, Golden Gate, Catalina, Tahoe, Sequoia). macOS and iOS
+  default to The Beach, whose frames follow the time of day; the Golden Gate tokens still set the warm tone of the
+  windows and chrome.
 - Keep border radius modest inside apps: controls and rows use `--radius-control` (7px); large panels use 12-16px.
 
 ## Typography
