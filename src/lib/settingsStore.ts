@@ -10,14 +10,7 @@ export type Platform = 'apple' | 'windows';
 export type OsName = 'macos' | 'ios' | 'windows' | 'android';
 
 export type AccentKey =
-  | 'blue'
-  | 'purple'
-  | 'pink'
-  | 'red'
-  | 'orange'
-  | 'yellow'
-  | 'green'
-  | 'graphite';
+  'blue' | 'purple' | 'pink' | 'red' | 'orange' | 'yellow' | 'green' | 'graphite';
 
 export type DockSize = 'small' | 'medium' | 'large';
 export type TaskbarAlignment = 'center' | 'left';
