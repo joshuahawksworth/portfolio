@@ -1,16 +1,18 @@
 /**
  * The macOS Trash. Renders Apple's artwork from public/icons/trash.png (and
- * trash-full.png when the bin has something in it) as soon as those files exist, and
- * falls back to the drawn mesh bin until then, so the desktop never shows a broken image.
+ * trash-full.png when the bin has something in it) when those files were in the build,
+ * and falls back to the drawn mesh bin otherwise, so the desktop never shows a broken
+ * image and never asks the server for artwork that is not there.
  */
 import { useState, type CSSProperties } from 'react';
+import { hasPublicAsset } from '../../lib/publicAssets';
 import { TrashBinIcon } from './FileSystemIcons';
 
 const missingArtwork = new Set<string>();
 
 function candidates(full: boolean): string[] {
   return (full ? ['/icons/trash-full.png', '/icons/trash.png'] : ['/icons/trash.png']).filter(
-    (src) => !missingArtwork.has(src)
+    (src) => hasPublicAsset(src) && !missingArtwork.has(src)
   );
 }
 

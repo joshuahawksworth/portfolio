@@ -1,7 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { useSettings } from '../../context/SettingsContext';
+import { useElapsed } from '../../hooks/useElapsed';
+import { usePageBackground } from '../../hooks/usePageBackground';
+import { BOOT_MS, bootProgress, logoFill } from '../../lib/bootProgress';
 import { WindowsLogo } from '../icons/WindowsIcons';
 import { BugdroidIcon } from '../icons/AndroidIcons';
+import { WinSpinner } from './WinSpinner';
 import styles from './Boot.module.css';
 
 interface Props {
@@ -17,16 +21,19 @@ interface FillLogoProps {
   /** Letter colour once the tile is filled. */
   letters?: string;
   clipId: string;
+  /** How far the tile has filled from the bottom, 0–1. */
+  progress: number;
 }
 
 /** JH logo tile that fills from the bottom up: white to start, `fill` once booted. */
-function JhFillLogo({ fill, letters = '#333', clipId }: FillLogoProps) {
+function JhFillLogo({ fill, letters = '#333', clipId, progress }: FillLogoProps) {
+  const height = 212 * progress;
   return (
     <div className={styles.logoWrap}>
       <svg viewBox="0 0 212 212" width="90" height="90" className={styles.logo}>
         <defs>
           <clipPath id={clipId}>
-            <rect x="0" y="212" width="212" height="212" className={styles.fillRect} />
+            <rect x="0" y={212 - height} width="212" height={height} />
           </clipPath>
         </defs>
         <rect width="212" height="212" fill="white" rx="18" />
@@ -41,29 +48,25 @@ function JhFillLogo({ fill, letters = '#333', clipId }: FillLogoProps) {
 }
 
 /** JH logo, filled from the bottom up: the portfolio's stand-in for the Apple logo. */
-function AppleBoot() {
+function AppleBoot({ elapsed }: { elapsed: number }) {
   return (
     <>
-      <JhFillLogo fill="#f7df1e" clipId="bootFillClip" />
+      <JhFillLogo fill="#f7df1e" clipId="bootFillClip" progress={logoFill(elapsed)} />
       <div className={styles.barTrack}>
-        <div className={styles.barFill} />
+        <div className={styles.barFill} style={{ width: `${bootProgress(elapsed) * 100}%` }} />
       </div>
     </>
   );
 }
 
 /** Windows 11: the four-tile logo with the spinning ring of dots. */
-function WindowsBoot() {
+function WindowsBoot({ elapsed }: { elapsed: number }) {
   return (
     <>
       <div className={`${styles.logoWrap} ${styles.winLogo}`}>
         <WindowsLogo size={96} color="#3aa0ff" />
       </div>
-      <div className={styles.winSpinner} aria-hidden="true">
-        {[0, 1, 2, 3, 4, 5].map((i) => (
-          <span key={i} className={styles.winDot} style={{ animationDelay: `${i * 0.12}s` }} />
-        ))}
-      </div>
+      <WinSpinner elapsed={elapsed} />
     </>
   );
 }
@@ -72,10 +75,15 @@ function WindowsBoot() {
  * Android: laid out like a Samsung boot screen. The JH logo takes the maker's spot
  * and fills up in Android green, with "Powered by android" pinned to the bottom.
  */
-function AndroidBoot() {
+function AndroidBoot({ elapsed }: { elapsed: number }) {
   return (
     <>
-      <JhFillLogo fill="#3ddc84" letters="#0b1a12" clipId="bootFillClipDroid" />
+      <JhFillLogo
+        fill="#3ddc84"
+        letters="#0b1a12"
+        clipId="bootFillClipDroid"
+        progress={logoFill(elapsed)}
+      />
       <div className={styles.poweredBy} aria-hidden="true">
         <div className={styles.poweredByInner}>
           <span className={styles.poweredByLabel}>Powered by</span>
@@ -91,33 +99,32 @@ function AndroidBoot() {
 
 export default function Boot({ onComplete }: Props) {
   const { os } = useSettings();
+  // The progress bar, logo fill and spinner all read the clock, not a CSS animation.
+  const elapsed = useElapsed();
 
-  // The boot lasts 4.2 s from mount, full stop. The timer must not restart when the
+  // The boot lasts BOOT_MS from mount, full stop. The timer must not restart when the
   // parent re-renders (a resize across the phone breakpoint hands us a new onComplete),
   // or a visitor resizing the window during boot would never leave the black screen.
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
   useEffect(() => {
-    const t = setTimeout(() => onCompleteRef.current(), 4200);
+    const t = setTimeout(() => onCompleteRef.current(), BOOT_MS);
     return () => clearTimeout(t);
   }, []);
 
   // Match the page background to the boot screen so a stale viewport never shows
-  // the desktop colour under it.
-  useEffect(() => {
-    const html = document.documentElement;
-    const prev = html.style.backgroundColor;
-    html.style.backgroundColor = '#000';
-    document.body.style.backgroundColor = '#000';
-    return () => {
-      html.style.backgroundColor = prev;
-      document.body.style.backgroundColor = '';
-    };
-  }, []);
+  // the desktop colour under it, and so the screen fades out to black.
+  usePageBackground('#000');
 
   return (
-    <div className={styles.screen} data-boot-os={os}>
-      {os === 'windows' ? <WindowsBoot /> : os === 'android' ? <AndroidBoot /> : <AppleBoot />}
+    <div className={styles.screen} data-boot-os={os} data-essential-motion="">
+      {os === 'windows' ? (
+        <WindowsBoot elapsed={elapsed} />
+      ) : os === 'android' ? (
+        <AndroidBoot elapsed={elapsed} />
+      ) : (
+        <AppleBoot elapsed={elapsed} />
+      )}
     </div>
   );
 }

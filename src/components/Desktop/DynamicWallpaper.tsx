@@ -1,14 +1,11 @@
 /**
- * The layers that make a dynamic wallpaper move through the day: the night image
- * (when the optional file exists) cross-faded over the day image, and a dawn / dusk /
- * night tint. Sits directly above the wallpaper it belongs to.
+ * The frames that make a dynamic wallpaper move through the day: the dawn, dusk and night
+ * pictures stacked over the day image and cross-faded by the time-of-day look. Sits directly
+ * above the wallpaper it belongs to and takes that wallpaper's layer class for positioning.
  */
-import { useEffect, useState } from 'react';
-import { DYNAMIC_NIGHT_IMAGES, DYNAMIC_WALLPAPERS, type WallpaperKey } from '../../data/wallpapers';
-import { dynamicLookFor, type DynamicLook } from '../../lib/dynamicWallpaper';
+import { DYNAMIC_WALLPAPERS, dynamicFrameSrc, type WallpaperKey } from '../../data/wallpapers';
+import { DYNAMIC_FRAMES, dynamicLookFor, type DynamicLook } from '../../lib/dynamicWallpaper';
 import { useTime } from '../../hooks/useTime';
-
-const nightAvailable = new Map<string, boolean>();
 
 export function useDynamicLook(key: WallpaperKey): DynamicLook | null {
   const now = useTime();
@@ -16,9 +13,9 @@ export function useDynamicLook(key: WallpaperKey): DynamicLook | null {
   return dynamicLookFor(now);
 }
 
-/** Dark enough that shell text should flip to white (night on a dynamic wallpaper). */
+/** Dark enough that shell text should flip to white (dawn, dusk or night on a dynamic wallpaper). */
 export function isDynamicDark(look: DynamicLook | null): boolean {
-  return !!look && look.night > 0.6;
+  return !!look?.dark;
 }
 
 export default function DynamicWallpaper({
@@ -29,54 +26,29 @@ export default function DynamicWallpaper({
   className?: string;
 }) {
   const look = useDynamicLook(wallpaper);
-  const nightSrc = DYNAMIC_NIGHT_IMAGES[wallpaper];
-  const [hasNight, setHasNight] = useState(() =>
-    nightSrc ? nightAvailable.get(nightSrc) === true : false
-  );
-
-  useEffect(() => {
-    if (!nightSrc || nightAvailable.has(nightSrc)) return;
-    const img = new Image();
-    img.onload = () => {
-      nightAvailable.set(nightSrc, true);
-      setHasNight(true);
-    };
-    img.onerror = () => nightAvailable.set(nightSrc, false);
-    img.src = nightSrc;
-  }, [nightSrc]);
-
   if (!look) return null;
-  const base: React.CSSProperties = {
-    position: 'absolute',
-    inset: 0,
-    pointerEvents: 'none',
-    transition: 'opacity 60s linear',
-  };
   return (
     <>
-      {hasNight && nightSrc && (
-        <div
-          className={className}
-          style={{
-            ...base,
-            backgroundImage: `url(${nightSrc})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            opacity: look.night,
-          }}
-          aria-hidden="true"
-        />
-      )}
-      <div
-        className={className}
-        style={{
-          ...base,
-          background: look.overlay,
-          opacity: look.overlayOpacity,
-          mixBlendMode: 'multiply',
-        }}
-        aria-hidden="true"
-      />
+      {DYNAMIC_FRAMES.map((frame) => {
+        const src = dynamicFrameSrc(wallpaper, frame);
+        if (!src) return null;
+        return (
+          <div
+            key={frame}
+            className={className}
+            data-frame={frame}
+            style={{
+              backgroundImage: `url(${src})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              opacity: look[frame],
+              // Frames drift in over a minute, as a real dynamic desktop does.
+              transition: 'opacity 60s linear',
+            }}
+            aria-hidden="true"
+          />
+        );
+      })}
     </>
   );
 }

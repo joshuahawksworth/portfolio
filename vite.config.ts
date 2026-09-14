@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import type { Plugin } from 'vite';
 import { searchWeb } from './api/search-utils';
+import { listPublicAssets } from './scripts/publicAssets';
 import {
   FETCH_TIMEOUT_MS,
   STRIP_HEADERS,
@@ -155,5 +156,9 @@ function browserProxyPlugin(): Plugin {
 }
 
 export default defineConfig({
+  define: {
+    // Optional artwork present at build time; see src/lib/publicAssets.ts.
+    __PUBLIC_ASSETS__: JSON.stringify(listPublicAssets()),
+  },
   plugins: [react(), contextReloadPlugin(), browserProxyPlugin()],
 });

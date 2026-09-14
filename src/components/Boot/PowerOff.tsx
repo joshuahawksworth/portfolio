@@ -1,18 +1,9 @@
-import { useEffect } from 'react';
+import { usePageBackground } from '../../hooks/usePageBackground';
 import styles from './Boot.module.css';
 
 /** The "machine" is off: a black screen with a power button that boots it again. */
 export default function PowerOff({ onPowerOn }: { onPowerOn: () => void }) {
-  useEffect(() => {
-    const html = document.documentElement;
-    const prev = html.style.backgroundColor;
-    html.style.backgroundColor = '#000';
-    document.body.style.backgroundColor = '#000';
-    return () => {
-      html.style.backgroundColor = prev;
-      document.body.style.backgroundColor = '';
-    };
-  }, []);
+  usePageBackground('#000');
 
   return (
     <div className={`${styles.screen} ${styles.off}`}>
