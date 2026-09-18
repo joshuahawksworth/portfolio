@@ -7,6 +7,7 @@ import { useTime } from '../../hooks/useTime';
 import { formatTime } from '../../lib/clock';
 import { appTitleFor } from '../../theme/platform';
 import { openCv } from '../../lib/cv';
+import { BATTERY_LEVEL } from '../../lib/battery';
 import styles from './MenuBar.module.css';
 
 type MenuName = 'apple' | 'File' | 'Edit' | 'View' | 'Go' | 'Window' | 'Help';
@@ -251,8 +252,14 @@ export default function MenuBar() {
             />
           </svg>
         </button>
-        {/* Battery */}
-        <button type="button" className={styles.statusBtn} aria-label="Battery" title="Battery">
+        {/* Battery: macOS "Show Percentage" puts the number beside a plain glyph */}
+        <button
+          type="button"
+          className={styles.statusBtn}
+          aria-label={`Battery ${BATTERY_LEVEL}%`}
+          title={`Battery ${BATTERY_LEVEL}%`}
+        >
+          <span className={styles.batteryPct}>{BATTERY_LEVEL}%</span>
           <svg
             className={styles.statusIcon}
             viewBox="0 0 24 12"
@@ -260,6 +267,7 @@ export default function MenuBar() {
             stroke="currentColor"
             strokeWidth="1.1"
             style={{ width: 24 }}
+            aria-hidden="true"
           >
             <rect x="0.6" y="0.6" width="19" height="10.8" rx="3" opacity="0.5" />
             <rect

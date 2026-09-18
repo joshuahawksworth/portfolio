@@ -175,6 +175,15 @@
   display: block;
 }
 
+/* "100%" beside the battery, set like the clock and separated from the glyph as macOS does */
+.batteryPct {
+  font-size: 13px;
+  font-family: var(--font-ui);
+  color: inherit;
+  margin-right: 5px;
+  white-space: nowrap;
+}
+
 /* The clock sits inside a status button, which provides the hover / open highlight */
 .clock {
   font-size: 13px;

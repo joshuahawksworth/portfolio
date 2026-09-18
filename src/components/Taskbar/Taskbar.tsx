@@ -15,6 +15,7 @@ import {
 } from '../Dock/dockConfig';
 import { WindowsLogo } from '../icons/WindowsIcons';
 import { describeWeather, useWeather } from '../Desktop/DesktopWidgets';
+import { BATTERY_LEVEL } from '../../lib/battery';
 import styles from './Taskbar.module.css';
 
 /** Windows 11 taskbar: centred Start / Search / Widgets + pinned apps, tray and clock on the right. */
@@ -209,7 +210,7 @@ export default function Taskbar() {
           className={`${styles.trayGroup} ${systemUI.panel === 'controlCenter' ? styles.active : ''}`}
           onClick={() => systemUI.toggle('controlCenter')}
           aria-label="Quick settings"
-          title={`${settings.wifi ? settings.network : 'No internet'} · Volume ${settings.muted ? 'muted' : Math.round(settings.volume * 100) + '%'} · Battery 100%`}
+          title={`${settings.wifi ? settings.network : 'No internet'} · Volume ${settings.muted ? 'muted' : Math.round(settings.volume * 100) + '%'} · Battery ${BATTERY_LEVEL}%`}
         >
           {settings.doNotDisturb && (
             <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true">

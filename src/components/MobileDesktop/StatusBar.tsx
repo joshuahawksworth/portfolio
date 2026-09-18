@@ -1,6 +1,8 @@
 import { useTime } from '../../hooks/useTime';
 import { useSettings } from '../../context/SettingsContext';
 import { formatTime } from '../../lib/clock';
+import { BATTERY_LEVEL } from '../../lib/battery';
+import BatteryIcon from '../SystemUI/BatteryIcon';
 import styles from './MobileDesktop.module.css';
 
 /**
@@ -46,7 +48,7 @@ export default function StatusBar({ onTap }: { onTap?: () => void } = {}) {
               <rect x="0.5" y="1.5" width="18" height="9" rx="2" fill="currentColor" />
               <rect x="19.5" y="4.5" width="2" height="3" rx="0.6" fill="currentColor" />
             </svg>
-            <span className={styles.statusPct}>100%</span>
+            <span className={styles.statusPct}>{BATTERY_LEVEL}%</span>
           </>
         ) : (
           <>
@@ -70,21 +72,8 @@ export default function StatusBar({ onTap }: { onTap?: () => void } = {}) {
                 opacity={settings.wifi ? 1 : 0.35}
               />
             </svg>
-            {/* Battery */}
-            <svg viewBox="0 0 27 12" width="27" height="12" className={styles.statusGlyph}>
-              <rect
-                x="0.5"
-                y="0.5"
-                width="22"
-                height="11"
-                rx="3"
-                fill="none"
-                stroke="currentColor"
-                strokeOpacity="0.4"
-              />
-              <rect x="2" y="2" width="17" height="8" rx="1.8" fill="currentColor" />
-              <path d="M24.2 4.2v3.6a2 2 0 0 0 0-3.6Z" fill="currentColor" fillOpacity="0.4" />
-            </svg>
+            {/* Battery, iOS style: the percentage sits on the battery itself */}
+            <BatteryIcon className={styles.statusGlyph} level={BATTERY_LEVEL} width={27} />
           </>
         )}
       </div>
