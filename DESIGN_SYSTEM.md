@@ -111,6 +111,9 @@ translucent nav bars). The full token list and reference measurements live in
   default to The Beach, whose frames follow the time of day; the Golden Gate tokens still set the warm tone of the
   windows and chrome.
 - Keep border radius modest inside apps: controls and rows use `--radius-control` (7px); large panels use 12-16px.
+- `docs/anti-vibecoded-ui-rules.md` lists the tells that make UI read as AI-generated (default gradients, orbs,
+  glassmorphism-by-default, three-up feature cards, sparkle icons, checkmark bullets). Read it before adding new
+  surfaces, and run its quick pass when reviewing UI.
 
 ## Typography
 
@@ -233,3 +236,4 @@ This catches serverless packaging issues that local Vite/TypeScript may miss.
 - Are credentials and provider calls kept behind API routes?
 - Are interactive controls reachable by keyboard/pointer/touch where appropriate?
 - Did tests/build pass, and did visual verification cover the changed surface?
+- Does the change clear the quick pass in `docs/anti-vibecoded-ui-rules.md`?
