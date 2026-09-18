@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useDesktop } from '../../context/DesktopContext';
 import { useSystemUI } from '../../context/SystemUIContext';
 import { useSettings } from '../../context/SettingsContext';
+import { BATTERY_LEVEL } from '../../lib/battery';
 import styles from './SystemUI.module.css';
 
 export const BRIGHTNESS_MIN = 0.6;
@@ -338,7 +339,7 @@ export default function ControlCenter() {
                 />
                 <path d="M21.4 4.2v3.6" strokeWidth="1.6" strokeLinecap="round" opacity="0.6" />
               </svg>
-              100%
+              {BATTERY_LEVEL}%
             </span>
             <button
               type="button"

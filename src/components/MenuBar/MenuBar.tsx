@@ -7,6 +7,8 @@ import { useTime } from '../../hooks/useTime';
 import { formatTime } from '../../lib/clock';
 import { appTitleFor } from '../../theme/platform';
 import { openCv } from '../../lib/cv';
+import { BATTERY_LEVEL } from '../../lib/battery';
+import BatteryIcon from '../SystemUI/BatteryIcon';
 import styles from './MenuBar.module.css';
 
 type MenuName = 'apple' | 'File' | 'Edit' | 'View' | 'Go' | 'Window' | 'Help';
@@ -251,28 +253,14 @@ export default function MenuBar() {
             />
           </svg>
         </button>
-        {/* Battery */}
-        <button type="button" className={styles.statusBtn} aria-label="Battery" title="Battery">
-          <svg
-            className={styles.statusIcon}
-            viewBox="0 0 24 12"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.1"
-            style={{ width: 24 }}
-          >
-            <rect x="0.6" y="0.6" width="19" height="10.8" rx="3" opacity="0.5" />
-            <rect
-              x="2.2"
-              y="2.2"
-              width="15.8"
-              height="7.6"
-              rx="1.8"
-              fill="currentColor"
-              stroke="none"
-            />
-            <path d="M21.4 4.2v3.6" strokeWidth="1.6" strokeLinecap="round" opacity="0.5" />
-          </svg>
+        {/* Battery: the level is written on the battery, like "Show Percentage" on macOS */}
+        <button
+          type="button"
+          className={styles.statusBtn}
+          aria-label={`Battery ${BATTERY_LEVEL}%`}
+          title={`Battery ${BATTERY_LEVEL}%`}
+        >
+          <BatteryIcon className={styles.statusIcon} level={BATTERY_LEVEL} width={27} />
         </button>
         {/* Spotlight */}
         <button
