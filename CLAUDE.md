@@ -46,37 +46,29 @@ If the line is missing, the token is wrong, or the goal has quietly become somet
 not ask for, the session has drifted: Joshua will restate the task or start a fresh session. Do
 not pad the line, decorate it or explain it; it is a check, not a summary.
 
-### What the canary does and does not catch
+### What it does not catch
 
-The two halves measure different things, and neither is a gauge of how full the context window is.
+The token proves this file loaded; the goal line catches a request that has drifted. Neither
+measures context usage: `CLAUDE.md` sits at the start of the window, the best-retained position,
+so the canary reads healthy long after the middle of a long session has begun to blur.
 
-- **The token** is a load check, and a binary one: `kestrel-7` can only come from this file, so
-  producing it proves the file was read. That is all it proves. `CLAUDE.md` is injected at the
-  start of the context, which is the best-retained position in the window, so the token keeps
-  reading healthy long after the middle of a long session has begun to blur. A correct token
-  means "the file loaded", never "this session is still sharp".
-- **The goal line** is the drift check, and it is the half that earns its place. Compressing the
-  request to ten words every turn forces a re-read of what was asked, and a goal that has quietly
-  become something adjacent is visible to Joshua immediately.
+## Context gauge
 
-An instruction sitting in the best-retained part of the window cannot report on the part that
-decays, so context usage is measured directly instead.
+`.claude/statusline.sh`, wired up in `.claude/settings.json`, renders usage as
+`context ██████████████░░░░░░ 71% · getting long`. Past 80% it reads `start a new session` —
+finish the current step and start one. Needs `jq`.
 
-## Context gauge (when a fresh session is due)
+## Code volume
 
-`.claude/statusline.sh`, wired up in `.claude/settings.json`, reads `context_window.used_percentage`
-from the session JSON Claude Code pipes to it and renders:
+Every line is a long-term liability, and an agent's default is to produce more of them. The
+measure of a change is the smallest diff that delivers the behaviour; a PR that deletes more
+than it adds is a good PR. No speculative abstraction, no defensive branch nothing asked for,
+and comments say why rather than what.
 
-```
-[<model>] portfolio · fix/notepad-text-colour
-context ██████████████░░░░░░ 71% · getting long
-```
-
-Bands: under 40% `fresh`, 40–65% `fine`, 65–80% `getting long` (amber), 80%+ `start a new session`
-(red). Past roughly 80%, finish the current step and start a fresh session rather than pushing on:
-detail from the middle of the conversation is the first thing to go, and it goes quietly. This is a
-readout rather than an inference, so it moves smoothly and is visible without waiting for a reply.
-Needs `jq`; Claude Code re-renders it on every assistant message.
+Before changing a shared shape — a signature, a return type, props, an HTTP path, an env var,
+a filename — find its readers first. Some coupling here has no code reference at either end, so
+a clean grep is not an answer: use the `cross-links` skill. Reasoning and worked examples are in
+`docs/working-with-ai.md`.
 
 ## Before opening a PR
 
