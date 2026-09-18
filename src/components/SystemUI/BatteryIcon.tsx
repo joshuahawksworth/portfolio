@@ -1,4 +1,3 @@
-import { useId } from 'react';
 import {
   BATTERY_GLYPH,
   BATTERY_LEVEL,
@@ -15,44 +14,26 @@ type Props = {
   width?: number;
   className?: string;
   /**
-   * Outline and nub opacity. The system bars fade them so the filled body reads as the
-   * icon, the way macOS and iOS draw it.
+   * Colour of the digits. iOS draws them in the colour that contrasts with the fill: black
+   * digits on a white battery in a light-on-dark status bar.
    */
-  frameOpacity?: number;
+  digitColor?: string;
 };
 
 /**
- * Battery glyph with the percentage written on the battery itself, as macOS (Show
- * Percentage) and iOS 16+ do. The digits are cut out of the filled body so they show the bar
- * behind, and drawn in the text colour over any unfilled part, so the number stays legible at
- * every charge level.
+ * Battery glyph in the iOS 16.1 style: a light grey body, a fill in the text colour that
+ * shrinks with the charge, and the percentage written across the battery in a contrasting
+ * colour. Plain shapes only, no masks or clip paths, so it renders the same in every browser.
  */
 export default function BatteryIcon({
   level = BATTERY_LEVEL,
   width = 27,
   className,
-  frameOpacity = 0.4,
+  digitColor = '#000',
 }: Props) {
-  const id = useId();
-  const maskId = `${id}-cutout`;
-  const emptyClipId = `${id}-empty`;
   const pct = clampBatteryLevel(level);
   const fillW = batteryFillWidth(pct);
   const height = (width * VIEW_H) / VIEW_W;
-  const digits = (
-    <text
-      x={FILL.x + FILL.w / 2}
-      y={VIEW_H / 2}
-      textAnchor="middle"
-      dominantBaseline="central"
-      fontSize="8.4"
-      fontWeight="700"
-      letterSpacing="-0.2"
-      style={{ fontFamily: 'var(--font-ui, system-ui, sans-serif)' }}
-    >
-      {pct}
-    </text>
-  );
 
   return (
     <svg
@@ -66,46 +47,33 @@ export default function BatteryIcon({
       aria-label={`Battery ${pct}%`}
       data-battery-level={pct}
     >
-      <defs>
-        <mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="0" width={VIEW_W} height={VIEW_H}>
-          <rect x="0" y="0" width={VIEW_W} height={VIEW_H} fill="#fff" />
-          <g fill="#000">{digits}</g>
-        </mask>
-        <clipPath id={emptyClipId}>
-          <rect
-            x={FILL.x + fillW}
-            y="0"
-            width={Math.max(0, VIEW_W - FILL.x - fillW)}
-            height={VIEW_H}
-          />
-        </clipPath>
-      </defs>
+      {/* Body: the text colour at low opacity reads as iOS's light grey battery. */}
       <rect
         x={BODY.x}
         y={BODY.y}
         width={BODY.w}
         height={BODY.h}
         rx={BODY.r}
-        fill="none"
-        stroke="currentColor"
-        strokeOpacity={frameOpacity}
+        fill="currentColor"
+        fillOpacity="0.35"
       />
-      <path d="M24.2 4.2v3.6a2 2 0 0 0 0-3.6Z" fill="currentColor" fillOpacity={frameOpacity} />
-      {/* Digits in the text colour over the empty part of the body only. */}
-      <g fill="currentColor" clipPath={`url(#${emptyClipId})`}>
-        {digits}
-      </g>
+      <path d="M24.2 4.2v3.6a2 2 0 0 0 0-3.6Z" fill="currentColor" fillOpacity="0.35" />
       {fillW > 0 && (
-        <rect
-          x={FILL.x}
-          y={FILL.y}
-          width={fillW}
-          height={FILL.h}
-          rx={FILL.r}
-          fill="currentColor"
-          mask={`url(#${maskId})`}
-        />
+        <rect x={FILL.x} y={FILL.y} width={fillW} height={FILL.h} rx={FILL.r} fill="currentColor" />
       )}
+      <text
+        x={FILL.x + FILL.w / 2}
+        y={VIEW_H / 2}
+        textAnchor="middle"
+        dominantBaseline="central"
+        fontSize="8.6"
+        fontWeight="700"
+        letterSpacing="-0.2"
+        fill={digitColor}
+        style={{ fontFamily: 'var(--font-ui, system-ui, sans-serif)' }}
+      >
+        {pct}
+      </text>
     </svg>
   );
 }

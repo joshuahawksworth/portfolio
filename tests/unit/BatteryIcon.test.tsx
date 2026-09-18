@@ -22,21 +22,21 @@ describe('batteryFillWidth', () => {
 });
 
 describe('BatteryIcon', () => {
-  it('writes the percentage on the battery and names it for assistive tech', () => {
-    render(<BatteryIcon />);
+  it('writes the percentage on the battery in a contrasting colour and names it for assistive tech', () => {
+    render(<BatteryIcon digitColor="#123456" />);
     const icon = screen.getByRole('img', { name: `Battery ${BATTERY_LEVEL}%` });
     expect(icon).toHaveAttribute('data-battery-level', String(BATTERY_LEVEL));
-    // The digits are drawn once in the text colour and once inside the mask that cuts them
-    // out of the filled body, so the number reads over both the filled and empty parts.
-    expect(icon.querySelectorAll('text')).toHaveLength(2);
-    for (const text of icon.querySelectorAll('text')) {
-      expect(text.textContent).toBe(String(BATTERY_LEVEL));
-    }
+    const digits = icon.querySelectorAll('text');
+    expect(digits).toHaveLength(1);
+    expect(digits[0].textContent).toBe(String(BATTERY_LEVEL));
+    expect(digits[0].getAttribute('fill')).toBe('#123456');
+    // Plain shapes only: no mask or clip path that a browser could fail to resolve.
+    expect(icon.querySelector('mask, clipPath, [mask], [clip-path]')).toBeNull();
   });
 
   it('shortens the filled body for a partial charge and drops it when empty', () => {
     const { rerender } = render(<BatteryIcon level={25} />);
-    const fill = () => screen.getByRole('img').querySelector('rect[mask]');
+    const fill = () => screen.getByRole('img').querySelector('rect:nth-of-type(2)');
     expect(fill()).not.toBeNull();
     expect(Number(fill()?.getAttribute('width'))).toBeCloseTo(batteryFillWidth(25));
     expect(screen.getByRole('img', { name: 'Battery 25%' })).toBeInTheDocument();
