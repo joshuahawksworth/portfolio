@@ -63,6 +63,12 @@ not pad the line, decorate it or explain it; it is a check, not a summary.
 
 ## Project conventions
 
+- **Ponytail governs every code change** (`.claude/skills/ponytail/SKILL.md`, MIT, copied from
+  [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)): read the code the
+  change touches, then climb the ladder before writing anything. Skip what isn't needed, reuse
+  what the repo already has, prefer the platform and installed dependencies over new ones,
+  and ship the shortest diff that works with one runnable check behind it. Never simplify
+  away validation, error handling, security or accessibility.
 - Read `DESIGN_SYSTEM.md` before adding UI. Names, icons, insets and wallpapers are per
   platform: use `appTitleFor`, `appLabelFor`, `nodeDisplayName`, `appIconFor`, `shellInsets`
   and `WALLPAPERS_FOR_OS` rather than hard-coding macOS strings.
