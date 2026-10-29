@@ -11,6 +11,7 @@ import TerminalApp from '../apps/TerminalApp';
 import FinderApp from '../apps/FinderApp';
 import SafariApp from '../apps/SafariApp';
 import MobileSnakeApp from '../apps/MobileSnakeApp';
+import DoomApp from '../apps/DoomApp';
 import RubberDuckApp from '../apps/RubberDuckApp';
 import KeyboardShortcutsApp from '../apps/KeyboardShortcutsApp';
 import CalculatorApp from '../apps/CalculatorApp';
@@ -340,6 +341,7 @@ const ICON_IMAGES: Record<string, { src: string; scale?: number; bg?: string }> 
   settings: { src: '/icons/settings.png', scale: 1.28 },
   safari: { src: '/icons/chrome.png', scale: 0.72, bg: '#ffffff' },
   github: { src: '/icons/github-mark-white.png', scale: 0.62, bg: '#0d1117' },
+  doom: { src: '/doom-icon.png', bg: '#000' },
 };
 
 function AppIcon({ appId, size = 60 }: { appId: string; size?: number }) {
@@ -470,6 +472,7 @@ const APP_COMPONENTS: Record<string, React.ComponentType<{ props?: Record<string
   finder: FinderApp,
   safari: SafariApp,
   snake: MobileSnakeApp,
+  doom: DoomApp,
   rubberduck: RubberDuckApp,
   shortcuts: KeyboardShortcutsApp,
   calculator: CalculatorApp,
@@ -492,6 +495,7 @@ const APP_LABELS: Record<string, string> = {
   github: 'GitHub',
   safari: 'Chrome',
   snake: 'Snake',
+  doom: 'DOOM',
   calculator: 'Calculator',
   askjosh: 'Ask Claude',
   settings: 'Settings',
@@ -581,13 +585,14 @@ const BASE_ITEMS = [
   'cv',
   'settings',
   'snake',
+  'doom',
 ] as const;
 
 const DOCK_APPS_IOS = ['about', 'experience', 'contact', 'settings'];
 const DOCK_APPS_ANDROID = ['about', 'experience', 'contact', 'github', 'settings'];
 
 /** Apps with a dark canvas get a dark sheet header so the bar doesn't glare. */
-const DARK_APPS = new Set(['calculator', 'terminal']);
+const DARK_APPS = new Set(['calculator', 'terminal', 'doom']);
 
 type Page = Array<string | null>;
 
@@ -996,6 +1001,7 @@ function MobileInner() {
                 styles.panelBody,
                 activeWindow.appId === 'snake' ? styles.panelBodySnake : '',
                 activeWindow.appId === 'calculator' ? styles.panelBodyCalculator : '',
+                activeWindow.appId === 'doom' ? styles.panelBodyDoom : '',
               ]
                 .filter(Boolean)
                 .join(' ')}

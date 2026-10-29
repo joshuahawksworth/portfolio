@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
 import { useDesktop } from '../../context/DesktopContext';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import styles from './DoomApp.module.css';
 
 interface CIEvents {
@@ -20,47 +22,68 @@ declare global {
   }
 }
 
-// DOSBox key codes (from js-dos Ia mapping: DOM keyCode → DOSBox key)
-// This bundle's DEFAULT.CFG: key_up=17(W) key_down=31(S) strafeL=30(A) strafeR=32(D)
-// key_left=75(←) key_right=77(→) key_fire=29(Ctrl) key_use=57(Space)
+// DOSBox key codes (from js-dos' mapping: DOM keyCode → DOSBox key). This bundle's DEFAULT.CFG
+// binds W/S to move, A/D to strafe, the arrows to turn (and menus), Ctrl to fire, Space to use.
 const K = {
-  w: 87, // W letter  → DOS scan 17 → Doom: move forward
-  s: 83, // S letter  → DOS scan 31 → Doom: move backward
-  a: 65, // A letter  → DOS scan 30 → Doom: strafe left (direct binding)
-  d: 68, // D letter  → DOS scan 32 → Doom: strafe right (direct binding)
-  left: 263, // ← arrow  → DOS scan 75 → Doom: turn left
-  right: 262, // → arrow  → DOS scan 77 → Doom: turn right
-  up: 265, // ↑ arrow  → menu navigation
-  down: 264, // ↓ arrow  → menu navigation
-  ctrl: 341, // Ctrl      → DOS scan 29 → Doom: fire
-  space: 32, // Space     → DOS scan 57 → Doom: use/open
-  shift: 340, // Shift     → DOS scan 54 → Doom: run
+  w: 87,
+  s: 83,
+  a: 65,
+  d: 68,
+  left: 263,
+  right: 262,
+  up: 265,
+  down: 264,
+  ctrl: 341, // fire
+  space: 32, // use / open
+  shift: 340, // run
   enter: 257,
   esc: 256,
-  d1: 49,
-  d2: 50,
-  d3: 51,
-  d4: 52,
-  d5: 53,
-  d6: 54,
-  d7: 55,
 };
+
+/** Browser key → DOSBox key while the DOOM window has the keyboard. */
+const KEYMAP: Record<string, number> = {
+  KeyW: K.w,
+  KeyS: K.s,
+  KeyA: K.a,
+  KeyD: K.d,
+  ArrowLeft: K.left,
+  ArrowRight: K.right,
+  ArrowUp: K.up,
+  ArrowDown: K.down,
+  Space: K.ctrl, // Space shoots, as most people expect
+  KeyF: K.space, // F uses / opens
+  ShiftLeft: K.shift,
+  ShiftRight: K.shift,
+  Enter: K.enter,
+  Escape: K.esc,
+  ...Object.fromEntries([1, 2, 3, 4, 5, 6, 7].map((n) => [`Digit${n}`, 48 + n])),
+};
+
+const PREVENT_DEFAULT = new Set([
+  'Space',
+  'ArrowUp',
+  'ArrowDown',
+  'ArrowLeft',
+  'ArrowRight',
+  'AltLeft',
+  'AltRight',
+]);
 
 type Status = 'loading' | 'ready' | 'error';
 
 /**
- * The game surface only: DOSBox boots into the canvas and the keyboard drives it while
- * the DOOM window is focused. Mute and the controls guide live in DoomWindow, which
- * frames this on the desktop.
+ * DOOM in a standard window: DOSBox boots straight into the game, the frame scales to whatever
+ * size the window is, and the keyboard drives it while the window is focused. On phones the
+ * game gets on-screen controls under the picture.
  */
-export default function DoomApp({ props }: { props?: Record<string, unknown> }) {
-  const muted = props?.muted === true;
+export default function DoomApp() {
   // Only drive the game while its window is the focused one; otherwise every other app
   // (the Terminal, text fields) would lose Space, Enter, the arrows and WASD to DOOM.
   const { windows, focusedId } = useDesktop();
   const doomFocused = windows.some((w) => w.id === focusedId && w.appId === 'doom');
   const focusedRef = useRef(doomFocused);
   focusedRef.current = doomFocused;
+  const isMobile = useIsMobile();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const ciRef = useRef<CI | null>(null);
@@ -68,11 +91,20 @@ export default function DoomApp({ props }: { props?: Record<string, unknown> }) 
   const mutedRef = useRef(false);
 
   const [status, setStatus] = useState<Status>('loading');
+  const [muted, setMuted] = useState(false);
+  const [hint, setHint] = useState(true);
 
   useEffect(() => {
     mutedRef.current = muted;
     if (!muted && audioRef.current?.state === 'suspended') audioRef.current.resume();
   }, [muted]);
+
+  // The controls line goes away on its own once the game has been up for a while.
+  useEffect(() => {
+    if (status !== 'ready') return;
+    const t = setTimeout(() => setHint(false), 9000);
+    return () => clearTimeout(t);
+  }, [status]);
 
   // ── Boot DOSBox ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -126,7 +158,6 @@ export default function DoomApp({ props }: { props?: Record<string, unknown> }) 
           ctx.putImageData(img, 0, 0);
         });
 
-        // Audio
         try {
           const freq = ci.soundFrequency();
           const ac = new AudioContext({ sampleRate: freq });
@@ -160,189 +191,107 @@ export default function DoomApp({ props }: { props?: Record<string, unknown> }) 
     };
   }, []);
 
-  // ── Keyboard only — no mouse interaction with game ─────────────────────
+  // ── Keyboard (desktop) ─────────────────────────────────────────────────
   useEffect(() => {
     const held = new Set<string>();
-
-    const dn = (e: KeyboardEvent) => {
+    const down = (e: KeyboardEvent) => {
       if (!focusedRef.current) return;
-      if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code))
-        e.preventDefault();
-      if (e.code === 'AltLeft' || e.code === 'AltRight') e.preventDefault();
-      if (held.has(e.code)) return;
+      if (PREVENT_DEFAULT.has(e.code)) e.preventDefault();
+      const key = KEYMAP[e.code];
+      if (key === undefined || held.has(e.code)) return;
       held.add(e.code);
-
-      const ci = ciRef.current;
-      if (!ci) return;
-
-      switch (e.code) {
-        // WASD — send letter key codes matching doom's DEFAULT.CFG bindings
-        case 'KeyW':
-          ci.sendKeyEvent(K.w, true);
-          break; // forward
-        case 'KeyS':
-          ci.sendKeyEvent(K.s, true);
-          break; // backward
-        case 'KeyA':
-          ci.sendKeyEvent(K.a, true);
-          break; // strafe left
-        case 'KeyD':
-          ci.sendKeyEvent(K.d, true);
-          break; // strafe right
-        // Arrow keys — turn camera left/right, navigate menus up/down
-        case 'ArrowLeft':
-          ci.sendKeyEvent(K.left, true);
-          break;
-        case 'ArrowRight':
-          ci.sendKeyEvent(K.right, true);
-          break;
-        case 'ArrowUp':
-          ci.sendKeyEvent(K.up, true);
-          break;
-        case 'ArrowDown':
-          ci.sendKeyEvent(K.down, true);
-          break;
-        // Actions
-        case 'Space':
-          ci.sendKeyEvent(K.ctrl, true);
-          break; // fire
-        case 'KeyF':
-          ci.sendKeyEvent(K.space, true);
-          break; // use/open
-        case 'ShiftLeft':
-        case 'ShiftRight':
-          ci.sendKeyEvent(K.shift, true);
-          break; // run
-        case 'Enter':
-          ci.sendKeyEvent(K.enter, true);
-          break;
-        case 'Escape':
-          ci.sendKeyEvent(K.esc, true);
-          break;
-        // Weapons
-        case 'Digit1':
-          ci.sendKeyEvent(K.d1, true);
-          break;
-        case 'Digit2':
-          ci.sendKeyEvent(K.d2, true);
-          break;
-        case 'Digit3':
-          ci.sendKeyEvent(K.d3, true);
-          break;
-        case 'Digit4':
-          ci.sendKeyEvent(K.d4, true);
-          break;
-        case 'Digit5':
-          ci.sendKeyEvent(K.d5, true);
-          break;
-        case 'Digit6':
-          ci.sendKeyEvent(K.d6, true);
-          break;
-        case 'Digit7':
-          ci.sendKeyEvent(K.d7, true);
-          break;
-      }
+      setHint(false);
+      ciRef.current?.sendKeyEvent(key, true);
     };
-
     const up = (e: KeyboardEvent) => {
       held.delete(e.code);
-      if (!focusedRef.current) return;
-      const ci = ciRef.current;
-      if (!ci) return;
-      switch (e.code) {
-        case 'KeyW':
-          ci.sendKeyEvent(K.w, false);
-          break;
-        case 'KeyS':
-          ci.sendKeyEvent(K.s, false);
-          break;
-        case 'KeyA':
-          ci.sendKeyEvent(K.a, false);
-          break;
-        case 'KeyD':
-          ci.sendKeyEvent(K.d, false);
-          break;
-        case 'ArrowLeft':
-          ci.sendKeyEvent(K.left, false);
-          break;
-        case 'ArrowRight':
-          ci.sendKeyEvent(K.right, false);
-          break;
-        case 'ArrowUp':
-          ci.sendKeyEvent(K.up, false);
-          break;
-        case 'ArrowDown':
-          ci.sendKeyEvent(K.down, false);
-          break;
-        case 'Space':
-          ci.sendKeyEvent(K.ctrl, false);
-          break;
-        case 'KeyF':
-          ci.sendKeyEvent(K.space, false);
-          break;
-        case 'ShiftLeft':
-        case 'ShiftRight':
-          ci.sendKeyEvent(K.shift, false);
-          break;
-        case 'Enter':
-          ci.sendKeyEvent(K.enter, false);
-          break;
-        case 'Escape':
-          ci.sendKeyEvent(K.esc, false);
-          break;
-        case 'Digit1':
-          ci.sendKeyEvent(K.d1, false);
-          break;
-        case 'Digit2':
-          ci.sendKeyEvent(K.d2, false);
-          break;
-        case 'Digit3':
-          ci.sendKeyEvent(K.d3, false);
-          break;
-        case 'Digit4':
-          ci.sendKeyEvent(K.d4, false);
-          break;
-        case 'Digit5':
-          ci.sendKeyEvent(K.d5, false);
-          break;
-        case 'Digit6':
-          ci.sendKeyEvent(K.d6, false);
-          break;
-        case 'Digit7':
-          ci.sendKeyEvent(K.d7, false);
-          break;
-      }
+      const key = KEYMAP[e.code];
+      if (key !== undefined && focusedRef.current) ciRef.current?.sendKeyEvent(key, false);
     };
-
-    window.addEventListener('keydown', dn);
+    window.addEventListener('keydown', down);
     window.addEventListener('keyup', up);
     return () => {
-      window.removeEventListener('keydown', dn);
+      window.removeEventListener('keydown', down);
       window.removeEventListener('keyup', up);
     };
   }, []);
 
+  // ── Touch controls (phones) ────────────────────────────────────────────
+  function pad(key: number, label: string, className = '') {
+    const press = (pressed: boolean) => (e: ReactPointerEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      if (pressed) {
+        try {
+          e.currentTarget.setPointerCapture(e.pointerId);
+        } catch {
+          /* synthetic events have no active pointer */
+        }
+        if (audioRef.current?.state === 'suspended') audioRef.current.resume();
+      }
+      ciRef.current?.sendKeyEvent(key, pressed);
+    };
+    return (
+      <button
+        type="button"
+        className={`${styles.pad} ${className}`}
+        onPointerDown={press(true)}
+        onPointerUp={press(false)}
+        onPointerCancel={press(false)}
+        onContextMenu={(e) => e.preventDefault()}
+        aria-label={label}
+      >
+        {label}
+      </button>
+    );
+  }
+
   return (
-    <div className={styles.root}>
-      {/* Loading / error splash */}
-      {status !== 'ready' && (
-        <div className={styles.splash}>
-          <div className={styles.doomTitle}>DOOM</div>
-          <div className={styles.bar} data-essential-motion="">
-            <div className={styles.fill} />
-          </div>
-          <p className={styles.sub}>
-            {status === 'error' ? 'Failed to start DOOM' : 'Loading engine…'}
+    <div className={`${styles.root} ${isMobile ? styles.rootMobile : ''}`}>
+      <div className={styles.screen}>
+        <canvas
+          ref={canvasRef}
+          className={`${styles.canvas} ${status === 'ready' ? styles.show : ''}`}
+        />
+        {status !== 'ready' && (
+          <p className={styles.status} role="status">
+            {status === 'error' ? 'DOOM could not start.' : 'Starting DOSBox…'}
           </p>
+        )}
+        {status === 'ready' && hint && !isMobile && (
+          <p className={styles.hint}>W A S D move · ← → turn · Space fire · F use · Esc menu</p>
+        )}
+        <button
+          type="button"
+          className={styles.mute}
+          onClick={() => setMuted((m) => !m)}
+          aria-pressed={muted}
+        >
+          {muted ? 'Unmute' : 'Mute'}
+        </button>
+      </div>
+
+      {isMobile && (
+        <div className={styles.controls} aria-label="DOOM controls">
+          <div className={styles.dpad}>
+            <span />
+            {pad(K.w, '↑')}
+            <span />
+            {pad(K.left, '←')}
+            {pad(K.s, '↓')}
+            {pad(K.right, '→')}
+          </div>
+          <div className={styles.actions}>
+            <div className={styles.row}>
+              {pad(K.esc, 'Esc', styles.padSmall)}
+              {pad(K.enter, 'Enter', styles.padSmall)}
+            </div>
+            <div className={styles.row}>
+              {pad(K.space, 'Use', styles.padWide)}
+              {pad(K.ctrl, 'Fire', styles.padFire)}
+            </div>
+          </div>
         </div>
       )}
-
-      {/* Game canvas — keyboard only, no mouse interaction */}
-      <canvas
-        ref={canvasRef}
-        className={`${styles.canvas} ${status === 'ready' ? styles.show : ''}`}
-        style={{ cursor: 'default' }}
-      />
     </div>
   );
 }

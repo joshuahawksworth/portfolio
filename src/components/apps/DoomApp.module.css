@@ -1,13 +1,24 @@
+/* ── DOOM: the DOSBox picture fills the window, nothing else ───────────── */
 .root {
   position: relative;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
   background: #000;
+  color: #c8c8c8;
+  font-family: var(--font-mono);
   overflow: hidden;
   user-select: none;
 }
 
-/* ── Canvas — keyboard only, no cursor change ───────────────────────── */
+.screen {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+/* The 320×200 frame scales to the window and keeps its shape */
 .canvas {
   display: block;
   width: 100%;
@@ -16,56 +27,127 @@
   image-rendering: pixelated;
   opacity: 0;
   transition: opacity 300ms;
-  pointer-events: none; /* mouse never reaches the game */
-}
-.canvas.show { opacity: 1; }
-
-/* ── Loading / error splash (light chrome over the game area) ───────── */
-.splash {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  background: var(--panel);
-  color: var(--text);
-  z-index: 1;
   pointer-events: none;
 }
-
-.doomTitle {
-  font-family: 'Impact', 'Arial Black', sans-serif;
-  font-size: 56px;
-  font-weight: 900;
-  letter-spacing: 0.1em;
-  color: #cc1100;
-  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
+.canvas.show {
+  opacity: 1;
 }
 
-.bar {
-  width: 180px;
-  height: 4px;
-  background: rgba(0, 0, 0, 0.08);
-  border-radius: 2px;
-  overflow: hidden;
-}
-.fill {
-  height: 100%;
-  background: var(--accent);
-  border-radius: 2px;
-  animation: sweep 2s ease-in-out infinite;
-}
-@keyframes sweep {
-  0%   { width: 0%;  margin-left: 0;    }
-  50%  { width: 60%; margin-left: 20%;  }
-  100% { width: 0%;  margin-left: 100%; }
-}
-.sub {
+.status {
+  position: absolute;
+  left: 14px;
+  top: 10px;
   margin: 0;
-  font-family: var(--font-ui);
   font-size: 12px;
-  color: var(--muted);
-  letter-spacing: 0;
+}
+
+.hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 5px 10px;
+  background: rgba(0, 0, 0, 0.72);
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mute {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #c8c8c8;
+  font: inherit;
+  font-size: 11px;
+  opacity: 0;
+  transition: opacity 120ms;
+}
+.root:hover .mute,
+.mute:focus-visible,
+.rootMobile .mute {
+  opacity: 1;
+}
+
+/* ── Touch controls ───────────────────────────────────────────────────── */
+.rootMobile .screen {
+  flex: 0 0 auto;
+  aspect-ratio: 16 / 10;
+}
+
+.controls {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px calc(18px + env(safe-area-inset-bottom));
+  touch-action: none;
+}
+
+.dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 56px);
+  grid-auto-rows: 56px;
+  gap: 6px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+}
+
+.pad {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e6e6e6;
+  font: inherit;
+  font-size: 15px;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.pad:active {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.padSmall {
+  width: 58px;
+  height: 36px;
+  font-size: 12px;
+}
+.padWide {
+  width: 58px;
+  height: 72px;
+}
+.padFire {
+  width: 84px;
+  height: 72px;
+  border-radius: 50%;
+  border-color: rgba(220, 60, 50, 0.6);
+  background: rgba(190, 40, 30, 0.35);
+}
+.padFire:active {
+  background: rgba(220, 60, 50, 0.6);
 }
