@@ -25,9 +25,10 @@ Rules for platform-aware work:
   `<html data-os>` mirrors it, so CSS can branch with `:global(html[data-os='windows'])` or a `data-os` on the app root.
 - App artwork goes through `appIconFor(key, os)` (`src/theme/platformIcons.tsx`): macOS art lives in `dockIcons.tsx`,
   Windows in `icons/WindowsIcons.tsx`, Android in `icons/AndroidIcons.tsx`. Every Windows system icon is a
-  `WinArt`: a real bitmap from `public/icons/windows/<name>.png` when the file exists (explorer, briefcase, skills,
-  mail, maps, terminal, calculator, photos, settings, keyboard, recycle-bin-empty, recycle-bin-full, this-pc,
-  folder), else the drawn Fluent-style SVG. Desktop shortcuts on Windows get the shortcut-arrow badge (`NodeIcon`). Shared apps with no native counterpart
+  `WinArt`: a real bitmap from `public/icons/windows/<name>.png` when the file exists, else the drawn Fluent-style
+  SVG. The Windows 11 renders ship for explorer, folder, recycle-bin-empty, recycle-bin-full, calculator, mail, maps,
+  terminal, photos, settings, keyboard, briefcase and this-pc (96px, from the HaydenReeve/WindowsIcons pack and
+  daedalOS); `skills` has no Windows counterpart and stays drawn. Desktop shortcuts on Windows get the shortcut-arrow badge (`NodeIcon`). Shared apps with no native counterpart
   (GitHub, Chrome, Claude, DOOM, Snake) fall through to the macOS art. Folders, drives and bins use `PlatformFileIcons`.
 - Names differ per OS: use `appTitleFor` / `appLabelFor` / `nodeDisplayName` instead of hard-coding "Finder" or "Trash".
 - Space above and below windows comes from `shellInsets(os)`; never hard-code the menu bar or dock height.
