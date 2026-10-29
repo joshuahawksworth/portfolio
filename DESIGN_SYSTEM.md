@@ -36,7 +36,9 @@ Rules for platform-aware work:
   are rendered from the day image by `node scripts/wallpapers/beach-variants.mjs`. `windows-7-harmony.jpg` and
   `windows-xp-bliss.jpg` are git-ignored extras: drop them into `public/wallpapers/` and the picker lists them.
   Which optional files exist is baked in at build time (`__PUBLIC_ASSETS__`, see `lib/publicAssets.ts`), so
-  nothing is probed at runtime; restart the dev server after adding one.
+  nothing is probed at runtime; restart the dev server after adding one. `waves` is a live wallpaper: the
+  desktop draws it with a shader (`Desktop/WavesWallpaper.tsx`, listed in `LIVE_WALLPAPERS`) over its poster
+  still; the lock screens, thumbnails and phones show the still.
 - The Terminal's commands live in `lib/terminalShell.ts`: one `Shell` class with a zsh, PowerShell or bash personality
   chosen by `shellFor(os)`. Add commands there, not in `TerminalApp.tsx`; keep error messages in each shell's own wording.
 - Boot, shutdown and lock screens live in `Boot/` and `Login/` and branch on `os`. Their progress (the boot bar,
