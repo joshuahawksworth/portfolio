@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { jobsData } from '../../data/experienceData';
 import { CV_URL } from '../../lib/cv';
+import { STACK } from '../../data/skills';
 import styles from './PlainPortfolioSite.module.css';
 
 /** The address the browser shows for this page; typed into a real browser it lands on the site itself. */
@@ -12,29 +13,13 @@ const LINKEDIN = 'https://www.linkedin.com/in/joshua-hawksworth-9741aa209';
 const FONT_HREF =
   'https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600&display=swap';
 
-const SKILLS: [string, string[]][] = [
-  [
-    'Front End',
-    ['HTML', 'CSS', 'JavaScript', 'TypeScript', 'React', 'Next', 'Vue', 'Angular', 'Vite'],
-  ],
-  ['Mobile', ['React Native', 'Expo', 'Swift', 'iOS & Android', 'App Store releases', 'CI/CD']],
-  [
-    'Back End & Tools',
-    [
-      'Node',
-      'Nest',
-      'PHP',
-      'Laravel',
-      'SQL',
-      'AWS',
-      'Azure',
-      'Docker',
-      'Git',
-      'Jest',
-      'Playwright',
-      'Claude',
-    ],
-  ],
+/** The stack grouped the way the site lists it, with the same logos the Skills app uses. */
+const SKILL_GROUPS: { title: string; cats: string[] }[] = [
+  { title: 'Front End', cats: ['Frontend'] },
+  { title: 'Mobile', cats: ['Mobile'] },
+  { title: 'Back End & Cloud', cats: ['Backend', 'Cloud'] },
+  { title: 'Testing, Tools & AI', cats: ['Testing', 'Tools', 'AI'] },
+  { title: 'Design', cats: ['Design'] },
 ];
 
 const SECTIONS = ['About', 'Skills', 'Projects', 'Contact'] as const;
@@ -236,12 +221,15 @@ export default function PlainPortfolioSite() {
 
           <section id="plain-skills" className={styles.section}>
             <h2 className={styles.title}>Skills</h2>
-            {SKILLS.map(([group, items]) => (
-              <div key={group} className={styles.skillGroup}>
-                <h3>{group}</h3>
-                <ul className={styles.chips}>
-                  {items.map((item) => (
-                    <li key={item}>{item}</li>
+            {SKILL_GROUPS.map(({ title, cats }) => (
+              <div key={title} className={styles.skillGroup}>
+                <h3>{title}</h3>
+                <ul className={styles.tiles}>
+                  {STACK.filter((skill) => cats.includes(skill.cat)).map((skill) => (
+                    <li key={skill.name}>
+                      <img src={skill.icon} alt="" width={26} height={26} loading="lazy" />
+                      {skill.name}
+                    </li>
                   ))}
                 </ul>
               </div>
