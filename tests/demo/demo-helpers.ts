@@ -35,12 +35,22 @@ export async function enterPortfolio(page: Page, platform?: Platform) {
     }, platform);
   }
   await page.goto('/');
-  await expect(page.getByText(/Joshua|Swipe up to unlock/).first()).toBeVisible({
-    timeout: 15_000,
-  });
+  // macOS and the phones show the name or the swipe hint; the Windows 11 lock screen shows
+  // only the clock and its power button until a key lifts it to the sign-in panel.
+  await expect(
+    page
+      .getByText(/Joshua|Swipe up to unlock/)
+      .or(page.getByRole('button', { name: 'Power' }))
+      .first()
+  ).toBeVisible({ timeout: 15_000 });
   await beat(page);
   await page.keyboard.press('Enter');
   await beat(page);
+  const signIn = page.getByRole('button', { name: 'Sign in' });
+  if (await signIn.isVisible()) {
+    await signIn.click();
+    await beat(page);
+  }
 }
 
 /**
