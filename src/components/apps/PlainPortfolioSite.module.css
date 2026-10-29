@@ -1,219 +1,401 @@
-/* A deliberately ordinary one-page personal site, so it reads as a different website. */
+/* A one-page personal site in the style most developers ship: dark navy, one pink accent,
+   Quicksand, centred thin section titles, soft colour glows behind the content. */
 .site {
   height: 100%;
   overflow-y: auto;
-  background: #fff;
-  color: #1f2328;
-  font-family: Georgia, 'Times New Roman', serif;
+  background: #111720;
+  color: #fff;
+  font-family: Quicksand, 'Varela Round', Nunito, system-ui, sans-serif;
   font-size: 16px;
   line-height: 1.55;
-  -webkit-font-smoothing: auto;
+  scroll-behavior: smooth;
 }
 
-.site h1,
-.site h2,
-.site h3,
-.nav,
-.cta,
-.meta,
-.kicker,
-.footer {
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
+.page {
+  position: relative;
+  min-height: 100%;
+}
+
+/* The glows: a few large soft discs down the page */
+.glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(520px 480px at 88% 5%, rgba(224, 24, 104, 0.42), transparent 70%),
+    radial-gradient(560px 520px at 6% 24%, rgba(43, 69, 104, 0.85), transparent 70%),
+    radial-gradient(520px 520px at 96% 42%, rgba(224, 24, 104, 0.22), transparent 70%),
+    radial-gradient(560px 520px at 10% 68%, rgba(224, 24, 104, 0.2), transparent 70%),
+    radial-gradient(560px 520px at 92% 88%, rgba(43, 69, 104, 0.8), transparent 70%);
 }
 
 .site a {
-  color: #0b57d0;
+  color: #fff;
+  text-decoration: none;
   font-weight: 400;
-  text-decoration: underline;
 }
 
+/* ── Nav ── */
 .nav {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  max-width: 880px;
+  max-width: 1060px;
   margin: 0 auto;
-  padding: 18px 24px;
-  border-bottom: 1px solid #e3e3e3;
-  font-size: 13px;
+  padding: 26px 56px 0;
+  font-size: 15px;
 }
 .brand {
-  font-weight: 700;
+  font-size: 19px;
+  font-weight: 400;
 }
 .nav nav {
   display: flex;
-  gap: 18px;
+  gap: 32px;
 }
-.nav button {
+.nav button,
+.nav a {
   padding: 0;
   border: 0;
   background: none;
-  color: #1f2328;
+  color: #fff;
   font: inherit;
+  opacity: 0.85;
   cursor: pointer;
 }
 .nav button:hover,
 .nav a:hover {
-  text-decoration: underline;
-}
-.nav a {
-  color: #1f2328;
-  text-decoration: none;
+  opacity: 1;
+  color: #e01868;
 }
 
+/* ── Left rail of contact icons ── */
+.rail {
+  position: sticky;
+  top: 44%;
+  height: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  width: 40px;
+  margin-left: 20px;
+}
+.rail a {
+  display: flex;
+  color: #fff;
+  opacity: 0.9;
+}
+.rail a:hover {
+  color: #e01868;
+}
+.railLine {
+  width: 2px;
+  height: 110px;
+  background: #fff;
+  opacity: 0.9;
+}
+
+/* ── Hero ── */
 .main {
-  max-width: 880px;
+  position: relative;
+  max-width: 1060px;
   margin: 0 auto;
-  padding: 0 24px 40px;
+  padding: 0 56px 40px;
 }
 
 .hero {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 40px;
-  padding: 56px 0 40px;
-  border-bottom: 1px solid #e3e3e3;
+  gap: 48px;
+  padding: 70px 0 10px;
+}
+.heroText {
+  max-width: 600px;
 }
 .kicker {
-  margin: 0;
-  color: #57606a;
-  font-size: 14px;
+  margin: 0 0 6px;
+  font-size: 19px;
+  font-weight: 400;
+  opacity: 0.9;
 }
 .hero h1 {
-  margin: 4px 0 2px;
-  font-size: 36px;
-  line-height: 1.15;
+  margin: 0 0 6px;
+  font-size: 25px;
+  font-weight: 400;
 }
 .role {
-  margin: 0 0 14px;
-  font-size: 18px;
-  color: #57606a;
-}
-.lead {
-  margin: 0 0 20px;
-  max-width: 520px;
-}
-.heroActions {
   display: flex;
   align-items: center;
-  gap: 18px;
-  font-size: 14px;
+  gap: 10px;
+  margin: 0 0 14px;
+  color: #e01868;
+  font-size: 20px;
+  font-weight: 400;
 }
-.cta {
-  padding: 9px 16px;
-  border-radius: 4px;
-  background: #0b57d0;
-  color: #fff !important;
-  text-decoration: none !important;
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #e01868;
+}
+.lead {
+  margin: 0 0 24px;
+  font-size: 18px;
+  line-height: 1.5;
+  opacity: 0.95;
+}
+
+/* Outlined pink buttons: the resume button and the project links */
+.outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border: 1px solid #e01868;
+  border-radius: 2px;
+  color: #e01868 !important;
+  font-size: 18px;
+  background: transparent;
+}
+.outline:hover {
+  background: rgba(224, 24, 104, 0.12);
+}
+
+/* Tilted photo over a tilted pink square */
+.photoWrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 330px;
+  height: 330px;
+  margin-right: 30px;
+}
+.photoBack {
+  position: absolute;
+  inset: 22px 4px 4px 22px;
+  background: #e01868;
+  transform: rotate(8deg);
 }
 .photo {
-  flex-shrink: 0;
-  width: 220px;
-  height: 220px;
-  border-radius: 50%;
+  position: absolute;
+  inset: 0 24px 24px 0;
+  width: 306px;
+  height: 306px;
   object-fit: cover;
-  border: 4px solid #eef1f5;
+  border: 4px solid #e01868;
+  background: #0b1018;
+  transform: rotate(-8deg);
 }
 
+.scrollCue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin: 56px 0 10px;
+  color: #e01868;
+}
+
+/* ── Sections ── */
 .section {
-  padding: 36px 0;
-  border-bottom: 1px solid #e3e3e3;
+  padding: 70px 0 20px;
 }
-.section h2 {
-  margin: 0 0 18px;
-  font-size: 22px;
+.title {
+  margin: 0 0 54px;
+  font-size: 54px;
+  font-weight: 300;
+  text-align: center;
+  line-height: 1.1;
 }
 
-.timeline {
+.triptych {
   display: grid;
-  grid-template-columns: 90px 1fr;
-  gap: 10px 18px;
-  margin: 0;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px 60px;
+  justify-items: center;
 }
-.timeline dt {
-  font-weight: 700;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-  font-size: 14px;
+.triptych > div {
+  max-width: 420px;
+  text-align: center;
 }
-.timeline dd {
+.triptych h3 {
+  margin: 0 0 14px;
+  color: #e01868;
+  font-size: 32px;
+  font-weight: 400;
+}
+.triptych p {
   margin: 0;
+  font-size: 18px;
+  opacity: 0.95;
+}
+.wide {
+  grid-column: 1 / -1;
 }
 
-.skills {
-  margin: 0;
-  display: grid;
-  gap: 14px;
+/* Skills: group titles and chips */
+.skillGroup {
+  margin: 0 0 30px;
 }
-.skills dt {
-  font-weight: 700;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-  font-size: 14px;
-  margin-bottom: 2px;
+.skillGroup h3 {
+  margin: 0 0 14px;
+  font-size: 27px;
+  font-weight: 400;
 }
-.skills dd {
+.chips {
+  list-style: none;
   margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 20px;
+}
+.chips li {
+  padding: 9px 16px;
+  border-radius: 3px;
+  background: #273a52;
+  color: #e01868;
+  font-size: 17px;
 }
 
+/* Projects: glowing screenshot frame left, text right */
 .projects {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 28px;
+  gap: 90px;
 }
 .project {
-  display: flex;
-  gap: 22px;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 44px;
+  align-items: start;
 }
-.project img {
-  flex-shrink: 0;
-  width: 160px;
-  height: 100px;
+.shot {
+  display: block;
+  aspect-ratio: 16 / 10;
+  border: 2px solid #e01868;
+  border-radius: 6px;
+  background: #0b1018;
+  box-shadow: 0 0 18px rgba(224, 24, 104, 0.75);
+  overflow: hidden;
+}
+.shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border: 1px solid #e3e3e3;
-  background: #f6f8fa;
 }
-.project h3 {
-  margin: 0 0 2px;
-  font-size: 17px;
+.shotEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.project p {
-  margin: 0 0 8px;
+.shotEmpty img {
+  width: 46%;
+  height: auto;
+  max-height: 40%;
+  object-fit: contain;
 }
-.meta {
-  color: #57606a;
-  font-size: 12px;
+.projectText h3 {
+  margin: 0 0 10px;
+  font-size: 40px;
+  font-weight: 300;
+  line-height: 1.1;
+}
+.madeWith {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+.madeWith span {
+  color: #e01868;
+  font-size: 16px;
+}
+.projectText p {
+  margin: 0 0 18px;
+  font-size: 18px;
 }
 
+/* Footer links and copyright */
+.footerLinks {
+  display: flex;
+  justify-content: center;
+  gap: 54px;
+  margin-top: 70px;
+  font-size: 28px;
+  font-weight: 400;
+}
+.footerLinks a:hover {
+  color: #e01868;
+}
 .footer {
-  max-width: 880px;
-  margin: 0 auto;
-  padding: 18px 24px 28px;
-  color: #57606a;
-  font-size: 12px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 24px 30px;
+  font-size: 15px;
+}
+.footer p {
+  margin: 0;
+  opacity: 0.9;
+}
+.toTop {
+  padding: 4px;
+  border: 0;
+  background: none;
+  color: #e01868;
+  cursor: pointer;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 760px) {
+  .nav {
+    padding: 20px 20px 0;
+  }
+  .nav nav {
+    gap: 16px;
+    font-size: 14px;
+  }
+  .rail {
+    display: none;
+  }
+  .main {
+    padding: 0 20px 30px;
+  }
   .hero {
     flex-direction: column-reverse;
     align-items: flex-start;
-    padding-top: 32px;
+    padding-top: 40px;
+  }
+  .photoWrap {
+    width: 240px;
+    height: 240px;
+    align-self: center;
   }
   .photo {
-    width: 140px;
-    height: 140px;
+    width: 216px;
+    height: 216px;
+  }
+  .title {
+    font-size: 40px;
+  }
+  .triptych {
+    grid-template-columns: 1fr;
   }
   .project {
-    flex-direction: column;
-  }
-  .timeline {
     grid-template-columns: 1fr;
-    gap: 4px;
   }
-  .timeline dd {
-    margin-bottom: 10px;
+  .footerLinks {
+    gap: 24px;
+    font-size: 20px;
   }
 }
