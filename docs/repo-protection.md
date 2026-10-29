@@ -54,6 +54,12 @@ The workflow section states that merging is Joshua's alone and that CI must be g
 review. Agents read it every session; the canary line at the end of every reply shows it is
 still in context.
 
+The canary proves the file loaded and surfaces a drifting goal, but it is not a measure of
+session health: `CLAUDE.md` sits at the start of the context window, the position retained
+best, so the canary stays green well after detail from the middle of a long session has begun
+to blur. The status line in `.claude/settings.json` reports context usage directly for that;
+both are described under Canary and Context gauge in `CLAUDE.md`.
+
 ## What CI checks
 
 `.github/workflows/ci.yml` runs on every PR and every push to `main`:

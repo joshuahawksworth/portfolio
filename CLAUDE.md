@@ -46,6 +46,30 @@ If the line is missing, the token is wrong, or the goal has quietly become somet
 not ask for, the session has drifted: Joshua will restate the task or start a fresh session. Do
 not pad the line, decorate it or explain it; it is a check, not a summary.
 
+### What it does not catch
+
+The token proves this file loaded; the goal line catches a request that has drifted. Neither
+measures context usage: `CLAUDE.md` sits at the start of the window, the best-retained position,
+so the canary reads healthy long after the middle of a long session has begun to blur.
+
+## Context gauge
+
+`.claude/statusline.sh`, wired up in `.claude/settings.json`, renders usage as
+`context ██████████████░░░░░░ 71% · getting long`. Past 80% it reads `start a new session` —
+finish the current step and start one. Needs `jq`.
+
+## Code volume
+
+Every line is a long-term liability, and an agent's default is to produce more of them. The
+measure of a change is the smallest diff that delivers the behaviour; a PR that deletes more
+than it adds is a good PR. No speculative abstraction, no defensive branch nothing asked for,
+and comments say why rather than what.
+
+Before changing a shared shape — a signature, a return type, props, an HTTP path, an env var,
+a filename — find its readers first. Some coupling here has no code reference at either end, so
+a clean grep is not an answer: use the `cross-links` skill. Reasoning and worked examples are in
+`docs/working-with-ai.md`.
+
 ## Before opening a PR
 
 - `npm run typecheck` passes (both `tsconfig.app.json` and `tsconfig.node.json`).
