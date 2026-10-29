@@ -498,3 +498,22 @@
     display: flex;
   }
 }
+
+/* The composer is already a rounded field: keep the platform text-box dressing off the
+   textarea inside it on Windows and Android. (The Material rule carries a :not(), so this
+   needs the extra class to outrank it.) */
+:global(html[data-os='windows']) .root .composer .textarea,
+:global(html[data-os='android']) .root .composer .textarea {
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  min-height: 0;
+  padding: 6px 0;
+}
+:global(html[data-os='windows']) .root .composer .textarea:focus,
+:global(html[data-os='android']) .root .composer .textarea:focus {
+  border: 0;
+  outline: none;
+  box-shadow: none;
+}
