@@ -24,7 +24,10 @@ Rules for platform-aware work:
 - Read the OS with `useOs()` / `useSettings()` in components, or `currentOs()` (`src/theme/platform.ts`) in plain helpers.
   `<html data-os>` mirrors it, so CSS can branch with `:global(html[data-os='windows'])` or a `data-os` on the app root.
 - App artwork goes through `appIconFor(key, os)` (`src/theme/platformIcons.tsx`): macOS art lives in `dockIcons.tsx`,
-  Windows in `icons/WindowsIcons.tsx`, Android in `icons/AndroidIcons.tsx`. Shared apps with no native counterpart
+  Windows in `icons/WindowsIcons.tsx`, Android in `icons/AndroidIcons.tsx`. Every Windows system icon is a
+  `WinArt`: a real bitmap from `public/icons/windows/<name>.png` when the file exists (explorer, briefcase, skills,
+  mail, maps, terminal, calculator, photos, settings, keyboard, recycle-bin-empty, recycle-bin-full, this-pc,
+  folder), else the drawn Fluent-style SVG. Desktop shortcuts on Windows get the shortcut-arrow badge (`NodeIcon`). Shared apps with no native counterpart
   (GitHub, Chrome, Claude, DOOM, Snake) fall through to the macOS art. Folders, drives and bins use `PlatformFileIcons`.
 - Names differ per OS: use `appTitleFor` / `appLabelFor` / `nodeDisplayName` instead of hard-coding "Finder" or "Trash".
 - Space above and below windows comes from `shellInsets(os)`; never hard-code the menu bar or dock height.
