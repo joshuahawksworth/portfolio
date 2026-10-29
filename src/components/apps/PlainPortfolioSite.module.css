@@ -1,0 +1,219 @@
+/* A deliberately ordinary one-page personal site, so it reads as a different website. */
+.site {
+  height: 100%;
+  overflow-y: auto;
+  background: #fff;
+  color: #1f2328;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: auto;
+}
+
+.site h1,
+.site h2,
+.site h3,
+.nav,
+.cta,
+.meta,
+.kicker,
+.footer {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.site a {
+  color: #0b57d0;
+  font-weight: 400;
+  text-decoration: underline;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 18px 24px;
+  border-bottom: 1px solid #e3e3e3;
+  font-size: 13px;
+}
+.brand {
+  font-weight: 700;
+}
+.nav nav {
+  display: flex;
+  gap: 18px;
+}
+.nav button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #1f2328;
+  font: inherit;
+  cursor: pointer;
+}
+.nav button:hover,
+.nav a:hover {
+  text-decoration: underline;
+}
+.nav a {
+  color: #1f2328;
+  text-decoration: none;
+}
+
+.main {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 24px 40px;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 56px 0 40px;
+  border-bottom: 1px solid #e3e3e3;
+}
+.kicker {
+  margin: 0;
+  color: #57606a;
+  font-size: 14px;
+}
+.hero h1 {
+  margin: 4px 0 2px;
+  font-size: 36px;
+  line-height: 1.15;
+}
+.role {
+  margin: 0 0 14px;
+  font-size: 18px;
+  color: #57606a;
+}
+.lead {
+  margin: 0 0 20px;
+  max-width: 520px;
+}
+.heroActions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-size: 14px;
+}
+.cta {
+  padding: 9px 16px;
+  border-radius: 4px;
+  background: #0b57d0;
+  color: #fff !important;
+  text-decoration: none !important;
+}
+.photo {
+  flex-shrink: 0;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #eef1f5;
+}
+
+.section {
+  padding: 36px 0;
+  border-bottom: 1px solid #e3e3e3;
+}
+.section h2 {
+  margin: 0 0 18px;
+  font-size: 22px;
+}
+
+.timeline {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 10px 18px;
+  margin: 0;
+}
+.timeline dt {
+  font-weight: 700;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 14px;
+}
+.timeline dd {
+  margin: 0;
+}
+
+.skills {
+  margin: 0;
+  display: grid;
+  gap: 14px;
+}
+.skills dt {
+  font-weight: 700;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+.skills dd {
+  margin: 0;
+}
+
+.projects {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 28px;
+}
+.project {
+  display: flex;
+  gap: 22px;
+  align-items: flex-start;
+}
+.project img {
+  flex-shrink: 0;
+  width: 160px;
+  height: 100px;
+  object-fit: cover;
+  border: 1px solid #e3e3e3;
+  background: #f6f8fa;
+}
+.project h3 {
+  margin: 0 0 2px;
+  font-size: 17px;
+}
+.project p {
+  margin: 0 0 8px;
+}
+.meta {
+  color: #57606a;
+  font-size: 12px;
+}
+
+.footer {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 18px 24px 28px;
+  color: #57606a;
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .hero {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    padding-top: 32px;
+  }
+  .photo {
+    width: 140px;
+    height: 140px;
+  }
+  .project {
+    flex-direction: column;
+  }
+  .timeline {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .timeline dd {
+    margin-bottom: 10px;
+  }
+}

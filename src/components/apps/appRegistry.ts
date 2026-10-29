@@ -138,7 +138,7 @@ export const PORTFOLIO_APPS = {
     component: SafariApp,
     defaultSize: { width: 900, height: 620 },
     minSize: { width: 600, height: 400 },
-    maxSize: { width: 900, height: 620 },
+    maxSize: { width: 1400, height: 900 },
   },
   githubapp: {
     id: 'githubapp',

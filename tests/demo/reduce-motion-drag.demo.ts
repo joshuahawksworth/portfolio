@@ -20,7 +20,9 @@ test.describe('Reduce Motion and window dragging', () => {
       window.localStorage.setItem(key, JSON.stringify({ platform: 'apple', reduceMotion: true }));
     }, SETTINGS_KEY);
     await enterPortfolio(page);
-    await expect(page.getByText('About Josh').first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: 'Joshua Hawksworth', level: 1 })).toBeVisible({
+      timeout: 10_000,
+    });
     await beat(page);
 
     const win = page.locator('[data-window]').first();

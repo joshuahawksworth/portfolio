@@ -13,7 +13,7 @@ import { SETTINGS_STORAGE_KEY } from '../../src/lib/settingsStore';
 function renderSettings(props?: Record<string, unknown>) {
   return render(
     <SettingsProvider>
-      <DesktopProvider startWithAbout={false}>
+      <DesktopProvider startWithLanding={false}>
         <SettingsApp props={props} />
       </DesktopProvider>
     </SettingsProvider>
