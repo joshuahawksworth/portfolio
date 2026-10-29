@@ -37,7 +37,7 @@ import NotificationShade from './NotificationShade';
 import NotificationBanners from '../SystemUI/NotificationBanners';
 import { useWelcomeNotifications } from '../../hooks/useWelcomeNotifications';
 import styles from './MobileDesktop.module.css';
-import { DARK_BODY_WALLPAPERS, DARK_WALLPAPERS, WALLPAPERS } from '../../data/wallpapers';
+import { DARK_WALLPAPERS, WALLPAPERS } from '../../data/wallpapers';
 
 // ── App icon gradients (iOS-style flat two-stop, light top → deep bottom) ──
 const ICON_GRADS: Record<string, [string, string]> = {
@@ -630,7 +630,6 @@ function MobileInner() {
   useWelcomeNotifications();
   const dynamicLook = useDynamicLook(wallpaper);
   const darkWall = DARK_WALLPAPERS.has(wallpaper) || isDynamicDark(dynamicLook);
-  const darkBody = DARK_BODY_WALLPAPERS.has(wallpaper);
 
   // Notification shade: tap the status bar or drag down from the top edge to open it.
   const [shadeOpen, setShadeOpen] = useState(false);
@@ -835,7 +834,7 @@ function MobileInner() {
 
   return (
     <div
-      className={`${styles.screen} ${android ? styles.android : ''} ${darkWall ? styles.darkWall : ''} ${darkBody ? styles.darkBody : ''}`}
+      className={`${styles.screen} ${android ? styles.android : ''} ${darkWall ? styles.darkWall : ''}`}
       data-os={os}
       onPointerDown={onScreenPointerDown}
       onPointerUp={onScreenPointerUp}

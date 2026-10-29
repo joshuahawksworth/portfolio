@@ -16,11 +16,11 @@ export const WALLPAPERS = {
   catalina: '/wallpapers/catalina-night.jpg',
   tahoe: '/wallpapers/tahoe-day.jpg',
   wave: '/wallpapers/blue-wave.jpg',
-  // The Android set is the stock Android wallpapers from AOSP (frameworks/base,
-  // drawable-sw720dp-nodpi/default_wallpaper.png on each release branch; Apache 2.0).
-  pixel: '/wallpapers/android-16.jpg',
-  pixelDark: '/wallpapers/android-13.jpg',
-  pixelCoral: '/wallpapers/android-12.jpg',
+  // The Android set is the Pixel 9's stock wallpapers (Google's "Porcelain", "Obsidian" and
+  // "Peony" florals, 1920×1920).
+  pixel: '/wallpapers/android-pixel-porcelain.jpg',
+  pixelDark: '/wallpapers/android-pixel-obsidian.jpg',
+  pixelCoral: '/wallpapers/android-pixel-peony.jpg',
   // The Windows 11 and 10 backgrounds ship with the repo. Windows 7 and XP are optional:
   // drop your own copies into public/wallpapers/ under these names and they join the
   // Windows set at the next build (see OPTIONAL_WALLPAPERS).
@@ -50,9 +50,9 @@ export const WALLPAPER_LABELS: Record<WallpaperKey, string> = {
   catalina: 'Catalina',
   tahoe: 'Tahoe',
   wave: 'Sequoia',
-  pixel: 'Android 16',
-  pixelDark: 'Android 13',
-  pixelCoral: 'Android 12',
+  pixel: 'Porcelain',
+  pixelDark: 'Obsidian',
+  pixelCoral: 'Peony',
   win11: 'Windows 11',
   win10: 'Windows 10',
   win7: 'Windows 7',
@@ -63,19 +63,11 @@ export const WALLPAPER_LABELS: Record<WallpaperKey, string> = {
 export const DARK_WALLPAPERS: ReadonlySet<WallpaperKey> = new Set<WallpaperKey>([
   'catalina',
   'wave',
+  'pixelDark',
   'win10',
 ]);
 
 const APPLE_SET: WallpaperKey[] = ['beach', 'gold', 'catalina', 'tahoe', 'wave'];
-
-/**
- * Wallpapers with a light top and a dark body (the Android 13+ stock art): the status bar and
- * At a Glance keep dark text while the icon labels, which sit over the dark part, go white.
- */
-export const DARK_BODY_WALLPAPERS: ReadonlySet<WallpaperKey> = new Set<WallpaperKey>([
-  'pixel',
-  'pixelDark',
-]);
 
 /** Wallpapers that follow the time of day, like macOS dynamic desktops. */
 export const DYNAMIC_WALLPAPERS: ReadonlySet<WallpaperKey> = new Set<WallpaperKey>(['beach']);

@@ -17,7 +17,7 @@ test.describe('Android wallpaper and weather icon', () => {
       timeout: 10_000,
     });
     await beat(page, 2_000);
-    await shot(page, 'Android home on the stock Android 16 wallpaper');
+    await shot(page, 'Android home on the Pixel 9 Porcelain wallpaper');
   });
 });
 
