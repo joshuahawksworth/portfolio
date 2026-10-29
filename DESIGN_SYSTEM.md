@@ -34,7 +34,7 @@ Rules for platform-aware work:
   `DynamicWallpaper` cross-fades on the visitor's clock around that day's sunrise and sunset
   (`lib/dynamicWallpaper.ts`); the lock screens show the dominant frame via `wallpaperImageFor`. The Beach frames
   are rendered from the day image by `node scripts/wallpapers/beach-variants.mjs`. `windows-7-harmony.jpg` and
-  `windows-xp-bliss.jpg` are git-ignored extras: drop them into `public/wallpapers/` and the picker lists them.
+  `windows-xp-bliss.jpg` are optional extras: drop them into `public/wallpapers/` and the picker lists them.
   Which optional files exist is baked in at build time (`__PUBLIC_ASSETS__`, see `lib/publicAssets.ts`), so
   nothing is probed at runtime; restart the dev server after adding one.
 - The Terminal's commands live in `lib/terminalShell.ts`: one `Shell` class with a zsh, PowerShell or bash personality
