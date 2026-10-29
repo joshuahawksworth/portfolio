@@ -26,9 +26,6 @@ export const WALLPAPERS = {
   win10: '/wallpapers/windows-10.jpg',
   win7: '/wallpapers/windows-7-harmony.jpg',
   winxp: '/wallpapers/windows-xp-bliss.jpg',
-  // A live wallpaper: the desktop draws it with a shader (Desktop/WavesWallpaper.tsx) and this
-  // still is its poster for the lock screen, the thumbnails and machines without WebGL.
-  waves: '/wallpapers/waves.jpg',
 } as const;
 
 /**
@@ -58,7 +55,6 @@ export const WALLPAPER_LABELS: Record<WallpaperKey, string> = {
   win10: 'Windows 10',
   win7: 'Windows 7',
   winxp: 'Windows XP',
-  waves: 'Waves (Live)',
 };
 
 /** Wallpapers dark enough that the menu bar / status bar should flip to white text. */
@@ -67,13 +63,9 @@ export const DARK_WALLPAPERS: ReadonlySet<WallpaperKey> = new Set<WallpaperKey>(
   'wave',
   'pixelDark',
   'win10',
-  'waves',
 ]);
 
-const APPLE_SET: WallpaperKey[] = ['beach', 'gold', 'catalina', 'tahoe', 'wave', 'waves'];
-
-/** Wallpapers the desktop animates with a shader; the image is their poster frame. */
-export const LIVE_WALLPAPERS: ReadonlySet<WallpaperKey> = new Set<WallpaperKey>(['waves']);
+const APPLE_SET: WallpaperKey[] = ['beach', 'gold', 'catalina', 'tahoe', 'wave'];
 
 /** Wallpapers that follow the time of day, like macOS dynamic desktops. */
 export const DYNAMIC_WALLPAPERS: ReadonlySet<WallpaperKey> = new Set<WallpaperKey>(['beach']);
@@ -106,7 +98,7 @@ export function wallpaperImageFor(key: WallpaperKey, look: DynamicLook | null): 
 export const WALLPAPERS_FOR_OS: Record<OsName, WallpaperKey[]> = {
   macos: APPLE_SET,
   ios: APPLE_SET,
-  windows: ['win11', 'win10', 'win7', 'winxp', 'waves'],
+  windows: ['win11', 'win10', 'win7', 'winxp'],
   android: ['pixel', 'pixelDark', 'pixelCoral'],
 };
 

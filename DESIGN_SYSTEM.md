@@ -14,10 +14,10 @@ This project is an interactive macOS-style portfolio. Future work should feel li
 The shell renders one of four operating systems from a single setting. `src/context/SettingsContext.tsx` owns the
 persisted settings (`src/lib/settingsStore.ts`) and derives `os` from the chosen platform and the device:
 
-| Platform | Desktop | Phone |
-| --- | --- | --- |
-| `apple` (default) | macOS (menu bar, Dock, Launchpad, Liquid Glass) | iOS (squircle grid, glass dock, iPhone lock screen) |
-| `windows` | Windows 11 (taskbar, Start menu, Mica windows, Fluent icons) | Android (Pixel launcher, Material discs, Google bar) |
+| Platform          | Desktop                                                      | Phone                                                |
+| ----------------- | ------------------------------------------------------------ | ---------------------------------------------------- |
+| `apple` (default) | macOS (menu bar, Dock, Launchpad, Liquid Glass)              | iOS (squircle grid, glass dock, iPhone lock screen)  |
+| `windows`         | Windows 11 (taskbar, Start menu, Mica windows, Fluent icons) | Android (Pixel launcher, Material discs, Google bar) |
 
 Rules for platform-aware work:
 
@@ -36,9 +36,7 @@ Rules for platform-aware work:
   are rendered from the day image by `node scripts/wallpapers/beach-variants.mjs`. `windows-7-harmony.jpg` and
   `windows-xp-bliss.jpg` are git-ignored extras: drop them into `public/wallpapers/` and the picker lists them.
   Which optional files exist is baked in at build time (`__PUBLIC_ASSETS__`, see `lib/publicAssets.ts`), so
-  nothing is probed at runtime; restart the dev server after adding one. `waves` is a live wallpaper: the
-  desktop draws it with a shader (`Desktop/WavesWallpaper.tsx`, listed in `LIVE_WALLPAPERS`) over its poster
-  still; the lock screens, thumbnails and phones show the still.
+  nothing is probed at runtime; restart the dev server after adding one.
 - The Terminal's commands live in `lib/terminalShell.ts`: one `Shell` class with a zsh, PowerShell or bash personality
   chosen by `shellFor(os)`. Add commands there, not in `TerminalApp.tsx`; keep error messages in each shell's own wording.
 - Boot, shutdown and lock screens live in `Boot/` and `Login/` and branch on `os`. Their progress (the boot bar,

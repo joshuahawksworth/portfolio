@@ -18,7 +18,6 @@ import Taskbar from '../Taskbar/Taskbar';
 import SystemPanels from '../SystemUI/SystemPanels';
 import NotificationBanners from '../SystemUI/NotificationBanners';
 import DynamicWallpaper, { isDynamicDark, useDynamicLook } from './DynamicWallpaper';
-import WavesWallpaper from './WavesWallpaper';
 import { useWelcomeNotifications } from '../../hooks/useWelcomeNotifications';
 import { SystemUIProvider } from '../../context/SystemUIContext';
 import { useSettings } from '../../context/SettingsContext';
@@ -46,7 +45,6 @@ import {
   DARK_WALLPAPERS,
   WALLPAPERS,
   WALLPAPER_LABELS,
-  LIVE_WALLPAPERS,
   availableWallpapersFor,
   preloadWallpapers,
   type WallpaperKey,
@@ -1221,7 +1219,6 @@ function DesktopSurface() {
         />
       ))}
       <DynamicWallpaper wallpaper={wallpaper} className={styles.wallpaperLayer} />
-      {LIVE_WALLPAPERS.has(wallpaper) && <WavesWallpaper className={styles.wallpaperLayer} />}
       {!isWindows && <DesktopWidgets />}
       {isWindows ? <Taskbar /> : <MenuBar />}
 
