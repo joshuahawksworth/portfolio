@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useTime } from '../../hooks/useTime';
+import { useBackButtonClosesApp } from '../../hooks/useBackButtonClosesApp';
 import AboutApp from '../apps/AboutApp';
 import ExperienceApp from '../apps/ExperienceApp';
 import SkillsApp from '../apps/SkillsApp';
@@ -618,6 +619,7 @@ function MobileInner() {
   const { settings, os, wallpaper } = useSettings();
   const android = os === 'android';
   const activeWindow = windows.length > 0 ? windows[windows.length - 1] : null;
+  useBackButtonClosesApp(windows.length, () => activeWindow && closeWindow(activeWindow.id));
   const WIDGET_SLOTS = android
     ? settings.showAtAGlance
       ? ANDROID_WIDGET_SLOTS
