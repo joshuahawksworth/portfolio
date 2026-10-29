@@ -16,9 +16,10 @@ export const WALLPAPERS = {
   catalina: '/wallpapers/catalina-night.jpg',
   tahoe: '/wallpapers/tahoe-day.jpg',
   wave: '/wallpapers/blue-wave.jpg',
-  pixel: '/wallpapers/android-pixel.svg',
-  pixelDark: '/wallpapers/android-pixel-dark.svg',
-  pixelCoral: '/wallpapers/android-pixel-coral.svg',
+  // The Android set is three photographs from Unsplash (Unsplash License; see README).
+  pixel: '/wallpapers/android-shore.jpg',
+  pixelDark: '/wallpapers/android-night-sky.jpg',
+  pixelCoral: '/wallpapers/android-valley.jpg',
   // The Windows 11 and 10 backgrounds ship with the repo. Windows 7 and XP are optional:
   // drop your own copies into public/wallpapers/ under these names and they join the
   // Windows set at the next build (see OPTIONAL_WALLPAPERS).
@@ -48,9 +49,9 @@ export const WALLPAPER_LABELS: Record<WallpaperKey, string> = {
   catalina: 'Catalina',
   tahoe: 'Tahoe',
   wave: 'Sequoia',
-  pixel: 'Minimal',
-  pixelDark: 'Minimal (Dark)',
-  pixelCoral: 'Coral',
+  pixel: 'Shore',
+  pixelDark: 'Night Sky',
+  pixelCoral: 'Valley',
   win11: 'Windows 11',
   win10: 'Windows 10',
   win7: 'Windows 7',

@@ -28,7 +28,7 @@ Rules for platform-aware work:
   (GitHub, Chrome, Claude, DOOM, Snake) fall through to the macOS art. Folders, drives and bins use `PlatformFileIcons`.
 - Names differ per OS: use `appTitleFor` / `appLabelFor` / `nodeDisplayName` instead of hard-coding "Finder" or "Trash".
 - Space above and below windows comes from `shellInsets(os)`; never hard-code the menu bar or dock height.
-- Wallpapers are per OS (`WALLPAPERS_FOR_OS`); the Android set is SVGs in `public/wallpapers/`, and the
+- Wallpapers are per OS (`WALLPAPERS_FOR_OS`); the Android set is three Unsplash photographs in `public/wallpapers/`, and the
   Windows 11 and 10 images ship with the repo, as does Apple's dynamic "The Beach", the macOS / iOS default.
   A dynamic wallpaper is a day picture plus dawn, dusk and night frames (`DYNAMIC_FRAME_IMAGES`) that
   `DynamicWallpaper` cross-fades on the visitor's clock around that day's sunrise and sunset

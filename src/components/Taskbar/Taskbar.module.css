@@ -150,11 +150,6 @@
   cursor: default;
 }
 
-.weatherGlyph {
-  font-size: 20px;
-  line-height: 1;
-}
-
 .weatherText {
   display: flex;
   flex-direction: column;

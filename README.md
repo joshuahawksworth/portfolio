@@ -143,6 +143,13 @@ npm run test:e2e
 
 The site is configured for Vercel. Production builds run TypeScript project references first, then Vite.
 
+## Credits
+
+The Android wallpapers (`public/wallpapers/android-*.jpg`) are photographs from [Unsplash](https://unsplash.com) under the
+[Unsplash License](https://unsplash.com/license): Shore (`photo-1507525428034-b723cf961d3e`), Night Sky
+(`photo-1519681393784-d120267933ba`) and Valley (`photo-1506744038136-46273834b3fb`). The Windows 7 and XP backgrounds
+are not shipped; drop your own copies into `public/wallpapers/` to enable them.
+
 ## Contact
 
 Joshua Hawksworth - joshuahawksworth@me.com
