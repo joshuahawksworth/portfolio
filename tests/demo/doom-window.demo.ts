@@ -30,7 +30,8 @@ test.describe('DOOM on a phone', () => {
     await doom.click();
     const fire = page.getByRole('button', { name: 'Fire' });
     await expect(fire).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Mute' })).toBeVisible({ timeout: 30_000 });
+    // The picture fades in once DOSBox has drawn its first frame.
+    await expect(page.locator('canvas')).toHaveCSS('opacity', '1', { timeout: 30_000 });
     await beat(page, 2_500);
     const enter = page.getByRole('button', { name: 'Enter' });
     await enter.dispatchEvent('pointerdown');

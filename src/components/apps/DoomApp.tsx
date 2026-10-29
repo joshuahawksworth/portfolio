@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { PointerEvent as ReactPointerEvent } from 'react';
+import type { PointerEvent as ReactPointerEvent, ReactNode } from 'react';
 import { useDesktop } from '../../context/DesktopContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import styles from './DoomApp.module.css';
@@ -217,7 +217,8 @@ export default function DoomApp() {
   }, []);
 
   // ── Touch controls (phones) ────────────────────────────────────────────
-  function pad(key: number, label: string, className = '') {
+  // Each button holds its DOSBox key down for as long as the finger is on it.
+  function pad(key: number, label: string, className: string, children?: ReactNode) {
     const press = (pressed: boolean) => (e: ReactPointerEvent<HTMLButtonElement>) => {
       e.preventDefault();
       if (pressed) {
@@ -233,17 +234,23 @@ export default function DoomApp() {
     return (
       <button
         type="button"
-        className={`${styles.pad} ${className}`}
+        className={className}
         onPointerDown={press(true)}
         onPointerUp={press(false)}
         onPointerCancel={press(false)}
         onContextMenu={(e) => e.preventDefault()}
         aria-label={label}
       >
-        {label}
+        {children ?? label}
       </button>
     );
   }
+
+  const arrow = (deg: number) => (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path d="M12 5l7 9H5z" fill="currentColor" transform={`rotate(${deg} 12 12)`} />
+    </svg>
+  );
 
   return (
     <div className={`${styles.root} ${isMobile ? styles.rootMobile : ''}`}>
@@ -272,22 +279,29 @@ export default function DoomApp() {
 
       {isMobile && (
         <div className={styles.controls} aria-label="DOOM controls">
-          <div className={styles.dpad}>
-            <span />
-            {pad(K.w, '↑')}
-            <span />
-            {pad(K.left, '←')}
-            {pad(K.s, '↓')}
-            {pad(K.right, '→')}
+          <div className={styles.menuRow}>
+            {pad(K.esc, 'Menu', styles.pill)}
+            <button
+              type="button"
+              className={styles.pill}
+              onClick={() => setMuted((m) => !m)}
+              aria-pressed={muted}
+            >
+              {muted ? 'Sound off' : 'Sound on'}
+            </button>
+            {pad(K.enter, 'Enter', styles.pill)}
           </div>
-          <div className={styles.actions}>
-            <div className={styles.row}>
-              {pad(K.esc, 'Esc', styles.padSmall)}
-              {pad(K.enter, 'Enter', styles.padSmall)}
+          <div className={styles.padRow}>
+            <div className={styles.dpad}>
+              {pad(K.w, 'Forward', `${styles.dbtn} ${styles.dUp}`, arrow(0))}
+              {pad(K.left, 'Turn left', `${styles.dbtn} ${styles.dLeft}`, arrow(-90))}
+              <span className={styles.dHub} aria-hidden="true" />
+              {pad(K.right, 'Turn right', `${styles.dbtn} ${styles.dRight}`, arrow(90))}
+              {pad(K.s, 'Back', `${styles.dbtn} ${styles.dDown}`, arrow(180))}
             </div>
-            <div className={styles.row}>
-              {pad(K.space, 'Use', styles.padWide)}
-              {pad(K.ctrl, 'Fire', styles.padFire)}
+            <div className={styles.buttons}>
+              {pad(K.space, 'Use', `${styles.round} ${styles.use}`)}
+              {pad(K.ctrl, 'Fire', `${styles.round} ${styles.fire}`)}
             </div>
           </div>
         </div>

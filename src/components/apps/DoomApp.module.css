@@ -77,77 +77,156 @@
   opacity: 1;
 }
 
-/* ── Touch controls ───────────────────────────────────────────────────── */
+/* ── Touch controls: a handheld layout under the picture ─────────────── */
 .rootMobile .screen {
   flex: 0 0 auto;
   aspect-ratio: 16 / 10;
+}
+.rootMobile .mute {
+  display: none;
 }
 
 .controls {
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 18px 20px calc(18px + env(safe-area-inset-bottom));
-  touch-action: none;
-}
-
-.dpad {
-  display: grid;
-  grid-template-columns: repeat(3, 56px);
-  grid-auto-rows: 56px;
-  gap: 6px;
-}
-
-.actions {
-  display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
+  justify-content: flex-end;
+  gap: 26px;
+  padding: 14px 22px calc(26px + env(safe-area-inset-bottom));
+  background: #141414;
+  border-top: 1px solid #262626;
+  touch-action: none;
+  font-family: var(--font-ui);
 }
 
-.row {
+.menuRow {
   display: flex;
-  gap: 10px;
-}
-
-.pad {
-  display: flex;
-  align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
-  padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #e6e6e6;
-  font: inherit;
-  font-size: 15px;
+  gap: 10px;
+}
+
+.pill {
+  min-width: 84px;
+  height: 30px;
+  padding: 0 14px;
+  border: 1px solid #333;
+  border-radius: 15px;
+  background: #1f1f1f;
+  color: #bdbdbd;
+  font: 500 12px/1 var(--font-ui);
+  letter-spacing: 0.02em;
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
 }
-.pad:active {
-  background: rgba(255, 255, 255, 0.24);
+.pill:active {
+  background: #333;
+  color: #fff;
 }
 
-.padSmall {
-  width: 58px;
-  height: 36px;
-  font-size: 12px;
+.padRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
 }
-.padWide {
-  width: 58px;
-  height: 72px;
+
+/* D-pad: four arms around a hub, drawn as one cross */
+.dpad {
+  position: relative;
+  width: 156px;
+  height: 156px;
+  flex-shrink: 0;
 }
-.padFire {
-  width: 84px;
-  height: 72px;
+.dbtn {
+  position: absolute;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 0;
+  background: #2a2a2a;
+  color: #d6d6d6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.dbtn:active {
+  background: #3a3a3a;
+  color: #fff;
+}
+.dHub {
+  position: absolute;
+  left: 52px;
+  top: 52px;
+  width: 52px;
+  height: 52px;
+  background: #2a2a2a;
+}
+.dHub::after {
+  content: '';
+  position: absolute;
+  inset: 20px;
   border-radius: 50%;
-  border-color: rgba(220, 60, 50, 0.6);
-  background: rgba(190, 40, 30, 0.35);
+  background: #1a1a1a;
 }
-.padFire:active {
-  background: rgba(220, 60, 50, 0.6);
+.dUp {
+  left: 52px;
+  top: 0;
+  border-radius: 10px 10px 0 0;
+}
+.dDown {
+  left: 52px;
+  top: 104px;
+  border-radius: 0 0 10px 10px;
+}
+.dLeft {
+  left: 0;
+  top: 52px;
+  border-radius: 10px 0 0 10px;
+}
+.dRight {
+  left: 104px;
+  top: 52px;
+  border-radius: 0 10px 10px 0;
+}
+
+/* Action buttons, staggered like a gamepad's A and B */
+.buttons {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  padding-bottom: 6px;
+}
+.round {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 0;
+  color: #e8e8e8;
+  font: 600 12px/1 var(--font-ui);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.use {
+  width: 66px;
+  height: 66px;
+  margin-bottom: 44px;
+  background: #2a2a2a;
+}
+.use:active {
+  background: #3a3a3a;
+}
+.fire {
+  width: 84px;
+  height: 84px;
+  background: #8c2622;
+}
+.fire:active {
+  background: #a9302b;
 }
