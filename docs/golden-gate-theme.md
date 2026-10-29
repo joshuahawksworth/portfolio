@@ -33,8 +33,9 @@ All shell tokens live on `:root` in `src/index.css`. Use them instead of hard-co
 ## Reference measurements (from the macOS Golden Gate site)
 
 - Menu bar: 29px tall, `rgba(255,227,165,0.15)` + `blur(30px)`, text `#282624` 13px, app name weight 650.
-- Window (Liquid Glass): the `.window` shell is the only blurred layer — `rgba(252,248,240,0.38)` + top sheen gradient,
-  `backdrop-filter: blur(5px) saturate(1.5)` (light: windows behind stay recognisable), `1px solid rgba(255,255,255,0.58)` border, inset white rim. App roots
+- Window (Liquid Glass): the `.window` shell is the only blurred layer — `rgba(252,248,240,0.76)` + top sheen gradient,
+  `backdrop-filter: blur(30px) saturate(1.5)` (heavy, as macOS does: colour from behind comes through, text and edges
+  behind dissolve so the window's own text stays readable), `1px solid rgba(255,255,255,0.58)` border, inset white rim. App roots
   only tint it with `--panel`; never give an app root an opaque background or a second backdrop-filter.
   Keep the intro animation without a fill mode: a persisting opacity animation turns the outer element into a
   backdrop root and the blur stops seeing the windows behind.
