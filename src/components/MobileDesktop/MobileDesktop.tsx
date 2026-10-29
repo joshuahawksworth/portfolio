@@ -33,6 +33,7 @@ import { describeWeather, useWeather } from '../Desktop/DesktopWidgets';
 import { DisplayOverlays } from '../SystemUI/SystemPanels';
 import DynamicWallpaper, { isDynamicDark, useDynamicLook } from '../Desktop/DynamicWallpaper';
 import StatusBar from './StatusBar';
+import ImmersiveShell from './ImmersiveShell';
 import NotificationShade from './NotificationShade';
 import NotificationBanners from '../SystemUI/NotificationBanners';
 import { useWelcomeNotifications } from '../../hooks/useWelcomeNotifications';
@@ -592,7 +593,9 @@ const DOCK_APPS_IOS = ['about', 'experience', 'contact', 'settings'];
 const DOCK_APPS_ANDROID = ['about', 'experience', 'contact', 'github', 'settings'];
 
 /** Apps with a dark canvas get a dark sheet header so the bar doesn't glare. */
-const DARK_APPS = new Set(['calculator', 'terminal', 'doom']);
+const DARK_APPS = new Set(['calculator', 'terminal']);
+/** Apps shown full screen with no sheet header (see ImmersiveShell). */
+const IMMERSIVE_APPS = new Set(['doom']);
 
 type Page = Array<string | null>;
 
@@ -773,6 +776,8 @@ function MobileInner() {
   }
 
   const ActiveComp = activeWindow ? APP_COMPONENTS[activeWindow.appId] : null;
+  // Games take the whole screen with no sheet header; the OS's own gesture or bar leaves them.
+  const immersive = activeWindow ? IMMERSIVE_APPS.has(activeWindow.appId) : false;
   const activeTitle = activeWindow ? appTitleFor(activeWindow.appId, activeWindow.title, os) : '';
   const label = (id: string) => appLabelFor(id, APP_LABELS[id] ?? id, os);
 
@@ -965,7 +970,12 @@ function MobileInner() {
       />
 
       <div className={`${styles.panel} ${activeWindow ? styles.panelOpen : ''}`}>
-        {activeWindow && (
+        {activeWindow && immersive && ActiveComp && (
+          <ImmersiveShell onExit={() => closeWindow(activeWindow.id)}>
+            <ActiveComp props={activeWindow.props} />
+          </ImmersiveShell>
+        )}
+        {activeWindow && !immersive && (
           <>
             <div
               className={`${styles.panelHeader} ${DARK_APPS.has(activeWindow.appId) && !(android && activeWindow.appId === 'calculator') ? styles.panelHeaderDark : ''}`}
@@ -1001,7 +1011,6 @@ function MobileInner() {
                 styles.panelBody,
                 activeWindow.appId === 'snake' ? styles.panelBodySnake : '',
                 activeWindow.appId === 'calculator' ? styles.panelBodyCalculator : '',
-                activeWindow.appId === 'doom' ? styles.panelBodyDoom : '',
               ]
                 .filter(Boolean)
                 .join(' ')}

@@ -35,9 +35,11 @@
 
 .status {
   position: absolute;
-  left: 14px;
-  top: 10px;
+  left: 0;
+  right: 0;
+  top: 50%;
   margin: 0;
+  text-align: center;
   font-size: 12px;
 }
 
@@ -77,24 +79,34 @@
   opacity: 1;
 }
 
-/* ── Touch controls: a handheld layout under the picture ─────────────── */
+/* ── Touch controls: translucent, laid over the full-screen picture ─────── */
 .rootMobile .screen {
-  flex: 0 0 auto;
-  aspect-ratio: 16 / 10;
+  position: absolute;
+  inset: 0;
+}
+/* Portrait: the picture sits in the upper part of the screen, above the pads */
+.rootMobile .canvas {
+  object-position: center 22%;
+}
+@media (orientation: landscape) {
+  .rootMobile .canvas {
+    object-position: center center;
+  }
 }
 .rootMobile .mute {
   display: none;
 }
 
 .controls {
-  flex: 1;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  gap: 26px;
-  padding: 14px 22px calc(26px + env(safe-area-inset-bottom));
-  background: #141414;
-  border-top: 1px solid #262626;
+  gap: 22px;
+  padding: 0 22px calc(44px + env(safe-area-inset-bottom));
   touch-action: none;
   font-family: var(--font-ui);
 }
@@ -109,17 +121,17 @@
   min-width: 84px;
   height: 30px;
   padding: 0 14px;
-  border: 1px solid #333;
+  border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 15px;
-  background: #1f1f1f;
-  color: #bdbdbd;
+  background: rgba(0, 0, 0, 0.45);
+  color: rgba(255, 255, 255, 0.85);
   font: 500 12px/1 var(--font-ui);
   letter-spacing: 0.02em;
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
 }
 .pill:active {
-  background: #333;
+  background: rgba(255, 255, 255, 0.3);
   color: #fff;
 }
 
@@ -143,17 +155,17 @@
   height: 52px;
   padding: 0;
   border: 0;
-  background: #2a2a2a;
-  color: #d6d6d6;
+  background: rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 .dbtn:active {
-  background: #3a3a3a;
+  background: rgba(255, 255, 255, 0.4);
   color: #fff;
 }
 .dHub {
@@ -162,14 +174,14 @@
   top: 52px;
   width: 52px;
   height: 52px;
-  background: #2a2a2a;
+  background: rgba(255, 255, 255, 0.16);
 }
 .dHub::after {
   content: '';
   position: absolute;
   inset: 20px;
   border-radius: 50%;
-  background: #1a1a1a;
+  background: rgba(0, 0, 0, 0.35);
 }
 .dUp {
   left: 52px;
@@ -205,28 +217,28 @@
   justify-content: center;
   border-radius: 50%;
   border: 0;
-  color: #e8e8e8;
+  color: rgba(255, 255, 255, 0.92);
   font: 600 12px/1 var(--font-ui);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
 }
 .use {
   width: 66px;
   height: 66px;
   margin-bottom: 44px;
-  background: #2a2a2a;
+  background: rgba(255, 255, 255, 0.16);
 }
 .use:active {
-  background: #3a3a3a;
+  background: rgba(255, 255, 255, 0.4);
 }
 .fire {
   width: 84px;
   height: 84px;
-  background: #8c2622;
+  background: rgba(190, 40, 32, 0.6);
 }
 .fire:active {
-  background: #a9302b;
+  background: rgba(220, 60, 50, 0.85);
 }

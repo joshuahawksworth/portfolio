@@ -643,13 +643,6 @@
   background: var(--panel-2);
 }
 
-/* DOOM is a black screen with the controls under it */
-.panelBodyDoom {
-  padding: 0;
-  overflow: hidden;
-  background: #000;
-}
-
 /* Calculator is dark in every iOS appearance */
 .panelBodyCalculator {
   padding: 0;

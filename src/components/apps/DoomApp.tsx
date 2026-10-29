@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent, ReactNode } from 'react';
 import { useDesktop } from '../../context/DesktopContext';
-import { useIsMobile } from '../../hooks/useIsMobile';
+import { useSettings } from '../../context/SettingsContext';
 import styles from './DoomApp.module.css';
 
 interface CIEvents {
@@ -83,7 +83,7 @@ export default function DoomApp() {
   const doomFocused = windows.some((w) => w.id === focusedId && w.appId === 'doom');
   const focusedRef = useRef(doomFocused);
   focusedRef.current = doomFocused;
-  const isMobile = useIsMobile();
+  const { isMobile } = useSettings();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const ciRef = useRef<CI | null>(null);
