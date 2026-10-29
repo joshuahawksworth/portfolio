@@ -135,7 +135,7 @@ describe('zsh on macOS', () => {
 
   it('opens apps, files and urls', () => {
     const { shell, host } = makeShell('zsh');
-    shell.run('open chrome', shell.home, []);
+    shell.run('open brave', shell.home, []);
     expect(host.openApp).toHaveBeenCalledWith('safari', undefined);
     shell.run('open github.com', shell.home, []);
     expect(host.openApp).toHaveBeenCalledWith('safari', { url: 'https://github.com' });

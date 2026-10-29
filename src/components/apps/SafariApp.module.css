@@ -196,11 +196,13 @@
   background: #fff;
 }
 
-/* ── Start page ── */
+/* ── Start page: Brave Search's white page with its faint dot grid ── */
 .searchHome {
   position: absolute;
   inset: 0;
-  background: var(--panel);
+  background:
+    radial-gradient(circle, #e3e4e8 1px, transparent 1.2px) 0 0 / 22px 22px,
+    #fff;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -212,62 +214,72 @@
 }
 
 .searchLogo {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: clamp(48px, 9vw, 86px);
-  font-weight: 700;
-  letter-spacing: -0.08em;
-  line-height: 1;
+  display: block;
+  height: 64px;
+  width: auto;
+  user-select: none;
 }
 
 .searchHomeForm {
-  width: min(540px, 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
+  width: min(600px, 100%);
 }
 
-.searchHomeInput {
-  width: 100%;
-  height: 42px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  padding: 0 18px;
-  color: var(--text);
-  font: inherit;
-  font-size: 15px;
-  outline: none;
-  box-shadow: 0 1px 6px rgba(60, 40, 10, 0.08);
+/* Brave Search's pill: hairline border, soft shadow, the search button inside on the right */
+.searchHomePill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 56px;
+  padding: 0 8px 0 22px;
+  border: 1px solid #e2e3e7;
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   transition:
     border-color 120ms,
     box-shadow 120ms;
 }
-.searchHomeInput::placeholder {
-  color: var(--muted-2);
+.searchHomePill:focus-within {
+  border-color: #c7c9d1;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
 }
 
-.searchHomeInput:focus {
-  border-color: var(--accent);
-  box-shadow:
-    0 0 0 3px var(--accent-soft),
-    0 2px 10px rgba(60, 40, 10, 0.1);
+.searchHomeInput {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: #1b1b1f;
+  font:
+    17px 'Inter',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Helvetica,
+    Arial,
+    sans-serif;
+  outline: none;
+}
+.searchHomeInput::placeholder {
+  color: #8a8c95;
 }
 
 .searchHomeButton {
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-control);
-  background: rgba(0, 0, 0, 0.05);
-  color: var(--text);
-  padding: 5px 14px;
-  font: inherit;
-  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: #f0f1f4;
+  color: #3b3d45;
   cursor: pointer;
   transition: background 120ms;
 }
-
 .searchHomeButton:hover {
-  background: rgba(0, 0, 0, 0.08);
+  background: #e4e6eb;
 }
 
 .searchHomeHint {
@@ -337,14 +349,21 @@
 }
 
 /* ── Results page ── */
-/* ── Google results page ─────────────────────────────────────────────── */
+/* ── Brave Search results page ───────────────────────────────────────── */
 .serp {
   position: absolute;
   inset: 0;
   overflow-y: auto;
   background: #fff;
-  color: #202124;
-  font-family: Arial, Helvetica, sans-serif;
+  color: #1b1b1f;
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Helvetica,
+    Arial,
+    sans-serif;
   display: flex;
   flex-direction: column;
   scrollbar-width: thin;
@@ -401,11 +420,8 @@
   border: 0;
   outline: none;
   background: transparent;
-  font:
-    16px Arial,
-    Helvetica,
-    sans-serif;
-  color: #202124;
+  font: 16px inherit;
+  color: #1b1b1f;
 }
 
 .serpClear,
@@ -431,7 +447,8 @@
 }
 
 .serpSubmit {
-  color: #4285f4;
+  color: #3b3d45;
+  background: #f0f1f4;
 }
 
 .serpTabs {
@@ -448,18 +465,16 @@
   background: none;
   cursor: default;
   padding: 8px 12px 12px;
-  font:
-    14px Arial,
-    Helvetica,
-    sans-serif;
+  font: 14px inherit;
   color: #5f6368;
-  border-bottom: 3px solid transparent;
+  border-bottom: 2px solid transparent;
   white-space: nowrap;
 }
 
 .serpTabActive {
-  color: #1a73e8;
-  border-bottom-color: #1a73e8;
+  color: #1b1b1f;
+  font-weight: 600;
+  border-bottom-color: #fb542b;
 }
 
 .serpTools {
@@ -556,12 +571,9 @@
   background: none;
   padding: 0;
   cursor: pointer;
-  font:
-    20px Arial,
-    Helvetica,
-    sans-serif;
+  font: 500 19px inherit;
   line-height: 26px;
-  color: #1a0dab;
+  color: #1b1b1f;
   text-align: left;
 }
 
@@ -570,7 +582,7 @@
 }
 
 .serpTitle button:visited {
-  color: #681da8;
+  color: #5b3fc4;
 }
 
 .serpSnippet {
@@ -648,20 +660,17 @@
 
 .serpRetry {
   margin-top: 6px;
-  border: 1px solid #dadce0;
-  background: #fff;
-  color: #1a73e8;
-  border-radius: 4px;
-  padding: 8px 16px;
-  font:
-    14px Arial,
-    Helvetica,
-    sans-serif;
+  border: 0;
+  background: #fb542b;
+  color: #fff;
+  border-radius: 20px;
+  padding: 8px 18px;
+  font: 500 14px inherit;
   cursor: pointer;
 }
 
 .serpRetry:hover {
-  background: #f8f9fa;
+  background: #e6471f;
 }
 
 .serpPager {
@@ -672,17 +681,6 @@
   gap: 4px;
 }
 
-.serpPagerLogo {
-  font:
-    500 34px 'Product Sans',
-    'Google Sans',
-    Arial,
-    Helvetica,
-    sans-serif;
-  letter-spacing: -1px;
-  user-select: none;
-}
-
 .serpPages {
   display: flex;
   gap: 12px;
@@ -691,32 +689,31 @@
 }
 
 .serpPages button {
-  border: 0;
-  background: none;
-  padding: 0;
+  border: 1px solid #e2e3e7;
+  background: #fff;
+  padding: 6px 12px;
+  border-radius: 16px;
   cursor: pointer;
   font: inherit;
-  color: #1a0dab;
+  color: #1b1b1f;
 }
 
 .serpPages button:hover {
-  text-decoration: underline;
+  background: #f0f1f4;
 }
 
 .serpPageCurrent {
-  color: #202124;
+  padding: 6px 12px;
+  border-radius: 16px;
+  background: #1b1b1f;
+  color: #fff;
 }
 
 .serpFooter {
-  background: #f2f2f2;
-  color: #70757a;
-  font-size: 14px;
-}
-
-.serpFooterRegion {
-  padding: 14px 30px;
-  border-bottom: 1px solid #dadce0;
-  font-size: 15px;
+  background: #f7f7f8;
+  color: #6b6e78;
+  font-size: 13px;
+  border-top: 1px solid #ececf0;
 }
 
 .serpFooterLinks {
@@ -783,4 +780,19 @@
   :global(html[data-os='android']) .root .urlBar .urlInput {
     font-size: 16px;
   }
+}
+
+/* The search pill is already the field: no WinUI / Material box on the input inside it. */
+:global(html[data-os='windows']) .root .searchHomePill .searchHomeInput,
+:global(html[data-os='android']) .root .searchHomePill .searchHomeInput,
+:global(html[data-os='windows']) .root .searchHomePill .searchHomeInput:focus,
+:global(html[data-os='android']) .root .searchHomePill .searchHomeInput:focus {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+  min-height: 0;
+  padding: 0;
+  font-size: 17px;
 }

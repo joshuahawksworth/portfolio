@@ -39,7 +39,7 @@ export const DOCK_LABELS: Record<string, string> = {
   finder: 'Finder',
   github: 'GitHub',
   githubdesktop: 'GitHub Desktop',
-  safari: 'Google Chrome',
+  safari: 'Brave Browser',
   askjosh: 'Ask Claude',
   about: 'About',
   experience: 'Experience',

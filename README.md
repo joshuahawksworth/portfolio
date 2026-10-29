@@ -41,7 +41,7 @@ the Finder behaves like the real one rather than a list of links.
   selection, ⌘A / ⌘⌫ / ⇧⌘N shortcuts, back and forward history, breadcrumb path bar, icon and list views, drag into
   folders and sidebar, drop files from your OS, search of the current folder tree.
 - **Trash with Put Back**: trashed items return to the folder they came from.
-- **Portfolio apps**: About, Experience, Skills, Contact, Location (Mapbox), CV, GitHub and a Chrome-style browser with a
+- **Portfolio apps**: About, Experience, Skills, Contact, Location (Mapbox), CV, GitHub and a Brave-style browser with a
   server-side proxy.
 - **Ask Claude**: a chat assistant. Visitors can bring their own Anthropic API key (kept in their browser, forwarded only
   to this site's `/api/ask` route for their messages, never stored) to talk to Claude itself, or continue as a guest and
@@ -113,7 +113,7 @@ VITE_MAPBOX_TOKEN="your_mapbox_access_token"
 BRAVE_SEARCH_KEY="your_brave_search_api_key"   # or TAVILY_API_KEY
 ```
 
-Chrome's search box is a real search. Google can't be embedded in another site (it forbids framing and shows a captcha
+Brave's search box is a real search. Google can't be embedded in another site (it forbids framing and shows a captcha
 to server requests), so `/api/search` fetches results and the app renders them on a Google-style results page. Set
 `BRAVE_SEARCH_KEY` ([Brave Search API](https://brave.com/search/api): its own index, a monthly free credit, card
 required) or `TAVILY_API_KEY` ([Tavily](https://tavily.com): free tier, no card) and the page fills with real results.

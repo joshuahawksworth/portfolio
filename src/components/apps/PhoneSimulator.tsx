@@ -104,7 +104,7 @@ const STOCK_APPS: Record<SimPlatform, StockApp[]> = {
   android: [
     { id: 'gmail', label: 'Gmail', icon: ANDROID_ICONS.contact },
     { id: 'maps', label: 'Maps', icon: ANDROID_ICONS.location },
-    { id: 'chrome', label: 'Chrome', icon: ANDROID_ICONS.safari },
+    { id: 'brave', label: 'Brave', icon: ANDROID_ICONS.safari },
     { id: 'photos', label: 'Photos', icon: ANDROID_ICONS.imageviewer },
     { id: 'calculator', label: 'Calculator', icon: ANDROID_ICONS.calculator },
     { id: 'keep', label: 'Keep', icon: ANDROID_ICONS.texteditor },
@@ -116,7 +116,7 @@ const STOCK_APPS: Record<SimPlatform, StockApp[]> = {
 /** The four the home-screen dock keeps. */
 const DOCK_IDS: Record<SimPlatform, string[]> = {
   ios: ['messages', 'safari', 'mail', 'settings'],
-  android: ['gmail', 'maps', 'chrome', 'settings'],
+  android: ['gmail', 'maps', 'brave', 'settings'],
 };
 
 type Screen = { kind: 'home' } | { kind: 'stock'; id: string } | { kind: 'arcus' };

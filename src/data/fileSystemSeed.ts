@@ -236,7 +236,7 @@ const SEEDS: Seed[] = [
   app('app-word', 'word', 'Microsoft Word.app'),
   app('app-appstore', 'appstore', 'App Store.app'),
   app('app-preview', 'imageviewer', 'Preview.app'),
-  app('app-safari', 'safari', 'Google Chrome.app'),
+  app('app-safari', 'safari', 'Brave Browser.app'),
   app('app-askjosh', 'askjosh', 'Ask Claude.app'),
   app('app-snake', 'snake', 'Snake.app'),
   app('app-doom', 'doom', 'DOOM.app'),

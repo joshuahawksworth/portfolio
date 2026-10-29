@@ -21,7 +21,6 @@ import TrashApp from '../apps/TrashApp';
 import SettingsApp from '../apps/SettingsApp';
 import { CalculatorLogoIcon } from '../icons/CalculatorLogoIcon';
 import { AboutLogoIcon } from '../icons/AboutLogoIcon';
-import { ChromeLogoIcon } from '../icons/ChromeLogoIcon';
 import { DesktopProvider, useDesktop } from '../../context/DesktopContext';
 import { useSettings } from '../../context/SettingsContext';
 import { appIconFor } from '../../theme/platformIcons';
@@ -338,7 +337,7 @@ const ICON_IMAGES: Record<string, { src: string; scale?: number; bg?: string }> 
   askjosh: { src: '/icons/claude.png' },
   shortcuts: { src: '/icons/shortcuts.png' },
   settings: { src: '/icons/settings.png', scale: 1.28 },
-  safari: { src: '/icons/chrome.png', scale: 0.72, bg: '#ffffff' },
+  safari: { src: '/icons/brave-lion.png', scale: 0.66, bg: '#ffffff' },
   github: { src: '/icons/github-mark-white.png', scale: 0.62, bg: '#0d1117' },
 };
 
@@ -424,14 +423,6 @@ function AppIcon({ appId, size = 60 }: { appId: string; size?: number }) {
     );
   }
 
-  if (appId === 'safari') {
-    return (
-      <IconFrame appId={appId} size={size}>
-        <ChromeLogoIcon size={size} style={flatLogo} />
-      </IconFrame>
-    );
-  }
-
   if (appId === 'calculator') {
     return (
       <IconFrame appId={appId} size={size}>
@@ -490,7 +481,7 @@ const APP_LABELS: Record<string, string> = {
   finder: 'Finder',
   cv: 'My CV',
   github: 'GitHub',
-  safari: 'Chrome',
+  safari: 'Brave',
   snake: 'Snake',
   calculator: 'Calculator',
   askjosh: 'Ask Claude',

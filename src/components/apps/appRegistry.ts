@@ -134,7 +134,7 @@ export const PORTFOLIO_APPS = {
   },
   safari: {
     id: 'safari',
-    title: 'Google Chrome',
+    title: 'Brave Browser',
     component: SafariApp,
     defaultSize: { width: 900, height: 620 },
     minSize: { width: 600, height: 400 },
