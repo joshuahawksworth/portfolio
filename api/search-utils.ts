@@ -5,7 +5,9 @@
  * results page is ours. Results come from, in order:
  *   1. Google Programmable Search (real Google results) when GOOGLE_SEARCH_KEY and
  *      GOOGLE_SEARCH_CX are set — https://programmablesearchengine.google.com
- *   2. DuckDuckGo's HTML endpoints (no key, but data-centre IPs are sometimes refused)
+ *   2. Bing's HTML results page (no key; answers hosting-provider IPs, which DuckDuckGo
+ *      refuses with a bot challenge)
+ *   3. DuckDuckGo's HTML endpoints (no key, but data-centre IPs are usually refused)
  */
 
 export interface SearchResult {
@@ -15,11 +17,11 @@ export interface SearchResult {
   snippet: string;
 }
 
-export type SearchProvider = 'google' | 'duckduckgo';
+export type SearchProvider = 'google' | 'bing' | 'duckduckgo';
 
 /** Why a search came back empty, so the page can say something useful. */
 export type SearchError =
-  | 'unconfigured' // no Google key and DuckDuckGo refused us
+  | 'unconfigured' // no Google key and every keyless provider refused us
   | 'blocked' // the provider rejected the request (captcha / 403 / 429)
   | 'failed'; // network error or timeout
 
@@ -51,6 +53,8 @@ function decodeEntities(value: string): string {
     .replace(/&#x27;/g, "'")
     .replace(/&#x2F;/g, '/')
     .replace(/&nbsp;/g, ' ')
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec: string) => String.fromCodePoint(Number(dec)))
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -232,6 +236,23 @@ export function parseDuckDuckGoHtml(html: string): SearchResult[] {
     .slice(0, RESULT_LIMIT);
 }
 
+/**
+ * Bing (and sometimes DuckDuckGo) answer a suspected bot from a data-centre address with a
+ * normal-looking page whose results belong to someone else's query. Pages like that are
+ * worse than an error, so a result set has to mention the query somewhere before it counts.
+ */
+export function looksRelevant(query: string, results: SearchResult[]): boolean {
+  const terms = query
+    .toLowerCase()
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((t) => t.length >= 3);
+  if (terms.length === 0 || results.length === 0) return results.length > 0;
+  return results.some((r) => {
+    const hay = `${r.title} ${r.snippet} ${r.url}`.toLowerCase();
+    return terms.some((t) => hay.includes(t));
+  });
+}
+
 function looksBlocked(status: number, html: string): boolean {
   return (
     status === 403 ||
@@ -269,12 +290,92 @@ async function searchDuckDuckGo(query: string, page: number): Promise<SearchResp
       }
       if (!upstream.ok) continue;
       const results = attempt.parse(html);
+      if (results.length > 0 && !looksRelevant(query, results)) {
+        error = 'blocked';
+        continue;
+      }
       if (results.length > 0) return { query, page, provider: 'duckduckgo', results };
     } catch (err) {
       console.error('search: DuckDuckGo request errored', err);
     }
   }
   return { query, page, provider: 'duckduckgo', results: [], error };
+}
+
+/* ── Bing (HTML results page) ───────────────────────────────────────────── */
+/**
+ * Bing wraps every result link in a redirect, bing.com/ck/a?…&u=a1<base64url>&…; the real
+ * address is the base64url payload after the "a1" prefix.
+ */
+export function unwrapBingUrl(value: string): string {
+  const decoded = decodeEntities(value);
+  try {
+    const parsed = new URL(decoded, 'https://www.bing.com');
+    const wrapped = parsed.searchParams.get('u');
+    if (parsed.hostname.endsWith('bing.com') && wrapped?.startsWith('a1')) {
+      const b64 = wrapped.slice(2).replace(/-/g, '+').replace(/_/g, '/');
+      return Buffer.from(b64, 'base64').toString('utf8');
+    }
+    return parsed.href;
+  } catch {
+    return decoded;
+  }
+}
+
+/** bing.com/search: each result is `<li class="b_algo">` with an `<h2><a>` title and a `b_caption` snippet. */
+export function parseBingResults(html: string): SearchResult[] {
+  const seen = new Set<string>();
+  return html
+    .split(/<li[^>]+class=["']b_algo["'][^>]*>/g)
+    .slice(1)
+    .map((block) => {
+      const link = block.match(/<h2[^>]*>\s*<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/);
+      if (!link) return null;
+      const url = unwrapBingUrl(link[1]);
+      if (!/^https?:\/\//.test(url) || seen.has(url)) return null;
+      seen.add(url);
+      const snippet = block.match(
+        /class=["'][^"']*b_caption[^"']*["'][^>]*>[\s\S]*?<p[^>]*>([\s\S]*?)<\/p>/
+      );
+      return {
+        title: stripTags(link[2]),
+        url,
+        displayUrl: displayUrl(url),
+        snippet: snippet ? stripTags(snippet[1]) : '',
+      };
+    })
+    .filter((result): result is SearchResult => Boolean(result))
+    .slice(0, RESULT_LIMIT);
+}
+
+async function searchBing(query: string, page: number): Promise<SearchResponse> {
+  const params = new URLSearchParams({
+    q: query,
+    first: String((page - 1) * RESULT_LIMIT + 1),
+    setlang: 'en',
+    cc: 'GB',
+  });
+  try {
+    const upstream = await fetchWithTimeout(`https://www.bing.com/search?${params.toString()}`, {
+      headers: {
+        'User-Agent': BROWSER_UA,
+        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-GB,en;q=0.9',
+      },
+    });
+    const html = await upstream.text();
+    if (looksBlocked(upstream.status, html) || !upstream.ok) {
+      return { query, page, provider: 'bing', results: [], error: 'blocked' };
+    }
+    const results = parseBingResults(html);
+    if (results.length > 0 && !looksRelevant(query, results)) {
+      return { query, page, provider: 'bing', results: [], error: 'blocked' };
+    }
+    return { query, page, provider: 'bing', results };
+  } catch (err) {
+    console.error('search: Bing request errored', err);
+    return { query, page, provider: 'bing', results: [], error: 'failed' };
+  }
 }
 
 /* ── Entry point ────────────────────────────────────────────────────────── */
@@ -288,10 +389,14 @@ export async function searchWeb(
     const google = await searchGoogle(query, page, env);
     if (google) return google;
   }
+  const bing = await searchBing(query, page);
+  if (bing.results.length > 0) return bing;
   const ddg = await searchDuckDuckGo(query, page);
-  // Without a Google key, a refusal from DuckDuckGo means "set one up", not "try again".
-  if (ddg.error && !googleConfigured(env) && ddg.error === 'blocked') {
-    return { ...ddg, error: 'unconfigured' };
-  }
+  if (ddg.results.length > 0) return ddg;
+  // Both keyless providers refused us: without a Google key that means "set one up", not
+  // "try again". A genuinely empty query (no hits anywhere) is reported as such.
+  const refused = bing.error === 'blocked' || ddg.error === 'blocked';
+  if (refused && !googleConfigured(env)) return { ...ddg, error: 'unconfigured' };
+  if (!bing.error) return bing;
   return ddg;
 }

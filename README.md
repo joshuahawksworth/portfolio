@@ -119,8 +119,8 @@ to server requests), so `/api/search` fetches results and the app renders them o
 `GOOGLE_SEARCH_KEY` and `GOOGLE_SEARCH_CX` set, those are genuine Google results from the
 [Programmable Search JSON API](https://developers.google.com/custom-search/v1/overview) (create an engine that searches
 the entire web, then an API key with the Custom Search API enabled; 100 queries a day are free). Without them it falls
-back to DuckDuckGo, which sometimes refuses requests from hosting providers, in which case the page says search isn't
-configured.
+back to Bing's HTML results page and then DuckDuckGo, both keyless; only when every provider refuses the request does
+the page say search isn't configured.
 
 Ask Claude answers guests from the portfolio data in the browser, so it works with no backend at all. Visitors who enter
 their own Anthropic API key are answered by Claude through `/api/ask` with that key (sent as a request header, never

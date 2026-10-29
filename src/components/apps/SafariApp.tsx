@@ -50,7 +50,7 @@ interface SearchResponse {
   query: string;
   page: number;
   results: SearchResult[];
-  provider?: 'google' | 'duckduckgo';
+  provider?: 'google' | 'bing' | 'duckduckgo';
   totalResults?: string;
   searchTime?: string;
   error?: 'unconfigured' | 'blocked' | 'failed';
@@ -448,6 +448,7 @@ function SearchResults({
           <span>Send feedback</span>
           <span>Privacy</span>
           <span>Terms</span>
+          {data?.provider === 'bing' && <span>Results via Bing</span>}
           {data?.provider === 'duckduckgo' && <span>Results via DuckDuckGo</span>}
         </div>
       </footer>
