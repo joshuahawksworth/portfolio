@@ -5,9 +5,11 @@ import {
   googleConfigured,
   looksRelevant,
   parseBingResults,
+  parseBraveResults,
   parseDuckDuckGoHtml,
   parseGoogleResults,
   parseSearchResults,
+  parseTavilyResults,
   searchWeb,
   unwrapBingUrl,
 } from '../../api/search-utils';
@@ -114,6 +116,69 @@ describe('search parsers', () => {
     expect(displayUrl('https://example.com/a/b/')).toBe('example.com/a/b');
     expect(googleConfigured(GOOGLE_ENV)).toBe(true);
     expect(googleConfigured(NO_ENV)).toBe(false);
+  });
+});
+
+const braveJson = {
+  query: { more_results_available: true },
+  web: {
+    results: [
+      {
+        title: 'React',
+        url: 'https://react.dev/',
+        description: 'The library for <strong>web</strong> UIs',
+      },
+      { title: 'Dup', url: 'https://react.dev/', description: 'again' },
+    ],
+  },
+};
+const tavilyJson = {
+  results: Array.from({ length: 12 }, (_, i) => ({
+    title: `Result ${i + 1}`,
+    url: `https://example.com/${i + 1}`,
+    content: 'x'.repeat(300),
+  })),
+};
+
+describe('keyed providers', () => {
+  it('parses Brave and Tavily results', () => {
+    expect(parseBraveResults(braveJson)).toEqual([
+      {
+        title: 'React',
+        url: 'https://react.dev/',
+        displayUrl: 'react.dev',
+        snippet: 'The library for web UIs',
+      },
+    ]);
+    expect(parseTavilyResults(tavilyJson, 1)).toHaveLength(10);
+    expect(parseTavilyResults(tavilyJson, 2).map((r) => r.url)).toEqual([
+      'https://example.com/11',
+      'https://example.com/12',
+    ]);
+    expect(parseTavilyResults(tavilyJson, 1)[0].snippet).toHaveLength(220);
+  });
+
+  it('asks Brave first when its key is set, paging with offset', async () => {
+    const spy = stubFetch(() => Response.json(braveJson));
+    const res = await searchWeb('react', 3, { BRAVE_SEARCH_KEY: 'brave-key' } as NodeJS.ProcessEnv);
+    expect(res.provider).toBe('brave');
+    expect(res.results).toHaveLength(1);
+    const [url, init] = spy.mock.calls[0] as [string, RequestInit];
+    expect(new URL(url).hostname).toBe('api.search.brave.com');
+    expect(new URL(url).searchParams.get('offset')).toBe('2');
+    expect((init.headers as Record<string, string>)['X-Subscription-Token']).toBe('brave-key');
+  });
+
+  it('posts to Tavily with a bearer token when only that key is set', async () => {
+    const spy = stubFetch(() => Response.json(tavilyJson));
+    const res = await searchWeb('react', 1, { TAVILY_API_KEY: 'tvly-key' } as NodeJS.ProcessEnv);
+    expect(res.provider).toBe('tavily');
+    expect(res.results).toHaveLength(10);
+    const [url, init] = spy.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe('https://api.tavily.com/search');
+    expect(init.method).toBe('POST');
+    expect((init.headers as Record<string, string>).Authorization).toBe('Bearer tvly-key');
+    expect(JSON.parse(String(init.body)).query).toBe('react');
   });
 });
 

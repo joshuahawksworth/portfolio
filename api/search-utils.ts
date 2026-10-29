@@ -3,11 +3,14 @@
  *
  * Google itself can't be embedded (it forbids framing and captchas data-centre IPs), so the
  * results page is ours. Results come from, in order:
- *   1. Google Programmable Search (real Google results) when GOOGLE_SEARCH_KEY and
- *      GOOGLE_SEARCH_CX are set — https://programmablesearchengine.google.com
- *   2. Bing's HTML results page (no key; answers hosting-provider IPs, which DuckDuckGo
- *      refuses with a bot challenge)
- *   3. DuckDuckGo's HTML endpoints (no key, but data-centre IPs are usually refused)
+ *   1. Brave Search API when BRAVE_SEARCH_KEY is set — https://brave.com/search/api
+ *      (its own index; a monthly free credit, card required)
+ *   2. Tavily when TAVILY_API_KEY is set — https://tavily.com (free tier, no card)
+ *   3. Google Programmable Search when GOOGLE_SEARCH_KEY and GOOGLE_SEARCH_CX are set. Only
+ *      engines created before 20 January 2026 can search the whole web, and those stop on
+ *      1 January 2027; kept for anyone who still has one.
+ *   4. Bing's HTML results page (no key; refuses most hosting-provider addresses)
+ *   5. DuckDuckGo's HTML endpoints (no key; refuses data-centre addresses)
  */
 
 export interface SearchResult {
@@ -17,7 +20,7 @@ export interface SearchResult {
   snippet: string;
 }
 
-export type SearchProvider = 'google' | 'bing' | 'duckduckgo';
+export type SearchProvider = 'google' | 'brave' | 'tavily' | 'bing' | 'duckduckgo';
 
 /** Why a search came back empty, so the page can say something useful. */
 export type SearchError =
@@ -170,6 +173,122 @@ async function searchGoogle(
     };
   } catch (err) {
     console.error('search: Google Programmable Search errored', err);
+    return null;
+  }
+}
+
+/* ── Brave Search API (keyed; its own index) ────────────────────────────── */
+interface BraveResponse {
+  web?: { results?: { title?: string; url?: string; description?: string }[] };
+  query?: { more_results_available?: boolean };
+}
+
+export function braveConfigured(env: NodeJS.ProcessEnv = process.env): boolean {
+  return Boolean(env.BRAVE_SEARCH_KEY);
+}
+
+export function parseBraveResults(data: BraveResponse): SearchResult[] {
+  const seen = new Set<string>();
+  return (data.web?.results ?? [])
+    .map((item) => {
+      const url = item.url ?? '';
+      if (!/^https?:\/\//.test(url) || seen.has(url)) return null;
+      seen.add(url);
+      return {
+        title: stripTags(item.title ?? url),
+        url,
+        displayUrl: displayUrl(url),
+        snippet: stripTags(item.description ?? ''),
+      };
+    })
+    .filter((result): result is SearchResult => Boolean(result))
+    .slice(0, RESULT_LIMIT);
+}
+
+async function searchBrave(
+  query: string,
+  page: number,
+  env: NodeJS.ProcessEnv
+): Promise<SearchResponse | null> {
+  const params = new URLSearchParams({
+    q: query,
+    count: String(RESULT_LIMIT),
+    offset: String(page - 1),
+    country: 'GB',
+    safesearch: 'moderate',
+  });
+  try {
+    const upstream = await fetchWithTimeout(
+      `https://api.search.brave.com/res/v1/web/search?${params.toString()}`,
+      {
+        headers: {
+          Accept: 'application/json',
+          'X-Subscription-Token': env.BRAVE_SEARCH_KEY ?? '',
+        },
+      }
+    );
+    if (!upstream.ok) {
+      console.error('search: Brave Search failed', upstream.status);
+      return null;
+    }
+    const data = (await upstream.json()) as BraveResponse;
+    return { query, page, provider: 'brave', results: parseBraveResults(data) };
+  } catch (err) {
+    console.error('search: Brave Search errored', err);
+    return null;
+  }
+}
+
+/* ── Tavily (keyed; no card needed for the free tier) ───────────────────── */
+interface TavilyResponse {
+  results?: { title?: string; url?: string; content?: string }[];
+}
+
+export function tavilyConfigured(env: NodeJS.ProcessEnv = process.env): boolean {
+  return Boolean(env.TAVILY_API_KEY);
+}
+
+export function parseTavilyResults(data: TavilyResponse, page = 1): SearchResult[] {
+  const seen = new Set<string>();
+  return (data.results ?? [])
+    .map((item) => {
+      const url = item.url ?? '';
+      if (!/^https?:\/\//.test(url) || seen.has(url)) return null;
+      seen.add(url);
+      return {
+        title: stripTags(item.title ?? url),
+        url,
+        displayUrl: displayUrl(url),
+        snippet: stripTags(item.content ?? '').slice(0, 220),
+      };
+    })
+    .filter((result): result is SearchResult => Boolean(result))
+    .slice((page - 1) * RESULT_LIMIT, page * RESULT_LIMIT);
+}
+
+async function searchTavily(
+  query: string,
+  page: number,
+  env: NodeJS.ProcessEnv
+): Promise<SearchResponse | null> {
+  try {
+    // Tavily has no paging, so the first two pages come from one 20-result request.
+    const upstream = await fetchWithTimeout('https://api.tavily.com/search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${env.TAVILY_API_KEY ?? ''}`,
+      },
+      body: JSON.stringify({ query, max_results: 20, search_depth: 'basic' }),
+    });
+    if (!upstream.ok) {
+      console.error('search: Tavily failed', upstream.status);
+      return null;
+    }
+    const data = (await upstream.json()) as TavilyResponse;
+    return { query, page, provider: 'tavily', results: parseTavilyResults(data, page) };
+  } catch (err) {
+    console.error('search: Tavily errored', err);
     return null;
   }
 }
@@ -385,6 +504,14 @@ export async function searchWeb(
   env: NodeJS.ProcessEnv = process.env
 ): Promise<SearchResponse> {
   const page = clampPage(pageInput);
+  if (braveConfigured(env)) {
+    const brave = await searchBrave(query, page, env);
+    if (brave) return brave;
+  }
+  if (tavilyConfigured(env)) {
+    const tavily = await searchTavily(query, page, env);
+    if (tavily) return tavily;
+  }
   if (googleConfigured(env)) {
     const google = await searchGoogle(query, page, env);
     if (google) return google;
@@ -396,7 +523,8 @@ export async function searchWeb(
   // Both keyless providers refused us: without a Google key that means "set one up", not
   // "try again". A genuinely empty query (no hits anywhere) is reported as such.
   const refused = bing.error === 'blocked' || ddg.error === 'blocked';
-  if (refused && !googleConfigured(env)) return { ...ddg, error: 'unconfigured' };
+  const keyed = braveConfigured(env) || tavilyConfigured(env) || googleConfigured(env);
+  if (refused && !keyed) return { ...ddg, error: 'unconfigured' };
   if (!bing.error) return bing;
   return ddg;
 }

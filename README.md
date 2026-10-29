@@ -110,17 +110,17 @@ local `.env` when needed:
 RESEND_API_KEY="your_resend_api_key_here"
 ANTHROPIC_API_KEY="your_anthropic_api_key"
 VITE_MAPBOX_TOKEN="your_mapbox_access_token"
-GOOGLE_SEARCH_KEY="your_google_api_key"
-GOOGLE_SEARCH_CX="your_programmable_search_engine_id"
+BRAVE_SEARCH_KEY="your_brave_search_api_key"   # or TAVILY_API_KEY
 ```
 
 Chrome's search box is a real search. Google can't be embedded in another site (it forbids framing and shows a captcha
-to server requests), so `/api/search` fetches results and the app renders them on a Google-style results page. With
-`GOOGLE_SEARCH_KEY` and `GOOGLE_SEARCH_CX` set, those are genuine Google results from the
-[Programmable Search JSON API](https://developers.google.com/custom-search/v1/overview) (create an engine that searches
-the entire web, then an API key with the Custom Search API enabled; 100 queries a day are free). Without them it falls
-back to Bing's HTML results page and then DuckDuckGo, both keyless; only when every provider refuses the request does
-the page say search isn't configured.
+to server requests), so `/api/search` fetches results and the app renders them on a Google-style results page. Set
+`BRAVE_SEARCH_KEY` ([Brave Search API](https://brave.com/search/api): its own index, a monthly free credit, card
+required) or `TAVILY_API_KEY` ([Tavily](https://tavily.com): free tier, no card) and the page fills with real results.
+Google's Programmable Search is still supported through `GOOGLE_SEARCH_KEY` / `GOOGLE_SEARCH_CX`, but Google no longer
+lets engines created after 20 January 2026 search the whole web, so it only helps if you already had one. With no key
+the route tries Bing's HTML results page and then DuckDuckGo, which refuse most hosting providers, and the page says
+search isn't configured.
 
 Ask Claude answers guests from the portfolio data in the browser, so it works with no backend at all. Visitors who enter
 their own Anthropic API key are answered by Claude through `/api/ask` with that key (sent as a request header, never
