@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { beat, enterPortfolio, onlyOn, screenshotsOnly, shot } from './demo-helpers';
 
 /**
- * The Android home screen on a photograph instead of the drawn gradient, with At a Glance
+ * The Android home screen on the stock Android wallpaper instead of the drawn gradient, with At a Glance
  * showing a drawn weather icon rather than an emoji; the same icon in the Windows taskbar
  * and the macOS weather widget.
  */
@@ -17,7 +17,7 @@ test.describe('Android wallpaper and weather icon', () => {
       timeout: 10_000,
     });
     await beat(page, 2_000);
-    await shot(page, 'Android home on the Shore photo');
+    await shot(page, 'Android home on the stock Android 16 wallpaper');
   });
 });
 

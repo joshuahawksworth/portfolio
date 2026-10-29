@@ -145,10 +145,10 @@ The site is configured for Vercel. Production builds run TypeScript project refe
 
 ## Credits
 
-The Android wallpapers (`public/wallpapers/android-*.jpg`) are photographs from [Unsplash](https://unsplash.com) under the
-[Unsplash License](https://unsplash.com/license): Shore (`photo-1507525428034-b723cf961d3e`), Night Sky
-(`photo-1519681393784-d120267933ba`) and Valley (`photo-1506744038136-46273834b3fb`). The Windows 7 and XP backgrounds
-are not shipped; drop your own copies into `public/wallpapers/` to enable them.
+The Android wallpapers (`public/wallpapers/android-*.jpg`) are the stock Android wallpapers from the Android Open
+Source Project: `core/res/res/drawable-sw720dp-nodpi/default_wallpaper.png` in `platform/frameworks/base` on the
+`main`, `android13-release` and `android12-release` branches, cropped to 1080×2340 and used under the Apache License 2.0.
+The Windows 7 and XP backgrounds are not shipped; drop your own copies into `public/wallpapers/` to enable them.
 
 ## Contact
 
