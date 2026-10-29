@@ -1,6 +1,8 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import type { Plugin } from 'vite';
+import { handleAsk } from './api/ask-utils';
+import { handleContact } from './api/contact-utils';
 import { searchWeb } from './api/search-utils';
 import { listPublicAssets } from './scripts/publicAssets';
 import { reduceMotionVariants } from './scripts/reduceMotionPlugin';
@@ -30,9 +32,14 @@ function contextReloadPlugin(): Plugin {
   };
 }
 
-function browserProxyPlugin(): Plugin {
+/**
+ * Mirrors the serverless endpoints in api/ for `npm run dev`. `env` holds the .env files plus
+ * the shell environment; /api/ask and /api/contact answer 503 (no model call, no email) when
+ * ANTHROPIC_API_KEY / RESEND_API_KEY are absent from it, exactly as they do in production.
+ */
+function apiDevPlugin(env: Record<string, string>): Plugin {
   return {
-    name: 'browser-proxy-dev',
+    name: 'api-dev',
     configureServer(server) {
       server.middlewares.use('/api/browser-proxy', async (req, res) => {
         try {
@@ -130,6 +137,12 @@ function browserProxyPlugin(): Plugin {
           );
         }
       });
+      server.middlewares.use('/api/ask', (req, res, next) => {
+        handleAsk(req, res, env.ANTHROPIC_API_KEY).catch(next);
+      });
+      server.middlewares.use('/api/contact', (req, res, next) => {
+        handleContact(req, res, env.RESEND_API_KEY).catch(next);
+      });
       server.middlewares.use('/api/search', async (req, res) => {
         try {
           const qs = req.url?.split('?')[1] ?? '';
@@ -156,7 +169,7 @@ function browserProxyPlugin(): Plugin {
   };
 }
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   define: {
     // Optional artwork present at build time; see src/lib/publicAssets.ts.
     __PUBLIC_ASSETS__: JSON.stringify(listPublicAssets()),
@@ -169,5 +182,5 @@ export default defineConfig({
       plugins: [reduceMotionVariants()],
     },
   },
-  plugins: [react(), contextReloadPlugin(), browserProxyPlugin()],
-});
+  plugins: [react(), contextReloadPlugin(), apiDevPlugin(loadEnv(mode, process.cwd(), ''))],
+}));
