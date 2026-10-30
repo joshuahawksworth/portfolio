@@ -507,8 +507,37 @@
 .root[data-narrow] .composerWrap {
   padding: 6px 12px 12px;
 }
-.root[data-narrow] .composer {
+.composerStacked {
+  flex-direction: column;
+  align-items: stretch;
   border-radius: 24px;
+  padding: 12px 10px 10px 14px;
+}
+.composerBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: -4px;
+}
+.spacer {
+  flex: 1;
+}
+.composerStacked .textarea {
+  padding: 2px 0 10px;
+}
+.composerStacked .roundBtn,
+.composerStacked .sendBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+.composerStacked .model {
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--cl-line);
+  border-radius: 999px;
+  background: var(--cl-bubble);
+  color: var(--cl-text);
 }
 
 /* The composer is already a card: keep the platform text-box and button dressing off it on
@@ -532,6 +561,10 @@
   padding: 0;
   min-width: 0;
   height: 32px;
+}
+:global(html[data-os='android']) .root .composerStacked .sendBtn {
+  border-radius: 50%;
+  height: 36px;
 }
 :global(html[data-os='windows']) .root .composer .sendBtn:hover:not(:disabled),
 :global(html[data-os='android']) .root .composer .sendBtn:hover:not(:disabled) {

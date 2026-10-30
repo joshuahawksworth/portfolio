@@ -157,6 +157,7 @@ const CHEVRON = 'M6 9l6 6 6-6';
 const ARROW_UP = 'M12 19V5M5 12l7-7 7 7';
 const COPY = 'M9 9h10v10H9zM5 15V5h10';
 const RETRY = 'M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7';
+const MIC = 'M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zM19 11a7 7 0 0 1-14 0M12 18v3';
 
 // ── App ────────────────────────────────────────────────────────────────────────
 export default function AskJoshApp() {
@@ -306,43 +307,74 @@ export default function AskJoshApp() {
   const sidebarShown = narrow ? drawerOpen : sidebarOpen;
   const toggleSidebar = () => (narrow ? setDrawerOpen((o) => !o) : setSidebarOpen((o) => !o));
 
-  const composer = (
+  const plusBtn = (
+    <button
+      type="button"
+      className={styles.roundBtn}
+      disabled
+      aria-label="Attach"
+      title="Attachments aren’t part of this demo"
+    >
+      <Icon d={PLUS} />
+    </button>
+  );
+  const modelPill = (
+    <span className={styles.model}>
+      {MODEL}
+      <Icon d={CHEVRON} size={14} />
+    </span>
+  );
+  const textarea = (
+    <textarea
+      ref={textareaRef}
+      className={styles.textarea}
+      rows={1}
+      placeholder={isEmpty ? 'How can I help you today?' : 'Reply to Claude…'}
+      aria-label="Message Claude"
+      value={input}
+      onChange={(e) => handleInput(e.target.value)}
+      onKeyDown={handleKeyDown}
+      disabled={streaming}
+    />
+  );
+  const sendBtn = (
+    <button
+      type="button"
+      className={styles.sendBtn}
+      onClick={() => void send(input)}
+      disabled={streaming || input.trim() === ''}
+      aria-label="Send"
+    >
+      <Icon d={ARROW_UP} size={16} />
+    </button>
+  );
+  // Desktop Claude keeps everything on one line; the phone app stacks the text over a row
+  // of controls (attach, model, dictate, send).
+  const composer = narrow ? (
+    <div className={`${styles.composer} ${styles.composerStacked}`}>
+      {textarea}
+      <div className={styles.composerBar}>
+        {plusBtn}
+        {modelPill}
+        <span className={styles.spacer} />
+        <button
+          type="button"
+          className={styles.roundBtn}
+          disabled
+          aria-label="Dictate"
+          title="Dictation isn’t part of this demo"
+        >
+          <Icon d={MIC} />
+        </button>
+        {sendBtn}
+      </div>
+    </div>
+  ) : (
     <div className={styles.composer}>
-      <button
-        type="button"
-        className={styles.roundBtn}
-        disabled
-        aria-label="Attach"
-        title="Attachments aren’t part of this demo"
-      >
-        <Icon d={PLUS} />
-      </button>
-      <textarea
-        ref={textareaRef}
-        className={styles.textarea}
-        rows={1}
-        placeholder={isEmpty ? 'How can I help you today?' : 'Reply to Claude…'}
-        aria-label="Message Claude"
-        value={input}
-        onChange={(e) => handleInput(e.target.value)}
-        onKeyDown={handleKeyDown}
-        disabled={streaming}
-      />
-      {!narrow && (
-        <span className={styles.model}>
-          {MODEL}
-          <Icon d={CHEVRON} size={14} />
-        </span>
-      )}
-      <button
-        type="button"
-        className={styles.sendBtn}
-        onClick={() => void send(input)}
-        disabled={streaming || input.trim() === ''}
-        aria-label="Send"
-      >
-        <Icon d={ARROW_UP} size={16} />
-      </button>
+      {plusBtn}
+      {textarea}
+      {modelPill}
+      {sendBtn}
     </div>
   );
 
@@ -416,16 +448,7 @@ export default function AskJoshApp() {
               <Icon d={PANEL} />
             </button>
           )}
-          <span className={styles.headerTitle}>
-            {narrow ? (
-              <>
-                {MODEL}
-                <Icon d={CHEVRON} size={14} />
-              </>
-            ) : (
-              !isEmpty && chatTitle(activeChat)
-            )}
-          </span>
+          <span className={styles.headerTitle}>{!isEmpty && chatTitle(activeChat)}</span>
           {narrow && (
             <button
               type="button"
