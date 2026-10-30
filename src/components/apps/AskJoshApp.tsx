@@ -402,7 +402,7 @@ export default function AskJoshApp() {
           <span className={styles.accountAvatar}>JH</span>
           <span className={styles.accountName}>
             Joshua Hawksworth
-            <small>Free plan</small>
+            <small>Pro plan</small>
           </span>
         </div>
       </aside>
