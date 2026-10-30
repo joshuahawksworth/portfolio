@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { beat, enterPortfolio, onlyOn, screenshotsOnly, shot } from './demo-helpers';
 
 /**
- * The desktop now opens on Google Chrome showing a plain one-page version of the portfolio
+ * The desktop now opens on Brave Browser showing a plain one-page version of the portfolio
  * instead of the About Josh window. Stills of the first screen on both platforms, plus the
  * projects section further down the page.
  */
@@ -12,7 +12,7 @@ for (const platform of ['apple', 'windows'] as const) {
   test.describe(`landing on ${platform}`, () => {
     onlyOn('desktop');
 
-    test(`${platform}: Chrome opens on the plain portfolio site`, async ({ page }) => {
+    test(`${platform}: Brave opens on the plain portfolio site`, async ({ page }) => {
       await enterPortfolio(page, platform);
       const heading = page.getByRole('heading', { name: 'Joshua Hawksworth', level: 1 });
       await expect(heading).toBeVisible({ timeout: 10_000 });
