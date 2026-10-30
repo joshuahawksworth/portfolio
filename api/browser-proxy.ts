@@ -5,6 +5,7 @@ import {
   errorPage,
   isBlockedTarget,
   processHtml,
+  shortcutPage,
 } from './browser-utils.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -31,6 +32,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           'ERR_BLOCKED_BY_CLIENT'
         )
       );
+  }
+
+  const shortcut = shortcutPage(target);
+  if (shortcut) {
+    return res.status(200).setHeader('Content-Type', 'text/html; charset=utf-8').send(shortcut);
   }
 
   const controller = new AbortController();

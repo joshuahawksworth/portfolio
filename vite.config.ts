@@ -12,6 +12,7 @@ import {
   errorPage,
   isBlockedTarget,
   processHtml,
+  shortcutPage,
 } from './api/browser-utils';
 
 /**
@@ -63,6 +64,14 @@ function apiDevPlugin(env: Record<string, string>): Plugin {
                 'ERR_BLOCKED_BY_CLIENT'
               )
             );
+            return;
+          }
+
+          const shortcut = shortcutPage(target);
+          if (shortcut) {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
+            res.end(shortcut);
             return;
           }
 
