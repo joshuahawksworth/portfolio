@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { APP_READY_EVENT } from '../../lib/appReady';
 import {
   DesktopProvider,
   useDesktop,
@@ -534,12 +535,29 @@ interface CtxMenu {
 }
 
 // ── Constants ──────────────────────────────────────────────────────────────
-// A launching app bounces in the Dock until it is up, as on macOS: the first launch of an
-// app in a session is a cold start of 1.2–3.2 s (two to five hops), a relaunch 0.35–0.9 s. The
-// window opens at that moment and the Dock drops the bounce at the end of the hop in flight,
-// so how many times it bounces varies with the launch. The long timer only covers a missing
-// animation event (animations disabled, tab hidden).
+// A launching app bounces in the Dock until it is up, as on macOS. Apple's own apps open at
+// once with a single hop. Other apps take a launch: the first in a session is a cold start of
+// 1.2–3.2 s (two to five hops), a relaunch 0.35–0.9 s; the window opens at that moment and
+// the Dock drops the bounce at the end of the hop in flight. An app that loads itself after
+// its window opens (DOOM booting DOSBox) opens at once and bounces until it reports its first
+// frame. The long timers only cover a missing animation event (animations disabled, tab
+// hidden) or an app that never reports.
 const BOUNCE_MAX_MS = 8000;
+const SELF_LOADING_MAX_MS = 30_000;
+const NATIVE_APPS = new Set([
+  'finder',
+  'trash',
+  'settings',
+  'terminal',
+  'calculator',
+  'imageviewer',
+  'cv',
+  'contact',
+  'location',
+  'shortcuts',
+  'appstore',
+]);
+const SELF_LOADING_APPS = new Set(['doom']);
 const launchedOnce = new Set<string>();
 function launchDelay(appId: string): number {
   const warm = launchedOnce.has(appId);
@@ -921,15 +939,27 @@ function DesktopSurface() {
       return;
     }
     if (bouncingKeys.has(dockKey)) return; // already launching
-    const delay = launchDelay(appId);
-    const at = Date.now() + delay;
-    launchAt.current.set(dockKey, at);
     setBouncingKeys((prev) => new Set([...prev, dockKey]));
-    setTimeout(open, delay);
-    setTimeout(() => {
-      // Only this launch's bounce; a later relaunch has its own
-      if (launchAt.current.get(dockKey) === at) stopBounce(dockKey);
-    }, BOUNCE_MAX_MS);
+    let at: number;
+    if (NATIVE_APPS.has(appId)) {
+      open();
+      at = 0; // the first landing ends it: one hop
+    } else if (SELF_LOADING_APPS.has(appId)) {
+      open();
+      at = Infinity; // until the app reports ready
+    } else {
+      const delay = launchDelay(appId);
+      at = Date.now() + delay;
+      setTimeout(open, delay);
+    }
+    launchAt.current.set(dockKey, at);
+    setTimeout(
+      () => {
+        // Only this launch's bounce; a later relaunch has its own
+        if (launchAt.current.get(dockKey) === at) stopBounce(dockKey);
+      },
+      at === Infinity ? SELF_LOADING_MAX_MS : BOUNCE_MAX_MS
+    );
   }
 
   function openWithBounce(dockKey: string, appId: string, props?: Record<string, unknown>) {
@@ -1182,9 +1212,18 @@ function DesktopSurface() {
 
   // ── Dock item activate (bounce, then open) ────────────────────────────
   function handleDockActivate(key: string, action: () => void) {
-    if (key === 'finder' || key === 'trash' || key === 'cv') action();
-    else launch(key, key, action);
+    launch(key, key, action);
   }
+
+  // A self-loading app's first frame: the bounce ends on the next landing
+  useEffect(() => {
+    const onReady = (e: Event) => {
+      const key = (e as CustomEvent<string>).detail;
+      if (launchAt.current.has(key)) launchAt.current.set(key, Date.now());
+    };
+    window.addEventListener(APP_READY_EVENT, onReady);
+    return () => window.removeEventListener(APP_READY_EVENT, onReady);
+  }, []);
 
   // ── Render ────────────────────────────────────────────────────────────
   const ctxTarget = ctxMenu?.targetId ? items.find((i) => i.id === ctxMenu.targetId) : null;

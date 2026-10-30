@@ -57,6 +57,30 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: transform 240ms ease;
+}
+/* Slid down into its drawer; the toggle below brings it back */
+.hintHidden {
+  transform: translateY(100%);
+}
+
+.hintToggle {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #c8c8c8;
+  cursor: pointer;
+  transition: bottom 240ms ease;
+}
+.hintToggleRaised {
+  bottom: 34px;
 }
 
 .mute {

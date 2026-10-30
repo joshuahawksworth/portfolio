@@ -2,10 +2,10 @@ import { expect, test } from '@playwright/test';
 import { beat, enterPortfolio, onlyOn } from './demo-helpers';
 
 /**
- * The Dock bounce runs like macOS's: the icon keeps hopping (about an icon's height, a beat
- * on the ground between hops) until the app is up, then lands and stops as the window
- * appears. A first launch is a cold start of a few hops; relaunching the same app is quick.
- * Video, since the point is the motion and its timing.
+ * The Dock bounce runs like macOS's: the icon keeps hopping until the app is up, then lands
+ * and stops as the window appears. A first launch is a cold start of a few hops; relaunching
+ * the same app is quick; Apple's own apps (Terminal) open at once with a single hop. Video,
+ * since the point is the motion and its timing.
  */
 test.describe('Dock launch bounce', () => {
   onlyOn('desktop');
@@ -24,6 +24,13 @@ test.describe('Dock launch bounce', () => {
     await beat(page);
     await dockItem.click();
     await expect(window).toBeVisible({ timeout: 10_000 });
+    await beat(page, 1_500);
+
+    // A built-in app: the window is there at once and the icon bobs just once
+    await page.getByRole('button', { name: 'Terminal' }).first().click();
+    await expect(page.locator('[data-window]', { hasText: 'Terminal' })).toBeVisible({
+      timeout: 1_000,
+    });
     await beat(page, 1_500);
   });
 });

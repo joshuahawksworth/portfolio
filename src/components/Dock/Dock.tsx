@@ -93,11 +93,12 @@ export default function Dock({
 
   const minimizedWindows = windows.filter((w) => w.minimized);
 
-  // Running desktop-only apps (doom/snake) — shown in dock only while open
+  // Desktop-only apps (doom/snake) — in the dock while launching or open
   const runningDesktopKeys = [
-    ...new Set(
-      windows.filter((w) => !w.minimized && DOCK_DESKTOP_ONLY.has(w.appId)).map((w) => w.appId)
-    ),
+    ...new Set([
+      ...windows.filter((w) => !w.minimized && DOCK_DESKTOP_ONLY.has(w.appId)).map((w) => w.appId),
+      ...[...(bouncingKeys ?? [])].filter((k) => DOCK_DESKTOP_ONLY.has(k)),
+    ]),
   ];
 
   // Track which keys are newly appeared so we can play the spring animation
