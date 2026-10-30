@@ -9,16 +9,19 @@ import styles from './SettingsApp.module.css';
 export function Group({
   title,
   footer,
+  bare = false,
   children,
 }: {
   title?: string;
   footer?: ReactNode;
+  /** No framed body: for content that draws its own cards (the platform choice). */
+  bare?: boolean;
   children: ReactNode;
 }) {
   return (
     <section className={styles.group}>
       {title && <h3 className={styles.groupTitle}>{title}</h3>}
-      <div className={styles.groupBody}>{children}</div>
+      <div className={bare ? undefined : styles.groupBody}>{children}</div>
       {footer && <p className={styles.groupFooter}>{footer}</p>}
     </section>
   );

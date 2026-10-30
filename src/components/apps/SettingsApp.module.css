@@ -149,11 +149,32 @@
   margin-bottom: 14px;
 }
 
-.breadcrumb {
-  display: block;
-  font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 2px;
+/* macOS toolbar arrows: back / forward through visited panes */
+.navArrows {
+  display: inline-flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.navArrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 24px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--text);
+  cursor: default;
+}
+
+.navArrow:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.navArrow:disabled {
+  opacity: 0.35;
 }
 
 .contentTitle {
@@ -180,12 +201,10 @@
 
 .groupTitle {
   margin: 0;
-  padding: 0 2px;
-  font-size: 11px;
+  padding: 0 4px;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  color: var(--text-strong);
 }
 
 .groupBody {
@@ -808,6 +827,15 @@
   padding-top: 16px;
 }
 
+.root[data-os='ios'] .groupTitle {
+  padding: 0 16px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
 .root[data-os='ios'] .groupBody,
 .root[data-os='android'] .groupBody {
   border: 0;
@@ -1026,6 +1054,35 @@
   border-color: #79747e;
 }
 
+/* ── macOS: a toolbar strip with the arrows and pane title, content below ── */
+.root[data-os='macos'] .content {
+  padding: 0;
+}
+
+.root[data-os='macos'] .contentHead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 52px;
+  margin: 0;
+  padding: 0 16px;
+  background: rgba(252, 248, 240, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--line);
+}
+
+.root[data-os='macos'] .contentTitle {
+  font-size: 15px;
+}
+
+.root[data-os='macos'] .paneBody {
+  padding: 20px 26px 28px;
+}
+
 /* ── Windows 11 ───────────────────────────────────────────────────── */
 .root[data-os='windows'] {
   font-size: 13px;
@@ -1084,8 +1141,18 @@
 }
 
 .root[data-os='windows'] .contentTitle {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 600;
+}
+
+.root[data-os='windows'] .profileAvatar {
+  width: 48px;
+  height: 48px;
+  font-size: 15px;
+}
+
+.root[data-os='windows'] .profileName {
+  font-size: 14px;
 }
 
 .root[data-os='windows'] .paneBody {

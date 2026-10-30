@@ -1,7 +1,7 @@
 /**
  * System Settings. One settings model, four native layouts:
  *  - macOS: sidebar of coloured pane icons + detail
- *  - Windows 11: left navigation + breadcrumb detail
+ *  - Windows 11: left navigation + titled detail
  *  - iOS: inset grouped list that drills into each pane
  *  - Android: Material list with a search bar that drills into each pane
  */
@@ -617,6 +617,35 @@ export default function SettingsApp({ props }: { props?: Record<string, unknown>
   const visible = useMemo(() => searchPanes(panes, query), [panes, query]);
   const pane = panes.find((p) => p.id === paneId) ?? null;
 
+  // Back / forward through the panes visited, as System Settings' toolbar arrows do
+  const [history, setHistory] = useState<{ back: string[]; forward: string[] }>({
+    back: [],
+    forward: [],
+  });
+  function goTo(id: string) {
+    if (id === paneId) return;
+    setHistory((h) => ({ back: paneId ? [...h.back, paneId] : h.back, forward: [] }));
+    setPaneId(id);
+  }
+  function goBack() {
+    const prev = history.back[history.back.length - 1];
+    if (!prev) return;
+    setHistory((h) => ({
+      back: h.back.slice(0, -1),
+      forward: paneId ? [paneId, ...h.forward] : h.forward,
+    }));
+    setPaneId(prev);
+  }
+  function goForward() {
+    const next = history.forward[0];
+    if (!next) return;
+    setHistory((h) => ({
+      back: paneId ? [...h.back, paneId] : h.back,
+      forward: h.forward.slice(1),
+    }));
+    setPaneId(next);
+  }
+
   /* ── Phone layouts: list → detail ─────────────────────────────────── */
   if (isMobile) {
     const android = os === 'android';
@@ -718,11 +747,7 @@ export default function SettingsApp({ props }: { props?: Record<string, unknown>
     <div className={styles.root} data-os={os}>
       <aside className={styles.sidebar}>
         {windows && (
-          <button
-            type="button"
-            className={styles.sideProfile}
-            onClick={() => setPaneId('accounts')}
-          >
+          <button type="button" className={styles.sideProfile} onClick={() => goTo('accounts')}>
             <span className={styles.profileAvatar}>{initialsOf(settings.userName)}</span>
             <span className={styles.profileText}>
               <span className={styles.profileName}>{settings.userName}</span>
@@ -736,7 +761,7 @@ export default function SettingsApp({ props }: { props?: Record<string, unknown>
           placeholder={windows ? 'Find a setting' : 'Search'}
         />
         {!windows && (
-          <button type="button" className={styles.sideProfile} onClick={() => setPaneId('users')}>
+          <button type="button" className={styles.sideProfile} onClick={() => goTo('users')}>
             <span className={styles.profileAvatar}>{initialsOf(settings.userName)}</span>
             <span className={styles.profileText}>
               <span className={styles.profileName}>{settings.userName}</span>
@@ -750,7 +775,7 @@ export default function SettingsApp({ props }: { props?: Record<string, unknown>
               key={p.id}
               type="button"
               className={`${styles.sideRow} ${p.id === paneId ? styles.sideRowOn : ''}`}
-              onClick={() => setPaneId(p.id)}
+              onClick={() => goTo(p.id)}
               aria-current={p.id === paneId ? 'page' : undefined}
             >
               <PaneIcon pane={p} os={os} />
@@ -764,7 +789,52 @@ export default function SettingsApp({ props }: { props?: Record<string, unknown>
         {pane && (
           <>
             <header className={styles.contentHead}>
-              {windows && <span className={styles.breadcrumb}>Settings ›</span>}
+              {!windows && (
+                <div className={styles.navArrows}>
+                  <button
+                    type="button"
+                    className={styles.navArrow}
+                    onClick={goBack}
+                    disabled={history.back.length === 0}
+                    aria-label="Back"
+                  >
+                    <svg
+                      viewBox="0 0 12 20"
+                      width="8"
+                      height="13"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M10 2L2 10l8 8" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.navArrow}
+                    onClick={goForward}
+                    disabled={history.forward.length === 0}
+                    aria-label="Forward"
+                  >
+                    <svg
+                      viewBox="0 0 12 20"
+                      width="8"
+                      height="13"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M2 2l8 8-8 8" />
+                    </svg>
+                  </button>
+                </div>
+              )}
               <h1 className={styles.contentTitle}>{pane.title}</h1>
             </header>
             <PaneBody pane={pane} />

@@ -178,6 +178,7 @@ export function PlatformSection() {
   ];
   return (
     <Group
+      bare
       title="Platform"
       footer={`Switching shuts ${OS_LABELS[os]} down and boots the other platform: lock screen, wallpaper, icons, windows and system panels all change. Your choice is saved on this device, so it comes back after a reload. First visits start on whichever platform matches your device.`}
     >
