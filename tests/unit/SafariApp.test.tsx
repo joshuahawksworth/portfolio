@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import SafariApp from '../../src/components/apps/SafariApp';
+import { PLAIN_SITE_URL } from '../../src/components/apps/PlainPortfolioSite';
 
 describe('SafariApp search', () => {
   beforeEach(() => {
@@ -65,5 +66,16 @@ describe('SafariApp search', () => {
     const images = await screen.findByRole('link', { name: /^Images/ });
     expect(images).toHaveAttribute('href', 'https://search.brave.com/images?q=portfolio%20testing');
     expect(screen.queryByRole('button', { name: 'Settings' })).toBeNull();
+  });
+
+  it('reloading the plain site shows a load and redraws it', async () => {
+    const user = userEvent.setup();
+    render(<SafariApp props={{ url: PLAIN_SITE_URL }} />);
+    expect(screen.queryByRole('status')).toBeNull();
+
+    await user.click(screen.getByRole('button', { name: 'Reload' }));
+    expect(screen.getByRole('status')).toHaveTextContent('Loading hawksworth.dev');
+    await waitForElementToBeRemoved(() => screen.queryByRole('status'), { timeout: 2000 });
+    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
   });
 });
