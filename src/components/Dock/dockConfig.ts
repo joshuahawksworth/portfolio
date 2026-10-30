@@ -3,8 +3,8 @@ import { DOCK_ICONS } from './dockIcons';
 import { openCv } from '../../lib/cv';
 
 export const DOCK_DEFAULT_ORDER = [
-  'github',
   'calendar',
+  'github',
   'safari',
   'askjosh',
   'about',
