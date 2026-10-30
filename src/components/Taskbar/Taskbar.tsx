@@ -15,6 +15,7 @@ import {
 } from '../Dock/dockConfig';
 import { WindowsLogo } from '../icons/WindowsIcons';
 import { describeWeather, useWeather } from '../Desktop/DesktopWidgets';
+import { WeatherIcon } from '../icons/WeatherIcons';
 import { BATTERY_LEVEL } from '../../lib/battery';
 import styles from './Taskbar.module.css';
 
@@ -58,7 +59,7 @@ export default function Taskbar() {
     windows.forEach((w) => !w.minimized && minimizeWindow(w.id));
   }
 
-  const { label: weatherLabel, glyph } = describeWeather(weather?.code ?? 3);
+  const { label: weatherLabel, kind: weatherKind } = describeWeather(weather?.code ?? 3);
   const time = formatTime(now, { clock24h: settings.clock24h, showSeconds: settings.showSeconds });
 
   function button(
@@ -95,9 +96,7 @@ export default function Taskbar() {
             onClick={() => systemUI.toggle('notificationCenter')}
             aria-label={`Weather: ${weatherLabel}. Open widgets`}
           >
-            <span className={styles.weatherGlyph} aria-hidden="true">
-              {glyph}
-            </span>
+            <WeatherIcon kind={weatherKind} size={24} />
             <span className={styles.weatherText}>
               <strong>{weather ? `${weather.temp}°C` : '—'}</strong>
               <span>{weatherLabel}</span>

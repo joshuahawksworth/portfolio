@@ -2,13 +2,33 @@
  * Renders the right artwork for any file-system node, at any size, so the desktop,
  * Finder (icon + list views), Get Info and the Trash all show the same icons.
  */
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import type { FsNode } from '../../context/DesktopContext';
 import { DocumentIcon, FolderIcon, PictureIcon } from './FileSystemIcons';
 import { NokiaIcon } from './NokiaIcon';
 import { PlatformBinIcon, PlatformDriveIcon, PlatformFolderIcon } from './PlatformFileIcons';
 import { appIconFor } from '../../theme/platformIcons';
 import { useOs } from '../../context/SettingsContext';
+
+/** The little white box with a blue arrow Windows puts on the corner of a shortcut. */
+function WinShortcut({ size, children }: { size: number; children: ReactNode }) {
+  const badge = Math.max(12, Math.round(size * 0.3));
+  return (
+    <span style={{ position: 'relative', display: 'inline-flex', width: size, height: size }}>
+      {children}
+      <svg
+        viewBox="0 0 16 16"
+        width={badge}
+        height={badge}
+        aria-hidden="true"
+        style={{ position: 'absolute', left: 0, bottom: 0 }}
+      >
+        <rect x="0.5" y="0.5" width="15" height="15" rx="1.5" fill="#fff" stroke="#7a7a7a" />
+        <path d="M5 11.5V7.3h4.2V4.8L12.5 8l-3.3 3.2V8.8H6.6v2.7z" fill="#1a73e8" />
+      </svg>
+    </span>
+  );
+}
 
 export function NodeIcon({
   node,
@@ -53,6 +73,15 @@ export function NodeIcon({
   }
 
   if (node.type === 'app') {
+    // Desktop shortcuts on Windows carry the shortcut arrow; apps in their folders do not.
+    if (os === 'windows' && node.id.startsWith('shortcut-')) {
+      const plain = { ...node, id: node.id.replace(/^shortcut-/, '') };
+      return (
+        <WinShortcut size={size}>
+          <NodeIcon node={plain} size={size} trashFull={trashFull} trashGlow={trashGlow} />
+        </WinShortcut>
+      );
+    }
     // The CV shortcut opens the PDF, so it wears the PDF document icon on every platform.
     if (node.appId === 'cv') return <DocumentIcon name="CV.pdf" size={size} />;
     if (node.appId === 'doom') {

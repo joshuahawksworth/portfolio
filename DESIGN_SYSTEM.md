@@ -14,27 +14,31 @@ This project is an interactive macOS-style portfolio. Future work should feel li
 The shell renders one of four operating systems from a single setting. `src/context/SettingsContext.tsx` owns the
 persisted settings (`src/lib/settingsStore.ts`) and derives `os` from the chosen platform and the device:
 
-| Platform | Desktop | Phone |
-| --- | --- | --- |
-| `apple` (default) | macOS (menu bar, Dock, Launchpad, Liquid Glass) | iOS (squircle grid, glass dock, iPhone lock screen) |
-| `windows` | Windows 11 (taskbar, Start menu, Mica windows, Fluent icons) | Android (Pixel launcher, Material discs, Google bar) |
+| Platform          | Desktop                                                      | Phone                                                |
+| ----------------- | ------------------------------------------------------------ | ---------------------------------------------------- |
+| `apple` (default) | macOS (menu bar, Dock, Launchpad, Liquid Glass)              | iOS (squircle grid, glass dock, iPhone lock screen)  |
+| `windows`         | Windows 11 (taskbar, Start menu, Mica windows, Fluent icons) | Android (Pixel launcher, Material discs, Google bar) |
 
 Rules for platform-aware work:
 
 - Read the OS with `useOs()` / `useSettings()` in components, or `currentOs()` (`src/theme/platform.ts`) in plain helpers.
   `<html data-os>` mirrors it, so CSS can branch with `:global(html[data-os='windows'])` or a `data-os` on the app root.
 - App artwork goes through `appIconFor(key, os)` (`src/theme/platformIcons.tsx`): macOS art lives in `dockIcons.tsx`,
-  Windows in `icons/WindowsIcons.tsx`, Android in `icons/AndroidIcons.tsx`. Shared apps with no native counterpart
-  (GitHub, Chrome, Claude, DOOM, Snake) fall through to the macOS art. Folders, drives and bins use `PlatformFileIcons`.
+  Windows in `icons/WindowsIcons.tsx`, Android in `icons/AndroidIcons.tsx`. Every Windows system icon is a
+  `WinArt`: a real bitmap from `public/icons/windows/<name>.png` when the file exists, else the drawn Fluent-style
+  SVG. The Windows 11 renders ship for explorer, folder, recycle-bin-empty, recycle-bin-full, calculator, mail, maps,
+  terminal, photos, settings, keyboard, briefcase and this-pc (96px, from the HaydenReeve/WindowsIcons pack and
+  daedalOS); `skills` has no Windows counterpart and stays drawn. Desktop shortcuts on Windows get the shortcut-arrow badge (`NodeIcon`). Shared apps with no native counterpart
+  (GitHub, Brave, Claude, DOOM, Snake) fall through to the macOS art. Folders, drives and bins use `PlatformFileIcons`.
 - Names differ per OS: use `appTitleFor` / `appLabelFor` / `nodeDisplayName` instead of hard-coding "Finder" or "Trash".
 - Space above and below windows comes from `shellInsets(os)`; never hard-code the menu bar or dock height.
-- Wallpapers are per OS (`WALLPAPERS_FOR_OS`); the Android set is SVGs in `public/wallpapers/`, and the
+- Wallpapers are per OS (`WALLPAPERS_FOR_OS`); the Android set is the Pixel 9's stock wallpapers in `public/wallpapers/`, and the
   Windows 11 and 10 images ship with the repo, as does Apple's dynamic "The Beach", the macOS / iOS default.
   A dynamic wallpaper is a day picture plus dawn, dusk and night frames (`DYNAMIC_FRAME_IMAGES`) that
   `DynamicWallpaper` cross-fades on the visitor's clock around that day's sunrise and sunset
   (`lib/dynamicWallpaper.ts`); the lock screens show the dominant frame via `wallpaperImageFor`. The Beach frames
-  are rendered from the day image by `node scripts/wallpapers/beach-variants.mjs`. `windows-7-harmony.jpg` and
-  `windows-xp-bliss.jpg` are git-ignored extras: drop them into `public/wallpapers/` and the picker lists them.
+  are Apple's own four pictures, cropped square (2000×2000) so one file serves the desktop and the phones. `windows-7-harmony.jpg` and
+  `windows-xp-bliss.jpg` are optional extras: drop them into `public/wallpapers/` and the picker lists them.
   Which optional files exist is baked in at build time (`__PUBLIC_ASSETS__`, see `lib/publicAssets.ts`), so
   nothing is probed at runtime; restart the dev server after adding one.
 - The Terminal's commands live in `lib/terminalShell.ts`: one `Shell` class with a zsh, PowerShell or bash personality

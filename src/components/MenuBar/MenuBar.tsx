@@ -86,7 +86,7 @@ export default function MenuBar() {
         action: () => openApp('finder', { menuOpenedAt: Date.now() }),
       },
       { label: 'New File in VS Code', shortcut: '⇧⌘N', action: () => openApp('texteditor') },
-      { label: 'Open Google Chrome', action: () => openApp('safari'), divider: true },
+      { label: 'Open Brave Browser', action: () => openApp('safari'), divider: true },
       { label: 'Open My CV', action: openCv },
       {
         label: 'Close Window',

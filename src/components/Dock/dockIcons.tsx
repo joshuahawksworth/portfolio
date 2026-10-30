@@ -225,29 +225,6 @@ const DRAWN_ICONS = {
       />
     </MacIcon>
   ),
-  safari: (
-    // Google Chrome icon — junctions at 2 o'clock (330°), 6 o'clock (90°), 10 o'clock (210°)
-    // so red is centred at 12 o'clock (top), yellow at 4 o'clock, green at 8 o'clock
-    <svg viewBox="0 0 44 44" fill="none" width="44" height="44">
-      <rect width="44" height="44" rx="11" fill="white" />
-      {/* Red — 210° → 330° clockwise, centred at top (270°) */}
-      <path d="M22 22 L5.55 12.5 A19 19 0 0 1 38.45 12.5 Z" fill="#EA4335" />
-      {/* Yellow — 330° → 90° clockwise, centred at lower-right */}
-      <path d="M22 22 L38.45 12.5 A19 19 0 0 1 22 41 Z" fill="#FBBC05" />
-      {/* Green — 90° → 210° clockwise, centred at lower-left */}
-      <path d="M22 22 L22 41 A19 19 0 0 1 5.55 12.5 Z" fill="#34A853" />
-      {/* White inner ring covers the pie centres */}
-      <circle cx="22" cy="22" r="13" fill="white" />
-      {/* White dividers: from inner edge (r=13) to outer edge (r=19) at each junction */}
-      <line x1="10.74" y1="15.5" x2="5.55" y2="12.5" stroke="white" strokeWidth="2" />
-      <line x1="33.26" y1="15.5" x2="38.45" y2="12.5" stroke="white" strokeWidth="2" />
-      <line x1="22" y1="35" x2="22" y2="41" stroke="white" strokeWidth="2" />
-      {/* Blue centre */}
-      <circle cx="22" cy="22" r="10.5" fill="#4285F4" />
-      {/* White separator ring */}
-      <circle cx="22" cy="22" r="13" fill="none" stroke="white" strokeWidth="1.5" />
-    </svg>
-  ),
   // The real macOS bin (no tile), same artwork as the desktop and Finder
   trashEmpty: <MacTrashIcon size={44} />,
   trashFull: <MacTrashIcon size={44} full />,
@@ -412,7 +389,7 @@ export function BrandIcon({
 const REAL_ICONS = {
   // Apple's current Finder render is full-bleed, so it takes the squircle like the iOS icons
   finder: <RealIcon src="/icons/finder.png" rounded />,
-  safari: <RealIcon src="/icons/chrome.png" scale={0.82} />,
+  safari: <RealIcon src="/icons/brave.png" rounded />,
   askjosh: <RealIcon src="/icons/claude.png" rounded />,
   contact: <RealIcon src="/icons/mail.png" rounded />,
   location: <RealIcon src="/icons/maps.png" rounded />,

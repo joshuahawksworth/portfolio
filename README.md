@@ -41,7 +41,7 @@ the Finder behaves like the real one rather than a list of links.
   selection, ⌘A / ⌘⌫ / ⇧⌘N shortcuts, back and forward history, breadcrumb path bar, icon and list views, drag into
   folders and sidebar, drop files from your OS, search of the current folder tree.
 - **Trash with Put Back**: trashed items return to the folder they came from.
-- **Portfolio apps**: About, Experience, Skills, Contact, Location (Mapbox), CV, GitHub and a Chrome-style browser with a
+- **Portfolio apps**: About, Experience, Skills, Contact, Location (Mapbox), CV, GitHub and a Brave-style browser with a
   server-side proxy.
 - **Ask Claude**: a chat assistant. Visitors can bring their own Anthropic API key (kept in their browser, forwarded only
   to this site's `/api/ask` route for their messages, never stored) to talk to Claude itself, or continue as a guest and
@@ -110,23 +110,21 @@ local `.env` when needed:
 RESEND_API_KEY="your_resend_api_key_here"
 ANTHROPIC_API_KEY="your_anthropic_api_key"
 VITE_MAPBOX_TOKEN="your_mapbox_access_token"
-GOOGLE_SEARCH_KEY="your_google_api_key"
-GOOGLE_SEARCH_CX="your_programmable_search_engine_id"
+BRAVE_SEARCH_KEY="your_brave_search_api_key"   # or TAVILY_API_KEY
 ```
 
-Chrome's search box is a real search. Google can't be embedded in another site (it forbids framing and shows a captcha
-to server requests), so `/api/search` fetches results and the app renders them on a Google-style results page. With
-`GOOGLE_SEARCH_KEY` and `GOOGLE_SEARCH_CX` set, those are genuine Google results from the
-[Programmable Search JSON API](https://developers.google.com/custom-search/v1/overview) (create an engine that searches
-the entire web, then an API key with the Custom Search API enabled; 100 queries a day are free). Without them it falls
-back to DuckDuckGo, which sometimes refuses requests from hosting providers, in which case the page says search isn't
-configured.
+Brave's search box is a real search. Google can't be embedded in another site (it forbids framing and shows a captcha
+to server requests), so `/api/search` fetches results and the app renders them on a Google-style results page. Set
+`BRAVE_SEARCH_KEY` ([Brave Search API](https://brave.com/search/api): its own index, a monthly free credit, card
+required) or `TAVILY_API_KEY` ([Tavily](https://tavily.com): free tier, no card) and the page fills with real results.
+Google's Programmable Search is still supported through `GOOGLE_SEARCH_KEY` / `GOOGLE_SEARCH_CX`, but Google no longer
+lets engines created after 20 January 2026 search the whole web, so it only helps if you already had one. With no key
+the route tries Bing's HTML results page and then DuckDuckGo, which refuse most hosting providers, and the page says
+search isn't configured.
 
-Ask Claude answers guests from the portfolio data in the browser, so it works with no backend at all. Visitors who enter
-their own Anthropic API key are answered by Claude through `/api/ask` with that key (sent as a request header, never
-logged or stored). If `ANTHROPIC_API_KEY` is set, it is used for visitors without a key; when neither is available,
-everyone gets the offline answers and no error is shown. There is no public "Sign in with Claude" for third-party sites,
-which is why the key is the way in.
+Ask Claude is a stand-in for the real thing: every reply is built in the browser from the portfolio data
+(`src/lib/localAnswers.ts`), so it needs no key, no sign-in and no backend. `/api/ask` still streams a real Claude
+answer when `ANTHROPIC_API_KEY` is set and a client posts to it, but the app no longer calls it.
 
 The Snake high-score table is personal: it keeps the visitor's own best runs in `localStorage`, so there is no database.
 
@@ -142,6 +140,11 @@ npm run test:e2e
 ## Deployment
 
 The site is configured for Vercel. Production builds run TypeScript project references first, then Vite.
+
+## Credits
+
+The Android wallpapers (`public/wallpapers/android-pixel-*.jpg`) are the Pixel 9's stock wallpapers (Google). The
+Windows 7 and XP backgrounds are not shipped; drop your own copies into `public/wallpapers/` to enable them.
 
 ## Contact
 

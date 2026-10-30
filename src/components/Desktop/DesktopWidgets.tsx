@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDesktop } from '../../context/DesktopContext';
 import { useTime } from '../../hooks/useTime';
+import { WeatherIcon, type WeatherKind } from '../icons/WeatherIcons';
 import styles from './DesktopWidgets.module.css';
 
 // Manchester, UK — matches the Location app
@@ -12,17 +13,17 @@ export interface Weather {
   code: number;
 }
 
-// WMO weather interpretation codes → label + glyph
-export function describeWeather(code: number): { label: string; glyph: string } {
-  if (code === 0) return { label: 'Sunny', glyph: '☀' };
-  if (code <= 2) return { label: 'Partly cloudy', glyph: '⛅' };
-  if (code === 3) return { label: 'Cloudy', glyph: '☁' };
-  if (code <= 49) return { label: 'Foggy', glyph: '🌫' };
-  if (code <= 59) return { label: 'Drizzle', glyph: '🌦' };
-  if (code <= 69) return { label: 'Rain', glyph: '🌧' };
-  if (code <= 79) return { label: 'Snow', glyph: '🌨' };
-  if (code <= 84) return { label: 'Showers', glyph: '🌦' };
-  return { label: 'Thunder', glyph: '⛈' };
+// WMO weather interpretation codes → label + icon
+export function describeWeather(code: number): { label: string; kind: WeatherKind } {
+  if (code === 0) return { label: 'Sunny', kind: 'sun' };
+  if (code <= 2) return { label: 'Partly cloudy', kind: 'partly' };
+  if (code === 3) return { label: 'Cloudy', kind: 'cloud' };
+  if (code <= 49) return { label: 'Foggy', kind: 'fog' };
+  if (code <= 59) return { label: 'Drizzle', kind: 'drizzle' };
+  if (code <= 69) return { label: 'Rain', kind: 'rain' };
+  if (code <= 79) return { label: 'Snow', kind: 'snow' };
+  if (code <= 84) return { label: 'Showers', kind: 'showers' };
+  return { label: 'Thunder', kind: 'thunder' };
 }
 
 export function useWeather(): Weather | null {
@@ -53,7 +54,7 @@ export default function DesktopWidgets() {
   const { openApp } = useDesktop();
   const now = useTime();
   const weather = useWeather();
-  const { label, glyph } = describeWeather(weather?.code ?? 3);
+  const { label, kind } = describeWeather(weather?.code ?? 3);
   const weekday = now.toLocaleDateString('en-GB', { weekday: 'long' });
 
   return (
@@ -67,7 +68,7 @@ export default function DesktopWidgets() {
         <small>MANCHESTER</small>
         <strong>{weather ? `${weather.temp}°` : '—'}</strong>
         <span>
-          {glyph} {label}
+          <WeatherIcon kind={kind} size={16} /> {label}
         </span>
         <span className={styles.sub}>Current conditions</span>
       </button>

@@ -322,7 +322,7 @@ export const ANDROID_ICONS = {
   shortcuts: <GboardIcon />,
   trashEmpty: <AndroidBinIcon />,
   trashFull: <AndroidBinIcon full />,
-  safari: <DiscImage src="/icons/chrome.png" scale={0.66} />,
+  safari: <DiscImage src="/icons/brave-lion.png" scale={0.6} />,
   github: <DiscImage src="/icons/github-mark.png" scale={0.62} />,
   askjosh: <DiscImage src="/icons/claude.png" bg="#d97757" scale={1.02} />,
   snake: <SnakeLcdIcon round />,

@@ -1,0 +1,106 @@
+.shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  touch-action: none;
+}
+
+/* The bottom edge that starts the system gesture */
+.edge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 36px;
+  z-index: 30;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Android: translucent system bars that slide in over the game ───────── */
+.droidStatus {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: calc(28px + env(safe-area-inset-top, 0px));
+  padding: env(safe-area-inset-top, 0px) 20px 0 28px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font: 500 14px var(--font-ui);
+  transform: translateY(-100%);
+  transition: transform 200ms ease;
+  pointer-events: none;
+}
+.droidStatusIcons {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.droidNav {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  height: calc(48px + env(safe-area-inset-bottom, 0px));
+  padding: 0 40px env(safe-area-inset-bottom, 0px);
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  transform: translateY(100%);
+  transition: transform 200ms ease;
+  pointer-events: none;
+}
+.droidNav button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 48px;
+  border: 0;
+  background: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.droidNav button:active {
+  opacity: 0.6;
+}
+
+.droidStatus.visible,
+.droidNav.visible {
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.droidNav.visible {
+  /* the bar sits over the edge strip while it is showing, so its buttons get the taps */
+  z-index: 40;
+}
+
+/* ── iOS: the home indicator, hidden while the game is being played ──────── */
+.homeIndicator {
+  position: absolute;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+  z-index: 20;
+  width: 134px;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.85);
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 240ms ease;
+  pointer-events: none;
+}
+.homeIndicator.visible {
+  opacity: 1;
+}

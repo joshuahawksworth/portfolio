@@ -23,11 +23,11 @@ describe('SafariApp search', () => {
     );
   });
 
-  it('renders a search home instead of embedding google.com', () => {
+  it('renders a Brave Search home instead of embedding a search engine', () => {
     render(<SafariApp />);
 
-    expect(screen.getByLabelText('Google Search')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Search Google')).toBeInTheDocument();
+    expect(screen.getByAltText('Brave Search')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Search the web privately…')).toBeInTheDocument();
     expect(screen.queryByTitle('Browser')).not.toBeInTheDocument();
   });
 
@@ -35,7 +35,7 @@ describe('SafariApp search', () => {
     const user = userEvent.setup();
     render(<SafariApp />);
 
-    await user.type(screen.getByPlaceholderText('Search Google'), 'portfolio testing');
+    await user.type(screen.getByPlaceholderText('Search the web privately…'), 'portfolio testing');
     await user.click(screen.getByRole('button', { name: 'Search' }));
 
     expect(await screen.findByText('Portfolio Testing Guide')).toBeInTheDocument();
