@@ -8,8 +8,12 @@ import styles from './MobileDesktop.module.css';
 /**
  * Phone status bar. iOS: time left, cellular / Wi-Fi / battery glyphs right.
  * Android: time left, Wi-Fi / signal / battery (with percentage) right, Material glyphs.
+ * Over the wallpaper it colours itself; over an app, `tone` says which surface it sits on.
  */
-export default function StatusBar({ onTap }: { onTap?: () => void } = {}) {
+export default function StatusBar({
+  onTap,
+  tone,
+}: { onTap?: () => void; tone?: 'light' | 'dark' } = {}) {
   const now = useTime();
   const { settings, os } = useSettings();
   const time = formatTime(now, { clock24h: settings.clock24h });
@@ -18,6 +22,7 @@ export default function StatusBar({ onTap }: { onTap?: () => void } = {}) {
   return (
     <div
       className={`${styles.statusBar} ${android ? styles.statusBarDroid : ''}`}
+      data-tone={tone}
       role={onTap ? 'button' : 'presentation'}
       aria-label={onTap ? 'Open notifications' : undefined}
       onClick={onTap}

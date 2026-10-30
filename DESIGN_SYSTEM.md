@@ -154,9 +154,9 @@ translucent nav bars). The full token list and reference measurements live in
 
 ## Mobile Rules
 
-- Mobile is an iOS-style home screen (status bar, widget, squircle icon grid, Search pill, floating glass dock) with full-screen panels that use an iOS nav bar. Do not reuse desktop windows on mobile.
+- Mobile is an iOS-style home screen (status bar, widget, squircle icon grid, Search pill, floating glass dock). Apps open full screen inside `PhoneShell`, which draws the status bar above them and the OS's own way out below: the three-button navigation bar on Android, the home indicator (swipe up to leave) on iOS. There is no sheet header or close button, so an app that needs a title draws its own. Games are immersive: the bars hide and come back on the edge gesture. Do not reuse desktop windows on mobile.
 - Touch targets should be at least `40px` high, preferably larger for game controls.
-- Use safe-area insets for status bars, bottom docks, and panel headers.
+- Use safe-area insets for status bars, bottom docks and navigation bars.
 - Mobile app panels should be dense but readable. Avoid hover-only affordances.
 - If adding a desktop app that should be available on mobile, provide mobile-specific sizing and controls rather than relying on the desktop layout to shrink.
 

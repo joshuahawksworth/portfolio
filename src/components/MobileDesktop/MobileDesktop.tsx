@@ -25,7 +25,7 @@ import { AboutLogoIcon } from '../icons/AboutLogoIcon';
 import { DesktopProvider, useDesktop } from '../../context/DesktopContext';
 import { useSettings } from '../../context/SettingsContext';
 import { appIconFor } from '../../theme/platformIcons';
-import { appLabelFor, appTitleFor } from '../../theme/platform';
+import { appLabelFor } from '../../theme/platform';
 import { formatShortDate } from '../../lib/clock';
 import { openCv } from '../../lib/cv';
 import { describeWeather, useWeather } from '../Desktop/DesktopWidgets';
@@ -33,7 +33,7 @@ import { WeatherIcon } from '../icons/WeatherIcons';
 import { DisplayOverlays } from '../SystemUI/SystemPanels';
 import DynamicWallpaper, { isDynamicDark, useDynamicLook } from '../Desktop/DynamicWallpaper';
 import StatusBar from './StatusBar';
-import ImmersiveShell from './ImmersiveShell';
+import PhoneShell from './PhoneShell';
 import NotificationShade from './NotificationShade';
 import NotificationBanners from '../SystemUI/NotificationBanners';
 import { useWelcomeNotifications } from '../../hooks/useWelcomeNotifications';
@@ -584,10 +584,10 @@ const BASE_ITEMS = [
 const DOCK_APPS_IOS = ['about', 'experience', 'contact', 'settings'];
 const DOCK_APPS_ANDROID = ['about', 'experience', 'contact', 'github', 'settings'];
 
-/** Apps with a dark canvas get a dark sheet header so the bar doesn't glare. */
+/** Apps with a dark canvas, so the system bars draw white (see PhoneShell). */
 const DARK_APPS = new Set(['calculator', 'terminal']);
-/** Apps shown full screen with no sheet header (see ImmersiveShell). */
-const IMMERSIVE_APPS = new Set(['doom']);
+/** Games: immersive, the system bars hide over them (see PhoneShell). */
+const GAMES = new Set(['doom']);
 
 type Page = Array<string | null>;
 
@@ -768,9 +768,6 @@ function MobileInner() {
   }
 
   const ActiveComp = activeWindow ? APP_COMPONENTS[activeWindow.appId] : null;
-  // Games take the whole screen with no sheet header; the OS's own gesture or bar leaves them.
-  const immersive = activeWindow ? IMMERSIVE_APPS.has(activeWindow.appId) : false;
-  const activeTitle = activeWindow ? appTitleFor(activeWindow.appId, activeWindow.title, os) : '';
   const label = (id: string) => appLabelFor(id, APP_LABELS[id] ?? id, os);
 
   const searchBar = (
@@ -962,61 +959,40 @@ function MobileInner() {
       />
 
       <div className={`${styles.panel} ${activeWindow ? styles.panelOpen : ''}`}>
-        {activeWindow && immersive && ActiveComp && (
-          <ImmersiveShell onExit={() => closeWindow(activeWindow.id)}>
-            <ActiveComp props={activeWindow.props} />
-          </ImmersiveShell>
-        )}
-        {activeWindow && !immersive && (
-          <>
-            <div
-              className={`${styles.panelHeader} ${DARK_APPS.has(activeWindow.appId) && !(android && activeWindow.appId === 'calculator') ? styles.panelHeaderDark : ''}`}
-            >
-              <button
-                className={styles.closeBtn}
-                onClick={() => closeWindow(activeWindow.id)}
-                aria-label={android ? 'Back' : 'Close'}
+        {activeWindow && (
+          <PhoneShell
+            game={GAMES.has(activeWindow.appId)}
+            // Google Calculator is light, so its bars are too
+            dark={
+              DARK_APPS.has(activeWindow.appId) && !(android && activeWindow.appId === 'calculator')
+            }
+            onExit={() => closeWindow(activeWindow.id)}
+          >
+            {GAMES.has(activeWindow.appId) && ActiveComp ? (
+              <ActiveComp props={activeWindow.props} />
+            ) : (
+              <div
+                className={[
+                  styles.panelBody,
+                  activeWindow.appId === 'snake' ? styles.panelBodySnake : '',
+                  activeWindow.appId === 'calculator' ? styles.panelBodyCalculator : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
               >
-                {android ? (
-                  <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-                    <path
-                      d="M20 11H7.8l5.6-5.6L12 4l-8 8 8 8 1.4-1.4L7.8 13H20z"
-                      fill="currentColor"
-                    />
-                  </svg>
+                {ActiveComp ? (
+                  <ActiveComp props={activeWindow.props} />
                 ) : (
-                  <svg viewBox="0 0 8 8" width="8" height="8" aria-hidden="true">
-                    <path
-                      d="M1.5 1.5L6.5 6.5M6.5 1.5L1.5 6.5"
-                      stroke="rgba(0,0,0,0.6)"
-                      strokeWidth="1.3"
-                      strokeLinecap="round"
-                    />
-                  </svg>
+                  <div className={styles.unavailable}>
+                    <strong>{activeWindow.title}</strong>
+                    <span>
+                      This app isn’t available on mobile yet. Try it on a desktop browser.
+                    </span>
+                  </div>
                 )}
-              </button>
-              <span className={styles.panelTitle}>{activeTitle}</span>
-              <div className={styles.headerSpacer} />
-            </div>
-            <div
-              className={[
-                styles.panelBody,
-                activeWindow.appId === 'snake' ? styles.panelBodySnake : '',
-                activeWindow.appId === 'calculator' ? styles.panelBodyCalculator : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              {ActiveComp ? (
-                <ActiveComp props={activeWindow.props} />
-              ) : (
-                <div className={styles.unavailable}>
-                  <strong>{activeWindow.title}</strong>
-                  <span>This app isn’t available on mobile yet. Try it on a desktop browser.</span>
-                </div>
-              )}
-            </div>
-          </>
+              </div>
+            )}
+          </PhoneShell>
         )}
       </div>
     </div>

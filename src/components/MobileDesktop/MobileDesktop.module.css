@@ -528,93 +528,6 @@
   border-radius: 0;
 }
 
-/* ── Sheet header: frosted bar, macOS close light, centred title ─────── */
-.panelHeader {
-  flex-shrink: 0;
-  height: calc(46px + env(safe-area-inset-top, 0px));
-  padding: env(safe-area-inset-top, 0px) 14px 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(248, 242, 230, 0.82);
-  backdrop-filter: blur(30px) saturate(1.6);
-  -webkit-backdrop-filter: blur(30px) saturate(1.6);
-  border-bottom: 1px solid var(--line);
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.5);
-  z-index: 2;
-}
-
-.panelHeaderDark {
-  background: rgba(28, 28, 30, 0.92);
-  border-bottom-color: rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.06);
-}
-
-/* macOS traffic-light close button, sized for a thumb */
-.closeBtn {
-  width: 44px;
-  height: 44px;
-  margin-left: -14px;
-  padding: 0;
-  border: none;
-  background: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  flex-shrink: 0;
-}
-
-.closeBtn svg {
-  width: 14px;
-  height: 14px;
-  padding: 3px;
-  box-sizing: border-box;
-  border-radius: 50%;
-  background: #ff5f57;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-.closeBtn svg path {
-  opacity: 0;
-  transition: opacity 120ms ease;
-}
-
-.closeBtn:active svg path {
-  opacity: 1;
-}
-
-.closeBtn:active svg {
-  filter: brightness(0.85);
-}
-
-.panelTitle {
-  flex: 1;
-  min-width: 0;
-  padding: 0 8px;
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--text-strong);
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.panelHeaderDark .panelTitle {
-  color: #fff;
-}
-
-/* Balances the close button so the title stays centred */
-.headerSpacer {
-  width: 30px;
-  flex-shrink: 0;
-}
-
 .panelBody {
   flex: 1;
   min-height: 0;
@@ -879,60 +792,10 @@
   background: rgba(28, 27, 31, 0.6);
 }
 
-/* Material 3 app sheet: left-aligned title, back arrow, tonal surface */
+/* Material 3 app sheet: tonal surface */
 .android .panel {
   background: var(--panel-solid);
   border-radius: 28px 28px 0 0;
-}
-
-.android .panelHeader {
-  height: calc(64px + env(safe-area-inset-top, 0px));
-  padding-left: 4px;
-  background: #eef2f8;
-  border-bottom: 0;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-.android .panelHeaderDark {
-  background: rgba(28, 28, 30, 0.96);
-}
-
-.android .closeBtn {
-  margin-left: 0;
-  width: 48px;
-  height: 48px;
-  color: #1c1b1f;
-}
-
-.android .closeBtn svg {
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border-radius: 0;
-  background: transparent;
-  border: 0;
-  box-shadow: none;
-}
-
-.android .closeBtn svg path {
-  opacity: 1;
-}
-
-.android .panelHeaderDark .closeBtn {
-  color: #fff;
-}
-
-.android .panelTitle {
-  text-align: left;
-  font-size: 22px;
-  font-weight: 400;
-  padding-left: 4px;
-}
-
-.android .headerSpacer {
-  width: 48px;
 }
 
 /* Dark Pixel wallpaper: flip the launcher text back to white */
@@ -1112,4 +975,16 @@
 
 .shadeDroid .shadeHandle {
   background: rgba(0, 0, 0, 0.35);
+}
+
+/* The status bar over an open app follows the app's surface, not the wallpaper */
+.panel .statusBar[data-tone='light'],
+.panel .statusBar[data-tone='light'] .statusIcons {
+  color: #1c1b1f;
+  text-shadow: none;
+}
+.panel .statusBar[data-tone='dark'],
+.panel .statusBar[data-tone='dark'] .statusIcons {
+  color: #fff;
+  text-shadow: none;
 }
