@@ -63,6 +63,73 @@ export function processHtml(html: string, target: string): string {
 
 export const FETCH_TIMEOUT_MS = 12_000;
 
+/**
+ * Web apps the proxy cannot show: their HTML arrives, but the scripts then call the site's
+ * own APIs from this origin and are refused, so the page sits on its loading skeleton; some
+ * (Reddit) also wall off data-centre fetches outright. Matched on the host and its subdomains.
+ */
+const APP_ONLY: Record<string, string> = {
+  'youtube.com': 'YouTube',
+  'reddit.com': 'Reddit',
+  'x.com': 'X',
+  'twitter.com': 'X',
+  'instagram.com': 'Instagram',
+  'facebook.com': 'Facebook',
+  'tiktok.com': 'TikTok',
+  'linkedin.com': 'LinkedIn',
+  'mail.google.com': 'Gmail',
+};
+
+/** The web app's name when the target is one the proxy cannot render, else null. */
+export function appOnlyName(url: URL): string | null {
+  const host = url.hostname.toLowerCase();
+  for (const [domain, name] of Object.entries(APP_ONLY)) {
+    if (host === domain || host.endsWith(`.${domain}`)) return name;
+  }
+  return null;
+}
+
+/** The video id of a YouTube watch, Shorts or youtu.be address, else null. */
+export function youtubeVideoId(url: URL): string | null {
+  const host = url.hostname.toLowerCase().replace(/^(www|m)\./, '');
+  const id =
+    host === 'youtu.be'
+      ? url.pathname.slice(1)
+      : host === 'youtube.com'
+        ? (url.pathname === '/watch' && url.searchParams.get('v')) ||
+          url.pathname.match(/^\/(?:shorts|embed|live)\/([^/?#]+)/)?.[1]
+        : null;
+  return id && /^[\w-]{11}$/.test(id) ? id : null;
+}
+
+/** YouTube's own embed player filling the frame: the one YouTube page built to run elsewhere. */
+export function youtubePlayerPage(id: string): string {
+  return `<!doctype html><html><head><meta charset="utf-8"><title>YouTube</title>
+<style>html,body{margin:0;height:100%;background:#0f0f0f}iframe{display:block;width:100%;height:100%;border:0}</style>
+</head><body><iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0" title="YouTube video player"
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></body></html>`;
+}
+
+/**
+ * A page to send instead of fetching the target, or null to fetch it: YouTube videos get the
+ * embed player, app-only sites a straight answer rather than a skeleton that never fills.
+ */
+export function shortcutPage(target: string): string | null {
+  const url = new URL(target);
+  const video = youtubeVideoId(url);
+  if (video) return youtubePlayerPage(video);
+  const name = appOnlyName(url);
+  if (name) {
+    return errorPage(
+      target,
+      `${name} can't run inside this browser`,
+      `${name} is a web app that only works in a full browser: its pages load here but it refuses to talk to a site it isn't running on. Open it in a new tab instead.`,
+      'ERR_APP_ONLY'
+    );
+  }
+  return null;
+}
+
 export function isBlockedTarget(url: URL): boolean {
   if (url.protocol !== 'http:' && url.protocol !== 'https:') return true;
   const host = url.hostname.toLowerCase();
