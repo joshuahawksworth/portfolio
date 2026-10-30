@@ -792,10 +792,13 @@
   background: rgba(28, 27, 31, 0.6);
 }
 
-/* Material 3 app sheet: tonal surface */
+/* Material 3 app sheet: tonal surface, rounded while it slides up, square once open */
 .android .panel {
   background: var(--panel-solid);
   border-radius: 28px 28px 0 0;
+}
+.android .panelOpen {
+  border-radius: 0;
 }
 
 /* Dark Pixel wallpaper: flip the launcher text back to white */
