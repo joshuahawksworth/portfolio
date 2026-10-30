@@ -537,8 +537,10 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
   }
   function reload() {
     setReloadKey((k) => k + 1);
-    // Search and the plain site render locally; only a framed page has anything to wait for
-    setLoading(!showingSearch && !showingPlainSite);
+    if (showingSearch) return;
+    setLoading(true);
+    // The plain site renders locally: redraw it from the top after a moment, like a reload
+    if (showingPlainSite) window.setTimeout(() => setLoading(false), 400);
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -656,14 +658,14 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
         </a>
       </div>
 
-      {loading && !showingSearch && !showingPlainSite && (
+      {loading && !showingSearch && (
         <div className={styles.loadingBar} data-essential-motion="">
           <div className={styles.loadingFill} />
         </div>
       )}
 
       <div className={styles.viewport}>
-        {loading && !showingSearch && !showingPlainSite && (
+        {loading && !showingSearch && (
           <div
             className={styles.loadingOverlay}
             role="status"
@@ -675,7 +677,7 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
           </div>
         )}
         {showingPlainSite ? (
-          <PlainPortfolioSite />
+          <PlainPortfolioSite key={reloadKey} />
         ) : showingSearch && searchQuery ? (
           <SearchResults key={reloadKey} query={searchQuery} onOpen={navigate} onSearch={search} />
         ) : showingSearch ? (
