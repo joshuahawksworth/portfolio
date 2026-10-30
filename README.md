@@ -41,8 +41,8 @@ the Finder behaves like the real one rather than a list of links.
   selection, ⌘A / ⌘⌫ / ⇧⌘N shortcuts, back and forward history, breadcrumb path bar, icon and list views, drag into
   folders and sidebar, drop files from your OS, search of the current folder tree.
 - **Trash with Put Back**: trashed items return to the folder they came from.
-- **Portfolio apps**: About, Experience, Skills, Contact, Location (Mapbox), CV, GitHub and a Brave-style browser with a
-  server-side proxy.
+- **Portfolio apps**: About, Experience, Skills, Contact, Location (Mapbox), CV, GitHub, a Calendar (the desktop date
+  widget opens it) and a Brave-style browser with a server-side proxy.
 - **Ask Claude**: a stand-in for the Claude app, dressed like the real one (ivory, serif greeting, the Claude composer,
   the collapsible sidebar on desktop and the drawer on phones). Every reply is built from the portfolio data in the
   browser: no key, no sign-in, no backend.

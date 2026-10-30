@@ -556,6 +556,7 @@ const NATIVE_APPS = new Set([
   'location',
   'shortcuts',
   'appstore',
+  'calendar',
 ]);
 const SELF_LOADING_APPS = new Set(['doom']);
 const launchedOnce = new Set<string>();
