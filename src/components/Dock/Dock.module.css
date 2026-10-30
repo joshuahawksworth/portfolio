@@ -254,23 +254,24 @@
     filter 150ms ease;
 }
 
-/* macOS launch bounce: the icon keeps hopping while the app launches. Each hop is a parabola
-   (decelerating on the way up, accelerating down) to about an icon's height, with a beat on
-   the ground before the next. Desktop clears `.bouncing` on an animationiteration once the
-   app is up, so the icon always lands before it stops. */
+/* macOS launch bounce: the icon keeps hopping while the app launches. The numbers are a
+   frame-tracked measurement of the real Dock (opendock PR #52): each hop is 0.65 s, rises to
+   half the icon's height, and follows a gravity parabola (fastest leaving and meeting the
+   ground, hanging at the top) with no pause between hops. Up is ease-out-quad and down
+   ease-in-quad, which together are exactly that parabola. Desktop clears `.bouncing` on an
+   animationiteration once the app is up, so the icon always lands before it stops. */
 .bouncing {
-  animation: dockBounce 600ms infinite;
+  animation: dockBounce 650ms infinite;
 }
 
 @keyframes dockBounce {
-  0%,
-  8% {
+  0% {
     transform: translateY(0);
-    animation-timing-function: cubic-bezier(0.2, 0.55, 0.4, 1);
+    animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
-  54% {
-    transform: translateY(calc(var(--app-icon-size, 50px) * -0.8));
-    animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.45);
+  50% {
+    transform: translateY(calc(var(--app-icon-size, 50px) * -0.5));
+    animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53);
   }
   100% {
     transform: translateY(0);

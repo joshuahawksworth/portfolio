@@ -535,7 +535,7 @@ interface CtxMenu {
 
 // ── Constants ──────────────────────────────────────────────────────────────
 // A launching app bounces in the Dock until it is up, as on macOS: the first launch of an
-// app in a session is a cold start of 1.2–3.2 s (two to six hops), a relaunch 0.35–0.9 s. The
+// app in a session is a cold start of 1.2–3.2 s (two to five hops), a relaunch 0.35–0.9 s. The
 // window opens at that moment and the Dock drops the bounce at the end of the hop in flight,
 // so how many times it bounces varies with the launch. The long timer only covers a missing
 // animation event (animations disabled, tab hidden).
