@@ -4,6 +4,7 @@ import { openCv } from '../../lib/cv';
 
 export const DOCK_DEFAULT_ORDER = [
   'github',
+  'calendar',
   'safari',
   'askjosh',
   'about',
@@ -31,7 +32,6 @@ export type DockKey =
   | 'androidstudio'
   | 'githubdesktop'
   | 'outlook'
-  | 'calendar'
   | 'postman'
   | 'word'
   | 'wallpaper';
@@ -77,7 +77,6 @@ export const DOCK_DESKTOP_ONLY = new Set([
   'androidstudio',
   'githubdesktop',
   'outlook',
-  'calendar',
   'postman',
   'word',
 ]);
