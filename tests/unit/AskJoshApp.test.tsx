@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import AskJoshApp from '../../src/components/apps/AskJoshApp';
 
-const PLACEHOLDER = 'Ask anything about Josh…';
+const PLACEHOLDER = 'How can I help you today?';
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -12,7 +12,7 @@ describe('AskJoshApp', () => {
     render(<AskJoshApp />);
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(screen.getByText('Where should we begin?')).toBeInTheDocument();
+    expect(screen.getByText(/^Good (morning|afternoon|evening), Joshua$/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: "Summarise Josh's experience" })).toBeInTheDocument();
     expect(screen.getByPlaceholderText(PLACEHOLDER)).toBeInTheDocument();
   });
@@ -39,7 +39,7 @@ describe('AskJoshApp', () => {
     const bold = await screen.findByText('Senior Full Stack Developer', {}, { timeout: 4000 });
     expect(bold.tagName).toBe('STRONG');
     expect(await screen.findAllByRole('listitem', {}, { timeout: 4000 })).not.toHaveLength(0);
-    expect(screen.getByText('Your chats')).toBeInTheDocument();
+    expect(screen.getByText('Recents')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Summarise Josh's experience/ })).toBeInTheDocument();
   }, 8000);
 });

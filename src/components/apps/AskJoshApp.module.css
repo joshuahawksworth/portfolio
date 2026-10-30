@@ -1,108 +1,135 @@
-/* ── Ask Josh — macOS Golden Gate (light, warm) ─────────────────────────── */
+/* ── Ask Claude: the Claude app's own look (ivory, serif greeting, terracotta) ── */
 .root {
+  --cl-bg: #faf9f5;
+  --cl-side: #f5f4ee;
+  --cl-card: #fdfcfa;
+  --cl-text: #3d3929;
+  --cl-muted: #73706a;
+  --cl-line: rgba(61, 57, 41, 0.12);
+  --cl-hover: rgba(61, 57, 41, 0.06);
+  --cl-bubble: #f0eee6;
+  --cl-brand: #c96442;
+  --cl-brand-hover: #b85a3a;
+  --cl-serif: 'Tiempos Text', Charter, 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+
   position: relative;
-  display: grid;
-  /* `auto` collapses to nothing when the sidebar is display: none — a container query
-     cannot restyle the container itself, so the column count can't change there */
-  grid-template-columns: auto minmax(0, 1fr);
+  display: flex;
   height: 100%;
   min-height: 0;
-  background: var(--panel);
-  color: var(--text);
-  font-family: var(--font-ui);
+  background: var(--cl-bg);
+  color: var(--cl-text);
+  font-family:
+    'Styrene B',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+  font-size: 15px;
   overflow: hidden;
-  container-type: inline-size;
+}
+
+/* Icon-only buttons: a quiet round hit target that tints on hover */
+.roundBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--cl-muted);
+  cursor: pointer;
+}
+.roundBtn:hover:not(:disabled) {
+  background: var(--cl-hover);
+  color: var(--cl-text);
+}
+.roundBtn:disabled {
+  cursor: default;
 }
 
 /* ── Sidebar ── */
 .sidebar {
-  display: flex;
+  display: none;
   flex-direction: column;
-  width: 200px;
+  width: 260px;
   min-height: 0;
-  padding: 13px 9px;
-  background: var(--glass);
-  -webkit-backdrop-filter: blur(36px) saturate(1.6);
-  backdrop-filter: blur(36px) saturate(1.6);
-  border-right: 1px solid var(--line);
+  padding: 10px 8px 12px;
+  background: var(--cl-side);
+  border-right: 1px solid var(--cl-line);
+  box-sizing: border-box;
+}
+.sidebarShown {
+  display: flex;
+}
+.sidebarTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px 10px 10px;
+}
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--cl-serif);
+  font-size: 19px;
+  letter-spacing: -0.01em;
+}
+.wordmark img {
+  display: block;
 }
 
-.newChat,
+.navRow,
 .chatRow {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   width: 100%;
   padding: 7px 10px;
   border: none;
-  border-radius: var(--radius-control);
+  border-radius: 8px;
   background: none;
-  color: var(--text);
+  color: var(--cl-text);
   font: inherit;
-  font-size: 13px;
+  font-size: 14px;
   text-align: left;
   cursor: pointer;
-  transition: background 100ms;
 }
-.newChat:hover,
+.navRow:hover,
 .chatRow:hover {
-  background: rgba(0, 0, 0, 0.03);
+  background: var(--cl-hover);
 }
-.newChat {
-  font-weight: 500;
-}
-
-.rowIcon {
+.plusDisc,
+.navIcon {
   display: inline-flex;
-  width: 16px;
-  height: 16px;
-  color: var(--accent);
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
 }
-
-.search {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 26px;
-  margin: 6px 2px 0;
-  padding: 0 8px;
-  background: rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-control);
-  color: var(--muted);
-  transition:
-    border-color 120ms,
-    box-shadow 120ms;
+.plusDisc {
+  border-radius: 50%;
+  background: var(--cl-brand);
+  color: #fff;
 }
-.search:focus-within {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
-}
-.searchInput {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  outline: none;
-  background: none;
-  color: var(--text);
-  font: inherit;
-  font-size: 12px;
-}
-.searchInput::placeholder {
-  color: var(--muted-2);
-}
-.searchInput::-webkit-search-cancel-button {
-  -webkit-appearance: none;
+.navIcon {
+  color: var(--cl-muted);
 }
 
 .sectionLabel {
-  padding: 15px 10px 7px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--muted);
+  padding: 18px 10px 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--cl-muted);
 }
-
 .chatList {
   flex: 1;
   min-height: 0;
@@ -113,85 +140,84 @@
 }
 .chatListEmpty {
   padding: 4px 10px;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.4;
-  color: var(--muted-2);
+  color: var(--cl-muted);
 }
-.chatRowActive {
-  background: rgba(0, 0, 0, 0.05);
-  font-weight: 600;
-}
-.chatRowActive:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
-.chatRow .rowIcon {
-  color: var(--muted);
-}
-.chatRowTitle {
-  flex: 1;
-  min-width: 0;
+.chatRow {
+  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.chatRowActive,
+.chatRowActive:hover {
+  background: rgba(61, 57, 41, 0.09);
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--cl-line);
+}
+.accountAvatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #6c5dac;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+.accountName {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  line-height: 1.25;
+}
+.accountName small {
+  font-size: 11.5px;
+  color: var(--cl-muted);
+}
 
 /* ── Main pane ── */
 .main {
+  flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
   min-height: 0;
-  background: var(--panel);
 }
-
 .header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  height: 44px;
-  padding: 0 14px;
+  gap: 6px;
+  height: 48px;
+  padding: 0 10px;
   flex-shrink: 0;
 }
-
-.modelChip {
+.headerTitle {
+  flex: 1;
+  min-width: 0;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 26px;
-  padding: 0 9px 0 7px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-control);
-  background: rgba(0, 0, 0, 0.05);
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 600;
-  user-select: none;
-}
-.modelChipIcon {
-  display: inline-flex;
-  width: 16px;
-  height: 16px;
-  align-items: center;
   justify-content: center;
-  border-radius: 5px;
-  background: linear-gradient(180deg, #ffd39a, #e0862c);
-  color: #fff;
+  gap: 4px;
+  padding: 0 6px;
+  font-size: 14px;
+  color: var(--cl-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
-.headerNewChat {
-  display: none;
-  width: 28px;
-  height: 28px;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  border-radius: var(--radius-control);
-  background: none;
-  color: var(--accent);
-  cursor: pointer;
-}
-.headerNewChat:hover {
-  background: var(--hover);
+.root:not([data-narrow]) .headerTitle {
+  justify-content: flex-start;
 }
 
 /* ── Messages ── */
@@ -208,29 +234,28 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
-  padding: 24px 28px;
-  max-width: 560px;
+  gap: 22px;
+  width: 100%;
+  max-width: 720px;
+  padding: 24px 28px 40px;
+  box-sizing: border-box;
   text-align: center;
 }
 .heroIcon {
   display: block;
-  width: 44px;
-  height: 44px;
-  border-radius: 22.5%;
-  object-fit: cover;
-  background: transparent;
-  color: #fff;
-  box-shadow:
-    0 6px 16px rgba(224, 134, 44, 0.32),
-    inset 0 1px rgba(255, 255, 255, 0.45);
+  width: 40px;
+  height: 40px;
 }
 .heroTitle {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 26px;
-  font-weight: 600;
-  color: var(--text-strong);
+  margin: -4px 0 2px;
+  font-family: var(--cl-serif);
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--cl-text);
+}
+.hero .composer {
+  width: 100%;
 }
 .suggestions {
   display: flex;
@@ -239,293 +264,300 @@
   gap: 8px;
 }
 .suggestion {
-  padding: 7px 13px;
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.035);
-  color: var(--text);
+  padding: 7px 14px;
+  border: 1px solid var(--cl-line);
+  border-radius: 10px;
+  background: none;
+  color: var(--cl-muted);
   font: inherit;
-  font-size: 12.5px;
+  font-size: 13.5px;
   cursor: pointer;
-  transition:
-    background 100ms,
-    border-color 100ms;
 }
 .suggestion:hover:not(:disabled) {
-  background: rgba(0, 0, 0, 0.07);
+  background: var(--cl-hover);
+  color: var(--cl-text);
 }
 .suggestion:disabled {
-  color: var(--muted-2);
   cursor: default;
 }
 
 .thread {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 22px;
   width: 100%;
-  max-width: 680px;
+  max-width: 760px;
   margin: 0 auto;
-  padding: 8px 22px 18px;
+  padding: 8px 24px 20px;
   box-sizing: border-box;
 }
-
 .userRow {
   display: flex;
   justify-content: flex-end;
 }
 .userBubble {
   max-width: 78%;
-  padding: 8px 14px;
+  padding: 10px 16px;
   border-radius: 18px;
-  background: var(--accent);
-  color: #fff;
-  font-size: 13.5px;
+  background: var(--cl-bubble);
+  color: var(--cl-text);
+  font-size: 15px;
   line-height: 1.5;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-
 .assistantRow {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  flex-direction: column;
+  gap: 6px;
 }
-.avatar {
-  display: block;
-  width: 22px;
-  height: 22px;
-  object-fit: contain;
-  flex-shrink: 0;
-  margin-top: 1px;
-  border-radius: 50%;
-  background: linear-gradient(180deg, #ffd39a, #e0862c);
-  color: #fff;
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.4);
+.actions {
+  display: flex;
+  gap: 2px;
+  margin-left: -8px;
 }
-.assistantBody {
-  flex: 1;
-  min-width: 0;
-  padding-top: 2px;
+.actions .roundBtn {
+  width: 28px;
+  height: 28px;
 }
 
 .markdown {
-  font-size: 13.5px;
-  line-height: 1.55;
-  color: var(--text);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--cl-text);
   overflow-wrap: anywhere;
 }
 .markdown p {
-  margin: 0 0 10px;
+  margin: 0 0 12px;
 }
 .markdown ul,
 .markdown ol {
-  margin: 0 0 10px;
-  padding-left: 20px;
+  margin: 0 0 12px;
+  padding-left: 22px;
 }
 .markdown li {
-  margin: 2px 0;
+  margin: 3px 0;
 }
 .markdown > :last-child {
   margin-bottom: 0;
 }
 .markdown strong {
   font-weight: 600;
-  color: var(--text-strong);
 }
 .markdown code {
   padding: 1px 5px;
   border-radius: 4px;
-  background: var(--panel-2);
+  background: var(--cl-bubble);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 13px;
 }
 .markdown a {
-  color: var(--accent);
-  text-decoration: none;
-}
-.markdown a:hover {
+  color: var(--cl-text);
   text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .note {
-  display: inline-block;
+  align-self: flex-start;
   padding: 8px 12px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--cl-line);
   border-radius: 10px;
-  background: var(--panel-2);
-  color: var(--muted);
-  font-size: 12.5px;
+  background: var(--cl-bubble);
+  color: var(--cl-muted);
+  font-size: 13.5px;
   line-height: 1.45;
 }
-
-.typing {
-  display: inline-flex;
-  gap: 4px;
-  padding: 8px 0;
+.thinking {
+  width: 22px;
+  height: 22px;
+  margin: 6px 0;
+  animation: breathe 1.4s ease-in-out infinite;
 }
-.typing span {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--muted-2);
-  animation: pulse 1.2s ease-in-out infinite;
-}
-.typing span:nth-child(2) {
-  animation-delay: 0.15s;
-}
-.typing span:nth-child(3) {
-  animation-delay: 0.3s;
-}
-@keyframes pulse {
+@keyframes breathe {
   0%,
-  80%,
   100% {
-    opacity: 0.35;
-    transform: translateY(0);
+    opacity: 0.45;
+    transform: scale(0.92);
   }
-  40% {
+  50% {
     opacity: 1;
-    transform: translateY(-2px);
+    transform: scale(1);
   }
 }
 
-/* ── Composer ── */
+/* ── Composer: the Claude card, text above a row of controls ── */
 .composerWrap {
   flex-shrink: 0;
   width: 100%;
-  max-width: 680px;
+  max-width: 760px;
   margin: 0 auto;
-  padding: 6px 22px 12px;
+  padding: 6px 24px 14px;
   box-sizing: border-box;
 }
 .composer {
   display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  padding: 6px 6px 6px 14px;
-  border: 1px solid var(--line-strong);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.6);
-  transition:
-    border-color 120ms,
-    box-shadow 120ms;
+  flex-direction: column;
+  padding: 12px 12px 10px 16px;
+  border: 1px solid var(--cl-line);
+  border-radius: 16px;
+  background: var(--cl-card);
+  box-shadow: 0 2px 12px rgba(61, 57, 41, 0.08);
+  text-align: left;
+  transition: border-color 120ms;
 }
 .composer:focus-within {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  border-color: rgba(61, 57, 41, 0.24);
 }
 .textarea {
-  flex: 1;
-  min-width: 0;
-  max-height: 132px;
-  padding: 6px 0;
+  width: 100%;
+  max-height: 180px;
+  padding: 2px 0 8px;
   border: none;
   outline: none;
   background: none;
   resize: none;
-  color: var(--text);
+  color: var(--cl-text);
   font: inherit;
-  font-size: 13.5px;
-  line-height: 1.45;
+  font-size: 15px;
+  line-height: 1.5;
+  box-sizing: border-box;
 }
 .textarea::placeholder {
-  color: var(--muted-2);
+  color: var(--cl-muted);
 }
-.textarea:disabled {
-  color: var(--muted);
-}
-.sendBtn {
+.composerBar {
   display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: -4px;
+}
+.composerBar .roundBtn {
+  border: 1px solid var(--cl-line);
+  border-radius: 50%;
   width: 30px;
   height: 30px;
+}
+.spacer {
+  flex: 1;
+}
+.model {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: var(--cl-muted);
+  user-select: none;
+}
+.sendBtn {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  padding: 0;
   border: none;
-  border-radius: 50%;
-  background: var(--accent);
+  border-radius: 9px;
+  background: var(--cl-brand);
   color: #fff;
   cursor: pointer;
   transition:
     background 100ms,
-    transform 100ms;
+    opacity 100ms;
 }
 .sendBtn:hover:not(:disabled) {
-  background: #0a6ee6;
-}
-.sendBtn:active:not(:disabled) {
-  transform: scale(0.95);
+  background: var(--cl-brand-hover);
 }
 .sendBtn:disabled {
-  background: var(--muted-2);
+  opacity: 0.45;
   cursor: default;
 }
 .footnote {
   padding: 8px 4px 0;
-  font-size: 11px;
+  font-size: 12px;
   text-align: center;
-  color: var(--muted-2);
+  color: var(--cl-muted);
 }
 
-/* ── Narrow windows / mobile: collapse the sidebar ── */
-@container (max-width: 639px) {
-  .sidebar {
-    display: none;
-  }
-  .headerNewChat {
-    display: flex;
-  }
-  .thread,
-  .composerWrap {
-    padding-left: 14px;
-    padding-right: 14px;
-  }
-  .heroTitle {
-    font-size: 22px;
-  }
+/* ── Narrow: the Claude phone app. Drawer sidebar, docked composer. ── */
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: rgba(0, 0, 0, 0.28);
+}
+.root[data-narrow] .sidebar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 6;
+  width: min(300px, 84%);
+  box-shadow: 8px 0 30px rgba(0, 0, 0, 0.14);
+}
+.root[data-narrow] .header {
+  padding: 0 12px;
+}
+.root[data-narrow] .heroIcon {
+  width: 36px;
+  height: 36px;
+}
+.root[data-narrow] .heroTitle {
+  font-size: 28px;
+}
+.root[data-narrow] .thread {
+  padding: 4px 16px 16px;
+}
+.root[data-narrow] .composerWrap {
+  padding: 6px 12px 12px;
+}
+.root[data-narrow] .composer {
+  border-radius: 22px;
+  padding: 10px 10px 8px 16px;
 }
 
-/* Phones: single column regardless of container support */
-@media (max-width: 599px) {
-  .root {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .sidebar {
-    display: none;
-  }
-  .headerNewChat {
-    display: flex;
-  }
-}
-
-/* The composer is already a rounded field: keep the platform text-box dressing off the
-   textarea inside it on Windows and Android. (The Material rule carries a :not(), so this
-   needs the extra class to outrank it.) */
+/* The composer is already a card: keep the platform text-box and button dressing off it on
+   Windows and Android. (The Material rule carries a :not(), so this needs the extra class.) */
 :global(html[data-os='windows']) .root .composer .textarea,
-:global(html[data-os='android']) .root .composer .textarea {
-  border: 0;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
-  min-height: 0;
-  padding: 6px 0;
-}
+:global(html[data-os='android']) .root .composer .textarea,
 :global(html[data-os='windows']) .root .composer .textarea:focus,
 :global(html[data-os='android']) .root .composer .textarea:focus {
   border: 0;
+  border-radius: 0;
   outline: none;
+  background: none;
   box-shadow: none;
+  min-height: 0;
+  padding: 2px 0 8px;
+}
+:global(html[data-os='windows']) .root .composer .sendBtn,
+:global(html[data-os='android']) .root .composer .sendBtn {
+  border-radius: 9px;
+  background: var(--cl-brand);
+  padding: 0;
+  min-width: 0;
+  height: 32px;
+}
+:global(html[data-os='windows']) .root .composer .sendBtn:hover:not(:disabled),
+:global(html[data-os='android']) .root .composer .sendBtn:hover:not(:disabled) {
+  background: var(--cl-brand-hover);
+}
+:global(html[data-os='windows']) .root .composer .sendBtn:disabled,
+:global(html[data-os='android']) .root .composer .sendBtn:disabled {
+  background: var(--cl-brand);
+  opacity: 0.45;
+}
+/* The greeting is Claude's serif on every platform */
+:global(html[data-os]) .root .hero .heroTitle {
+  font-family: var(--cl-serif);
+  font-weight: 400;
 }
 
-/* iOS draws no blue ring on a focused field: the composer just firms its edge. */
-:global(html[data-os='ios']) .root .composer:focus-within {
-  border-color: var(--line-strong);
-  box-shadow: none;
-}
+/* iOS draws no blue ring on a focused field */
 :global(html[data-os='ios']) .root .composer .textarea,
-:global(html[data-os='ios']) .root .composer .textarea:focus,
-:global(html[data-os='ios']) .root .searchInput:focus {
+:global(html[data-os='ios']) .root .composer .textarea:focus {
   outline: none;
   -webkit-appearance: none;
   appearance: none;

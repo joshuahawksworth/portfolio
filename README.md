@@ -43,10 +43,9 @@ the Finder behaves like the real one rather than a list of links.
 - **Trash with Put Back**: trashed items return to the folder they came from.
 - **Portfolio apps**: About, Experience, Skills, Contact, Location (Mapbox), CV, GitHub and a Brave-style browser with a
   server-side proxy.
-- **Ask Claude**: a chat assistant. Visitors can bring their own Anthropic API key (kept in their browser, forwarded only
-  to this site's `/api/ask` route for their messages, never stored) to talk to Claude itself, or continue as a guest and
-  get answers built from the portfolio data in the browser (free, offline). With `ANTHROPIC_API_KEY` set on the server,
-  the site's own key is used when a visitor has none.
+- **Ask Claude**: a stand-in for the Claude app, dressed like the real one (ivory, serif greeting, the Claude composer,
+  the collapsible sidebar on desktop and the drawer on phones). Every reply is built from the portfolio data in the
+  browser: no key, no sign-in, no backend.
 - **Toys**: Apple-style Calculator (with a scientific pad on wide windows), a Nokia 3310 running Snake with a
   personal high-score table (and a hidden Space Impact), DOOM via js-dos and Rubber Duck.
 - **Terminal**: a real shell per platform: zsh on macOS/iOS, Windows PowerShell (with cmd aliases such as `dir`, `type`,

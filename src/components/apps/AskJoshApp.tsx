@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent, ReactNode } from 'react';
 import { answerLocally, streamLocally } from '../../lib/localAnswers';
 import styles from './AskJoshApp.module.css';
@@ -25,6 +25,16 @@ const SUGGESTIONS = [
 ];
 
 const ERROR_TEXT = 'Something went wrong putting that answer together. Please try again.';
+const MODEL = 'Sonnet 5.5';
+/** Below this width the app lays out like the Claude phone app: drawer sidebar, docked composer. */
+const NARROW_PX = 640;
+
+/** Claude greets the signed-in user by first name and time of day. */
+function greeting(now = new Date()): string {
+  const h = now.getHours();
+  const part = h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening';
+  return `Good ${part}, Joshua`;
+}
 
 let idCounter = 0;
 const nextId = () => `${Date.now().toString(36)}-${(idCounter += 1)}`;
@@ -121,101 +131,60 @@ function renderMarkdown(text: string): ReactNode[] {
   return blocks;
 }
 
-// ── Icons ──────────────────────────────────────────────────────────────────────
-function PencilIcon() {
+// ── Icons (Claude's line icons, 1.5px strokes) ────────────────────────────────
+function Icon({ d, size = 18 }: { d: string; size?: number }) {
   return (
     <svg
-      viewBox="0 0 16 16"
-      width="16"
-      height="16"
-      aria-hidden="true"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M11.3 2.3a1.6 1.6 0 0 1 2.3 2.3L5.2 13 2 14l1-3.2z" />
-      <path d="M10 3.6l2.4 2.4" />
-    </svg>
-  );
-}
-
-function SearchIcon() {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      width="13"
-      height="13"
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
       aria-hidden="true"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.6"
       strokeLinecap="round"
-    >
-      <circle cx="7" cy="7" r="4.5" />
-      <path d="M10.5 10.5L14 14" />
-    </svg>
-  );
-}
-
-function ChatBubbleIcon() {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      width="16"
-      height="16"
-      aria-hidden="true"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
       strokeLinejoin="round"
     >
-      <path d="M2.5 3.5h11v7h-6L4.5 13v-2.5h-2z" />
+      <path d={d} />
     </svg>
   );
 }
-
-function SendIcon() {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      width="14"
-      height="14"
-      aria-hidden="true"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M8 13V3M3.5 7.5L8 3l4.5 4.5" />
-    </svg>
-  );
-}
+const PANEL = 'M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM9 5v14';
+const COMPOSE = 'M12 20h8M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4z';
+const CHATS = 'M21 12a8 8 0 0 1-11.6 7.2L4 20l1.2-4.4A8 8 0 1 1 21 12z';
+const PLUS = 'M12 5v14M5 12h14';
+const CHEVRON = 'M6 9l6 6 6-6';
+const ARROW_UP = 'M12 19V5M5 12l7-7 7 7';
+const COPY = 'M9 9h10v10H9zM5 15V5h10';
+const RETRY = 'M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7';
 
 // ── App ────────────────────────────────────────────────────────────────────────
 export default function AskJoshApp() {
   const [chats, setChats] = useState<Chat[]>(() => [newChat()]);
   const [activeId, setActiveId] = useState(() => chats[0].id);
   const [input, setInput] = useState('');
-  const [search, setSearch] = useState('');
   const [streaming, setStreaming] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [narrow, setNarrow] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const activeChat = chats.find((c) => c.id === activeId) ?? chats[0];
   const isEmpty = activeChat.messages.length === 0;
-
-  const visibleChats = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return chats.filter(
-      (c) => c.messages.length > 0 && (q === '' || chatTitle(c).toLowerCase().includes(q))
-    );
-  }, [chats, search]);
+  const recents = chats.filter((c) => c.messages.length > 0);
 
   useEffect(() => () => abortRef.current?.abort(), []);
+
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(([entry]) => setNarrow(entry.contentRect.width < NARROW_PX));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     const el = listRef.current;
@@ -292,6 +261,7 @@ export default function AskJoshApp() {
   );
 
   function startNewChat() {
+    setDrawerOpen(false);
     if (isEmpty) return;
     abortRef.current?.abort();
     const chat = newChat();
@@ -301,9 +271,20 @@ export default function AskJoshApp() {
   }
 
   function selectChat(id: string) {
+    setDrawerOpen(false);
     if (id === activeId) return;
     abortRef.current?.abort();
     setActiveId(id);
+  }
+
+  /** Re-ask the question that produced an assistant message. */
+  function retry(messageId: string) {
+    const i = activeChat.messages.findIndex((m) => m.id === messageId);
+    const question = activeChat.messages
+      .slice(0, i)
+      .reverse()
+      .find((m) => m.role === 'user');
+    if (question) void send(question.content);
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
@@ -322,86 +303,155 @@ export default function AskJoshApp() {
     }
   }
 
+  const sidebarShown = narrow ? drawerOpen : sidebarOpen;
+  const toggleSidebar = () => (narrow ? setDrawerOpen((o) => !o) : setSidebarOpen((o) => !o));
+
+  const composer = (
+    <div className={styles.composer}>
+      <textarea
+        ref={textareaRef}
+        className={styles.textarea}
+        rows={1}
+        placeholder={isEmpty ? 'How can I help you today?' : 'Reply to Claude…'}
+        aria-label="Message Claude"
+        value={input}
+        onChange={(e) => handleInput(e.target.value)}
+        onKeyDown={handleKeyDown}
+        disabled={streaming}
+      />
+      <div className={styles.composerBar}>
+        <button
+          type="button"
+          className={styles.roundBtn}
+          disabled
+          aria-label="Attach"
+          title="Attachments aren’t part of this demo"
+        >
+          <Icon d={PLUS} />
+        </button>
+        <span className={styles.spacer} />
+        {!narrow && (
+          <span className={styles.model}>
+            {MODEL}
+            <Icon d={CHEVRON} size={14} />
+          </span>
+        )}
+        <button
+          type="button"
+          className={styles.sendBtn}
+          onClick={() => void send(input)}
+          disabled={streaming || input.trim() === ''}
+          aria-label="Send"
+        >
+          <Icon d={ARROW_UP} size={16} />
+        </button>
+      </div>
+    </div>
+  );
+
   return (
-    <div className={styles.root}>
-      <aside className={styles.sidebar}>
-        <button type="button" className={styles.newChat} onClick={startNewChat}>
-          <span className={styles.rowIcon}>
-            <PencilIcon />
+    <div className={styles.root} ref={rootRef} data-narrow={narrow || undefined}>
+      {narrow && drawerOpen && (
+        <div className={styles.scrim} onClick={() => setDrawerOpen(false)} aria-hidden="true" />
+      )}
+      <aside className={`${styles.sidebar} ${sidebarShown ? styles.sidebarShown : ''}`}>
+        <div className={styles.sidebarTop}>
+          <span className={styles.wordmark}>
+            <img src="/icons/claude-symbol.png" alt="" width={18} height={18} draggable={false} />
+            Claude
+          </span>
+          <button
+            type="button"
+            className={styles.roundBtn}
+            onClick={toggleSidebar}
+            aria-label="Close sidebar"
+          >
+            <Icon d={PANEL} />
+          </button>
+        </div>
+        <button type="button" className={styles.navRow} onClick={startNewChat}>
+          <span className={styles.plusDisc}>
+            <Icon d={PLUS} size={14} />
           </span>
           New chat
         </button>
-        <label className={styles.search}>
-          <SearchIcon />
-          <input
-            className={styles.searchInput}
-            type="search"
-            placeholder="Search chats"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            aria-label="Search chats"
-          />
-        </label>
-        <div className={styles.sectionLabel}>Your chats</div>
+        <button type="button" className={styles.navRow} onClick={startNewChat}>
+          <span className={styles.navIcon}>
+            <Icon d={CHATS} />
+          </span>
+          Chats
+        </button>
+        <div className={styles.sectionLabel}>Recents</div>
         <div className={styles.chatList}>
-          {visibleChats.length === 0 ? (
-            <div className={styles.chatListEmpty}>
-              {search ? 'No matching chats' : 'Chats from this session appear here'}
-            </div>
+          {recents.length === 0 ? (
+            <div className={styles.chatListEmpty}>Chats from this session appear here</div>
           ) : (
-            visibleChats.map((chat) => (
+            recents.map((chat) => (
               <button
                 key={chat.id}
                 type="button"
                 className={`${styles.chatRow} ${chat.id === activeId ? styles.chatRowActive : ''}`}
                 onClick={() => selectChat(chat.id)}
               >
-                <span className={styles.rowIcon}>
-                  <ChatBubbleIcon />
-                </span>
-                <span className={styles.chatRowTitle}>{chatTitle(chat)}</span>
+                {chatTitle(chat)}
               </button>
             ))
           )}
+        </div>
+        <div className={styles.account}>
+          <span className={styles.accountAvatar}>JH</span>
+          <span className={styles.accountName}>
+            Joshua Hawksworth
+            <small>Free plan</small>
+          </span>
         </div>
       </aside>
 
       <section className={styles.main}>
         <header className={styles.header}>
-          <span className={styles.modelChip} title="Powered by Claude">
-            <span className={styles.modelChipIcon}>
-              <img src="/icons/claude-symbol.png" alt="" width={12} height={12} draggable={false} />
-            </span>
-            Claude
-            <svg
-              viewBox="0 0 10 10"
-              width="9"
-              height="9"
-              aria-hidden="true"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.4"
-              strokeLinecap="round"
+          {(narrow || !sidebarOpen) && (
+            <button
+              type="button"
+              className={styles.roundBtn}
+              onClick={toggleSidebar}
+              aria-label="Open sidebar"
             >
-              <path d="M2.5 4l2.5 2.5L7.5 4" />
-            </svg>
+              <Icon d={PANEL} />
+            </button>
+          )}
+          <span className={styles.headerTitle}>
+            {narrow ? (
+              <>
+                {MODEL}
+                <Icon d={CHEVRON} size={14} />
+              </>
+            ) : (
+              !isEmpty && chatTitle(activeChat)
+            )}
           </span>
-          <button
-            type="button"
-            className={styles.headerNewChat}
-            onClick={startNewChat}
-            aria-label="New chat"
-            title="New chat"
-          >
-            <PencilIcon />
-          </button>
+          {narrow && (
+            <button
+              type="button"
+              className={styles.roundBtn}
+              onClick={startNewChat}
+              aria-label="New chat"
+            >
+              <Icon d={COMPOSE} />
+            </button>
+          )}
         </header>
 
         <div className={styles.messages} ref={listRef}>
           {isEmpty ? (
             <div className={styles.hero}>
-              <img className={styles.heroIcon} src="/icons/claude.png" alt="" draggable={false} />
-              <h1 className={styles.heroTitle}>Where should we begin?</h1>
+              <img
+                className={styles.heroIcon}
+                src="/icons/claude-symbol.png"
+                alt=""
+                draggable={false}
+              />
+              <h1 className={styles.heroTitle}>{greeting()}</h1>
+              {!narrow && composer}
               <div className={styles.suggestions}>
                 {SUGGESTIONS.map((s) => (
                   <button
@@ -425,31 +475,45 @@ export default function AskJoshApp() {
                   </div>
                 ) : (
                   <div key={m.id} className={styles.assistantRow}>
-                    <img
-                      className={styles.avatar}
-                      src="/icons/claude-symbol.png"
-                      alt=""
-                      draggable={false}
-                    />
-                    <div className={styles.assistantBody}>
-                      {m.error ? (
-                        <div className={styles.note} role="status">
-                          {ERROR_TEXT}
-                        </div>
-                      ) : m.content ? (
+                    {m.error ? (
+                      <div className={styles.note} role="status">
+                        {ERROR_TEXT}
+                      </div>
+                    ) : m.content ? (
+                      <>
                         <div className={styles.markdown}>{renderMarkdown(m.content)}</div>
-                      ) : (
-                        <div
-                          className={styles.typing}
-                          aria-label="Thinking"
-                          data-essential-motion=""
-                        >
-                          <span />
-                          <span />
-                          <span />
-                        </div>
-                      )}
-                    </div>
+                        {!streaming && (
+                          <div className={styles.actions}>
+                            <button
+                              type="button"
+                              className={styles.roundBtn}
+                              onClick={() => void navigator.clipboard?.writeText(m.content)}
+                              aria-label="Copy"
+                              title="Copy"
+                            >
+                              <Icon d={COPY} size={16} />
+                            </button>
+                            <button
+                              type="button"
+                              className={styles.roundBtn}
+                              onClick={() => retry(m.id)}
+                              aria-label="Retry"
+                              title="Retry"
+                            >
+                              <Icon d={RETRY} size={16} />
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <img
+                        className={styles.thinking}
+                        src="/icons/claude-symbol.png"
+                        alt=""
+                        aria-label="Thinking"
+                        data-essential-motion=""
+                      />
+                    )}
                   </div>
                 )
               )}
@@ -457,33 +521,16 @@ export default function AskJoshApp() {
           )}
         </div>
 
-        <div className={styles.composerWrap}>
-          <div className={styles.composer}>
-            <textarea
-              ref={textareaRef}
-              className={styles.textarea}
-              rows={1}
-              placeholder="Ask anything about Josh…"
-              aria-label="Ask anything about Josh"
-              value={input}
-              onChange={(e) => handleInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={streaming}
-            />
-            <button
-              type="button"
-              className={styles.sendBtn}
-              onClick={() => void send(input)}
-              disabled={streaming || input.trim() === ''}
-              aria-label="Send"
-            >
-              <SendIcon />
-            </button>
+        {(!isEmpty || narrow) && (
+          <div className={styles.composerWrap}>
+            {composer}
+            {!narrow && (
+              <div className={styles.footnote}>
+                Claude can make mistakes. Please double-check responses.
+              </div>
+            )}
           </div>
-          <div className={styles.footnote}>
-            Answers are based on Josh's portfolio and may occasionally be imperfect.
-          </div>
-        </div>
+        )}
       </section>
     </div>
   );
