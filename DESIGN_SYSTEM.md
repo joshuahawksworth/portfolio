@@ -171,7 +171,7 @@ translucent nav bars). The full token list and reference measurements live in
 ## Assets And Icons
 
 - Reuse existing assets in `src/assets/` and `public/` when possible.
-- App icons are real artwork in `public/icons/` (renders of the official macOS/iOS icons from Wikimedia Commons), mapped in `src/components/Dock/dockIcons.tsx` (`REAL_ICONS`) and the mobile `ICON_IMAGES` map. Only apps with no real counterpart (Snake, Trash, Rubber Duck) keep drawn icons.
+- App icons are real artwork in `public/icons/` (the official macOS/iOS icons, Windows 11's system icons under `windows/`, the Google apps' launcher icons under `android/`, Google's weather icons under `weather/`), mapped in `src/components/Dock/dockIcons.tsx` (`REAL_ICONS`), `WINDOWS_ICONS`, `ANDROID_ICONS` and the mobile `ICON_IMAGES` map. Only the portfolio's own apps (About, Experience, Skills, Snake, Rubber Duck) keep drawn icons; never draw an imitation of a real app's icon.
 - Use existing icon components in `src/components/icons/` for branded desktop icons.
 - Images should have stable dimensions and `object-fit` rules.
 - Do not add large assets without checking bundle impact.

@@ -145,6 +145,9 @@ The site is configured for Vercel. Production builds run TypeScript project refe
 
 The Android wallpapers (`public/wallpapers/android-pixel-*.jpg`) are the Pixel 9's stock wallpapers (Google). The
 Windows 7 and XP backgrounds are not shipped; drop your own copies into `public/wallpapers/` to enable them.
+The Android app icons (`public/icons/android/`) are the Play Store renders of Google's apps and Termux, with Settings
+built from AOSP's launcher gear; the weather icons (`public/icons/weather/`) are Google's. The Windows system icons
+(`public/icons/windows/`) are Windows 11's, and the Microsoft Store icon is Microsoft's.
 
 ## Contact
 
