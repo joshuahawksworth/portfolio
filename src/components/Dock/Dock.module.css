@@ -254,20 +254,22 @@
     filter 150ms ease;
 }
 
-/* macOS launch bounce: the icon leaps three times, each hop a parabola (decelerating on
-   the way up, accelerating on the way down) and landing before the next. Desktop clears
-   `.bouncing` on animationend, so the icon is never pulled back mid-air. */
+/* macOS launch bounce: the icon keeps hopping while the app launches. Each hop is a parabola
+   (decelerating on the way up, accelerating down) to about an icon's height, with a beat on
+   the ground before the next. Desktop clears `.bouncing` on an animationiteration once the
+   app is up, so the icon always lands before it stops. */
 .bouncing {
-  animation: dockBounce 620ms 2;
+  animation: dockBounce 600ms infinite;
 }
 
 @keyframes dockBounce {
-  0% {
+  0%,
+  8% {
     transform: translateY(0);
     animation-timing-function: cubic-bezier(0.2, 0.55, 0.4, 1);
   }
-  50% {
-    transform: translateY(-34px);
+  54% {
+    transform: translateY(calc(var(--app-icon-size, 50px) * -0.8));
     animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.45);
   }
   100% {
