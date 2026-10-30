@@ -6,6 +6,7 @@
  */
 import { useId, type CSSProperties, type ReactNode } from 'react';
 import { MicrosoftStoreIcon } from './DevAppIcons';
+import { CalendarTileIcon } from './CalendarTileIcon';
 import { BrandIcon } from '../Dock/dockIcons';
 import { DocumentIcon } from './FileSystemIcons';
 
@@ -374,6 +375,7 @@ export const WINDOWS_ICONS = {
   skills: <WinArt name="skills" fallback={<SkillsIcon />} />,
   contact: <WinArt name="mail" fallback={<WinMailIcon />} />,
   outlook: <BrandIcon src="/icons/outlook.png" fallback={<OutlookIcon />} />,
+  calendar: <WinArt name="calendar" fallback={<CalendarTileIcon />} />,
   location: <WinArt name="maps" fallback={<WinMapsIcon />} />,
   terminal: <WinArt name="terminal" fallback={<WinTerminalIcon />} />,
   calculator: <WinArt name="calculator" fallback={<WinCalculatorIcon />} />,

@@ -122,6 +122,7 @@ export default function MenuBar() {
       { label: 'Contact', divider: true, action: () => openApp('contact') },
       { label: 'GitHub Desktop', action: () => openApp('githubdesktop') },
       { label: 'Outlook', action: () => openApp('outlook') },
+      { label: 'Calendar', action: () => openApp('calendar') },
       { label: 'Postman', action: () => openApp('postman') },
       { label: 'Xcode', action: () => openApp('xcode') },
       { label: 'Word', action: () => openApp('word') },

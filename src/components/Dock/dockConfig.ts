@@ -31,6 +31,7 @@ export type DockKey =
   | 'androidstudio'
   | 'githubdesktop'
   | 'outlook'
+  | 'calendar'
   | 'postman'
   | 'word'
   | 'wallpaper';
@@ -50,6 +51,7 @@ export const DOCK_LABELS: Record<string, string> = {
   calculator: 'Calculator',
   texteditor: 'Visual Studio Code',
   outlook: 'Outlook',
+  calendar: 'Calendar',
   postman: 'Postman',
   xcode: 'Xcode',
   androidstudio: 'Android Studio',
@@ -75,6 +77,7 @@ export const DOCK_DESKTOP_ONLY = new Set([
   'androidstudio',
   'githubdesktop',
   'outlook',
+  'calendar',
   'postman',
   'word',
 ]);

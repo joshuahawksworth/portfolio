@@ -17,6 +17,7 @@ const BLURB: Record<string, string> = {
   texteditor: 'Editing evolved, browser edition.',
   postman: 'Send real requests to the APIs behind this site.',
   outlook: 'Mail with the CMap Mail add-in side-loaded.',
+  calendar: 'Where Josh has been, month by month.',
   xcode: 'Build and run Arcus Engineer on the iOS Simulator.',
   androidstudio: 'The same app on the Android Emulator.',
   terminal: 'Type help. Then type spaceinvaders.',
