@@ -16,9 +16,11 @@ export const WALLPAPERS = {
   catalina: '/wallpapers/catalina-night.jpg',
   tahoe: '/wallpapers/tahoe-day.jpg',
   wave: '/wallpapers/blue-wave.jpg',
-  pixel: '/wallpapers/android-pixel.svg',
-  pixelDark: '/wallpapers/android-pixel-dark.svg',
-  pixelCoral: '/wallpapers/android-pixel-coral.svg',
+  // The Android set is the Pixel 9's stock wallpapers (Google's "Porcelain", "Obsidian" and
+  // "Peony" florals, 1920×1920).
+  pixel: '/wallpapers/android-pixel-porcelain.jpg',
+  pixelDark: '/wallpapers/android-pixel-obsidian.jpg',
+  pixelCoral: '/wallpapers/android-pixel-peony.jpg',
   // The Windows 11 and 10 backgrounds ship with the repo. Windows 7 and XP are optional:
   // drop your own copies into public/wallpapers/ under these names and they join the
   // Windows set at the next build (see OPTIONAL_WALLPAPERS).
@@ -48,9 +50,9 @@ export const WALLPAPER_LABELS: Record<WallpaperKey, string> = {
   catalina: 'Catalina',
   tahoe: 'Tahoe',
   wave: 'Sequoia',
-  pixel: 'Minimal',
-  pixelDark: 'Minimal (Dark)',
-  pixelCoral: 'Coral',
+  pixel: 'Porcelain',
+  pixelDark: 'Obsidian',
+  pixelCoral: 'Peony',
   win11: 'Windows 11',
   win10: 'Windows 10',
   win7: 'Windows 7',

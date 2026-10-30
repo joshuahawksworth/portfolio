@@ -30,6 +30,7 @@ import { appLabelFor, appTitleFor } from '../../theme/platform';
 import { formatShortDate } from '../../lib/clock';
 import { openCv } from '../../lib/cv';
 import { describeWeather, useWeather } from '../Desktop/DesktopWidgets';
+import { WeatherIcon } from '../icons/WeatherIcons';
 import { DisplayOverlays } from '../SystemUI/SystemPanels';
 import DynamicWallpaper, { isDynamicDark, useDynamicLook } from '../Desktop/DynamicWallpaper';
 import StatusBar from './StatusBar';
@@ -546,13 +547,13 @@ function NowWidget({ onOpen }: { onOpen: () => void }) {
 function AtAGlance({ onOpen }: { onOpen: () => void }) {
   const now = useTime();
   const weather = useWeather();
-  const { label, glyph } = describeWeather(weather?.code ?? 3);
+  const { label, kind } = describeWeather(weather?.code ?? 3);
   return (
     <div className={styles.glanceItem} style={{ gridColumn: '1 / 5', gridRow: '1 / 2' }}>
       <button type="button" className={styles.glance} onClick={onOpen} aria-label="At a glance">
         <span className={styles.glanceDate}>{formatShortDate(now)}</span>
         <span className={styles.glanceSub}>
-          <span aria-hidden="true">{glyph}</span> {weather ? `${weather.temp}°` : '—'} {label} ·
+          <WeatherIcon kind={kind} size={18} /> {weather ? `${weather.temp}°` : '—'} {label} ·
           Manchester
         </span>
       </button>
