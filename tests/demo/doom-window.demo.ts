@@ -5,8 +5,10 @@ import { beat, enterPortfolio, onlyOn } from './demo-helpers';
  * DOOM opens in an ordinary window and DOSBox boots straight into the game: its Dock icon
  * appears and bounces the moment it is launched and stops once the game draws. The controls
  * line slides into a drawer after a while; the controller button in the corner brings it
- * back. On a phone it takes the whole screen with translucent controls and the system bars
- * laid over it, and Home leaves it. Video, because the point is the launch and the exit.
+ * back, and the speaker button opens the sound drawer with the volume slider and Mute. None
+ * of these buttons keeps focus, so Enter stays with the game. On a phone it takes the whole
+ * screen with translucent controls and the system bars laid over it, and Home leaves it.
+ * Video, because the point is the launch and the exit.
  */
 test.describe('DOOM on the desktop', () => {
   onlyOn('desktop');
@@ -31,6 +33,17 @@ test.describe('DOOM on the desktop', () => {
     await beat(page, 1_500);
     await page.getByRole('button', { name: 'Show controls' }).click();
     await expect(page.getByRole('button', { name: 'Hide controls' })).toBeVisible();
+    await beat(page, 1_500);
+
+    // The sound drawer: volume and Mute behind the speaker button
+    await page.getByRole('button', { name: 'Sound', exact: true }).click();
+    await expect(page.getByRole('slider', { name: 'Volume' })).toBeVisible();
+    await page.getByRole('slider', { name: 'Volume' }).fill('0.3');
+    await beat(page);
+    await page.getByRole('button', { name: 'Mute' }).click();
+    // Enter goes to the game, not back to the button that was just clicked
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('button', { name: 'Unmute' })).toBeVisible();
     await beat(page, 1_500);
   });
 });
