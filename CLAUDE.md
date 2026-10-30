@@ -101,5 +101,5 @@ a clean grep is not an answer: use the `cross-links` skill. Reasoning and worked
   in their own module with a more specific selector.
 - Serverless endpoints live in `api/` with shared helpers in `api/*-utils.ts`; mirror any new
   endpoint in the Vite dev middleware in `vite.config.ts`.
-- Secrets and copyrighted assets are never committed: see `.env.example` and the git-ignored
-  Windows wallpapers in `public/wallpapers/`.
+- Secrets are never committed: see `.env.example`. Artwork from the real operating systems and
+  apps (wallpapers, icons) is welcome in `public/`; it is what makes the shells convincing.
