@@ -11,6 +11,7 @@ import TerminalApp from '../apps/TerminalApp';
 import FinderApp from '../apps/FinderApp';
 import SafariApp from '../apps/SafariApp';
 import MobileSnakeApp from '../apps/MobileSnakeApp';
+import DoomApp from '../apps/DoomApp';
 import RubberDuckApp from '../apps/RubberDuckApp';
 import KeyboardShortcutsApp from '../apps/KeyboardShortcutsApp';
 import CalculatorApp from '../apps/CalculatorApp';
@@ -32,6 +33,7 @@ import { describeWeather, useWeather } from '../Desktop/DesktopWidgets';
 import { DisplayOverlays } from '../SystemUI/SystemPanels';
 import DynamicWallpaper, { isDynamicDark, useDynamicLook } from '../Desktop/DynamicWallpaper';
 import StatusBar from './StatusBar';
+import ImmersiveShell from './ImmersiveShell';
 import NotificationShade from './NotificationShade';
 import NotificationBanners from '../SystemUI/NotificationBanners';
 import { useWelcomeNotifications } from '../../hooks/useWelcomeNotifications';
@@ -340,6 +342,7 @@ const ICON_IMAGES: Record<string, { src: string; scale?: number; bg?: string }> 
   settings: { src: '/icons/settings.png', scale: 1.28 },
   safari: { src: '/icons/chrome.png', scale: 0.72, bg: '#ffffff' },
   github: { src: '/icons/github-mark-white.png', scale: 0.62, bg: '#0d1117' },
+  doom: { src: '/doom-icon.png', bg: '#000' },
 };
 
 function AppIcon({ appId, size = 60 }: { appId: string; size?: number }) {
@@ -470,6 +473,7 @@ const APP_COMPONENTS: Record<string, React.ComponentType<{ props?: Record<string
   finder: FinderApp,
   safari: SafariApp,
   snake: MobileSnakeApp,
+  doom: DoomApp,
   rubberduck: RubberDuckApp,
   shortcuts: KeyboardShortcutsApp,
   calculator: CalculatorApp,
@@ -492,6 +496,7 @@ const APP_LABELS: Record<string, string> = {
   github: 'GitHub',
   safari: 'Chrome',
   snake: 'Snake',
+  doom: 'DOOM',
   calculator: 'Calculator',
   askjosh: 'Ask Claude',
   settings: 'Settings',
@@ -581,6 +586,7 @@ const BASE_ITEMS = [
   'cv',
   'settings',
   'snake',
+  'doom',
 ] as const;
 
 const DOCK_APPS_IOS = ['about', 'experience', 'contact', 'settings'];
@@ -588,6 +594,8 @@ const DOCK_APPS_ANDROID = ['about', 'experience', 'contact', 'github', 'settings
 
 /** Apps with a dark canvas get a dark sheet header so the bar doesn't glare. */
 const DARK_APPS = new Set(['calculator', 'terminal']);
+/** Apps shown full screen with no sheet header (see ImmersiveShell). */
+const IMMERSIVE_APPS = new Set(['doom']);
 
 type Page = Array<string | null>;
 
@@ -768,6 +776,8 @@ function MobileInner() {
   }
 
   const ActiveComp = activeWindow ? APP_COMPONENTS[activeWindow.appId] : null;
+  // Games take the whole screen with no sheet header; the OS's own gesture or bar leaves them.
+  const immersive = activeWindow ? IMMERSIVE_APPS.has(activeWindow.appId) : false;
   const activeTitle = activeWindow ? appTitleFor(activeWindow.appId, activeWindow.title, os) : '';
   const label = (id: string) => appLabelFor(id, APP_LABELS[id] ?? id, os);
 
@@ -960,7 +970,12 @@ function MobileInner() {
       />
 
       <div className={`${styles.panel} ${activeWindow ? styles.panelOpen : ''}`}>
-        {activeWindow && (
+        {activeWindow && immersive && ActiveComp && (
+          <ImmersiveShell onExit={() => closeWindow(activeWindow.id)}>
+            <ActiveComp props={activeWindow.props} />
+          </ImmersiveShell>
+        )}
+        {activeWindow && !immersive && (
           <>
             <div
               className={`${styles.panelHeader} ${DARK_APPS.has(activeWindow.appId) && !(android && activeWindow.appId === 'calculator') ? styles.panelHeaderDark : ''}`}

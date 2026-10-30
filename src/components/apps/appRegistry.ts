@@ -216,9 +216,10 @@ export const PORTFOLIO_APPS = {
     id: 'doom',
     title: 'DOOM',
     component: DoomApp,
-    defaultSize: { width: 800, height: 640 },
-    minSize: { width: 540, height: 460 },
-    maxSize: { width: 1060, height: 760 },
+    // The DOSBox frame is 320×200; at 2.5× plus the title bar nothing is letterboxed.
+    defaultSize: { width: 800, height: 546 },
+    minSize: { width: 480, height: 346 },
+    maxSize: { width: 1280, height: 846 },
   },
   snake: {
     id: 'snake',

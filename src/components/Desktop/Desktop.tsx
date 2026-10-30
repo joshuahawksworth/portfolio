@@ -53,7 +53,6 @@ import type { OsName } from '../../lib/settingsStore';
 import Dock from '../Dock/Dock';
 import Window from '../Window/Window';
 import SnakeApp from '../apps/SnakeApp';
-import DoomWindow from './DoomWindow';
 import RubberDuckApp from '../apps/RubberDuckApp';
 import { APP_COMPONENTS } from '../apps/appRegistry';
 import styles from './Desktop.module.css';
@@ -1374,7 +1373,6 @@ function DesktopSurface() {
       {/* Open windows */}
       {windows.map((win) => {
         if (win.appId === 'snake') return <NokiaWindow key={win.id} win={win} />;
-        if (win.appId === 'doom') return <DoomWindow key={win.id} win={win} />;
         if (win.appId === 'rubberduck') return <DuckWindow key={win.id} win={win} />;
         const Comp = APP_COMPONENTS[win.appId];
         if (!Comp) return null;

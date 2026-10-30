@@ -1,13 +1,24 @@
+/* ── DOOM: the DOSBox picture fills the window, nothing else ───────────── */
 .root {
   position: relative;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
   background: #000;
+  color: #c8c8c8;
+  font-family: var(--font-mono);
   overflow: hidden;
   user-select: none;
 }
 
-/* ── Canvas — keyboard only, no cursor change ───────────────────────── */
+.screen {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+/* The 320×200 frame scales to the window and keeps its shape */
 .canvas {
   display: block;
   width: 100%;
@@ -16,56 +27,218 @@
   image-rendering: pixelated;
   opacity: 0;
   transition: opacity 300ms;
-  pointer-events: none; /* mouse never reaches the game */
-}
-.canvas.show { opacity: 1; }
-
-/* ── Loading / error splash (light chrome over the game area) ───────── */
-.splash {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  background: var(--panel);
-  color: var(--text);
-  z-index: 1;
   pointer-events: none;
 }
-
-.doomTitle {
-  font-family: 'Impact', 'Arial Black', sans-serif;
-  font-size: 56px;
-  font-weight: 900;
-  letter-spacing: 0.1em;
-  color: #cc1100;
-  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
+.canvas.show {
+  opacity: 1;
 }
 
-.bar {
-  width: 180px;
-  height: 4px;
-  background: rgba(0, 0, 0, 0.08);
-  border-radius: 2px;
-  overflow: hidden;
-}
-.fill {
-  height: 100%;
-  background: var(--accent);
-  border-radius: 2px;
-  animation: sweep 2s ease-in-out infinite;
-}
-@keyframes sweep {
-  0%   { width: 0%;  margin-left: 0;    }
-  50%  { width: 60%; margin-left: 20%;  }
-  100% { width: 0%;  margin-left: 100%; }
-}
-.sub {
+.status {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
   margin: 0;
-  font-family: var(--font-ui);
+  text-align: center;
   font-size: 12px;
-  color: var(--muted);
-  letter-spacing: 0;
+}
+
+.hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 5px 10px;
+  background: rgba(0, 0, 0, 0.72);
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mute {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #c8c8c8;
+  font: inherit;
+  font-size: 11px;
+  opacity: 0;
+  transition: opacity 120ms;
+}
+.root:hover .mute,
+.mute:focus-visible,
+.rootMobile .mute {
+  opacity: 1;
+}
+
+/* ── Touch controls: translucent, laid over the full-screen picture ─────── */
+.rootMobile .screen {
+  position: absolute;
+  inset: 0;
+}
+/* Portrait: the picture sits in the upper part of the screen, above the pads */
+.rootMobile .canvas {
+  object-position: center 22%;
+}
+@media (orientation: landscape) {
+  .rootMobile .canvas {
+    object-position: center center;
+  }
+}
+.rootMobile .mute {
+  display: none;
+}
+
+.controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 0 22px calc(44px + env(safe-area-inset-bottom));
+  touch-action: none;
+  font-family: var(--font-ui);
+}
+
+.menuRow {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.pill {
+  min-width: 84px;
+  height: 30px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 15px;
+  background: rgba(0, 0, 0, 0.45);
+  color: rgba(255, 255, 255, 0.85);
+  font: 500 12px/1 var(--font-ui);
+  letter-spacing: 0.02em;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.pill:active {
+  background: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.padRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+/* D-pad: four arms around a hub, drawn as one cross */
+.dpad {
+  position: relative;
+  width: 156px;
+  height: 156px;
+  flex-shrink: 0;
+}
+.dbtn {
+  position: absolute;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 0;
+  background: rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+.dbtn:active {
+  background: rgba(255, 255, 255, 0.4);
+  color: #fff;
+}
+.dHub {
+  position: absolute;
+  left: 52px;
+  top: 52px;
+  width: 52px;
+  height: 52px;
+  background: rgba(255, 255, 255, 0.16);
+}
+.dHub::after {
+  content: '';
+  position: absolute;
+  inset: 20px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+}
+.dUp {
+  left: 52px;
+  top: 0;
+  border-radius: 10px 10px 0 0;
+}
+.dDown {
+  left: 52px;
+  top: 104px;
+  border-radius: 0 0 10px 10px;
+}
+.dLeft {
+  left: 0;
+  top: 52px;
+  border-radius: 10px 0 0 10px;
+}
+.dRight {
+  left: 104px;
+  top: 52px;
+  border-radius: 0 10px 10px 0;
+}
+
+/* Action buttons, staggered like a gamepad's A and B */
+.buttons {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  padding-bottom: 6px;
+}
+.round {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 0;
+  color: rgba(255, 255, 255, 0.92);
+  font: 600 12px/1 var(--font-ui);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+.use {
+  width: 66px;
+  height: 66px;
+  margin-bottom: 44px;
+  background: rgba(255, 255, 255, 0.16);
+}
+.use:active {
+  background: rgba(255, 255, 255, 0.4);
+}
+.fire {
+  width: 84px;
+  height: 84px;
+  background: rgba(190, 40, 32, 0.6);
+}
+.fire:active {
+  background: rgba(220, 60, 50, 0.85);
 }
