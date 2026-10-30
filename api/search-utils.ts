@@ -3,9 +3,14 @@
  *
  * Google itself can't be embedded (it forbids framing and captchas data-centre IPs), so the
  * results page is ours. Results come from, in order:
- *   1. Google Programmable Search (real Google results) when GOOGLE_SEARCH_KEY and
- *      GOOGLE_SEARCH_CX are set — https://programmablesearchengine.google.com
- *   2. DuckDuckGo's HTML endpoints (no key, but data-centre IPs are sometimes refused)
+ *   1. Brave Search API when BRAVE_SEARCH_KEY is set — https://brave.com/search/api
+ *      (its own index; a monthly free credit, card required)
+ *   2. Tavily when TAVILY_API_KEY is set — https://tavily.com (free tier, no card)
+ *   3. Google Programmable Search when GOOGLE_SEARCH_KEY and GOOGLE_SEARCH_CX are set. Only
+ *      engines created before 20 January 2026 can search the whole web, and those stop on
+ *      1 January 2027; kept for anyone who still has one.
+ *   4. Bing's HTML results page (no key; refuses most hosting-provider addresses)
+ *   5. DuckDuckGo's HTML endpoints (no key; refuses data-centre addresses)
  */
 
 export interface SearchResult {
@@ -15,11 +20,11 @@ export interface SearchResult {
   snippet: string;
 }
 
-export type SearchProvider = 'google' | 'duckduckgo';
+export type SearchProvider = 'google' | 'brave' | 'tavily' | 'bing' | 'duckduckgo';
 
 /** Why a search came back empty, so the page can say something useful. */
 export type SearchError =
-  | 'unconfigured' // no Google key and DuckDuckGo refused us
+  | 'unconfigured' // no Google key and every keyless provider refused us
   | 'blocked' // the provider rejected the request (captcha / 403 / 429)
   | 'failed'; // network error or timeout
 
@@ -51,6 +56,8 @@ function decodeEntities(value: string): string {
     .replace(/&#x27;/g, "'")
     .replace(/&#x2F;/g, '/')
     .replace(/&nbsp;/g, ' ')
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec: string) => String.fromCodePoint(Number(dec)))
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -170,6 +177,122 @@ async function searchGoogle(
   }
 }
 
+/* ── Brave Search API (keyed; its own index) ────────────────────────────── */
+interface BraveResponse {
+  web?: { results?: { title?: string; url?: string; description?: string }[] };
+  query?: { more_results_available?: boolean };
+}
+
+export function braveConfigured(env: NodeJS.ProcessEnv = process.env): boolean {
+  return Boolean(env.BRAVE_SEARCH_KEY);
+}
+
+export function parseBraveResults(data: BraveResponse): SearchResult[] {
+  const seen = new Set<string>();
+  return (data.web?.results ?? [])
+    .map((item) => {
+      const url = item.url ?? '';
+      if (!/^https?:\/\//.test(url) || seen.has(url)) return null;
+      seen.add(url);
+      return {
+        title: stripTags(item.title ?? url),
+        url,
+        displayUrl: displayUrl(url),
+        snippet: stripTags(item.description ?? ''),
+      };
+    })
+    .filter((result): result is SearchResult => Boolean(result))
+    .slice(0, RESULT_LIMIT);
+}
+
+async function searchBrave(
+  query: string,
+  page: number,
+  env: NodeJS.ProcessEnv
+): Promise<SearchResponse | null> {
+  const params = new URLSearchParams({
+    q: query,
+    count: String(RESULT_LIMIT),
+    offset: String(page - 1),
+    country: 'GB',
+    safesearch: 'moderate',
+  });
+  try {
+    const upstream = await fetchWithTimeout(
+      `https://api.search.brave.com/res/v1/web/search?${params.toString()}`,
+      {
+        headers: {
+          Accept: 'application/json',
+          'X-Subscription-Token': env.BRAVE_SEARCH_KEY ?? '',
+        },
+      }
+    );
+    if (!upstream.ok) {
+      console.error('search: Brave Search failed', upstream.status);
+      return null;
+    }
+    const data = (await upstream.json()) as BraveResponse;
+    return { query, page, provider: 'brave', results: parseBraveResults(data) };
+  } catch (err) {
+    console.error('search: Brave Search errored', err);
+    return null;
+  }
+}
+
+/* ── Tavily (keyed; no card needed for the free tier) ───────────────────── */
+interface TavilyResponse {
+  results?: { title?: string; url?: string; content?: string }[];
+}
+
+export function tavilyConfigured(env: NodeJS.ProcessEnv = process.env): boolean {
+  return Boolean(env.TAVILY_API_KEY);
+}
+
+export function parseTavilyResults(data: TavilyResponse, page = 1): SearchResult[] {
+  const seen = new Set<string>();
+  return (data.results ?? [])
+    .map((item) => {
+      const url = item.url ?? '';
+      if (!/^https?:\/\//.test(url) || seen.has(url)) return null;
+      seen.add(url);
+      return {
+        title: stripTags(item.title ?? url),
+        url,
+        displayUrl: displayUrl(url),
+        snippet: stripTags(item.content ?? '').slice(0, 220),
+      };
+    })
+    .filter((result): result is SearchResult => Boolean(result))
+    .slice((page - 1) * RESULT_LIMIT, page * RESULT_LIMIT);
+}
+
+async function searchTavily(
+  query: string,
+  page: number,
+  env: NodeJS.ProcessEnv
+): Promise<SearchResponse | null> {
+  try {
+    // Tavily has no paging, so the first two pages come from one 20-result request.
+    const upstream = await fetchWithTimeout('https://api.tavily.com/search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${env.TAVILY_API_KEY ?? ''}`,
+      },
+      body: JSON.stringify({ query, max_results: 20, search_depth: 'basic' }),
+    });
+    if (!upstream.ok) {
+      console.error('search: Tavily failed', upstream.status);
+      return null;
+    }
+    const data = (await upstream.json()) as TavilyResponse;
+    return { query, page, provider: 'tavily', results: parseTavilyResults(data, page) };
+  } catch (err) {
+    console.error('search: Tavily errored', err);
+    return null;
+  }
+}
+
 /* ── DuckDuckGo (lite + html) ───────────────────────────────────────────── */
 /** duckduckgo.com/lite: results are `<a class="result-link">` followed by a `result-snippet` cell. */
 export function parseSearchResults(html: string): SearchResult[] {
@@ -232,6 +355,23 @@ export function parseDuckDuckGoHtml(html: string): SearchResult[] {
     .slice(0, RESULT_LIMIT);
 }
 
+/**
+ * Bing (and sometimes DuckDuckGo) answer a suspected bot from a data-centre address with a
+ * normal-looking page whose results belong to someone else's query. Pages like that are
+ * worse than an error, so a result set has to mention the query somewhere before it counts.
+ */
+export function looksRelevant(query: string, results: SearchResult[]): boolean {
+  const terms = query
+    .toLowerCase()
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((t) => t.length >= 3);
+  if (terms.length === 0 || results.length === 0) return results.length > 0;
+  return results.some((r) => {
+    const hay = `${r.title} ${r.snippet} ${r.url}`.toLowerCase();
+    return terms.some((t) => hay.includes(t));
+  });
+}
+
 function looksBlocked(status: number, html: string): boolean {
   return (
     status === 403 ||
@@ -269,12 +409,92 @@ async function searchDuckDuckGo(query: string, page: number): Promise<SearchResp
       }
       if (!upstream.ok) continue;
       const results = attempt.parse(html);
+      if (results.length > 0 && !looksRelevant(query, results)) {
+        error = 'blocked';
+        continue;
+      }
       if (results.length > 0) return { query, page, provider: 'duckduckgo', results };
     } catch (err) {
       console.error('search: DuckDuckGo request errored', err);
     }
   }
   return { query, page, provider: 'duckduckgo', results: [], error };
+}
+
+/* ── Bing (HTML results page) ───────────────────────────────────────────── */
+/**
+ * Bing wraps every result link in a redirect, bing.com/ck/a?…&u=a1<base64url>&…; the real
+ * address is the base64url payload after the "a1" prefix.
+ */
+export function unwrapBingUrl(value: string): string {
+  const decoded = decodeEntities(value);
+  try {
+    const parsed = new URL(decoded, 'https://www.bing.com');
+    const wrapped = parsed.searchParams.get('u');
+    if (parsed.hostname.endsWith('bing.com') && wrapped?.startsWith('a1')) {
+      const b64 = wrapped.slice(2).replace(/-/g, '+').replace(/_/g, '/');
+      return Buffer.from(b64, 'base64').toString('utf8');
+    }
+    return parsed.href;
+  } catch {
+    return decoded;
+  }
+}
+
+/** bing.com/search: each result is `<li class="b_algo">` with an `<h2><a>` title and a `b_caption` snippet. */
+export function parseBingResults(html: string): SearchResult[] {
+  const seen = new Set<string>();
+  return html
+    .split(/<li[^>]+class=["']b_algo["'][^>]*>/g)
+    .slice(1)
+    .map((block) => {
+      const link = block.match(/<h2[^>]*>\s*<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/);
+      if (!link) return null;
+      const url = unwrapBingUrl(link[1]);
+      if (!/^https?:\/\//.test(url) || seen.has(url)) return null;
+      seen.add(url);
+      const snippet = block.match(
+        /class=["'][^"']*b_caption[^"']*["'][^>]*>[\s\S]*?<p[^>]*>([\s\S]*?)<\/p>/
+      );
+      return {
+        title: stripTags(link[2]),
+        url,
+        displayUrl: displayUrl(url),
+        snippet: snippet ? stripTags(snippet[1]) : '',
+      };
+    })
+    .filter((result): result is SearchResult => Boolean(result))
+    .slice(0, RESULT_LIMIT);
+}
+
+async function searchBing(query: string, page: number): Promise<SearchResponse> {
+  const params = new URLSearchParams({
+    q: query,
+    first: String((page - 1) * RESULT_LIMIT + 1),
+    setlang: 'en',
+    cc: 'GB',
+  });
+  try {
+    const upstream = await fetchWithTimeout(`https://www.bing.com/search?${params.toString()}`, {
+      headers: {
+        'User-Agent': BROWSER_UA,
+        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-GB,en;q=0.9',
+      },
+    });
+    const html = await upstream.text();
+    if (looksBlocked(upstream.status, html) || !upstream.ok) {
+      return { query, page, provider: 'bing', results: [], error: 'blocked' };
+    }
+    const results = parseBingResults(html);
+    if (results.length > 0 && !looksRelevant(query, results)) {
+      return { query, page, provider: 'bing', results: [], error: 'blocked' };
+    }
+    return { query, page, provider: 'bing', results };
+  } catch (err) {
+    console.error('search: Bing request errored', err);
+    return { query, page, provider: 'bing', results: [], error: 'failed' };
+  }
 }
 
 /* ── Entry point ────────────────────────────────────────────────────────── */
@@ -284,14 +504,27 @@ export async function searchWeb(
   env: NodeJS.ProcessEnv = process.env
 ): Promise<SearchResponse> {
   const page = clampPage(pageInput);
+  if (braveConfigured(env)) {
+    const brave = await searchBrave(query, page, env);
+    if (brave) return brave;
+  }
+  if (tavilyConfigured(env)) {
+    const tavily = await searchTavily(query, page, env);
+    if (tavily) return tavily;
+  }
   if (googleConfigured(env)) {
     const google = await searchGoogle(query, page, env);
     if (google) return google;
   }
+  const bing = await searchBing(query, page);
+  if (bing.results.length > 0) return bing;
   const ddg = await searchDuckDuckGo(query, page);
-  // Without a Google key, a refusal from DuckDuckGo means "set one up", not "try again".
-  if (ddg.error && !googleConfigured(env) && ddg.error === 'blocked') {
-    return { ...ddg, error: 'unconfigured' };
-  }
+  if (ddg.results.length > 0) return ddg;
+  // Both keyless providers refused us: without a Google key that means "set one up", not
+  // "try again". A genuinely empty query (no hits anywhere) is reported as such.
+  const refused = bing.error === 'blocked' || ddg.error === 'blocked';
+  const keyed = braveConfigured(env) || tavilyConfigured(env) || googleConfigured(env);
+  if (refused && !keyed) return { ...ddg, error: 'unconfigured' };
+  if (!bing.error) return bing;
   return ddg;
 }

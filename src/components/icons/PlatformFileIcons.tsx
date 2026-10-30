@@ -6,7 +6,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import type { OsName } from '../../lib/settingsStore';
 import { FolderIcon, MacintoshHDIcon } from './FileSystemIcons';
 import { MacTrashIcon } from './MacTrashIcon';
-import { RecycleBinIcon, ThisPcIcon, WinFolderIcon } from './WindowsIcons';
+import { RecycleBinIcon, ThisPcIcon, WinArtSized, WinFolderIcon } from './WindowsIcons';
 import { AndroidBinIcon, AndroidFolderIcon, AndroidStorageIcon } from './AndroidIcons';
 
 export function PlatformFolderIcon({
@@ -25,7 +25,11 @@ export function PlatformFolderIcon({
   if (os === 'windows') {
     return (
       <span style={{ display: 'inline-flex', ...style }}>
-        <WinFolderIcon size={size}>{children}</WinFolderIcon>
+        {children ? (
+          <WinFolderIcon size={size}>{children}</WinFolderIcon>
+        ) : (
+          <WinArtSized name="folder" size={size} fallback={<WinFolderIcon size={size} />} />
+        )}
       </span>
     );
   }
@@ -44,7 +48,9 @@ export function PlatformFolderIcon({
 }
 
 export function PlatformDriveIcon({ os, size = 50 }: { os: OsName; size?: number }) {
-  if (os === 'windows') return <ThisPcIcon size={size} />;
+  if (os === 'windows') {
+    return <WinArtSized name="this-pc" size={size} fallback={<ThisPcIcon size={size} />} />;
+  }
   if (os === 'android') return <AndroidStorageIcon size={size} />;
   return <MacintoshHDIcon size={size} />;
 }
@@ -68,7 +74,11 @@ export function PlatformBinIcon({
   if (os === 'windows') {
     return (
       <span style={{ display: 'inline-flex', ...glowStyle, ...style }}>
-        <RecycleBinIcon full={full} size={size} />
+        <WinArtSized
+          name={full ? 'recycle-bin-full' : 'recycle-bin-empty'}
+          size={size}
+          fallback={<RecycleBinIcon full={full} size={size} />}
+        />
       </span>
     );
   }
