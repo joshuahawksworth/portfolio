@@ -89,17 +89,31 @@ export default function DoomApp() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const ciRef = useRef<CI | null>(null);
   const audioRef = useRef<AudioContext | null>(null);
+  const gainRef = useRef<GainNode | null>(null);
   const mutedRef = useRef(false);
+  const volumeRef = useRef(0.8);
 
   const [status, setStatus] = useState<Status>('loading');
   // The controls line shows for the first 20 s, then slides into a drawer the player can reopen
   const [hintOpen, setHintOpen] = useState(true);
   const [muted, setMuted] = useState(false);
+  const [volume, setVolume] = useState(0.8);
+  // The sound drawer (volume and mute) lives behind the speaker button, top right
+  const [soundOpen, setSoundOpen] = useState(false);
+
+  // None of the controls takes keyboard focus: Enter and Space belong to the game, so a
+  // button that kept focus after a click would toggle itself again on the next keypress.
+  const noFocus = {
+    tabIndex: -1,
+    onMouseDown: (e: React.MouseEvent) => e.preventDefault(),
+  };
 
   useEffect(() => {
     mutedRef.current = muted;
+    volumeRef.current = volume;
+    if (gainRef.current) gainRef.current.gain.value = muted ? 0 : volume;
     if (!muted && audioRef.current?.state === 'suspended') audioRef.current.resume();
-  }, [muted]);
+  }, [muted, volume]);
 
   useEffect(() => {
     if (status !== 'ready') return;
@@ -164,6 +178,10 @@ export default function DoomApp() {
           const freq = ci.soundFrequency();
           const ac = new AudioContext({ sampleRate: freq });
           audioRef.current = ac;
+          const gain = ac.createGain();
+          gain.gain.value = mutedRef.current ? 0 : volumeRef.current;
+          gain.connect(ac.destination);
+          gainRef.current = gain;
           let next = 0;
           ev.onSoundPush((samples) => {
             if (mutedRef.current) return;
@@ -172,7 +190,7 @@ export default function DoomApp() {
             buf.getChannelData(0).set(samples);
             const src = ac.createBufferSource();
             src.buffer = buf;
-            src.connect(ac.destination);
+            src.connect(gain);
             const t = Math.max(ac.currentTime, next);
             src.start(t);
             next = t + buf.duration;
@@ -273,6 +291,7 @@ export default function DoomApp() {
             <button
               type="button"
               className={`${styles.hintToggle} ${hintOpen ? styles.hintToggleRaised : ''}`}
+              {...noFocus}
               onClick={() => setHintOpen((o) => !o)}
               aria-expanded={hintOpen}
               aria-label={hintOpen ? 'Hide controls' : 'Show controls'}
@@ -307,14 +326,65 @@ export default function DoomApp() {
             </button>
           </>
         )}
-        <button
-          type="button"
-          className={styles.mute}
-          onClick={() => setMuted((m) => !m)}
-          aria-pressed={muted}
-        >
-          {muted ? 'Unmute' : 'Mute'}
-        </button>
+        {!isMobile && (
+          <div className={`${styles.sound} ${soundOpen ? styles.soundOpen : ''}`}>
+            <button
+              type="button"
+              className={styles.soundToggle}
+              {...noFocus}
+              onClick={() => setSoundOpen((o) => !o)}
+              aria-expanded={soundOpen}
+              aria-label={soundOpen ? 'Hide sound controls' : 'Sound'}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" />
+                {muted ? (
+                  <path d="M16 9.5l5 5M21 9.5l-5 5" />
+                ) : (
+                  <>
+                    <path d="M15.5 9a4.2 4.2 0 0 1 0 6" />
+                    <path d="M18.2 6.3a8 8 0 0 1 0 11.4" />
+                  </>
+                )}
+              </svg>
+            </button>
+            {soundOpen && (
+              <div className={styles.soundDrawer}>
+                <input
+                  type="range"
+                  className={styles.volume}
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={volume}
+                  tabIndex={-1}
+                  aria-label="Volume"
+                  onChange={(e) => setVolume(Number(e.target.value))}
+                  onPointerUp={(e) => e.currentTarget.blur()}
+                />
+                <button
+                  type="button"
+                  className={styles.mute}
+                  {...noFocus}
+                  onClick={() => setMuted((m) => !m)}
+                  aria-pressed={muted}
+                >
+                  {muted ? 'Unmute' : 'Mute'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {isMobile && (

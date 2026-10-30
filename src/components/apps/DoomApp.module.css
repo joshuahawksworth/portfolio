@@ -83,24 +83,59 @@
   bottom: 34px;
 }
 
-.mute {
+/* Sound: a speaker button that opens a drawer with the volume slider and Mute */
+.sound {
   position: absolute;
   top: 8px;
   right: 8px;
-  padding: 3px 8px;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 120ms;
+}
+.root:hover .sound,
+.soundOpen {
+  opacity: 1;
+}
+.soundToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 26px;
+  padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 3px;
   background: rgba(0, 0, 0, 0.6);
   color: #c8c8c8;
+  cursor: pointer;
+}
+.soundDrawer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.6);
+}
+.volume {
+  width: 110px;
+  margin: 0;
+  accent-color: #c8c8c8;
+}
+.mute {
+  padding: 2px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.4);
+  color: #c8c8c8;
   font: inherit;
   font-size: 11px;
-  opacity: 0;
-  transition: opacity 120ms;
-}
-.root:hover .mute,
-.mute:focus-visible,
-.rootMobile .mute {
-  opacity: 1;
+  cursor: pointer;
 }
 
 /* ── Touch controls: translucent, laid over the full-screen picture ─────── */
@@ -117,10 +152,6 @@
     object-position: center center;
   }
 }
-.rootMobile .mute {
-  display: none;
-}
-
 .controls {
   position: absolute;
   left: 0;
