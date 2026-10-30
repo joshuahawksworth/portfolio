@@ -11,6 +11,9 @@ test.describe('DOOM on the desktop', () => {
 
   test('macOS: DOOM boots into the game inside a standard window', async ({ page }) => {
     await enterPortfolio(page, 'apple');
+    // The browser the desktop opens on overlaps the right-hand icons; close it first.
+    await page.getByRole('button', { name: 'Close', exact: true }).first().click();
+    await beat(page);
     await page.getByRole('button', { name: 'DOOM', exact: true }).first().dblclick();
     // The controls line only appears once DOSBox has drawn its first frame.
     await expect(page.getByText(/W A S D move/)).toBeVisible({ timeout: 30_000 });
