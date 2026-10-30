@@ -25,8 +25,8 @@ export function CalendarTileIcon({ size = 50 }: { size?: number }) {
         textAnchor="middle"
         fontFamily="-apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif"
         fontSize="33"
-        fontWeight="700"
-        letterSpacing="-1"
+        fontWeight="500"
+        letterSpacing="-0.5"
         fill="#1c1c1e"
       >
         {now.getDate()}
