@@ -122,11 +122,9 @@ lets engines created after 20 January 2026 search the whole web, so it only help
 the route tries Bing's HTML results page and then DuckDuckGo, which refuse most hosting providers, and the page says
 search isn't configured.
 
-Ask Claude answers guests from the portfolio data in the browser, so it works with no backend at all. Visitors who enter
-their own Anthropic API key are answered by Claude through `/api/ask` with that key (sent as a request header, never
-logged or stored). If `ANTHROPIC_API_KEY` is set, it is used for visitors without a key; when neither is available,
-everyone gets the offline answers and no error is shown. There is no public "Sign in with Claude" for third-party sites,
-which is why the key is the way in.
+Ask Claude is a stand-in for the real thing: every reply is built in the browser from the portfolio data
+(`src/lib/localAnswers.ts`), so it needs no key, no sign-in and no backend. `/api/ask` still streams a real Claude
+answer when `ANTHROPIC_API_KEY` is set and a client posts to it, but the app no longer calls it.
 
 The Snake high-score table is personal: it keeps the visitor's own best runs in `localStorage`, so there is no database.
 

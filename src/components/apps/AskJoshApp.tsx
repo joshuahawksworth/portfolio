@@ -4,13 +4,12 @@ import { answerLocally, streamLocally } from '../../lib/localAnswers';
 import styles from './AskJoshApp.module.css';
 
 type Role = 'user' | 'assistant';
-type ErrorKind = 'unconfigured' | 'rate_limited' | 'generic';
 
 interface ChatMessage {
   id: string;
   role: Role;
   content: string;
-  error?: ErrorKind;
+  error?: boolean;
 }
 
 interface Chat {
@@ -25,44 +24,7 @@ const SUGGESTIONS = [
   'How do I contact Josh?',
 ];
 
-const ERROR_TEXT: Record<ErrorKind, string> = {
-  unconfigured:
-    "The assistant isn't configured on this deployment yet (missing ANTHROPIC_API_KEY).",
-  rate_limited:
-    "You've sent quite a few messages in a short time — give it a few minutes and try again.",
-  generic: 'Something went wrong reaching the assistant. Please try again in a moment.',
-};
-
-const SIGN_IN_KEY = 'portfolio.askclaude.account';
-
-type Provider = 'key' | 'guest';
-
-interface Account {
-  name: string;
-  provider: Provider;
-  /** The visitor's own Anthropic API key. Kept in this browser only. */
-  apiKey?: string;
-}
-
-const KEY_PATTERN = /^sk-ant-[A-Za-z0-9_-]{20,}$/;
-
-function loadAccount(): Account | null {
-  try {
-    const raw = localStorage.getItem(SIGN_IN_KEY);
-    return raw ? (JSON.parse(raw) as Account) : null;
-  } catch {
-    return null;
-  }
-}
-
-function saveAccount(account: Account | null) {
-  try {
-    if (account) localStorage.setItem(SIGN_IN_KEY, JSON.stringify(account));
-    else localStorage.removeItem(SIGN_IN_KEY);
-  } catch {
-    /* private mode */
-  }
-}
+const ERROR_TEXT = 'Something went wrong putting that answer together. Please try again.';
 
 let idCounter = 0;
 const nextId = () => `${Date.now().toString(36)}-${(idCounter += 1)}`;
@@ -232,131 +194,8 @@ function SendIcon() {
   );
 }
 
-/**
- * The sign-in sheet shown over the app. There is no public "Sign in with Claude" for
- * third-party sites, so visitors who want real answers use their own Anthropic API key;
- * everyone else continues as a guest and gets answers built from the portfolio data.
- */
-function SignInGate({
-  onSignIn,
-  error,
-}: {
-  onSignIn: (account: Account) => void;
-  error?: string | null;
-}) {
-  const [mode, setMode] = useState<'choose' | 'key'>('choose');
-  const [key, setKey] = useState('');
-  const [busy, setBusy] = useState(false);
-  const valid = KEY_PATTERN.test(key.trim());
-
-  function submitKey() {
-    if (!valid || busy) return;
-    setBusy(true);
-    window.setTimeout(
-      () => onSignIn({ name: 'Your Claude API key', provider: 'key', apiKey: key.trim() }),
-      300
-    );
-  }
-
-  return (
-    <div className={styles.gate} role="dialog" aria-modal="true" aria-labelledby="askclaude-signin">
-      <div className={styles.gateCard}>
-        <img className={styles.gateIcon} src="/icons/claude.png" alt="" draggable={false} />
-        <h2 id="askclaude-signin" className={styles.gateTitle}>
-          {mode === 'key' ? 'Use your Claude API key' : 'Chat with Claude'}
-        </h2>
-        {mode === 'choose' ? (
-          <>
-            <p className={styles.gateText}>
-              Ask about Josh's work, experience and projects. Bring your own Anthropic API key to
-              talk to Claude itself, or continue as a guest for answers built from the portfolio.
-            </p>
-            {error && <p className={styles.gateError}>{error}</p>}
-            <button
-              type="button"
-              className={`${styles.gateBtn} ${styles.gateBtnPrimary}`}
-              onClick={() => setMode('key')}
-            >
-              <img src="/icons/claude-symbol.png" alt="" width={16} height={16} draggable={false} />
-              Use my Claude API key
-            </button>
-            <button
-              type="button"
-              className={styles.gateBtn}
-              onClick={() => onSignIn({ name: 'Guest', provider: 'guest' })}
-            >
-              Continue as guest
-            </button>
-            <p className={styles.gateFoot}>
-              Guests never send anything to a model. Keys are stored only in this browser.
-            </p>
-          </>
-        ) : (
-          <>
-            <p className={styles.gateText}>
-              Paste a key from{' '}
-              <a
-                href="https://console.anthropic.com/settings/keys"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                console.anthropic.com
-              </a>
-              . It stays in this browser and is only forwarded to this site's Claude route for your
-              own messages; it is never stored on the server.
-            </p>
-            <input
-              className={styles.gateInput}
-              type="password"
-              value={key}
-              onChange={(e) => setKey(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && submitKey()}
-              placeholder="sk-ant-…"
-              autoComplete="off"
-              spellCheck={false}
-              autoFocus
-              aria-label="Anthropic API key"
-            />
-            {key && !valid && (
-              <p className={styles.gateError}>
-                That doesn't look like an Anthropic key (they start with sk-ant-).
-              </p>
-            )}
-            <button
-              type="button"
-              className={`${styles.gateBtn} ${styles.gateBtnPrimary}`}
-              onClick={submitKey}
-              disabled={!valid || busy}
-            >
-              {busy ? <span className={styles.gateBusy} data-essential-motion="" /> : null}
-              Start chatting
-            </button>
-            <button type="button" className={styles.gateBtn} onClick={() => setMode('choose')}>
-              Back
-            </button>
-            <p className={styles.gateFoot}>Usage is billed to your own Anthropic account.</p>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
 // ── App ────────────────────────────────────────────────────────────────────────
 export default function AskJoshApp() {
-  const [account, setAccount] = useState<Account | null>(loadAccount);
-  const [gateError, setGateError] = useState<string | null>(null);
-  // Once /api/ask reports it has no key, stay offline for the session instead of retrying.
-  const offlineRef = useRef(false);
-  function signIn(next: Account) {
-    saveAccount(next);
-    setAccount(next);
-    setGateError(null);
-  }
-  function signOut() {
-    saveAccount(null);
-    setAccount(null);
-  }
   const [chats, setChats] = useState<Chat[]>(() => [newChat()]);
   const [activeId, setActiveId] = useState(() => chats[0].id);
   const [input, setInput] = useState('');
@@ -419,10 +258,6 @@ export default function AskJoshApp() {
       const chatId = activeChat.id;
       const userMessage: ChatMessage = { id: nextId(), role: 'user', content: text };
       const assistantMessage: ChatMessage = { id: nextId(), role: 'assistant', content: '' };
-      const history = [...activeChat.messages, userMessage]
-        .filter((m) => !m.error && m.content)
-        .map(({ role, content }) => ({ role, content }));
-
       setChats((prev) =>
         prev.map((chat) =>
           chat.id === chatId
@@ -436,80 +271,24 @@ export default function AskJoshApp() {
       const controller = new AbortController();
       abortRef.current = controller;
 
-      const fail = (kind: ErrorKind) =>
-        updateMessage(chatId, assistantMessage.id, { error: kind, content: '' });
-
-      // Guests, and everyone when the API has no key, get answers built from the
-      // portfolio data right here in the browser — no model call, no cost.
-      const answerOffline = () =>
-        streamLocally(
+      try {
+        // Every reply is built from the portfolio data right here in the browser: no model
+        // call, no key to paste, nothing to configure.
+        await streamLocally(
           answerLocally(text),
           (chunk) =>
             updateMessage(chatId, assistantMessage.id, (m) => ({ content: m.content + chunk })),
           controller.signal
         );
-
-      try {
-        if (account?.provider === 'guest' || offlineRef.current) {
-          await answerOffline();
-          return;
-        }
-
-        const res = await fetch('/api/ask', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(account?.apiKey ? { 'X-Anthropic-Key': account.apiKey } : {}),
-          },
-          body: JSON.stringify({ messages: history }),
-          signal: controller.signal,
-        });
-
-        if (!res.ok) {
-          let code = '';
-          try {
-            code = String(((await res.json()) as { error?: unknown }).error ?? '');
-          } catch {
-            /* non-JSON error body */
-          }
-          if (res.status === 503 && code === 'assistant_unconfigured') {
-            offlineRef.current = true;
-            await answerOffline();
-          } else if (res.status === 401 && code === 'invalid_key') {
-            // Their key was rejected: drop it and send them back to the gate to try again.
-            saveAccount(null);
-            setAccount(null);
-            setGateError('Anthropic rejected that API key. Check it and try again.');
-            fail('generic');
-          } else if (res.status === 429) fail('rate_limited');
-          else fail('generic');
-          return;
-        }
-
-        if (res.body) {
-          const reader = res.body.getReader();
-          const decoder = new TextDecoder();
-          for (;;) {
-            const { value, done } = await reader.read();
-            if (done) break;
-            const chunk = decoder.decode(value, { stream: true });
-            if (chunk)
-              updateMessage(chatId, assistantMessage.id, (m) => ({ content: m.content + chunk }));
-          }
-          const tail = decoder.decode();
-          if (tail)
-            updateMessage(chatId, assistantMessage.id, (m) => ({ content: m.content + tail }));
-        } else {
-          updateMessage(chatId, assistantMessage.id, { content: await res.text() });
-        }
       } catch (err) {
-        if (!(err instanceof DOMException && err.name === 'AbortError')) fail('generic');
+        if (!(err instanceof DOMException && err.name === 'AbortError'))
+          updateMessage(chatId, assistantMessage.id, { error: true, content: '' });
       } finally {
         if (abortRef.current === controller) abortRef.current = null;
         setStreaming(false);
       }
     },
-    [activeChat, streaming, updateMessage, account]
+    [activeChat, streaming, updateMessage]
   );
 
   function startNewChat() {
@@ -545,7 +324,6 @@ export default function AskJoshApp() {
 
   return (
     <div className={styles.root}>
-      {!account && <SignInGate onSignIn={signIn} error={gateError} />}
       <aside className={styles.sidebar}>
         <button type="button" className={styles.newChat} onClick={startNewChat}>
           <span className={styles.rowIcon}>
@@ -556,6 +334,7 @@ export default function AskJoshApp() {
         <label className={styles.search}>
           <SearchIcon />
           <input
+            className={styles.searchInput}
             type="search"
             placeholder="Search chats"
             value={search}
@@ -585,17 +364,6 @@ export default function AskJoshApp() {
             ))
           )}
         </div>
-        {account && (
-          <div className={styles.account}>
-            <span className={styles.accountAvatar} aria-hidden="true">
-              {account.provider === 'guest' ? 'G' : 'K'}
-            </span>
-            <span className={styles.accountName}>{account.name}</span>
-            <button type="button" className={styles.signOut} onClick={signOut}>
-              Sign out
-            </button>
-          </div>
-        )}
       </aside>
 
       <section className={styles.main}>
@@ -666,7 +434,7 @@ export default function AskJoshApp() {
                     <div className={styles.assistantBody}>
                       {m.error ? (
                         <div className={styles.note} role="status">
-                          {ERROR_TEXT[m.error]}
+                          {ERROR_TEXT}
                         </div>
                       ) : m.content ? (
                         <div className={styles.markdown}>{renderMarkdown(m.content)}</div>

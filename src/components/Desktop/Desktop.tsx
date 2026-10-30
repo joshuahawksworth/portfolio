@@ -1334,7 +1334,7 @@ function DesktopSurface() {
             <span className={styles.iconArt}>
               <NodeIcon
                 node={item.node}
-                size={50}
+                size={isWindows ? 48 : 50}
                 trashFull={trashFull}
                 trashGlow={item.appId === 'trash' && nearTrashTarget === 'desktop'}
               />
