@@ -175,7 +175,21 @@ function Favicon({ url }: { url: string }) {
   );
 }
 
-const SERP_TABS = ['All', 'Images', 'Videos', 'News'];
+/** Brave Search's result types; the ones this page can't show open on search.brave.com. */
+const SERP_TABS: Array<{ label: string; path?: string }> = [
+  { label: 'All' },
+  { label: 'Images', path: 'images' },
+  { label: 'Videos', path: 'videos' },
+  { label: 'News', path: 'news' },
+];
+/** Brave's footer links, to the real pages. */
+const SERP_FOOTER_LINKS: Array<[string, string]> = [
+  ['Advertise', 'https://brave.com/brave-ads/'],
+  ['API', 'https://brave.com/search/api/'],
+  ['News', 'https://search.brave.com/news'],
+  ['FAQ', 'https://search.brave.com/help'],
+  ['Privacy Policy', 'https://search.brave.com/help/privacy-policy'],
+];
 
 function SearchResults({
   query,
@@ -273,19 +287,30 @@ function SearchResults({
           </form>
         </div>
         <nav className={styles.serpTabs} aria-label="Search type">
-          {SERP_TABS.map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              className={`${styles.serpTab} ${tab === 'All' ? styles.serpTabActive : ''}`}
-              aria-current={tab === 'All' ? 'page' : undefined}
-            >
-              {tab}
-            </button>
-          ))}
-          <button type="button" className={`${styles.serpTab} ${styles.serpTools}`}>
-            Settings
-          </button>
+          {SERP_TABS.map(({ label, path }) =>
+            path ? (
+              <a
+                key={label}
+                className={styles.serpTab}
+                href={`https://search.brave.com/${path}?q=${encodeURIComponent(query)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={`${label} results on Brave Search (new tab)`}
+              >
+                {label}
+              </a>
+            ) : (
+              <button
+                key={label}
+                type="button"
+                className={`${styles.serpTab} ${styles.serpTabActive}`}
+                aria-current="page"
+                onClick={() => setAttempt((a) => a + 1)}
+              >
+                {label}
+              </button>
+            )
+          )}
         </nav>
       </header>
 
@@ -408,11 +433,11 @@ function SearchResults({
       <footer className={styles.serpFooter}>
         <div className={styles.serpFooterLinks}>
           <span>© Brave Software</span>
-          <span>Advertise</span>
-          <span>API</span>
-          <span>News</span>
-          <span>FAQ</span>
-          <span>Privacy Policy</span>
+          {SERP_FOOTER_LINKS.map(([label, href]) => (
+            <a key={label} href={href} target="_blank" rel="noopener noreferrer">
+              {label}
+            </a>
+          ))}
           {data?.provider === 'brave' && <span>Results via Brave Search</span>}
           {data?.provider === 'tavily' && <span>Results via Tavily</span>}
           {data?.provider === 'bing' && <span>Results via Bing</span>}
@@ -429,6 +454,8 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
   const [idx, setIdx] = useState(0);
   const [inputUrl, setInputUrl] = useState(start);
   const [loading, setLoading] = useState(true);
+  // Bumped by Reload: the frame (or the results page) remounts and fetches again
+  const [reloadKey, setReloadKey] = useState(0);
 
   // Always-fresh refs so the message listener never has a stale closure
   const stackRef = useRef(stack);
@@ -509,8 +536,9 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
     }
   }
   function reload() {
-    setLoading(true);
-    setStack((s) => [...s]);
+    setReloadKey((k) => k + 1);
+    // Search and the plain site render locally; only a framed page has anything to wait for
+    setLoading(!showingSearch && !showingPlainSite);
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -649,13 +677,13 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
         {showingPlainSite ? (
           <PlainPortfolioSite />
         ) : showingSearch && searchQuery ? (
-          <SearchResults query={searchQuery} onOpen={navigate} onSearch={search} />
+          <SearchResults key={reloadKey} query={searchQuery} onOpen={navigate} onSearch={search} />
         ) : showingSearch ? (
           <SearchHome onSearch={search} />
         ) : (
           <iframe
             ref={iframeRef}
-            key={`${currentUrl}-${idx}`}
+            key={`${currentUrl}-${idx}-${reloadKey}`}
             src={proxyUrl(currentUrl)}
             className={styles.iframe}
             title="Browser"

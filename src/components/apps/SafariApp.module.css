@@ -461,24 +461,25 @@
 }
 
 .serpTab {
+  display: inline-block;
   border: 0;
   background: none;
-  cursor: default;
+  cursor: pointer;
   padding: 8px 12px 12px;
   font: 14px inherit;
   color: #5f6368;
+  text-decoration: none;
   border-bottom: 2px solid transparent;
   white-space: nowrap;
+}
+.serpTab:hover {
+  color: #1b1b1f;
 }
 
 .serpTabActive {
   color: #1b1b1f;
   font-weight: 600;
   border-bottom-color: #fb542b;
-}
-
-.serpTools {
-  margin-left: auto;
 }
 
 .serpMain {
@@ -721,6 +722,13 @@
   gap: 28px;
   padding: 14px 30px;
   flex-wrap: wrap;
+}
+.serpFooterLinks a {
+  color: inherit;
+  text-decoration: none;
+}
+.serpFooterLinks a:hover {
+  text-decoration: underline;
 }
 
 @media (max-width: 767px) {
