@@ -796,3 +796,17 @@
   padding: 0;
   font-size: 17px;
 }
+
+/* iOS draws no blue ring on a focused field: the bar just brightens, as Safari's does. */
+:global(html[data-os='ios']) .root .urlBar:focus-within {
+  border-color: var(--line-strong);
+  box-shadow: none;
+}
+:global(html[data-os='ios']) .root .urlInput,
+:global(html[data-os='ios']) .root .urlInput:focus,
+:global(html[data-os='ios']) .root .searchHomeInput:focus {
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  box-shadow: none;
+}
