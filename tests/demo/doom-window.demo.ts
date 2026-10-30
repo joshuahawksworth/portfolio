@@ -15,11 +15,13 @@ test.describe('DOOM on the desktop', () => {
     await page.getByRole('button', { name: 'Close', exact: true }).first().click();
     await beat(page);
     await page.getByRole('button', { name: 'DOOM', exact: true }).first().dblclick();
-    // The controls line only appears once DOSBox has drawn its first frame.
-    await expect(page.getByText(/W A S D move/)).toBeVisible({ timeout: 30_000 });
+    // The controls line appears once DOSBox has drawn its first frame and stays for the game.
+    await expect(page.getByText(/W A S D move/)).toBeVisible({ timeout: 60_000 });
     await beat(page, 2_500);
     await page.keyboard.press('Enter');
     await beat(page, 3_000);
+    // Still there after playing: a player who skips the title screen can read it later.
+    await expect(page.getByText(/W A S D move/)).toBeVisible();
   });
 });
 
@@ -28,14 +30,16 @@ test.describe('DOOM on a phone', () => {
 
   test('Android: DOOM full screen with touch controls, then Home to leave', async ({ page }) => {
     await enterPortfolio(page, 'windows');
-    const doom = page.getByRole('button', { name: 'DOOM', exact: true }).first();
+    // The disc carries its own label, so the button's name is "DOOM DOOM"
+    const doom = page.getByRole('button', { name: /DOOM$/ }).first();
     await doom.scrollIntoViewIfNeeded();
     await beat(page);
     await doom.click();
     const fire = page.getByRole('button', { name: 'Fire' });
     await expect(fire).toBeVisible();
-    // The picture fades in once DOSBox has drawn its first frame.
-    await expect(page.locator('canvas')).toHaveCSS('opacity', '1', { timeout: 30_000 });
+    // The picture fades in once DOSBox has drawn its first frame; a shared CI runner can take
+    // a while to boot the emulator.
+    await expect(page.locator('canvas')).toHaveCSS('opacity', '1', { timeout: 60_000 });
     await beat(page, 2_500);
     const enter = page.getByRole('button', { name: 'Enter' });
     await enter.dispatchEvent('pointerdown');
