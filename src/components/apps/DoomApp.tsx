@@ -91,13 +91,13 @@ export default function DoomApp() {
   const audioRef = useRef<AudioContext | null>(null);
   const gainRef = useRef<GainNode | null>(null);
   const mutedRef = useRef(false);
-  const volumeRef = useRef(0.8);
+  const volumeRef = useRef(0.5);
 
   const [status, setStatus] = useState<Status>('loading');
   // The controls line shows for the first 20 s, then slides into a drawer the player can reopen
   const [hintOpen, setHintOpen] = useState(true);
   const [muted, setMuted] = useState(false);
-  const [volume, setVolume] = useState(0.8);
+  const [volume, setVolume] = useState(0.5);
   // The sound drawer (volume and mute) lives behind the speaker button, top right
   const [soundOpen, setSoundOpen] = useState(false);
 
