@@ -8,9 +8,9 @@ import type { DynamicFrame, DynamicLook } from '../lib/dynamicWallpaper';
 import type { OsName } from '../lib/settingsStore';
 
 export const WALLPAPERS = {
-  // "The Beach", Apple's dynamic Big Sur wallpaper and the macOS / iOS default. the-beach.jpg
-  // is the day picture; DYNAMIC_FRAME_IMAGES lists the dawn, dusk and night frames it
-  // cross-fades through (rendered from it by scripts/wallpapers/beach-variants.mjs).
+  // "The Beach", Apple's dynamic wallpaper (Lake Tahoe) and the macOS / iOS default. the-beach.jpg
+  // is Apple's day frame; DYNAMIC_FRAME_IMAGES lists Apple's dawn, dusk and night frames it
+  // cross-fades through.
   beach: '/wallpapers/the-beach.jpg',
   gold: '/wallpapers/golden-gate.jpg',
   catalina: '/wallpapers/catalina-night.jpg',

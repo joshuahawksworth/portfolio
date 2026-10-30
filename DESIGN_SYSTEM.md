@@ -37,7 +37,7 @@ Rules for platform-aware work:
   A dynamic wallpaper is a day picture plus dawn, dusk and night frames (`DYNAMIC_FRAME_IMAGES`) that
   `DynamicWallpaper` cross-fades on the visitor's clock around that day's sunrise and sunset
   (`lib/dynamicWallpaper.ts`); the lock screens show the dominant frame via `wallpaperImageFor`. The Beach frames
-  are rendered from the day image by `node scripts/wallpapers/beach-variants.mjs`. `windows-7-harmony.jpg` and
+  are Apple's own four pictures, cropped square (2000×2000) so one file serves the desktop and the phones. `windows-7-harmony.jpg` and
   `windows-xp-bliss.jpg` are optional extras: drop them into `public/wallpapers/` and the picker lists them.
   Which optional files exist is baked in at build time (`__PUBLIC_ASSETS__`, see `lib/publicAssets.ts`), so
   nothing is probed at runtime; restart the dev server after adding one.
