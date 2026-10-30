@@ -385,7 +385,7 @@
   }
 }
 
-/* ── Composer: the Claude card, text above a row of controls ── */
+/* ── Composer: the Claude card, the text between the plus and the send button ── */
 .composerWrap {
   flex-shrink: 0;
   width: 100%;
@@ -396,8 +396,9 @@
 }
 .composer {
   display: flex;
-  flex-direction: column;
-  padding: 12px 12px 10px 16px;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 8px 8px 8px 10px;
   border: 1px solid var(--cl-line);
   border-radius: 16px;
   background: var(--cl-card);
@@ -409,9 +410,10 @@
   border-color: rgba(61, 57, 41, 0.24);
 }
 .textarea {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   max-height: 180px;
-  padding: 2px 0 8px;
+  padding: 5px 0;
   border: none;
   outline: none;
   background: none;
@@ -425,26 +427,18 @@
 .textarea::placeholder {
   color: var(--cl-muted);
 }
-.composerBar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-left: -4px;
-}
-.composerBar .roundBtn {
+.composer .roundBtn {
   border: 1px solid var(--cl-line);
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
-}
-.spacer {
-  flex: 1;
+  width: 32px;
+  height: 32px;
 }
 .model {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  padding: 4px 8px;
+  height: 32px;
+  padding: 0 6px;
   border-radius: 8px;
   font-size: 13.5px;
   color: var(--cl-muted);
@@ -514,8 +508,7 @@
   padding: 6px 12px 12px;
 }
 .root[data-narrow] .composer {
-  border-radius: 22px;
-  padding: 10px 10px 8px 16px;
+  border-radius: 24px;
 }
 
 /* The composer is already a card: keep the platform text-box and button dressing off it on
@@ -530,7 +523,7 @@
   background: none;
   box-shadow: none;
   min-height: 0;
-  padding: 2px 0 8px;
+  padding: 5px 0;
 }
 :global(html[data-os='windows']) .root .composer .sendBtn,
 :global(html[data-os='android']) .root .composer .sendBtn {

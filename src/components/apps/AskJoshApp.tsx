@@ -308,6 +308,15 @@ export default function AskJoshApp() {
 
   const composer = (
     <div className={styles.composer}>
+      <button
+        type="button"
+        className={styles.roundBtn}
+        disabled
+        aria-label="Attach"
+        title="Attachments aren’t part of this demo"
+      >
+        <Icon d={PLUS} />
+      </button>
       <textarea
         ref={textareaRef}
         className={styles.textarea}
@@ -319,33 +328,21 @@ export default function AskJoshApp() {
         onKeyDown={handleKeyDown}
         disabled={streaming}
       />
-      <div className={styles.composerBar}>
-        <button
-          type="button"
-          className={styles.roundBtn}
-          disabled
-          aria-label="Attach"
-          title="Attachments aren’t part of this demo"
-        >
-          <Icon d={PLUS} />
-        </button>
-        <span className={styles.spacer} />
-        {!narrow && (
-          <span className={styles.model}>
-            {MODEL}
-            <Icon d={CHEVRON} size={14} />
-          </span>
-        )}
-        <button
-          type="button"
-          className={styles.sendBtn}
-          onClick={() => void send(input)}
-          disabled={streaming || input.trim() === ''}
-          aria-label="Send"
-        >
-          <Icon d={ARROW_UP} size={16} />
-        </button>
-      </div>
+      {!narrow && (
+        <span className={styles.model}>
+          {MODEL}
+          <Icon d={CHEVRON} size={14} />
+        </span>
+      )}
+      <button
+        type="button"
+        className={styles.sendBtn}
+        onClick={() => void send(input)}
+        disabled={streaming || input.trim() === ''}
+        aria-label="Send"
+      >
+        <Icon d={ARROW_UP} size={16} />
+      </button>
     </div>
   );
 
