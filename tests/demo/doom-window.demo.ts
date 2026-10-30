@@ -2,9 +2,11 @@ import { expect, test } from '@playwright/test';
 import { beat, enterPortfolio, onlyOn } from './demo-helpers';
 
 /**
- * DOOM opens in an ordinary window and DOSBox boots straight into the game; on a phone it
- * takes the whole screen with translucent controls and the system bars laid over it, and
- * Home leaves it. Video, because the point is the launch and the exit.
+ * DOOM opens in an ordinary window and DOSBox boots straight into the game: its Dock icon
+ * appears and bounces the moment it is launched and stops once the game draws. The controls
+ * line slides into a drawer after a while; the controller button in the corner brings it
+ * back. On a phone it takes the whole screen with translucent controls and the system bars
+ * laid over it, and Home leaves it. Video, because the point is the launch and the exit.
  */
 test.describe('DOOM on the desktop', () => {
   onlyOn('desktop');
@@ -15,13 +17,21 @@ test.describe('DOOM on the desktop', () => {
     await page.getByRole('button', { name: 'Close', exact: true }).first().click();
     await beat(page);
     await page.getByRole('button', { name: 'DOOM', exact: true }).first().dblclick();
-    // The controls line appears once DOSBox has drawn its first frame and stays for the game.
+    // Feedback at once: DOOM joins the Dock and bounces while DOSBox boots.
+    const dockDoom = page.locator('[class*="_wrapper_"]').getByRole('button', { name: 'DOOM' });
+    await expect(dockDoom).toBeVisible({ timeout: 2_000 });
+    // The controls line appears once DOSBox has drawn its first frame.
     await expect(page.getByText(/W A S D move/)).toBeVisible({ timeout: 60_000 });
     await beat(page, 2_500);
     await page.keyboard.press('Enter');
     await beat(page, 3_000);
-    // Still there after playing: a player who skips the title screen can read it later.
-    await expect(page.getByText(/W A S D move/)).toBeVisible();
+    // The line lives in a drawer: the controller button in the corner hides and shows it.
+    await page.getByRole('button', { name: 'Hide controls' }).click();
+    await expect(page.getByRole('button', { name: 'Show controls' })).toBeVisible();
+    await beat(page, 1_500);
+    await page.getByRole('button', { name: 'Show controls' }).click();
+    await expect(page.getByRole('button', { name: 'Hide controls' })).toBeVisible();
+    await beat(page, 1_500);
   });
 });
 

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent, ReactNode } from 'react';
 import { useDesktop } from '../../context/DesktopContext';
 import { useSettings } from '../../context/SettingsContext';
+import { reportAppReady } from '../../lib/appReady';
 import styles from './DoomApp.module.css';
 
 interface CIEvents {
@@ -91,12 +92,20 @@ export default function DoomApp() {
   const mutedRef = useRef(false);
 
   const [status, setStatus] = useState<Status>('loading');
+  // The controls line shows for the first 20 s, then slides into a drawer the player can reopen
+  const [hintOpen, setHintOpen] = useState(true);
   const [muted, setMuted] = useState(false);
 
   useEffect(() => {
     mutedRef.current = muted;
     if (!muted && audioRef.current?.state === 'suspended') audioRef.current.resume();
   }, [muted]);
+
+  useEffect(() => {
+    if (status !== 'ready') return;
+    const t = setTimeout(() => setHintOpen(false), 20_000);
+    return () => clearTimeout(t);
+  }, [status]);
 
   // ── Boot DOSBox ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -133,6 +142,7 @@ export default function DoomApp() {
           ctx = canvas.getContext('2d');
           img = ctx?.createImageData(w, h) ?? null;
           setStatus('ready');
+          reportAppReady('doom');
         });
 
         ev.onFrame((rgb, rgba) => {
@@ -256,7 +266,46 @@ export default function DoomApp() {
           </p>
         )}
         {status === 'ready' && !isMobile && (
-          <p className={styles.hint}>W A S D move · ← → turn · Space fire · F use · Esc menu</p>
+          <>
+            <p className={`${styles.hint} ${hintOpen ? '' : styles.hintHidden}`}>
+              W A S D move · ← → turn · Space fire · F use · Esc menu
+            </p>
+            <button
+              type="button"
+              className={`${styles.hintToggle} ${hintOpen ? styles.hintToggleRaised : ''}`}
+              onClick={() => setHintOpen((o) => !o)}
+              aria-expanded={hintOpen}
+              aria-label={hintOpen ? 'Hide controls' : 'Show controls'}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M7 6h10a5 5 0 0 1 5 5v2.2a4.3 4.3 0 0 1-7.7 2.6L13.4 15h-2.8l-.9.8A4.3 4.3 0 0 1 2 13.2V11a5 5 0 0 1 5-5z" />
+                <path d="M7.5 9.2v3M6 10.7h3M15.5 11.5h.01M17.5 9.5h.01" />
+              </svg>
+              <svg
+                viewBox="0 0 12 12"
+                width="10"
+                height="10"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                {hintOpen ? <path d="M3 4.5l3 3 3-3" /> : <path d="M3 7.5l3-3 3 3" />}
+              </svg>
+            </button>
+          </>
         )}
         <button
           type="button"
