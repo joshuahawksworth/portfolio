@@ -100,7 +100,7 @@ translucent nav bars). The full token list and reference measurements live in
 
 - Use the tokens, never raw hex, for normal portfolio apps:
   - Text: `--text`, `--text-strong`, `--muted`, `--muted-2`
-  - Surfaces: `--panel` (window body), `--panel-2` (inset areas), `--glass` (sidebars, toolbars, title bars),
+  - Surfaces: `--panel-solid` (the opaque window body every app sits on), `--panel` (an app's tint over it), `--panel-2` (inset areas), `--glass` (sidebars, toolbars, title bars),
     `--glass-strong` (menus, popovers)
   - Lines: `--line`, `--line-strong`
   - Accent: `--accent`, `--accent-soft`

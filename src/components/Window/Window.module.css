@@ -60,7 +60,8 @@
   border-radius: var(--radius-window);
   overflow: hidden;
   /* Liquid Glass: the wallpaper shows through a heavily blurred, lightly tinted
-     pane with a bright refracted rim. Apps only tint this; they never paint over it. */
+     pane with a bright refracted rim. Only the chrome (title bar, toolbar) shows it; the
+     body below is opaque, as macOS and Windows draw their windows. */
   background:
     linear-gradient(
       180deg,
@@ -265,8 +266,9 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  /* Transparent: the app root tints the window's glass */
-  background: transparent;
+  /* Opaque: what is behind the window never shows through its content, only through the
+     title bar above. Apps tint this with --panel / --panel-2. */
+  background: var(--panel-solid);
 }
 
 /* ── Windows 11 chrome (Mica pane, left title, caption buttons) ──────── */
