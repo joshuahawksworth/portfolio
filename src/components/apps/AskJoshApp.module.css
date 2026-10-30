@@ -517,3 +517,17 @@
   outline: none;
   box-shadow: none;
 }
+
+/* iOS draws no blue ring on a focused field: the composer just firms its edge. */
+:global(html[data-os='ios']) .root .composer:focus-within {
+  border-color: var(--line-strong);
+  box-shadow: none;
+}
+:global(html[data-os='ios']) .root .composer .textarea,
+:global(html[data-os='ios']) .root .composer .textarea:focus,
+:global(html[data-os='ios']) .root .searchInput:focus {
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  box-shadow: none;
+}
