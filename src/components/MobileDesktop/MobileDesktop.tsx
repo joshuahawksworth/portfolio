@@ -1037,7 +1037,7 @@ export default function MobileDesktop() {
   }, []);
 
   return (
-    <DesktopProvider startWithAbout={false}>
+    <DesktopProvider startWithLanding={false}>
       <MobileInner />
     </DesktopProvider>
   );

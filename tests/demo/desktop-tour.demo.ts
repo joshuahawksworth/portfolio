@@ -13,7 +13,9 @@ test.describe('desktop tour', () => {
   test('macOS desktop: Finder and Keyboard Shortcuts', async ({ page }) => {
     await enterPortfolio(page, 'apple');
 
-    await expect(page.getByText('About Josh').first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: 'Joshua Hawksworth', level: 1 })).toBeVisible({
+      timeout: 10_000,
+    });
     await beat(page);
 
     await page.getByRole('button', { name: 'Finder', exact: true }).click();

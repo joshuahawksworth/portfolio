@@ -1,0 +1,418 @@
+/* A one-page personal site in the style most developers ship: dark navy, one pink accent,
+   Quicksand, centred thin section titles, soft colour glows behind the content. */
+.site {
+  height: 100%;
+  overflow-y: auto;
+  background: #111720;
+  color: #fff;
+  font-family: Quicksand, 'Varela Round', Nunito, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  scroll-behavior: smooth;
+}
+
+.page {
+  position: relative;
+  min-height: 100%;
+}
+
+/* The glows: a few large soft discs down the page */
+.glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(520px 480px at 88% 5%, rgba(224, 24, 104, 0.42), transparent 70%),
+    radial-gradient(560px 520px at 6% 24%, rgba(43, 69, 104, 0.85), transparent 70%),
+    radial-gradient(520px 520px at 96% 42%, rgba(224, 24, 104, 0.22), transparent 70%),
+    radial-gradient(560px 520px at 10% 68%, rgba(224, 24, 104, 0.2), transparent 70%),
+    radial-gradient(560px 520px at 92% 88%, rgba(43, 69, 104, 0.8), transparent 70%);
+}
+
+.site a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 400;
+}
+
+/* ── Nav ── */
+.nav {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 26px 56px 0;
+  font-size: 15px;
+}
+.brand {
+  font-size: 19px;
+  font-weight: 400;
+}
+.nav nav {
+  display: flex;
+  gap: 32px;
+}
+.nav button,
+.nav a {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #fff;
+  font: inherit;
+  opacity: 0.85;
+  cursor: pointer;
+}
+.nav button:hover,
+.nav a:hover {
+  opacity: 1;
+  color: #e01868;
+}
+
+/* ── Left rail of contact icons ── */
+.rail {
+  position: sticky;
+  top: 44%;
+  height: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  width: 40px;
+  margin-left: 20px;
+}
+.rail a {
+  display: flex;
+  color: #fff;
+  opacity: 0.9;
+}
+.rail a:hover {
+  color: #e01868;
+}
+.railLine {
+  width: 2px;
+  height: 110px;
+  background: #fff;
+  opacity: 0.9;
+}
+
+/* ── Hero ── */
+.main {
+  position: relative;
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 0 56px 40px;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 48px;
+  padding: 70px 0 10px;
+}
+.heroText {
+  max-width: 600px;
+}
+.kicker {
+  margin: 0 0 6px;
+  font-size: 19px;
+  font-weight: 400;
+  opacity: 0.9;
+}
+.hero h1 {
+  margin: 0 0 6px;
+  font-size: 25px;
+  font-weight: 400;
+}
+.role {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  color: #e01868;
+  font-size: 20px;
+  font-weight: 400;
+}
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #e01868;
+}
+.lead {
+  margin: 0 0 24px;
+  font-size: 18px;
+  line-height: 1.5;
+  opacity: 0.95;
+}
+
+/* Outlined pink buttons: the resume button and the project links */
+.outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border: 1px solid #e01868;
+  border-radius: 2px;
+  color: #e01868 !important;
+  font-size: 18px;
+  background: transparent;
+}
+.outline:hover {
+  background: rgba(224, 24, 104, 0.12);
+}
+
+/* Tilted photo (the whole picture, 3:4) over a tilted pink square */
+.photoWrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 300px;
+  height: 400px;
+  margin-right: 30px;
+}
+.photoBack {
+  position: absolute;
+  inset: 22px 4px 4px 22px;
+  background: #e01868;
+  transform: rotate(6deg);
+}
+.photo {
+  position: absolute;
+  inset: 0 24px 24px 0;
+  width: 276px;
+  height: 376px;
+  object-fit: cover;
+  border: 4px solid #e01868;
+  background: #0b1018;
+  transform: rotate(-6deg);
+}
+
+.scrollCue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin: 56px 0 10px;
+  color: #e01868;
+}
+
+/* ── Sections ── */
+.section {
+  padding: 70px 0 20px;
+}
+.title {
+  margin: 0 0 54px;
+  font-size: 54px;
+  font-weight: 300;
+  text-align: center;
+  line-height: 1.1;
+}
+
+.triptych {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px 60px;
+  justify-items: center;
+}
+.triptych > div {
+  max-width: 420px;
+  text-align: center;
+}
+.triptych h3 {
+  margin: 0 0 14px;
+  color: #e01868;
+  font-size: 32px;
+  font-weight: 400;
+}
+.triptych p {
+  margin: 0;
+  font-size: 18px;
+  opacity: 0.95;
+}
+.wide {
+  grid-column: 1 / -1;
+}
+
+/* Skills: a group title, then logo tiles on dark slate */
+.skillGroup {
+  margin: 0 0 34px;
+}
+.skillGroup h3 {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 16px;
+  font-size: 24px;
+  font-weight: 400;
+}
+.skillGroup h3::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+.tiles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.tiles li {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px 9px 11px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: #1b2633;
+  font-size: 16px;
+}
+.tiles img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+/* Projects: glowing screenshot frame left, text right */
+.projects {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 90px;
+}
+.project {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 44px;
+  align-items: start;
+}
+.shot {
+  display: block;
+  aspect-ratio: 16 / 10;
+  border: 2px solid #e01868;
+  border-radius: 6px;
+  background: #0b1018;
+  box-shadow: 0 0 18px rgba(224, 24, 104, 0.75);
+  overflow: hidden;
+}
+.shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.shotEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.shotEmpty img {
+  width: 46%;
+  height: auto;
+  max-height: 40%;
+  object-fit: contain;
+}
+.projectText h3 {
+  margin: 0 0 10px;
+  font-size: 40px;
+  font-weight: 300;
+  line-height: 1.1;
+}
+.madeWith {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+.madeWith span {
+  color: #e01868;
+  font-size: 16px;
+}
+.projectText p {
+  margin: 0 0 18px;
+  font-size: 18px;
+}
+
+/* Footer links and copyright */
+.footerLinks {
+  display: flex;
+  justify-content: center;
+  gap: 54px;
+  margin-top: 70px;
+  font-size: 28px;
+  font-weight: 400;
+}
+.footerLinks a:hover {
+  color: #e01868;
+}
+.footer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 24px 30px;
+  font-size: 15px;
+}
+.footer p {
+  margin: 0;
+  opacity: 0.9;
+}
+.toTop {
+  padding: 4px;
+  border: 0;
+  background: none;
+  color: #e01868;
+  cursor: pointer;
+}
+
+@media (max-width: 760px) {
+  .nav {
+    padding: 20px 20px 0;
+  }
+  .nav nav {
+    gap: 16px;
+    font-size: 14px;
+  }
+  .rail {
+    display: none;
+  }
+  .main {
+    padding: 0 20px 30px;
+  }
+  .hero {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    padding-top: 40px;
+  }
+  .photoWrap {
+    width: 225px;
+    height: 300px;
+    align-self: center;
+  }
+  .photo {
+    width: 201px;
+    height: 276px;
+  }
+  .title {
+    font-size: 40px;
+  }
+  .triptych {
+    grid-template-columns: 1fr;
+  }
+  .project {
+    grid-template-columns: 1fr;
+  }
+  .footerLinks {
+    gap: 24px;
+    font-size: 20px;
+  }
+}

@@ -31,7 +31,9 @@ test('desktop shell boots, opens menus, and captures a visual artifact', async (
 
   await enterPortfolio(page, 'apple');
 
-  await expect(page.getByText('About Josh').first()).toBeVisible({ timeout: 4_000 });
+  await expect(page.getByRole('heading', { name: 'Joshua Hawksworth', level: 1 })).toBeVisible({
+    timeout: 4_000,
+  });
   await page.getByRole('button', { name: 'Help' }).click();
   await expect(page.getByRole('menuitem', { name: /Keyboard Shortcuts/i })).toBeVisible();
 

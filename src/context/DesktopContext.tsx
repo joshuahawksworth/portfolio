@@ -1,5 +1,6 @@
 import { createContext, use, useState, useCallback, useRef, useMemo } from 'react';
 import { APP_DEFAULTS, APP_MIN } from '../components/apps/appRegistry';
+import { PLAIN_SITE_URL } from '../components/apps/PlainPortfolioSite';
 import { buildSeedFileSystem, ROOT_IDS, type FsNode } from '../data/fileSystemSeed';
 import { shellInsets } from '../theme/platform';
 
@@ -186,14 +187,19 @@ function fitToWorkArea(appId: string, width: number, height: number) {
   return { width: Math.min(width, maxW), height: Math.min(height, maxH) };
 }
 
-function makeAbout(): WindowInstance {
-  const base = APP_DEFAULTS.about;
-  const d = { ...base, ...fitToWorkArea('about', base.width, base.height) };
+/**
+ * The desktop opens on the browser showing a plain, one-page version of the portfolio: the
+ * portfolio inside the portfolio. About Josh and the rest are a dock click away.
+ */
+function makeLanding(): WindowInstance {
+  const base = APP_DEFAULTS.safari;
+  const d = { ...base, ...fitToWorkArea('safari', 1040, 700) };
   const { x, y } = cascadePosition(0, d.width, d.height);
   return {
-    id: 'about-0',
-    appId: 'about',
+    id: 'safari-0',
+    appId: 'safari',
     title: d.title,
+    props: { url: PLAIN_SITE_URL },
     x,
     y,
     width: d.width,
@@ -210,16 +216,16 @@ function makeAbout(): WindowInstance {
 
 export function DesktopProvider({
   children,
-  startWithAbout = true,
+  startWithLanding = true,
 }: {
   children: React.ReactNode;
-  startWithAbout?: boolean;
+  startWithLanding?: boolean;
 }) {
   const [windows, setWindows] = useState<WindowInstance[]>(() =>
-    startWithAbout ? [makeAbout()] : []
+    startWithLanding ? [makeLanding()] : []
   );
   const [focusedId, setFocusedId] = useState<string | null>(() =>
-    startWithAbout ? 'about-0' : null
+    startWithLanding ? 'safari-0' : null
   );
 
   // ── File system ────────────────────────────────────────────────────────

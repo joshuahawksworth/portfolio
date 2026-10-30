@@ -34,7 +34,7 @@ describe('DesktopContext window lifecycle', () => {
     const user = userEvent.setup();
 
     render(
-      <DesktopProvider startWithAbout={false}>
+      <DesktopProvider startWithLanding={false}>
         <DesktopHarness />
       </DesktopProvider>
     );

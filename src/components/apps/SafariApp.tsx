@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import PlainPortfolioSite, { PLAIN_SITE_URL } from './PlainPortfolioSite';
 import styles from './SafariApp.module.css';
 
 const HOME = 'search://home';
@@ -442,6 +443,8 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
 
   const currentUrl = stack[idx];
   const showingSearch = isSearchEntry(currentUrl);
+  // The plain portfolio site is rendered here rather than fetched through the proxy.
+  const showingPlainSite = currentUrl === PLAIN_SITE_URL;
   const searchQuery = searchQueryFromEntry(currentUrl);
   const externalUrl = showingSearch
     ? searchQuery
@@ -453,8 +456,8 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
     setInputUrl(showingSearch ? searchQuery : currentUrl);
   }, [currentUrl, searchQuery, showingSearch]);
   useEffect(() => {
-    if (showingSearch) setLoading(false);
-  }, [showingSearch, currentUrl]);
+    if (showingSearch || showingPlainSite) setLoading(false);
+  }, [showingSearch, showingPlainSite, currentUrl]);
 
   const pushStack = useCallback((value: string) => {
     const cur = idxRef.current;
@@ -625,14 +628,14 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
         </a>
       </div>
 
-      {loading && !showingSearch && (
+      {loading && !showingSearch && !showingPlainSite && (
         <div className={styles.loadingBar} data-essential-motion="">
           <div className={styles.loadingFill} />
         </div>
       )}
 
       <div className={styles.viewport}>
-        {loading && !showingSearch && (
+        {loading && !showingSearch && !showingPlainSite && (
           <div
             className={styles.loadingOverlay}
             role="status"
@@ -643,7 +646,9 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
             <span className={styles.loadingText}>Loading {hostOf(currentUrl)}…</span>
           </div>
         )}
-        {showingSearch && searchQuery ? (
+        {showingPlainSite ? (
+          <PlainPortfolioSite />
+        ) : showingSearch && searchQuery ? (
           <SearchResults query={searchQuery} onOpen={navigate} onSearch={search} />
         ) : showingSearch ? (
           <SearchHome onSearch={search} />
