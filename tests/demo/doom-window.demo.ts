@@ -15,11 +15,13 @@ test.describe('DOOM on the desktop', () => {
     await page.getByRole('button', { name: 'Close', exact: true }).first().click();
     await beat(page);
     await page.getByRole('button', { name: 'DOOM', exact: true }).first().dblclick();
-    // The controls line only appears once DOSBox has drawn its first frame.
+    // The controls line appears once DOSBox has drawn its first frame and stays for the game.
     await expect(page.getByText(/W A S D move/)).toBeVisible({ timeout: 30_000 });
     await beat(page, 2_500);
     await page.keyboard.press('Enter');
     await beat(page, 3_000);
+    // Still there after playing: a player who skips the title screen can read it later.
+    await expect(page.getByText(/W A S D move/)).toBeVisible();
   });
 });
 

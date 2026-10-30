@@ -92,19 +92,11 @@ export default function DoomApp() {
 
   const [status, setStatus] = useState<Status>('loading');
   const [muted, setMuted] = useState(false);
-  const [hint, setHint] = useState(true);
 
   useEffect(() => {
     mutedRef.current = muted;
     if (!muted && audioRef.current?.state === 'suspended') audioRef.current.resume();
   }, [muted]);
-
-  // The controls line goes away on its own once the game has been up for a while.
-  useEffect(() => {
-    if (status !== 'ready') return;
-    const t = setTimeout(() => setHint(false), 9000);
-    return () => clearTimeout(t);
-  }, [status]);
 
   // ── Boot DOSBox ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -200,7 +192,6 @@ export default function DoomApp() {
       const key = KEYMAP[e.code];
       if (key === undefined || held.has(e.code)) return;
       held.add(e.code);
-      setHint(false);
       ciRef.current?.sendKeyEvent(key, true);
     };
     const up = (e: KeyboardEvent) => {
@@ -264,7 +255,7 @@ export default function DoomApp() {
             {status === 'error' ? 'DOOM could not start.' : 'Starting DOSBox…'}
           </p>
         )}
-        {status === 'ready' && hint && !isMobile && (
+        {status === 'ready' && !isMobile && (
           <p className={styles.hint}>W A S D move · ← → turn · Space fire · F use · Esc menu</p>
         )}
         <button
