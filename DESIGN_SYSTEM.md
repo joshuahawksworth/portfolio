@@ -14,17 +14,21 @@ This project is an interactive macOS-style portfolio. Future work should feel li
 The shell renders one of four operating systems from a single setting. `src/context/SettingsContext.tsx` owns the
 persisted settings (`src/lib/settingsStore.ts`) and derives `os` from the chosen platform and the device:
 
-| Platform | Desktop | Phone |
-| --- | --- | --- |
-| `apple` (default) | macOS (menu bar, Dock, Launchpad, Liquid Glass) | iOS (squircle grid, glass dock, iPhone lock screen) |
-| `windows` | Windows 11 (taskbar, Start menu, Mica windows, Fluent icons) | Android (Pixel launcher, Material discs, Google bar) |
+| Platform          | Desktop                                                      | Phone                                                |
+| ----------------- | ------------------------------------------------------------ | ---------------------------------------------------- |
+| `apple` (default) | macOS (menu bar, Dock, Launchpad, Liquid Glass)              | iOS (squircle grid, glass dock, iPhone lock screen)  |
+| `windows`         | Windows 11 (taskbar, Start menu, Mica windows, Fluent icons) | Android (Pixel launcher, Material discs, Google bar) |
 
 Rules for platform-aware work:
 
 - Read the OS with `useOs()` / `useSettings()` in components, or `currentOs()` (`src/theme/platform.ts`) in plain helpers.
   `<html data-os>` mirrors it, so CSS can branch with `:global(html[data-os='windows'])` or a `data-os` on the app root.
 - App artwork goes through `appIconFor(key, os)` (`src/theme/platformIcons.tsx`): macOS art lives in `dockIcons.tsx`,
-  Windows in `icons/WindowsIcons.tsx`, Android in `icons/AndroidIcons.tsx`. Shared apps with no native counterpart
+  Windows in `icons/WindowsIcons.tsx`, Android in `icons/AndroidIcons.tsx`. Every Windows system icon is a
+  `WinArt`: a real bitmap from `public/icons/windows/<name>.png` when the file exists, else the drawn Fluent-style
+  SVG. The Windows 11 renders ship for explorer, folder, recycle-bin-empty, recycle-bin-full, calculator, mail, maps,
+  terminal, photos, settings, keyboard, briefcase and this-pc (96px, from the HaydenReeve/WindowsIcons pack and
+  daedalOS); `skills` has no Windows counterpart and stays drawn. Desktop shortcuts on Windows get the shortcut-arrow badge (`NodeIcon`). Shared apps with no native counterpart
   (GitHub, Chrome, Claude, DOOM, Snake) fall through to the macOS art. Folders, drives and bins use `PlatformFileIcons`.
 - Names differ per OS: use `appTitleFor` / `appLabelFor` / `nodeDisplayName` instead of hard-coding "Finder" or "Trash".
 - Space above and below windows comes from `shellInsets(os)`; never hard-code the menu bar or dock height.

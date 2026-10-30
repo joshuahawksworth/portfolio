@@ -4,7 +4,7 @@
  * Drawn on the same 44×44 canvas as the macOS drawn icons so every surface can size
  * them the same way.
  */
-import { useId, type ReactNode } from 'react';
+import { useId, type CSSProperties, type ReactNode } from 'react';
 import { MicrosoftStoreIcon } from './DevAppIcons';
 import { BrandIcon } from '../Dock/dockIcons';
 import { DocumentIcon } from './FileSystemIcons';
@@ -339,21 +339,50 @@ export function WindowsLogo({ size = 24, color = '#0078d4' }: { size?: number; c
   );
 }
 
+/**
+ * A real Windows icon bitmap from public/icons/windows/<name>.png when the file is there (a
+ * square, transparent render, 48px or larger), else the drawn icon. Windows icons are not
+ * rounded tiles, so the image is shown as-is.
+ */
+export function WinArt({ name, fallback }: { name: string; fallback: ReactNode }) {
+  return <BrandIcon src={`/icons/windows/${name}.png`} fallback={fallback} rounded={false} />;
+}
+
+/** The same, at a fixed pixel size, for the file-system icons that are sized by their caller. */
+export function WinArtSized({
+  name,
+  size,
+  fallback,
+}: {
+  name: string;
+  size: number;
+  fallback: ReactNode;
+}) {
+  return (
+    <span
+      style={{ '--app-icon-size': `${size}px`, display: 'inline-flex' } as CSSProperties}
+      className="nodeAppIcon"
+    >
+      <WinArt name={name} fallback={fallback} />
+    </span>
+  );
+}
+
 export const WINDOWS_ICONS = {
-  finder: <ExplorerIcon />,
-  experience: <BriefcaseIcon />,
-  skills: <SkillsIcon />,
-  contact: <WinMailIcon />,
+  finder: <WinArt name="explorer" fallback={<ExplorerIcon />} />,
+  experience: <WinArt name="briefcase" fallback={<BriefcaseIcon />} />,
+  skills: <WinArt name="skills" fallback={<SkillsIcon />} />,
+  contact: <WinArt name="mail" fallback={<WinMailIcon />} />,
   outlook: <BrandIcon src="/icons/outlook.png" fallback={<OutlookIcon />} />,
-  location: <WinMapsIcon />,
-  terminal: <WinTerminalIcon />,
-  calculator: <WinCalculatorIcon />,
+  location: <WinArt name="maps" fallback={<WinMapsIcon />} />,
+  terminal: <WinArt name="terminal" fallback={<WinTerminalIcon />} />,
+  calculator: <WinArt name="calculator" fallback={<WinCalculatorIcon />} />,
   // The CV is a PDF; Word is its own app now, so the shortcut wears the document icon
   cv: <DocumentIcon name="CV.pdf" />,
   appstore: <BrandIcon src="/icons/microsoft-store.png" fallback={<MicrosoftStoreIcon />} />,
-  imageviewer: <WinPhotosIcon />,
-  settings: <WinSettingsIcon />,
-  shortcuts: <WinKeyboardIcon />,
-  trashEmpty: <RecycleBinIcon />,
-  trashFull: <RecycleBinIcon full />,
+  imageviewer: <WinArt name="photos" fallback={<WinPhotosIcon />} />,
+  settings: <WinArt name="settings" fallback={<WinSettingsIcon />} />,
+  shortcuts: <WinArt name="keyboard" fallback={<WinKeyboardIcon />} />,
+  trashEmpty: <WinArt name="recycle-bin-empty" fallback={<RecycleBinIcon />} />,
+  trashFull: <WinArt name="recycle-bin-full" fallback={<RecycleBinIcon full />} />,
 } as const;

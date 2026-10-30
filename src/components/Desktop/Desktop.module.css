@@ -823,39 +823,66 @@
 }
 
 .desktopWin .icon {
-  border-radius: 3px;
-  padding: 6px 4px 4px;
+  width: 74px;
+  gap: 3px;
+  padding: 5px 2px 4px;
+  border-radius: 0;
 }
 
+/* Hover and selection are the pale translucent panes of the Windows shell */
 .desktopWin .icon:hover {
-  background: rgba(255, 255, 255, 0.16);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+  background: rgba(176, 204, 232, 0.25);
+  box-shadow: inset 0 0 0 1px rgba(176, 204, 232, 0.3);
 }
 
 .desktopWin .iconSelected {
-  background: rgba(120, 180, 255, 0.28) !important;
-  box-shadow: inset 0 0 0 1px rgba(160, 205, 255, 0.7);
+  background: rgba(142, 190, 240, 0.35) !important;
+  box-shadow: inset 0 0 0 1px rgba(142, 190, 240, 0.7);
 }
 
 .desktopWin .iconImg {
-  border-radius: 4px;
+  border-radius: 0;
   background: transparent;
   border: 0;
   padding: 0;
   box-shadow: none;
 }
 
+/* Labels wrap to two lines rather than cutting off, and sit on the layered shadow Windows
+   draws so they read on any background. */
 .desktopWin .iconLabel {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  max-width: 72px;
   font-size: 12px;
   font-weight: 400;
+  letter-spacing: -0.1px;
+  line-height: 1.2;
   text-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.8),
-    0 0 6px rgba(0, 0, 0, 0.5);
+    0 0 1px rgba(0, 0, 0, 0.75),
+    0 0 2px rgba(0, 0, 0, 0.5),
+    0 1px 1px rgba(0, 0, 0, 0.6),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 2px 1px rgba(0, 0, 0, 0.2);
 }
 
 .desktopWin .iconLabelFocused {
+  -webkit-line-clamp: 3;
   background: transparent;
   color: #fff;
+  padding: 0;
+  border-radius: 0;
+  text-shadow:
+    0 0 1px rgba(0, 0, 0, 0.75),
+    0 0 2px rgba(0, 0, 0, 0.5),
+    0 1px 1px rgba(0, 0, 0, 0.6),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 2px 1px rgba(0, 0, 0, 0.2);
 }
 
 .desktopWin .ctxMenu {
