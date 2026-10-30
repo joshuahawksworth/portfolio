@@ -155,7 +155,7 @@ function apiDevPlugin(env: Record<string, string>): Plugin {
           }
 
           const page = Number(new URLSearchParams(qs).get('page') ?? 1);
-          const response = await searchWeb(query, page);
+          const response = await searchWeb(query, page, { ...process.env, ...env });
           res.statusCode = 200;
           res.setHeader('Content-Type', 'application/json; charset=utf-8');
           res.end(JSON.stringify(response));

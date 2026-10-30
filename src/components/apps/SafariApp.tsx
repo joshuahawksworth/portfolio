@@ -50,7 +50,7 @@ interface SearchResponse {
   query: string;
   page: number;
   results: SearchResult[];
-  provider?: 'google' | 'duckduckgo';
+  provider?: 'google' | 'brave' | 'tavily' | 'bing' | 'duckduckgo';
   totalResults?: string;
   searchTime?: string;
   error?: 'unconfigured' | 'blocked' | 'failed';
@@ -339,10 +339,9 @@ function SearchResults({
           <div className={styles.serpNotice}>
             <h2>Search isn't set up on this site yet</h2>
             <p>
-              Google can't be embedded in another website, so results have to come from the Google
-              Programmable Search API. Add <code>GOOGLE_SEARCH_KEY</code> and{' '}
-              <code>GOOGLE_SEARCH_CX</code> to the deployment and this page fills with real Google
-              results.
+              Google can't be embedded in another website, so results have to come from a search
+              API. Add <code>BRAVE_SEARCH_KEY</code> (or <code>TAVILY_API_KEY</code>) to the
+              deployment and this page fills with real results.
             </p>
             <p>In the meantime you can still type a full web address in the bar above.</p>
           </div>
@@ -448,6 +447,9 @@ function SearchResults({
           <span>Send feedback</span>
           <span>Privacy</span>
           <span>Terms</span>
+          {data?.provider === 'brave' && <span>Results via Brave Search</span>}
+          {data?.provider === 'tavily' && <span>Results via Tavily</span>}
+          {data?.provider === 'bing' && <span>Results via Bing</span>}
           {data?.provider === 'duckduckgo' && <span>Results via DuckDuckGo</span>}
         </div>
       </footer>
