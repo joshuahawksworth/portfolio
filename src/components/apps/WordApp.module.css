@@ -301,3 +301,23 @@
   font-size: 11px;
   flex-shrink: 0;
 }
+
+/* The Markdown view is a transparent textarea over the coloured text. The Windows and
+   Android field styles would paint it as a white text box (85% white, solid when focused),
+   veiling the page and knocking the two layers out of line; keep it bare and aligned. */
+:global(html[data-os='windows']) .root .mdInput,
+:global(html[data-os='android']) .root .mdInput,
+:global(html[data-os='windows']) .root .mdInput:focus,
+:global(html[data-os='android']) .root .mdInput:focus {
+  background: transparent;
+  color: transparent;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  box-shadow: none;
+  min-height: 0;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 22px;
+}
