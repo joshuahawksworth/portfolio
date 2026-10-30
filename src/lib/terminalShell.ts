@@ -964,7 +964,7 @@ export class Shell {
           this.host.openApp('safari', {
             url: target.startsWith('http') ? target : `https://${target}`,
           });
-          say(`Opening ${target} in ${ps ? 'Google Chrome' : 'Chrome'}…`);
+          say(`Opening ${target} in ${ps ? 'Brave Browser' : 'Brave'}…`);
           break;
         }
         const appId = APP_ALIASES[target.toLowerCase().replace(/\.(app|exe)$/, '')];
@@ -1281,6 +1281,7 @@ const APP_ALIASES: Record<string, string> = {
   trash: 'trash',
   bin: 'trash',
   safari: 'safari',
+  brave: 'safari',
   chrome: 'safari',
   edge: 'safari',
   browser: 'safari',

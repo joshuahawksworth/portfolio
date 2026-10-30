@@ -87,65 +87,38 @@ function SearchHome({ onSearch }: { onSearch: (query: string) => void }) {
 
   return (
     <div className={styles.searchHome}>
-      <div className={styles.searchLogo} aria-label="Google Search">
-        <span style={{ color: '#4285f4' }}>G</span>
-        <span style={{ color: '#ea4335' }}>o</span>
-        <span style={{ color: '#fbbc05' }}>o</span>
-        <span style={{ color: '#4285f4' }}>g</span>
-        <span style={{ color: '#34a853' }}>l</span>
-        <span style={{ color: '#ea4335' }}>e</span>
-      </div>
+      <BraveLogo height={64} className={styles.searchLogo} />
       <form className={styles.searchHomeForm} onSubmit={handleSubmit}>
-        <input
-          className={styles.searchHomeInput}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search Google"
-          autoFocus={!isMobile}
-        />
-        <button className={styles.searchHomeButton} type="submit">
-          Search
-        </button>
+        <div className={styles.searchHomePill}>
+          <input
+            className={styles.searchHomeInput}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search the web privately…"
+            aria-label="Search"
+            autoFocus={!isMobile}
+          />
+          <button className={styles.searchHomeButton} type="submit" aria-label="Search">
+            <SearchIcon size={18} />
+          </button>
+        </div>
       </form>
       <p className={styles.searchHomeHint}>Type a search or enter a full website address above.</p>
     </div>
   );
 }
 
-/** The Google wordmark, drawn so it needs no image and no web font. */
-function GoogleLogo({ height = 30, className }: { height?: number; className?: string }) {
-  const letters: [string, string][] = [
-    ['G', '#4285f4'],
-    ['o', '#ea4335'],
-    ['o', '#fbbc05'],
-    ['g', '#4285f4'],
-    ['l', '#34a853'],
-    ['e', '#ea4335'],
-  ];
+/** The Brave Search wordmark: the lion mark and "brave", from Brave's own SVG. */
+function BraveLogo({ height = 30, className }: { height?: number; className?: string }) {
   return (
-    <svg
+    <img
       className={className}
-      viewBox="0 0 272 92"
+      src="/icons/brave-wordmark.svg"
+      alt="Brave Search"
       height={height}
-      width={(272 / 92) * height}
-      role="img"
-      aria-label="Google"
-    >
-      <text
-        x="6"
-        y="72"
-        fontFamily="'Product Sans', 'Google Sans', Arial, Helvetica, sans-serif"
-        fontSize="86"
-        fontWeight="500"
-        letterSpacing="-4"
-      >
-        {letters.map(([ch, fill], i) => (
-          <tspan key={i} fill={fill}>
-            {ch}
-          </tspan>
-        ))}
-      </text>
-    </svg>
+      width={(129 / 40) * height}
+      draggable={false}
+    />
   );
 }
 
@@ -157,7 +130,7 @@ function SearchIcon({ size = 20 }: { size?: number }) {
   );
 }
 
-/** Google shows "https://host › path › segments" under the site name. */
+/** Brave shows "host › path › segments" under the site name. */
 function breadcrumb(url: string): string {
   try {
     const parsed = new URL(url);
@@ -166,7 +139,7 @@ function breadcrumb(url: string): string {
       .filter(Boolean)
       .map((seg) => decodeURIComponent(seg));
     const shown = parts.length > 3 ? [parts[0], '…', parts[parts.length - 1]] : parts;
-    return [`${parsed.protocol}//${parsed.hostname}`, ...shown].join(' › ');
+    return [parsed.hostname, ...shown].join(' › ');
   } catch {
     return url;
   }
@@ -191,7 +164,7 @@ function Favicon({ url }: { url: string }) {
   return (
     <img
       className={styles.serpFavicon}
-      src={`https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=32`}
+      src={`https://icons.duckduckgo.com/ip3/${encodeURIComponent(host)}.ico`}
       alt=""
       width={18}
       height={18}
@@ -201,7 +174,7 @@ function Favicon({ url }: { url: string }) {
   );
 }
 
-const SERP_TABS = ['All', 'Images', 'Videos', 'News', 'Maps', 'Shopping', 'More'];
+const SERP_TABS = ['All', 'Images', 'Videos', 'News'];
 
 function SearchResults({
   query,
@@ -270,9 +243,9 @@ function SearchResults({
             type="button"
             className={styles.serpLogoBtn}
             onClick={() => onSearch('')}
-            aria-label="Google home"
+            aria-label="Brave Search home"
           >
-            <GoogleLogo height={30} />
+            <BraveLogo height={30} />
           </button>
           <form className={styles.serpForm} onSubmit={submit} role="search">
             <input
@@ -293,7 +266,7 @@ function SearchResults({
                 ×
               </button>
             )}
-            <button type="submit" className={styles.serpSubmit} aria-label="Google Search">
+            <button type="submit" className={styles.serpSubmit} aria-label="Search">
               <SearchIcon />
             </button>
           </form>
@@ -310,7 +283,7 @@ function SearchResults({
             </button>
           ))}
           <button type="button" className={`${styles.serpTab} ${styles.serpTools}`}>
-            Tools
+            Settings
           </button>
         </nav>
       </header>
@@ -339,8 +312,8 @@ function SearchResults({
           <div className={styles.serpNotice}>
             <h2>Search isn't set up on this site yet</h2>
             <p>
-              Google can't be embedded in another website, so results have to come from a search
-              API. Add <code>BRAVE_SEARCH_KEY</code> (or <code>TAVILY_API_KEY</code>) to the
+              Search engines can't be embedded in another website, so results have to come from a
+              search API. Add <code>BRAVE_SEARCH_KEY</code> (or <code>TAVILY_API_KEY</code>) to the
               deployment and this page fills with real results.
             </p>
             <p>In the meantime you can still type a full web address in the bar above.</p>
@@ -349,7 +322,9 @@ function SearchResults({
         {status !== 'loading' && (error === 'blocked' || error === 'failed') && (
           <div className={styles.serpNotice}>
             <h2>Something went wrong</h2>
-            <p>Google couldn't answer this search right now. Give it a moment and try again.</p>
+            <p>
+              Brave Search couldn't answer this search right now. Give it a moment and try again.
+            </p>
             <button
               type="button"
               className={styles.serpRetry}
@@ -402,17 +377,6 @@ function SearchResults({
 
         {status === 'done' && canPaginate && (
           <nav className={styles.serpPager} aria-label="Pagination">
-            <div className={styles.serpPagerLogo} aria-hidden="true">
-              <span style={{ color: '#4285f4' }}>G</span>
-              {pages.map((p) => (
-                <span key={p} style={{ color: p === page ? '#ea4335' : '#fbbc05' }}>
-                  o
-                </span>
-              ))}
-              <span style={{ color: '#4285f4' }}>g</span>
-              <span style={{ color: '#34a853' }}>l</span>
-              <span style={{ color: '#ea4335' }}>e</span>
-            </div>
             <div className={styles.serpPages}>
               {page > 1 && (
                 <button type="button" onClick={() => setPage(page - 1)}>
@@ -441,12 +405,13 @@ function SearchResults({
       </main>
 
       <footer className={styles.serpFooter}>
-        <div className={styles.serpFooterRegion}>United Kingdom</div>
         <div className={styles.serpFooterLinks}>
-          <span>Help</span>
-          <span>Send feedback</span>
-          <span>Privacy</span>
-          <span>Terms</span>
+          <span>© Brave Software</span>
+          <span>Advertise</span>
+          <span>API</span>
+          <span>News</span>
+          <span>FAQ</span>
+          <span>Privacy Policy</span>
           {data?.provider === 'brave' && <span>Results via Brave Search</span>}
           {data?.provider === 'tavily' && <span>Results via Tavily</span>}
           {data?.provider === 'bing' && <span>Results via Bing</span>}
@@ -480,8 +445,8 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
   const searchQuery = searchQueryFromEntry(currentUrl);
   const externalUrl = showingSearch
     ? searchQuery
-      ? `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`
-      : 'https://www.google.com'
+      ? `https://search.brave.com/search?q=${encodeURIComponent(searchQuery)}`
+      : 'https://search.brave.com'
     : currentUrl;
 
   useEffect(() => {
@@ -631,7 +596,7 @@ export default function SafariApp({ props }: { props?: Record<string, unknown> }
               onChange={(e) => setInputUrl(e.target.value)}
               onFocus={(e) => e.target.select()}
               spellCheck={false}
-              placeholder="Search Google or enter website name"
+              placeholder="Search Brave or type a URL"
             />
           </div>
         </form>

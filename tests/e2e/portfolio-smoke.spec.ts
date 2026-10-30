@@ -54,7 +54,7 @@ test('mobile shell renders app icons and captures a visual artifact', async ({
   await expect(page.getByRole('button', { name: 'About', exact: true })).toBeVisible({
     timeout: 4_000,
   });
-  await expect(page.getByRole('button', { name: /Chrome/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Brave/i })).toBeVisible();
   await expect(page.getByRole('button', { name: /Snake/i })).toBeVisible();
 
   await testInfo.attach('mobile-shell.png', {

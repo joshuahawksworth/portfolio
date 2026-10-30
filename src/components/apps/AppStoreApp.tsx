@@ -30,7 +30,7 @@ const BLURB: Record<string, string> = {
   imageviewer: 'Open any image from Finder.',
   finder: 'The file system behind the desktop.',
   settings: 'Every control does something.',
-  safari: 'Real Google results, server-side proxy.',
+  safari: 'Real web results via Brave Search.',
   rubberduck: 'Explain your bug to it.',
   shortcuts: 'Keyboard shortcuts for this desktop.',
   trash: 'It remembers where things came from.',

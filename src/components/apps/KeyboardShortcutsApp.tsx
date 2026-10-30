@@ -30,7 +30,7 @@ const groups = [
     ],
   },
   {
-    title: 'Chrome',
+    title: 'Brave',
     shortcuts: [
       ['Enter in address bar', 'Search or open URL'],
       ['Back / Forward buttons', 'Navigate history'],

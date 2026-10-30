@@ -29,7 +29,7 @@ Rules for platform-aware work:
   SVG. The Windows 11 renders ship for explorer, folder, recycle-bin-empty, recycle-bin-full, calculator, mail, maps,
   terminal, photos, settings, keyboard, briefcase and this-pc (96px, from the HaydenReeve/WindowsIcons pack and
   daedalOS); `skills` has no Windows counterpart and stays drawn. Desktop shortcuts on Windows get the shortcut-arrow badge (`NodeIcon`). Shared apps with no native counterpart
-  (GitHub, Chrome, Claude, DOOM, Snake) fall through to the macOS art. Folders, drives and bins use `PlatformFileIcons`.
+  (GitHub, Brave, Claude, DOOM, Snake) fall through to the macOS art. Folders, drives and bins use `PlatformFileIcons`.
 - Names differ per OS: use `appTitleFor` / `appLabelFor` / `nodeDisplayName` instead of hard-coding "Finder" or "Trash".
 - Space above and below windows comes from `shellInsets(os)`; never hard-code the menu bar or dock height.
 - Wallpapers are per OS (`WALLPAPERS_FOR_OS`); the Android set is the Pixel 9's stock wallpapers in `public/wallpapers/`, and the
