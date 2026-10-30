@@ -34,11 +34,6 @@ test.describe('official icons on Windows', () => {
     await enterPortfolio(page, 'windows');
     await page.getByRole('button', { name: 'Start', exact: true }).click();
     await beat(page);
-    await page.getByRole('button', { name: /All apps/ }).click();
-    await beat(page);
-    await shot(
-      page,
-      'Windows Start menu: every app with its own icon, Google weather on the taskbar'
-    );
+    await shot(page, 'Windows Start menu and taskbar: the Microsoft Store bag, Google weather');
   });
 });
