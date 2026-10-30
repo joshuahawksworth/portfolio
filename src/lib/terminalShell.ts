@@ -1288,6 +1288,7 @@ const APP_ALIASES: Record<string, string> = {
   github: 'githubdesktop',
   'github desktop': 'githubdesktop',
   outlook: 'outlook',
+  calendar: 'calendar',
   postman: 'postman',
   xcode: 'xcode',
   'android studio': 'androidstudio',

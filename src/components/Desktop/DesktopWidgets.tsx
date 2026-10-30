@@ -75,8 +75,8 @@ export default function DesktopWidgets() {
       <button
         type="button"
         className={`${styles.widget} ${styles.calendar}`}
-        onClick={() => openApp('experience')}
-        aria-label={`${weekday} ${now.getDate()}`}
+        onClick={() => openApp('calendar')}
+        aria-label={`${weekday} ${now.getDate()}: open Calendar`}
       >
         <small className={styles.calDay}>{weekday.toUpperCase()}</small>
         <strong className={styles.calNum}>{now.getDate()}</strong>

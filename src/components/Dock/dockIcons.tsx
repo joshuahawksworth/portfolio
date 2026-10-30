@@ -1,6 +1,7 @@
 import { useId, useState, type ReactNode } from 'react';
 import { AboutLogoIcon } from '../icons/AboutLogoIcon';
 import { CalculatorLogoIcon } from '../icons/CalculatorLogoIcon';
+import { CalendarTileIcon } from '../icons/CalendarTileIcon';
 import { MacTrashIcon } from '../icons/MacTrashIcon';
 import { SnakeLcdIcon } from '../icons/SnakeLcdIcon';
 import {
@@ -296,6 +297,7 @@ const DRAWN_ICONS = {
   ),
   texteditor: <BrandIcon src="/icons/vscode.png" fallback={<VSCodeIcon />} />,
   outlook: <BrandIcon src="/icons/outlook.png" fallback={<OutlookIcon />} />,
+  calendar: <CalendarTileIcon />,
   postman: <BrandIcon src="/icons/postman.png" fallback={<PostmanIcon />} />,
   // Apple's Xcode render carries its own margin (and the hammer overhangs the tile), so it
   // is not squircle-clipped like the full-bleed brand icons.

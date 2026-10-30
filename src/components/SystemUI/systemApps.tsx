@@ -32,6 +32,7 @@ const ENTRIES: Entry[] = [
   { id: 'skills', dockKey: 'skills' },
   { id: 'contact', dockKey: 'contact' },
   { id: 'outlook', dockKey: 'outlook' },
+  { id: 'calendar', dockKey: 'calendar' },
   { id: 'location', dockKey: 'location' },
   { id: 'terminal', dockKey: 'terminal' },
   { id: 'calculator', dockKey: 'calculator' },

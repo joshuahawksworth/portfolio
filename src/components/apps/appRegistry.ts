@@ -2,6 +2,7 @@ import type { ComponentType } from 'react';
 import AboutApp from './AboutApp';
 import AskJoshApp from './AskJoshApp';
 import CalculatorApp from './CalculatorApp';
+import CalendarApp from './CalendarApp';
 import ContactApp from './ContactApp';
 import DoomApp from './DoomApp';
 import ExperienceApp from './ExperienceApp';
@@ -40,6 +41,7 @@ export type PortfolioAppId =
   | 'githubapp'
   | 'githubdesktop'
   | 'outlook'
+  | 'calendar'
   | 'postman'
   | 'xcode'
   | 'androidstudio'
@@ -154,6 +156,14 @@ export const PORTFOLIO_APPS = {
     component: GitHubDesktopApp,
     defaultSize: { width: 960, height: 620 },
     minSize: { width: 640, height: 420 },
+    maxSize: { width: 1200, height: 800 },
+  },
+  calendar: {
+    id: 'calendar',
+    title: 'Calendar',
+    component: CalendarApp,
+    defaultSize: { width: 960, height: 640 },
+    minSize: { width: 640, height: 440 },
     maxSize: { width: 1200, height: 800 },
   },
   outlook: {
