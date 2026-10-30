@@ -4,7 +4,7 @@ import { beat, enterPortfolio, onlyOn, screenshotsOnly, shot } from './demo-help
 /**
  * A Calendar app on both desktops: Day / Week / Month / Year views, the roles' start and end
  * months as events, a mini month in the sidebar. On macOS the date widget opens it and the
- * Dock shows the live Calendar icon; on Windows it sits on the desktop. Stills.
+ * Dock shows the live Calendar icon; on Windows it is pinned to the taskbar. Stills.
  */
 screenshotsOnly();
 
@@ -25,9 +25,12 @@ test.describe('Calendar', () => {
     await shot(page, 'macOS Calendar: year view');
   });
 
-  test('Windows: Calendar from the desktop; Week view', async ({ page }) => {
+  test('Windows: Calendar from the taskbar; Week view', async ({ page }) => {
     await enterPortfolio(page, 'windows');
-    await page.getByRole('button', { name: 'Calendar', exact: true }).first().dblclick();
+    await page
+      .locator('[class*="_taskbar_"]')
+      .getByRole('button', { name: 'Calendar', exact: true })
+      .click();
     await expect(page.getByRole('tab', { name: 'Month' })).toBeVisible({ timeout: 10_000 });
     await beat(page);
     await shot(page, 'Windows Calendar: month view');
