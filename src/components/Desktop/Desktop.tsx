@@ -534,9 +534,19 @@ interface CtxMenu {
 }
 
 // ── Constants ──────────────────────────────────────────────────────────────
-// The dock reports when its launch bounce ends; this only clears a bounce whose animationend
-// never arrived (animations disabled, tab hidden). Windows open immediately regardless.
-const BOUNCE_MS = 4000;
+// A launching app bounces in the Dock until it is up, as on macOS: the first launch of an
+// app in a session is a cold start of 1.2–3.2 s (two to six hops), a relaunch 0.35–0.9 s. The
+// window opens at that moment and the Dock drops the bounce at the end of the hop in flight,
+// so how many times it bounces varies with the launch. The long timer only covers a missing
+// animation event (animations disabled, tab hidden).
+const BOUNCE_MAX_MS = 8000;
+const launchedOnce = new Set<string>();
+function launchDelay(appId: string): number {
+  const warm = launchedOnce.has(appId);
+  launchedOnce.add(appId);
+  const [min, max] = warm ? [350, 900] : [1200, 3200];
+  return min + Math.random() * (max - min);
+}
 
 function toItem(node: FsNode): DesktopItem {
   return {
@@ -737,6 +747,7 @@ function DesktopSurface() {
   useEffect(() => preloadWallpapers(os), [os]);
   const [cleaning, setCleaning] = useState(false);
   const [bouncingKeys, setBouncingKeys] = useState<Set<string>>(new Set());
+  const launchAt = useRef(new Map<string, number>());
   const [nearTrashTarget, setNearTrashTarget] = useState<'dock' | 'desktop' | null>(null);
   const [draggingIds, setDraggingIds] = useState<Set<string>>(new Set());
   const [nearFolderTarget, setNearFolderTarget] = useState<string | null>(null);
@@ -886,8 +897,9 @@ function DesktopSurface() {
     }
   }
 
-  // ── Open with bounce animation ─────────────────────────────────────────
-  function clearBounce(dockKey: string) {
+  // ── Launch with the Dock bounce ────────────────────────────────────────
+  function stopBounce(dockKey: string) {
+    launchAt.current.delete(dockKey);
     setBouncingKeys((prev) => {
       if (!prev.has(dockKey)) return prev;
       const n = new Set(prev);
@@ -896,19 +908,32 @@ function DesktopSurface() {
     });
   }
 
-  function openWithBounce(dockKey: string, appId: string, props?: Record<string, unknown>) {
-    // Skip animation entirely when an instance of this app is already running
-    const alreadyRunning = windows.some((w) => w.appId === appId && !w.minimized);
-    openApp(appId, props);
-    if (alreadyRunning) return;
+  /** The Dock reports each landing; the bounce stops at the first one after the app is up. */
+  function onBounceHop(dockKey: string) {
+    const at = launchAt.current.get(dockKey);
+    if (at === undefined || Date.now() >= at) stopBounce(dockKey);
+  }
+
+  function launch(dockKey: string, appId: string, open: () => void) {
+    // An app that is already running just comes forward
+    if (windows.some((w) => w.appId === appId && !w.minimized)) {
+      open();
+      return;
+    }
+    if (bouncingKeys.has(dockKey)) return; // already launching
+    const delay = launchDelay(appId);
+    const at = Date.now() + delay;
+    launchAt.current.set(dockKey, at);
     setBouncingKeys((prev) => new Set([...prev, dockKey]));
+    setTimeout(open, delay);
     setTimeout(() => {
-      setBouncingKeys((prev) => {
-        const n = new Set(prev);
-        n.delete(dockKey);
-        return n;
-      });
-    }, BOUNCE_MS);
+      // Only this launch's bounce; a later relaunch has its own
+      if (launchAt.current.get(dockKey) === at) stopBounce(dockKey);
+    }, BOUNCE_MAX_MS);
+  }
+
+  function openWithBounce(dockKey: string, appId: string, props?: Record<string, unknown>) {
+    launch(dockKey, appId, () => openApp(appId, props));
   }
 
   function openItem(item: DesktopItem) {
@@ -1155,27 +1180,10 @@ function DesktopSurface() {
     setTimeout(() => setCleaning(false), 520);
   }
 
-  // ── Dock item activate (bounce + delayed open) ────────────────────────
+  // ── Dock item activate (bounce, then open) ────────────────────────────
   function handleDockActivate(key: string, action: () => void) {
-    if (key === 'finder' || key === 'trash' || key === 'cv') {
-      action();
-      return;
-    }
-    // Skip bounce animation if app is already open
-    const alreadyOpen = windows.some((w) => w.appId === key && !w.minimized);
-    if (alreadyOpen) {
-      action();
-      return;
-    }
-    action();
-    setBouncingKeys((prev) => new Set([...prev, key]));
-    setTimeout(() => {
-      setBouncingKeys((prev) => {
-        const n = new Set(prev);
-        n.delete(key);
-        return n;
-      });
-    }, BOUNCE_MS);
+    if (key === 'finder' || key === 'trash' || key === 'cv') action();
+    else launch(key, key, action);
   }
 
   // ── Render ────────────────────────────────────────────────────────────
@@ -1386,7 +1394,7 @@ function DesktopSurface() {
       {!isWindows && (
         <Dock
           bouncingKeys={bouncingKeys}
-          onBounceEnd={clearBounce}
+          onBounceHop={onBounceHop}
           onItemActivate={handleDockActivate}
           trashHighlighted={nearTrashTarget === 'dock'}
         />

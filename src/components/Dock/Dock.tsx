@@ -16,8 +16,8 @@ import styles from './Dock.module.css';
 /* ─── Types ───────────────────────────────────────────────────────────── */
 interface DockProps {
   bouncingKeys?: Set<string>;
-  /** The launch bounce for `key` has played out. */
-  onBounceEnd?: (key: string) => void;
+  /** The launch bounce for `key` has landed another hop. */
+  onBounceHop?: (key: string) => void;
   onItemActivate?: (key: string, action: () => void) => void;
   trashHighlighted?: boolean;
 }
@@ -78,7 +78,7 @@ function MinimizedSlot({ win }: { win: WindowInstance }) {
 /* ─── Dock ────────────────────────────────────────────────────────────── */
 export default function Dock({
   bouncingKeys,
-  onBounceEnd,
+  onBounceHop,
   onItemActivate,
   trashHighlighted,
 }: DockProps = {}) {
@@ -208,8 +208,8 @@ export default function Dock({
         <button
           className={`${styles.iconBtn} ${isBouncing ? styles.bouncing : ''} ${highlighted ? styles.trashHighlight : ''}`}
           onClick={() => handleClick(key)}
-          onAnimationEnd={(e) => {
-            if (e.animationName.includes('dockBounce')) onBounceEnd?.(key);
+          onAnimationIteration={(e) => {
+            if (e.animationName.includes('dockBounce')) onBounceHop?.(key);
           }}
           aria-label={label}
           style={draggable ? { cursor: isDragging ? 'grabbing' : 'grab' } : undefined}
