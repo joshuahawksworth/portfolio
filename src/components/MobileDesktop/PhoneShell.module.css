@@ -29,7 +29,7 @@
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
 }
 
-/* ── A game: immersive, the bars slide in over it on the edge gesture ──── */
+/* ── A game: the bars lie translucently over the picture ───────────────── */
 .game {
   background: #000;
   touch-action: none;
@@ -61,8 +61,6 @@
   left: 0;
   right: 0;
   background: rgba(0, 0, 0, 0.5);
-  transform: translateY(-100%);
-  transition: transform 200ms ease;
   pointer-events: none;
 }
 
@@ -85,11 +83,9 @@
   left: 0;
   right: 0;
   bottom: 0;
+  z-index: 40;
   background: rgba(0, 0, 0, 0.5);
   color: #fff;
-  transform: translateY(100%);
-  transition: transform 200ms ease;
-  pointer-events: none;
 }
 .droidNav button {
   display: flex;
@@ -106,16 +102,6 @@
   opacity: 0.6;
 }
 
-.game .status.visible,
-.game .droidNav.visible {
-  transform: translateY(0);
-  pointer-events: auto;
-}
-.game .droidNav.visible {
-  /* the bar sits over the edge strip while it is showing, so its buttons get the taps */
-  z-index: 40;
-}
-
 /* ── iOS home indicator ─────────────────────────────────────────────────── */
 .homeIndicator {
   position: absolute;
@@ -127,14 +113,9 @@
   border-radius: 3px;
   background: rgba(0, 0, 0, 0.55);
   transform: translateX(-50%);
-  opacity: 0;
-  transition: opacity 240ms ease;
   pointer-events: none;
 }
 .dark .homeIndicator,
 .game .homeIndicator {
   background: rgba(255, 255, 255, 0.85);
-}
-.homeIndicator.visible {
-  opacity: 1;
 }

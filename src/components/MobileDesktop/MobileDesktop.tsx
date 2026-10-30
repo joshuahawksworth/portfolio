@@ -586,7 +586,7 @@ const DOCK_APPS_ANDROID = ['about', 'experience', 'contact', 'github', 'settings
 
 /** Apps with a dark canvas, so the system bars draw white (see PhoneShell). */
 const DARK_APPS = new Set(['calculator', 'terminal']);
-/** Games: immersive, the system bars hide over them (see PhoneShell). */
+/** Games: the system bars lie over the picture instead of beside it (see PhoneShell). */
 const GAMES = new Set(['doom']);
 
 type Page = Array<string | null>;
