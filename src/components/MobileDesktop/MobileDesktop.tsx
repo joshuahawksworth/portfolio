@@ -340,7 +340,7 @@ const ICON_IMAGES: Record<string, { src: string; scale?: number; bg?: string }> 
   askjosh: { src: '/icons/claude.png' },
   shortcuts: { src: '/icons/shortcuts.png' },
   settings: { src: '/icons/settings.png', scale: 1.28 },
-  safari: { src: '/icons/brave-lion.png', scale: 0.66, bg: '#ffffff' },
+  safari: { src: '/icons/brave-lion.png', scale: 0.8, bg: '#ffffff' },
   github: { src: '/icons/github-mark-white.png', scale: 0.62, bg: '#0d1117' },
   doom: { src: '/doom-icon.png', bg: '#000' },
 };

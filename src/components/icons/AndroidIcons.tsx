@@ -64,9 +64,22 @@ function DiscImage({
   );
 }
 
-/** One of the real launcher icons in public/icons/android. */
-function Launcher({ name, title }: { name: string; title: string }) {
-  return <DiscImage src={`/icons/android/${name}.png`} title={title} />;
+/**
+ * One of the real launcher icons in public/icons/android. The Play Store renders carry
+ * different margins, so `scale` evens the glyphs out to the size the Pixel launcher shows.
+ */
+function Launcher({
+  name,
+  title,
+  scale,
+  bg,
+}: {
+  name: string;
+  title: string;
+  scale?: number;
+  bg?: string;
+}) {
+  return <DiscImage src={`/icons/android/${name}.png`} title={title} scale={scale} bg={bg} />;
 }
 
 export function BriefcaseDiscIcon() {
@@ -161,25 +174,29 @@ export const ANDROID_ICONS = {
   about: (
     <svg viewBox="0 0 44 44" width="44" height="44" aria-label="About" role="img">
       <circle cx="22" cy="22" r="22" fill="#f7df1e" />
-      <path d={JH_PATH} fill="#333" transform="translate(9.5 4) scale(0.118)" />
+      <path
+        d={JH_PATH}
+        fill="#333"
+        transform="translate(22 22) scale(0.148) translate(-116.03 -148.66)"
+      />
     </svg>
   ),
   experience: <BriefcaseDiscIcon />,
   skills: <SkillsDiscIcon />,
-  contact: <Launcher name="gmail" title="Gmail" />,
-  location: <Launcher name="maps" title="Maps" />,
-  terminal: <Launcher name="termux" title="Termux" />,
+  contact: <Launcher name="gmail" title="Gmail" scale={0.86} />,
+  location: <Launcher name="maps" title="Maps" scale={0.86} />,
+  terminal: <Launcher name="termux" title="Termux" scale={0.78} bg="#000" />,
   calculator: <Launcher name="calculator" title="Calculator" />,
-  cv: <Launcher name="docs" title="Docs" />,
+  cv: <Launcher name="docs" title="Docs" scale={0.86} />,
   texteditor: <Launcher name="keep" title="Keep" />,
   imageviewer: <Launcher name="photos" title="Photos" />,
   settings: <Launcher name="settings" title="Settings" />,
   shortcuts: <Launcher name="gboard" title="Gboard" />,
   trashEmpty: <AndroidBinIcon />,
   trashFull: <AndroidBinIcon full />,
-  safari: <DiscImage src="/icons/brave-lion.png" scale={0.6} />,
+  safari: <DiscImage src="/icons/brave-lion.png" scale={0.74} />,
   github: <DiscImage src="/icons/github-mark.png" scale={0.62} />,
-  askjosh: <DiscImage src="/icons/claude.png" bg="#d97757" scale={1.02} />,
+  askjosh: <DiscImage src="/icons/claude.png" bg="#d97757" scale={0.88} />,
   snake: <SnakeLcdIcon round />,
   doom: <DiscImage src="/doom-icon.png" bg="#000" title="DOOM" />,
 } as const;
