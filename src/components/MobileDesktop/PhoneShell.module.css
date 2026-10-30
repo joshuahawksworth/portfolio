@@ -35,21 +35,6 @@
   touch-action: none;
 }
 
-/* The bottom edge that starts the system gesture */
-.edge {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 24px;
-  z-index: 30;
-  touch-action: none;
-  -webkit-tap-highlight-color: transparent;
-}
-.game .edge {
-  height: 36px;
-}
-
 /* ── Status bar: in the flow for an app, translucent over a game ────────── */
 .status {
   flex-shrink: 0;

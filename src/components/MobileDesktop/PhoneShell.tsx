@@ -1,5 +1,9 @@
 import { useRef } from 'react';
-import type { PointerEvent as ReactPointerEvent, ReactNode } from 'react';
+import type {
+  PointerEvent as ReactPointerEvent,
+  ReactNode,
+  TouchEvent as ReactTouchEvent,
+} from 'react';
 import { useSettings } from '../../context/SettingsContext';
 import StatusBar from './StatusBar';
 import styles from './PhoneShell.module.css';
@@ -18,6 +22,10 @@ import styles from './PhoneShell.module.css';
  * instead of taking space beside it.
  */
 const SWIPE_PX = 56;
+/** How far up from the bottom an iOS home swipe may start. Safari and the system own the
+ *  very bottom edge on a real iPhone, and a mouse in Chrome needs room too, so the gesture is
+ *  read from well above the edge rather than from a thin strip on it. */
+const HOME_ZONE_PX = 110;
 
 export default function PhoneShell({
   game = false,
@@ -35,15 +43,35 @@ export default function PhoneShell({
   const { os } = useSettings();
   const android = os === 'android';
   const drag = useRef<number | null>(null);
+  const touch = useRef<{ y: number; last: number } | null>(null);
+  const shellRef = useRef<HTMLDivElement>(null);
 
-  function onEdgeDown(e: ReactPointerEvent<HTMLDivElement>) {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    drag.current = e.clientY;
+  function onTouchStart(e: ReactTouchEvent) {
+    if (android) return;
+    const t = e.touches[0];
+    const bottom = shellRef.current?.getBoundingClientRect().bottom ?? window.innerHeight;
+    touch.current = bottom - t.clientY <= HOME_ZONE_PX ? { y: t.clientY, last: t.clientY } : null;
   }
-  function onEdgeUp(e: ReactPointerEvent<HTMLDivElement>) {
+  function onTouchMove(e: ReactTouchEvent) {
+    if (touch.current) touch.current.last = e.touches[0].clientY;
+  }
+  function onTouchEnd() {
+    const t = touch.current;
+    touch.current = null;
+    if (t && t.y - t.last >= SWIPE_PX) onExit();
+  }
+
+  // Mouse (Chrome's device mode, a desktop at phone width): the same zone, via pointer events.
+  // Touches are handled below; a finger would otherwise count twice.
+  function onPointerDown(e: ReactPointerEvent) {
+    if (android || e.pointerType !== 'mouse') return;
+    const bottom = shellRef.current?.getBoundingClientRect().bottom ?? window.innerHeight;
+    drag.current = bottom - e.clientY <= HOME_ZONE_PX ? e.clientY : null;
+  }
+  function onPointerUp(e: ReactPointerEvent) {
     const start = drag.current;
     drag.current = null;
-    if (start !== null && start - e.clientY >= SWIPE_PX) onExit();
+    if (e.pointerType === 'mouse' && start !== null && start - e.clientY >= SWIPE_PX) onExit();
   }
 
   const tone = game || dark ? 'dark' : 'light';
@@ -84,12 +112,18 @@ export default function PhoneShell({
 
   return (
     <div
+      ref={shellRef}
       className={[
         styles.shell,
         game ? styles.game : styles.app,
         dark ? styles.dark : '',
         android ? styles.android : styles.ios,
       ].join(' ')}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
     >
       <div className={styles.status}>
         <StatusBar tone={tone} />
@@ -98,20 +132,6 @@ export default function PhoneShell({
       {game ? children : <div className={styles.body}>{children}</div>}
 
       {android ? navBar : <div className={styles.homeIndicator} aria-hidden="true" />}
-
-      {/* iOS: the bottom edge where the home gesture starts */}
-      {!android && (
-        <div
-          className={styles.edge}
-          onPointerDown={onEdgeDown}
-          onPointerUp={onEdgeUp}
-          onPointerCancel={() => (drag.current = null)}
-          role="button"
-          aria-label="Go home"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === 'Escape' && onExit()}
-        />
-      )}
     </div>
   );
 }

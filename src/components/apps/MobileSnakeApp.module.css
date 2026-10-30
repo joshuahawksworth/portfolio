@@ -64,17 +64,19 @@
   min-height: 0;
   width: 100%;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   padding: 0 14px 6px;
   overflow: hidden;
 }
 
+/* Height-led with the game's 20×18 ratio: on a short screen (an iPhone with Safari's bars) the
+   bezel narrows instead of squashing the picture. */
 .screenBezel {
   position: relative;
   box-sizing: border-box;
-  width: min(100%, 420px);
-  max-height: 100%;
+  height: 100%;
+  max-width: min(100%, 420px);
   aspect-ratio: 320 / 288;
   padding: 8px;
   border-radius: 14px;
@@ -121,14 +123,11 @@
 /* ── Navi row ── */
 .naviRow {
   flex-shrink: 0;
-  display: grid;
-  grid-template-columns: 52px 1fr 52px;
-  align-items: center;
-  gap: 12px;
+  display: flex;
+  justify-content: center;
   padding: 4px 48px 10px;
 }
 
-.cKey,
 .naviKey,
 .key {
   box-sizing: border-box;
@@ -151,22 +150,23 @@
   -webkit-appearance: none;
 }
 
-.cKey {
-  height: 40px;
-  border-radius: 20px;
-  font-size: 15px;
-}
-
 .naviKey {
-  grid-column: 2;
+  width: 60%;
   height: 44px;
   border-radius: 22px;
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.cKey:active,
+.naviRidge {
+  width: 28px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(29, 39, 48, 0.25);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.25);
+}
+
 .naviKey:active,
 .keyDir:active {
   transform: translateY(2px);
@@ -217,11 +217,7 @@
 }
 
 .keyArrow {
-  font-size: 13px;
-  line-height: 1;
-}
-
-.keyDir .keyDigit {
-  font-size: 11px;
-  opacity: 0.8;
+  width: 10px;
+  height: 10px;
+  display: block;
 }
