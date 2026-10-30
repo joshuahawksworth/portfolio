@@ -149,9 +149,10 @@
 .socialBtn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 11px;
-  min-height: 26px;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
   background: rgba(0, 0, 0, 0.05);
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-control);
@@ -168,8 +169,8 @@
 }
 
 .socialBtn svg {
-  width: 14px;
-  height: 14px;
+  width: 17px;
+  height: 17px;
   flex-shrink: 0;
   color: var(--accent);
 }

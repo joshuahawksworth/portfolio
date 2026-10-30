@@ -31,12 +31,35 @@ export default function MobileSnakeApp() {
     else startRef.current?.();
   }
 
+  const dirKey = (d: 'U' | 'D' | 'L' | 'R', digit: string, label: string, arrow: string) => (
+    <button
+      type="button"
+      className={`${styles.key} ${styles.keyDir}`}
+      aria-label={label}
+      onPointerDown={(e) => {
+        e.preventDefault();
+        pushDir(d);
+      }}
+    >
+      <span className={styles.keyArrow} aria-hidden="true">
+        {arrow}
+      </span>
+      <span className={styles.keyDigit} aria-hidden="true">
+        {digit}
+      </span>
+    </button>
+  );
+  const plainKey = (digit: string, letters?: string) => (
+    <span className={styles.key} aria-hidden="true">
+      <span className={styles.keyDigit}>{digit}</span>
+      {letters && <span className={styles.keyLetters}>{letters}</span>}
+    </span>
+  );
+
   return (
     <div className={styles.phone}>
-      <div className={styles.phoneTop}>
-        <div className={styles.cameraDot} />
-        <div className={styles.speaker} />
-      </div>
+      <div className={styles.earpiece} aria-hidden="true" />
+      <p className={styles.brand}>NOKIA</p>
 
       <div className={styles.screenSection}>
         <div className={styles.screenBezel}>
@@ -56,97 +79,61 @@ export default function MobileSnakeApp() {
         </div>
       </div>
 
-      <div className={styles.phoneBottom}>
-        <p className={styles.brand}>NOKIA</p>
+      {/* The 3310's Navi key with the C key beside it */}
+      <div className={styles.naviRow}>
+        <button
+          type="button"
+          className={styles.cKey}
+          aria-label={phase === 'entry' ? 'Skip' : 'Clear'}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            if (phase === 'entry') skipRef.current?.();
+          }}
+        >
+          C
+        </button>
+        <button
+          type="button"
+          className={styles.naviKey}
+          aria-label={phase === 'entry' ? 'Submit' : 'OK'}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            pressOk();
+          }}
+        >
+          {phase === 'entry' ? 'Submit' : phase === 'idle' || phase === 'dead' ? 'Start' : 'OK'}
+        </button>
+      </div>
 
-        <div className={phase === 'entry' ? styles.softRow : styles.callRow}>
-          {phase === 'entry' && (
-            <button
-              type="button"
-              className={styles.softKey}
-              onPointerDown={(e) => {
-                e.preventDefault();
-                skipRef.current?.();
-              }}
-            >
-              Skip
-            </button>
-          )}
-          <div className={styles.callBtns}>
-            <button type="button" className={styles.callGreen} aria-label="Call" />
-            <button type="button" className={styles.callRed} aria-label="End" />
-          </div>
-          {phase === 'entry' && (
-            <button
-              type="button"
-              className={styles.softKey}
-              onPointerDown={(e) => {
-                e.preventDefault();
-                pressOk();
-              }}
-            >
-              Submit
-            </button>
-          )}
-        </div>
-
-        <div className={styles.bigDpad}>
-          <button
-            type="button"
-            className={`${styles.dpadBtn} ${styles.dpadUp}`}
-            aria-label="Up"
-            onPointerDown={(e) => {
-              e.preventDefault();
-              pushDir('U');
-            }}
-          >
-            ▲
-          </button>
-          <button
-            type="button"
-            className={`${styles.dpadBtn} ${styles.dpadLeft}`}
-            aria-label="Left"
-            onPointerDown={(e) => {
-              e.preventDefault();
-              pushDir('L');
-            }}
-          >
-            ◀
-          </button>
-          <button
-            type="button"
-            className={styles.dpadCenter}
-            aria-label="OK"
-            onPointerDown={(e) => {
-              e.preventDefault();
-              pressOk();
-            }}
-          />
-          <button
-            type="button"
-            className={`${styles.dpadBtn} ${styles.dpadRight}`}
-            aria-label="Right"
-            onPointerDown={(e) => {
-              e.preventDefault();
-              pushDir('R');
-            }}
-          >
-            ▶
-          </button>
-          <button
-            type="button"
-            className={`${styles.dpadBtn} ${styles.dpadDown}`}
-            aria-label="Down"
-            onPointerDown={(e) => {
-              e.preventDefault();
-              pushDir('D');
-            }}
-          >
-            ▼
-          </button>
-        </div>
-
-        <div className={styles.chin} />
+      {/* Numeric keypad: 2 4 6 8 steer the snake, as on the real thing */}
+      <div className={styles.keypad}>
+        {plainKey('1')}
+        {dirKey('U', '2', 'Up', '▲')}
+        {plainKey('3', 'def')}
+        {dirKey('L', '4', 'Left', '◀')}
+        <button
+          type="button"
+          className={`${styles.key} ${styles.keyDir}`}
+          aria-label={phase === 'entry' ? 'Submit' : 'OK'}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            pressOk();
+          }}
+        >
+          <span className={styles.keyDigit} aria-hidden="true">
+            5
+          </span>
+          <span className={styles.keyLetters} aria-hidden="true">
+            jkl
+          </span>
+        </button>
+        {dirKey('R', '6', 'Right', '▶')}
+        {plainKey('7', 'pqrs')}
+        {dirKey('D', '8', 'Down', '▼')}
+        {plainKey('9', 'wxyz')}
+        {plainKey('*', '+')}
+        {plainKey('0', '␣')}
+        {plainKey('#', '⇧')}
       </div>
     </div>
   );

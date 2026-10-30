@@ -140,9 +140,16 @@
   font-family: inherit;
 }
 
-.sidebarItem:hover { background: rgba(0, 0, 0, 0.03); }
-.sidebarItem.active { background: rgba(0, 0, 0, 0.06); }
-.sidebarItem.active .sidebarCompany { color: var(--text-strong); font-weight: 600; }
+.sidebarItem:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+.sidebarItem.active {
+  background: rgba(0, 0, 0, 0.06);
+}
+.sidebarItem.active .sidebarCompany {
+  color: var(--text-strong);
+  font-weight: 600;
+}
 
 /* Company marks sit straight on the glass, rounded like app icons (no white tile) */
 .sidebarLogo {
@@ -354,7 +361,9 @@
   transition: color 120ms ease;
 }
 
-.projectLink:hover { color: #0062cc; }
+.projectLink:hover {
+  color: #0062cc;
+}
 
 .projectLink svg {
   width: 10px;
@@ -388,9 +397,13 @@
     -webkit-overflow-scrolling: touch;
     flex-shrink: 0;
   }
-  .sidebar::-webkit-scrollbar { display: none; }
+  .sidebar::-webkit-scrollbar {
+    display: none;
+  }
 
-  .sidebarLabel { display: none; }
+  .sidebarLabel {
+    display: none;
+  }
 
   .sidebarItem {
     flex-direction: column;
@@ -413,11 +426,15 @@
     max-width: 62px;
   }
 
-  .sidebarPeriod { display: none; }
+  .sidebarPeriod {
+    display: none;
+  }
 
   .detail {
     flex: 1;
     min-height: 0;
+    /* vertical scroll stays native; a sideways swipe reaches the role switcher */
+    touch-action: pan-y;
   }
 
   .jobDetail {
@@ -443,9 +460,15 @@
     font-size: 18px;
   }
 
-  .jobCompany { font-size: 15px; }
-  .jobRole { font-size: 12px; }
-  .summary { font-size: 12.5px; }
+  .jobCompany {
+    font-size: 15px;
+  }
+  .jobRole {
+    font-size: 12px;
+  }
+  .summary {
+    font-size: 12.5px;
+  }
 
   .responsibility {
     font-size: 12px;
