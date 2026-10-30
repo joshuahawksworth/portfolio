@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
+import { useSettings } from '../../context/SettingsContext';
 import { jobsData } from '../../data/experienceData';
 import { Job } from '../../types/experience';
 import { downloadCv, openCv } from '../../lib/cv';
@@ -20,9 +22,35 @@ function endOf(period: string): string {
  * toolbar keeps the CV one click away wherever they are in the timeline.
  */
 export default function ExperienceApp({ props }: Props) {
+  const { isMobile } = useSettings();
   const [selectedId, setSelectedId] = useState((props?.jobId as string) ?? jobsData[0].id);
   const selected = jobsData.find((j) => j.id === selectedId) ?? jobsData[0];
   const years = new Date().getFullYear() - FIRST_YEAR;
+
+  // On the phone the roles are tabs: a swipe across the detail moves to the next or previous
+  // one, and the strip scrolls to keep the chosen tab in view.
+  const tabsRef = useRef<HTMLElement>(null);
+  const swipe = useRef<{ x: number; y: number } | null>(null);
+  useEffect(() => {
+    if (!isMobile) return;
+    tabsRef.current
+      ?.querySelector('[aria-current="true"]')
+      ?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+  }, [selectedId, isMobile]);
+  function onSwipeStart(e: ReactPointerEvent) {
+    if (isMobile) swipe.current = { x: e.clientX, y: e.clientY };
+  }
+  function onSwipeEnd(e: ReactPointerEvent) {
+    const start = swipe.current;
+    swipe.current = null;
+    if (!start) return;
+    const dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    const i = jobsData.findIndex((j) => j.id === selectedId);
+    const next = jobsData[i + (dx < 0 ? 1 : -1)];
+    if (next) setSelectedId(next.id);
+  }
 
   return (
     <div className={styles.root}>
@@ -59,13 +87,14 @@ export default function ExperienceApp({ props }: Props) {
 
       <div className={styles.split}>
         {/* Sidebar */}
-        <aside className={styles.sidebar}>
+        <aside className={styles.sidebar} ref={tabsRef}>
           <p className={styles.sidebarLabel}>Timeline</p>
           {jobsData.map((job) => (
             <button
               key={job.id}
               className={`${styles.sidebarItem} ${selectedId === job.id ? styles.active : ''}`}
               onClick={() => setSelectedId(job.id)}
+              aria-current={selectedId === job.id ? 'true' : undefined}
             >
               {job.logo ? (
                 <img src={job.logo} alt={job.company} className={styles.sidebarLogo} />
@@ -81,7 +110,13 @@ export default function ExperienceApp({ props }: Props) {
         </aside>
 
         {/* Detail */}
-        <main className={styles.detail} key={selected.id}>
+        <main
+          className={styles.detail}
+          key={selected.id}
+          onPointerDown={onSwipeStart}
+          onPointerUp={onSwipeEnd}
+          onPointerCancel={() => (swipe.current = null)}
+        >
           <JobDetail job={selected} />
         </main>
       </div>
