@@ -107,10 +107,6 @@ button {
   [class*='bar_'] {
     background: rgba(252, 246, 232, 0.96) !important;
   }
-  /* App panel header */
-  [class*='panelHeader_'] {
-    background: rgba(252, 250, 247, 0.98) !important;
-  }
   /* Context menu */
   [class*='ctxMenu_'] {
     background: rgba(252, 250, 247, 0.98) !important;
@@ -212,7 +208,6 @@ html[data-reduce-transparency='on'] [class*='panel_'],
 html[data-reduce-transparency='on'] [class*='dock_'],
 html[data-reduce-transparency='on'] [class*='bar_'],
 html[data-reduce-transparency='on'] [class*='taskbar_'],
-html[data-reduce-transparency='on'] [class*='panelHeader_'],
 html[data-reduce-transparency='on'] [class*='ctxMenu_'],
 html[data-reduce-transparency='on'] [class*='dropdown_'],
 html[data-reduce-transparency='on'] [class*='glass_'] {
