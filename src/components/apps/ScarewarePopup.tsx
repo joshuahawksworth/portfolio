@@ -101,9 +101,23 @@ function Lock() {
 
 type Button = { label: string; primary?: boolean; spawns?: number };
 
-function Actions({ buttons, more }: { buttons: Button[]; more: (n: number) => void }) {
+function Actions({
+  buttons,
+  more,
+  help,
+}: {
+  buttons: Button[];
+  more: (n: number) => void;
+  /** macOS alerts carry the round "?" at the far left of the button row. */
+  help?: boolean;
+}) {
   return (
     <div className={styles.actions}>
+      {help && (
+        <button type="button" className={styles.help} aria-label="Help" onClick={() => more(1)}>
+          ?
+        </button>
+      )}
       {buttons.map((b) => (
         <button
           key={b.label}
@@ -228,6 +242,7 @@ function Crash({ layout, more }: { layout: Layout; more: (n: number) => void }) 
         <Actions
           buttons={[{ label: 'Ignore' }, { label: 'Report…' }, { label: 'Reopen', primary: true }]}
           more={more}
+          help
         />
       </div>
     );
@@ -306,14 +321,20 @@ function Gate({ layout, more }: { layout: Layout; more: (n: number) => void }) {
           <MacIcon />
           <div className={styles.text}>
             <h2 className={styles.heading}>
-              “{APP}” can’t be opened because Apple cannot check it for malicious software.
+              “{APP}” will damage your computer. You should move it to the Bin.
             </h2>
-            <p className={styles.body}>
-              This software needs to be updated. Contact the developer for more information.
-            </p>
+            <p className={styles.body}>This file was downloaded on an unknown date.</p>
+            <label className={styles.checkRow}>
+              <input type="checkbox" defaultChecked /> Report malware to Apple to protect other
+              users
+            </label>
           </div>
         </div>
-        <Actions buttons={[{ label: 'Move to Bin' }, { label: 'OK', primary: true }]} more={more} />
+        <Actions
+          buttons={[{ label: 'Move to Bin' }, { label: 'Cancel', primary: true }]}
+          more={more}
+          help
+        />
       </div>
     );
   }
@@ -353,19 +374,26 @@ function Alert({
   layout: Layout;
   more: (n: number) => void;
 }) {
+  const mac = layout === 'mac';
   return (
     <div className={styles.popup}>
       <div className={styles.content}>
-        {layout === 'mac' && <MacIcon />}
+        {mac && <MacIcon />}
         {layout === 'win' && <WinIcon tone={popup.tone} />}
         <div className={styles.text}>
           <h2 className={styles.heading}>{popup.heading}</h2>
           <p className={styles.body}>{popup.body}</p>
+          {mac && (
+            <label className={styles.checkRow}>
+              <input type="checkbox" defaultChecked /> Don’t warn me again
+            </label>
+          )}
         </div>
       </div>
       <Actions
         buttons={[{ label: 'No thanks' }, { label: popup.cta, primary: true }]}
         more={more}
+        help={mac}
       />
     </div>
   );
