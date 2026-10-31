@@ -868,7 +868,7 @@ function MobileInner() {
       <DynamicWallpaper wallpaper={wallpaper} className={styles.wallpaper} />
       <DisplayOverlays />
       <StatusBar onTap={() => setShadeOpen((o) => !o)} />
-      <MalwareEffects max={3} />
+      <MalwareEffects max={1} />
       <NotificationBanners />
       <NotificationShade open={shadeOpen} onClose={() => setShadeOpen(false)} />
 
@@ -1019,12 +1019,13 @@ function MobileInner() {
         )}
       </div>
 
-      {/* Another app's alerts sit under the app in front, so Malwarebytes can be used to clear them */}
+      {/* One alert at a time, as phones do; it sits under the app in front, so Malwarebytes
+          can be used to clear it */}
       {popups.length > 0 && activeWindow?.appId !== 'malwarebytes' && (
         <div className={styles.alerts}>
-          {popups.map((w, i) => (
-            <div key={w.id} className={styles.alert} style={{ translate: `0 ${i * 12}px` }}>
-              <MalwareApp props={w.props} />
+          {popups.slice(-1).map((w) => (
+            <div key={w.id} className={styles.alert}>
+              <MalwareApp props={{ ...w.props, windowId: w.id }} />
             </div>
           ))}
         </div>

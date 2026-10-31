@@ -1,5 +1,7 @@
 import type { FsNode } from '../context/DesktopContext';
 import { INSTALLER_SIZE } from './malwarePopups';
+import { nodeDisplayName } from '../theme/platform';
+import type { OsName } from './settingsStore';
 
 export type OpenTarget =
   | { kind: 'folder'; id: string }
@@ -22,7 +24,11 @@ export function openTargetFor(node: FsNode): OpenTarget {
       props: {
         variant: 'installer',
         source: node.id,
-        title: node.name,
+        title: nodeDisplayName(
+          node.id,
+          node.name,
+          (document.documentElement.dataset.os ?? 'macos') as OsName
+        ),
         ...INSTALLER_SIZE,
       },
     };

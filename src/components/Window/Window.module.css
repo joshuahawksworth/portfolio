@@ -396,9 +396,13 @@
   background: transparent;
 }
 
-/* Windows: a message box, white above a grey button strip, icon, title and Close only */
+/* Windows: a message box, white above a grey button strip, title and Close only */
 .win.dialog .window {
   background: #fff;
+}
+
+.win.dialog .titleBar {
+  height: 32px;
 }
 
 .win.dialog .body {

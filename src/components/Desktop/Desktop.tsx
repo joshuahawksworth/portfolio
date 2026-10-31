@@ -1430,7 +1430,10 @@ function DesktopSurface() {
         if (!Comp) return null;
         return (
           <Window key={win.id} win={win}>
-            <Comp props={win.props} />
+            {/* The bait's windows know their own id, so the installer can hand over to a pop-up */}
+            <Comp
+              props={win.appId === 'malware' ? { ...win.props, windowId: win.id } : win.props}
+            />
           </Window>
         );
       })}
