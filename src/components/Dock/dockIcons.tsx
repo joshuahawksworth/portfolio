@@ -14,7 +14,7 @@ import {
   XcodeIcon,
 } from '../icons/DevAppIcons';
 import { OutlookIcon, WordIcon } from '../icons/WindowsIcons';
-import { CandyIcon, MalwareAlertIcon, MalwarebytesTile } from '../icons/SecurityIcons';
+import { CandyIcon, MalwareAlertIcon, MalwarebytesAppIcon } from '../icons/SecurityIcons';
 
 export function MacIcon({
   top,
@@ -137,8 +137,7 @@ const DRAWN_ICONS = {
     </MacIcon>
   ),
   github: <GitHubAppIcon />,
-  // Drop the official render at public/icons/malwarebytes.png and it replaces the tile.
-  malwarebytes: <BrandIcon src="/icons/malwarebytes.png" fallback={<MalwarebytesTile />} />,
+  malwarebytes: <MalwarebytesAppIcon />,
   malware: <MalwareAlertIcon />,
   candycrush: <CandyIcon />,
   githubdesktop: <BrandIcon src="/icons/github-desktop.png" fallback={<GitHubDesktopIcon />} />,

@@ -1,45 +1,73 @@
 /**
- * Artwork for the malware joke: the Malwarebytes tile that stands in until the official
- * render is dropped into public/icons, the warning tile the pop-ups and their
+ * Artwork for the malware joke: the Malwarebytes mark and app tile, the warning tile the pop-ups and their
  * notifications wear, and the sweet on the Candy Crush adverts. All on the 44×44 canvas
  * the other drawn icons use.
  */
 import type { CSSProperties } from 'react';
 
-/** The shield glyph alone, for the phone's squircle and anywhere the tile is not wanted. */
-export function ShieldGlyph({ size = 28, color = '#fff' }: { size?: number; color?: string }) {
+const MARK = 'url(/icons/malwarebytes.png)';
+const MALWAREBYTES_BLUE = '#2563c9';
+
+/** The Malwarebytes "M" (Wikimedia Commons, CC BY-SA 4.0) as a mask, so it takes any colour. */
+export function MalwarebytesMark({
+  size,
+  color = '#fff',
+  style,
+}: {
+  size: number;
+  color?: string;
+  style?: CSSProperties;
+}) {
   return (
-    <svg viewBox="0 0 28 28" width={size} height={size} fill="none" aria-hidden="true">
-      <path d="M14 2.5l9 3.4v7.3c0 5.4-3.6 9.9-9 12.3-5.4-2.4-9-6.9-9-12.3V5.9z" fill={color} />
-      <path
-        d="M9.4 14.2l3 3 6.2-6.4"
-        stroke="#1159ff"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <span
+      aria-hidden="true"
+      style={{
+        display: 'inline-block',
+        width: size,
+        height: size,
+        background: color,
+        WebkitMaskImage: MARK,
+        maskImage: MARK,
+        WebkitMaskSize: 'contain',
+        maskSize: 'contain',
+        WebkitMaskRepeat: 'no-repeat',
+        maskRepeat: 'no-repeat',
+        WebkitMaskPosition: 'center',
+        maskPosition: 'center',
+        flexShrink: 0,
+        ...style,
+      }}
+    />
   );
 }
 
-/** Fallback Malwarebytes tile: brand blue with a white shield, not a copy of the logo.
- *  Full-bleed on the 44px canvas like the other drawn macOS icons; the Fluent set has its own. */
-export function MalwarebytesTile({ style }: { style?: CSSProperties }) {
+/** The app icon: the white mark on the brand-blue tile, at the platform's tile inset. */
+export function MalwarebytesAppIcon() {
   return (
-    <svg viewBox="0 0 44 44" width="44" height="44" fill="none" aria-hidden="true" style={style}>
-      <rect width="44" height="44" rx="10" fill="#1159ff" />
-      <path
-        d="M22 8l11.5 4.4v9.3c0 6.9-4.6 12.6-11.5 15.6-6.9-3-11.5-8.7-11.5-15.6v-9.3z"
-        fill="#fff"
-      />
-      <path
-        d="M16 22.6l3.9 3.9 8.1-8.4"
-        stroke="#1159ff"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <span
+      style={{
+        width: 'var(--app-icon-size, 50px)',
+        height: 'var(--app-icon-size, 50px)',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+      }}
+    >
+      <span
+        style={{
+          width: 'calc(var(--app-icon-size, 50px) * var(--app-tile-scale, 0.82))',
+          height: 'calc(var(--app-icon-size, 50px) * var(--app-tile-scale, 0.82))',
+          borderRadius: '22.5%',
+          background: MALWAREBYTES_BLUE,
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <MalwarebytesMark size={0} style={{ width: '64%', height: '64%' }} />
+      </span>
+    </span>
   );
 }
 

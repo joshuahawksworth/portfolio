@@ -13,7 +13,7 @@ import SafariApp from '../apps/SafariApp';
 import MobileSnakeApp from '../apps/MobileSnakeApp';
 import DoomApp from '../apps/DoomApp';
 import MalwarebytesApp from '../apps/MalwarebytesApp';
-import { ShieldGlyph } from '../icons/SecurityIcons';
+import { MalwarebytesMark } from '../icons/SecurityIcons';
 import RubberDuckApp from '../apps/RubberDuckApp';
 import KeyboardShortcutsApp from '../apps/KeyboardShortcutsApp';
 import CalculatorApp from '../apps/CalculatorApp';
@@ -434,7 +434,7 @@ function AppIcon({ appId, size = 60 }: { appId: string; size?: number }) {
     return (
       <IconFrame appId={appId} size={size}>
         <div className={styles.appIconGlyph}>
-          <ShieldGlyph size={glyphSize} />
+          <MalwarebytesMark size={Math.round(size * 0.6)} />
         </div>
       </IconFrame>
     );
