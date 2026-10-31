@@ -14,18 +14,19 @@ test.describe('Windows taskbar icon size', () => {
 
   test('GitHub, Ask Claude and About match the Fluent icons', async ({ page }) => {
     await enterPortfolio(page, 'windows');
-    await expect(page.getByRole('button', { name: 'About', exact: true })).toBeVisible({
-      timeout: 10_000,
-    });
+    // The decoy site in the browser has an About button of its own, so look in the taskbar.
+    await expect(
+      page.locator('[class*="_taskbar_"]').getByRole('button', { name: 'About', exact: true })
+    ).toBeVisible({ timeout: 10_000 });
     await beat(page);
     await shot(page, 'Windows taskbar: the shared icons sit at the same size as the Fluent set');
   });
 
   test('the macOS dock is unchanged', async ({ page }) => {
     await enterPortfolio(page, 'apple');
-    await expect(page.getByRole('button', { name: 'About', exact: true })).toBeVisible({
-      timeout: 10_000,
-    });
+    await expect(
+      page.locator('[class*="_wrapper_"]').getByRole('button', { name: 'About', exact: true })
+    ).toBeVisible({ timeout: 10_000 });
     await beat(page);
     await shot(page, 'macOS dock: still the 82% inset');
   });
