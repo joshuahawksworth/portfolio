@@ -1,5 +1,5 @@
 import type { FsNode } from '../context/DesktopContext';
-import { popupSize } from './malwarePopups';
+import { INSTALLER_SIZE } from './malwarePopups';
 
 export type OpenTarget =
   | { kind: 'folder'; id: string }
@@ -23,7 +23,7 @@ export function openTargetFor(node: FsNode): OpenTarget {
         variant: 'installer',
         source: node.id,
         title: node.name,
-        ...popupSize(document.documentElement.dataset.os),
+        ...INSTALLER_SIZE,
       },
     };
   }
