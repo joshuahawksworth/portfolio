@@ -385,6 +385,24 @@ export const WINDOWS_ICONS = {
   imageviewer: <WinArt name="photos" fallback={<WinPhotosIcon />} />,
   settings: <WinArt name="settings" fallback={<WinSettingsIcon />} />,
   shortcuts: <WinArt name="keyboard" fallback={<WinKeyboardIcon />} />,
+  // Drop the official render at public/icons/malwarebytes.png and it replaces the tile.
+  malwarebytes: (
+    <BrandIcon
+      src="/icons/malwarebytes.png"
+      fallback={
+        <WinTile top="#2f6bff" bottom="#0d3ecc">
+          <path d="M22 10l10 3.8v8.1c0 6-4 11-10 13.6-6-2.6-10-7.6-10-13.6v-8.1z" fill="#fff" />
+          <path
+            d="M16.9 22.6l3.3 3.3 6.9-7.1"
+            stroke="#1159ff"
+            strokeWidth="2.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </WinTile>
+      }
+    />
+  ),
   trashEmpty: <WinArt name="recycle-bin-empty" fallback={<RecycleBinIcon />} />,
   trashFull: <WinArt name="recycle-bin-full" fallback={<RecycleBinIcon full />} />,
 } as const;

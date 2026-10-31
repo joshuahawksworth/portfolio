@@ -18,6 +18,7 @@ import MenuBar from '../MenuBar/MenuBar';
 import Taskbar from '../Taskbar/Taskbar';
 import SystemPanels from '../SystemUI/SystemPanels';
 import NotificationBanners from '../SystemUI/NotificationBanners';
+import MalwareEffects from './MalwareEffects';
 import DynamicWallpaper, { isDynamicDark, useDynamicLook } from './DynamicWallpaper';
 import { useWelcomeNotifications } from '../../hooks/useWelcomeNotifications';
 import { SystemUIProvider } from '../../context/SystemUIContext';
@@ -557,6 +558,8 @@ const NATIVE_APPS = new Set([
   'shortcuts',
   'appstore',
   'calendar',
+  'malware',
+  'malwarebytes',
 ]);
 const SELF_LOADING_APPS = new Set(['doom']);
 const launchedOnce = new Set<string>();
@@ -1441,6 +1444,7 @@ function DesktopSurface() {
       )}
 
       <NotificationBanners />
+      <MalwareEffects />
       <SystemPanels />
 
       {/* Context menu */}

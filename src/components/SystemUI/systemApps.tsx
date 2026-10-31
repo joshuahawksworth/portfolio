@@ -43,6 +43,7 @@ const ENTRIES: Entry[] = [
   { id: 'word', dockKey: 'word' },
   { id: 'spotify', dockKey: 'spotify' },
   { id: 'appstore', dockKey: 'appstore' },
+  { id: 'malwarebytes' },
   { id: 'imageviewer', dockKey: 'imageviewer' },
   { id: 'doom', dockKey: 'doom' },
   { id: 'snake', dockKey: 'snake' },
