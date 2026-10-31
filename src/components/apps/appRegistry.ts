@@ -71,6 +71,8 @@ export interface PortfolioAppDefinition {
   defaultSize: Size;
   minSize: Size;
   maxSize: Size;
+  /** A fixed-size alert (no resize, no minimise / zoom; macOS draws it without a title bar). */
+  dialog?: boolean;
 }
 
 export const PORTFOLIO_APPS = {
@@ -295,9 +297,10 @@ export const PORTFOLIO_APPS = {
     id: 'malware',
     title: 'Security Alert',
     component: MalwareApp,
-    defaultSize: { width: 400, height: 250 },
-    minSize: { width: 360, height: 230 },
-    maxSize: { width: 480, height: 300 },
+    dialog: true,
+    defaultSize: { width: 400, height: 210 },
+    minSize: { width: 260, height: 180 },
+    maxSize: { width: 480, height: 360 },
   },
   malwarebytes: {
     id: 'malwarebytes',
@@ -320,6 +323,12 @@ export const PORTFOLIO_APPS = {
 export const APP_DEFAULTS = Object.fromEntries(
   Object.entries(PORTFOLIO_APPS).map(([id, app]) => [id, { title: app.title, ...app.defaultSize }])
 ) as Record<string, { title: string; width: number; height: number }>;
+
+export const DIALOG_APPS = new Set(
+  Object.entries(PORTFOLIO_APPS)
+    .filter(([, app]) => 'dialog' in app && app.dialog)
+    .map(([id]) => id)
+);
 
 export const APP_MIN = Object.fromEntries(
   Object.entries(PORTFOLIO_APPS).map(([id, app]) => [id, app.minSize])

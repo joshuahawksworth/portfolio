@@ -3,6 +3,7 @@
  * <html data-os>), shell insets and the names each OS uses for shared things.
  */
 import type { OsName } from '../lib/settingsStore';
+import { MALWARE_NODE_ID } from '../lib/infection';
 
 export function currentOs(): OsName {
   if (typeof document === 'undefined') return 'macos';
@@ -67,6 +68,13 @@ export function nodeDisplayName(nodeId: string, name: string, os: OsName): strin
   if (nodeId === 'shortcut-trash') {
     if (os === 'windows') return 'Recycle Bin';
     if (os === 'android') return 'Bin';
+    return name;
+  }
+  // The bait is an installer in each platform's own format.
+  if (nodeId === MALWARE_NODE_ID) {
+    if (os === 'macos') return 'DO_NOT_OPEN.pkg';
+    if (os === 'ios') return 'DO_NOT_OPEN.ipa';
+    if (os === 'android') return 'DO_NOT_OPEN.apk';
     return name;
   }
   return name;

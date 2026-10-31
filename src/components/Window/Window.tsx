@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useDesktop, WindowInstance } from '../../context/DesktopContext';
 import { useOs } from '../../context/SettingsContext';
+import { DIALOG_APPS } from '../apps/appRegistry';
 import { appIconFor } from '../../theme/platformIcons';
 import { appTitleFor, shellInsets } from '../../theme/platform';
 import styles from './Window.module.css';
@@ -134,6 +135,8 @@ export default function Window({ win, children }: Props) {
   const isFocused = focusedId === win.id;
   const os = useOs();
   const isWindows = os === 'windows';
+  // Alerts keep their size and offer only Close; macOS shows them without a title bar at all.
+  const dialog = DIALOG_APPS.has(win.appId);
   const title = appTitleFor(win.appId, win.title, os);
 
   // Always-current snapshot of win — eliminates every stale-closure risk
@@ -307,6 +310,7 @@ export default function Window({ win, children }: Props) {
       className={[
         styles.outer,
         isWindows ? styles.win : '',
+        dialog ? styles.dialog : '',
         isTransitioning ? styles.transitioning : '',
         isMinimizing ? styles.minimizing : '',
       ].join(' ')}
@@ -321,7 +325,7 @@ export default function Window({ win, children }: Props) {
       }}
     >
       {/* Resize handles — outside visible window so they sit on the edges */}
-      {(['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'] as Dir[]).map((dir) => (
+      {(dialog ? [] : (['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'] as Dir[])).map((dir) => (
         <div
           key={dir}
           className={`${styles.handle} ${styles[`h${dir}`]}`}
@@ -340,14 +344,14 @@ export default function Window({ win, children }: Props) {
         <div
           className={styles.titleBar}
           onMouseDown={handleTitleMouseDown}
-          onDoubleClick={isWindows ? handleMaximize : undefined}
+          onDoubleClick={isWindows && !dialog ? handleMaximize : undefined}
         >
-          {isWindows && (
+          {isWindows && !dialog && (
             <span className={styles.winAppIcon} aria-hidden="true">
               {appIconFor(win.appId, os)}
             </span>
           )}
-          <div className={styles.lights} hidden={isWindows}>
+          <div className={styles.lights} hidden={isWindows || dialog}>
             {/* Buttons: stopPropagation on mouseDown prevents the title bar's
                 drag handler from seeing this event. onClick works normally. */}
             <button
@@ -413,7 +417,9 @@ export default function Window({ win, children }: Props) {
               </svg>
             </button>
           </div>
-          <span className={styles.title}>{title}</span>
+          <span className={styles.title} hidden={dialog && !isWindows}>
+            {title}
+          </span>
           {isWindows && (
             <div className={styles.captions} onMouseDown={(e) => e.stopPropagation()}>
               <button
@@ -421,6 +427,7 @@ export default function Window({ win, children }: Props) {
                 className={styles.caption}
                 onClick={handleMinimize}
                 aria-label="Minimize"
+                hidden={dialog}
               >
                 <svg viewBox="0 0 10 10" width="10" height="10">
                   <path d="M0 5h10" stroke="currentColor" strokeWidth="1" />
@@ -436,6 +443,7 @@ export default function Window({ win, children }: Props) {
                 onMouseEnter={openSnap}
                 onMouseLeave={closeSnapSoon}
                 aria-label={win.maximized ? 'Restore' : 'Maximize'}
+                hidden={dialog}
               >
                 <svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor">
                   {win.maximized ? (

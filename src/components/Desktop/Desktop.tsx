@@ -11,7 +11,8 @@ import {
 } from '../../context/DesktopContext';
 import { ROOT_IDS } from '../../data/fileSystemSeed';
 import { openTargetFor } from '../../lib/openNode';
-import { NodeIcon, nodeKind } from '../icons/NodeIcon';
+import { NodeIcon } from '../icons/NodeIcon';
+import { nodeKind } from '../../lib/nodeKind';
 import { PlatformFolderIcon } from '../icons/PlatformFileIcons';
 import { FINDER_DRAG_TYPE } from '../apps/FinderApp';
 import MenuBar from '../MenuBar/MenuBar';
@@ -19,6 +20,7 @@ import Taskbar from '../Taskbar/Taskbar';
 import SystemPanels from '../SystemUI/SystemPanels';
 import NotificationBanners from '../SystemUI/NotificationBanners';
 import MalwareEffects from './MalwareEffects';
+import MalwareAssistants from './MalwareAssistants';
 import DynamicWallpaper, { isDynamicDark, useDynamicLook } from './DynamicWallpaper';
 import { useWelcomeNotifications } from '../../hooks/useWelcomeNotifications';
 import { SystemUIProvider } from '../../context/SystemUIContext';
@@ -1429,7 +1431,10 @@ function DesktopSurface() {
         if (!Comp) return null;
         return (
           <Window key={win.id} win={win}>
-            <Comp props={win.props} />
+            {/* The bait's windows know their own id, so the installer can hand over to a pop-up */}
+            <Comp
+              props={win.appId === 'malware' ? { ...win.props, windowId: win.id } : win.props}
+            />
           </Window>
         );
       })}
@@ -1445,6 +1450,7 @@ function DesktopSurface() {
 
       <NotificationBanners />
       <MalwareEffects />
+      <MalwareAssistants />
       <SystemPanels />
 
       {/* Context menu */}

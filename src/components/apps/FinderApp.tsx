@@ -10,7 +10,8 @@ import {
 } from '../../context/DesktopContext';
 import { FINDER_ROOTS, ROOT_IDS, type RootId } from '../../data/fileSystemSeed';
 import { openTargetFor } from '../../lib/openNode';
-import { NodeIcon, nodeKind } from '../icons/NodeIcon';
+import { NodeIcon } from '../icons/NodeIcon';
+import { nodeKind } from '../../lib/nodeKind';
 import { PlatformFolderIcon } from '../icons/PlatformFileIcons';
 import { useOs } from '../../context/SettingsContext';
 import { nodeDisplayName } from '../../theme/platform';

@@ -1,16 +1,20 @@
 /**
- * Whether the machine has "caught" malware.exe. One module-level store shared by the
+ * Whether the machine has "caught" DO_NOT_OPEN.exe. One module-level store shared by the
  * desktop (pop-ups, adverts, glitches), the Malwarebytes app (scan result, repair) and
  * anything else that wants to look unwell. It lives for the visit: a restart of the
  * pretend machine does not clean it, only Malwarebytes does.
  */
 import { useSyncExternalStore } from 'react';
 
+/** The bait on the desktop: its node id and the name it is seeded with (Windows spelling). */
+export const MALWARE_NODE_ID = 'malware-exe';
+export const MALWARE_FILE = 'DO_NOT_OPEN.exe';
+
 export type InfectionStatus = 'clean' | 'infected';
 
 export interface InfectionState {
   status: InfectionStatus;
-  /** When malware.exe finished "installing"; null while clean. */
+  /** When the bait finished "installing"; null while clean. */
   infectedAt: number | null;
   /** When Malwarebytes last finished a scan; null until the first one. */
   lastScanAt: number | null;
@@ -42,7 +46,7 @@ export function getInfection(): InfectionState {
   return state;
 }
 
-/** malware.exe has run: the desktop starts misbehaving. */
+/** The bait has run: the desktop starts misbehaving. */
 export function infect() {
   if (state.status === 'infected') return;
   set({ status: 'infected', infectedAt: Date.now() });

@@ -36,7 +36,7 @@ const BLURB: Record<string, string> = {
   shortcuts: 'Keyboard shortcuts for this desktop.',
   trash: 'It remembers where things came from.',
   appstore: 'You are here.',
-  malwarebytes: 'For after you double-click malware.exe.',
+  malwarebytes: 'For after you open the file that told you not to.',
 };
 
 const CATEGORIES: { id: string; label: string; ids: string[] }[] = [

@@ -36,7 +36,7 @@ describe('opening an .exe', () => {
   });
 
   it('runs malware.exe as the installer instead of opening it in the editor', () => {
-    expect(openTargetFor(node('malware.exe'))).toEqual({
+    expect(openTargetFor(node('malware.exe'))).toMatchObject({
       kind: 'app',
       appId: 'malware',
       props: { variant: 'installer', source: 'n', title: 'malware.exe' },

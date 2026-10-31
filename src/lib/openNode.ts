@@ -1,4 +1,7 @@
 import type { FsNode } from '../context/DesktopContext';
+import { INSTALLER_SIZE } from './malwarePopups';
+import { nodeDisplayName } from '../theme/platform';
+import type { OsName } from './settingsStore';
 
 export type OpenTarget =
   | { kind: 'folder'; id: string }
@@ -12,12 +15,22 @@ export function openTargetFor(node: FsNode): OpenTarget {
   if (node.type === 'app') {
     return { kind: 'app', appId: node.appId ?? 'finder' };
   }
-  // Any .exe is malware.exe in disguise: it "installs" and the machine catches it.
-  if (/\.exe$/i.test(node.name)) {
+  // Any installer (.exe, and the .pkg / .ipa / .apk the other platforms call it) is the
+  // bait in disguise: it "installs" and the machine catches it.
+  if (/\.(exe|pkg|ipa|apk)$/i.test(node.name)) {
     return {
       kind: 'app',
       appId: 'malware',
-      props: { variant: 'installer', source: node.id, title: node.name },
+      props: {
+        variant: 'installer',
+        source: node.id,
+        title: nodeDisplayName(
+          node.id,
+          node.name,
+          (document.documentElement.dataset.os ?? 'macos') as OsName
+        ),
+        ...INSTALLER_SIZE,
+      },
     };
   }
   if (node.type === 'image') {

@@ -72,19 +72,19 @@ export function MalwarebytesAppIcon() {
 }
 
 /** The amber warning triangle the pop-ups and their notifications carry. */
-export function MalwareAlertIcon() {
+/** A red hazard triangle: the bait file on every platform, and the pop-ups' app icon. */
+export function MalwareAlertIcon({ size = 44 }: { size?: number }) {
   return (
-    <svg viewBox="0 0 44 44" width="44" height="44" fill="none" aria-hidden="true">
-      <rect x="3" y="3" width="38" height="38" rx="9" fill="#2b2b33" />
+    <svg viewBox="0 0 44 44" width={size} height={size} fill="none" aria-hidden="true">
       <path
-        d="M22 9.5L36 33.5H8z"
-        fill="#ffb02e"
-        stroke="#e08a00"
+        d="M19.4 5.6a3 3 0 0 1 5.2 0l16 28.4A3 3 0 0 1 38 38.5H6a3 3 0 0 1-2.6-4.5z"
+        fill="#e0342b"
+        stroke="#a3140d"
         strokeWidth="1.2"
         strokeLinejoin="round"
       />
-      <rect x="20.4" y="17" width="3.2" height="9" rx="1.6" fill="#2b2b33" />
-      <circle cx="22" cy="29.5" r="1.9" fill="#2b2b33" />
+      <rect x="20.2" y="15" width="3.6" height="11.5" rx="1.8" fill="#fff" />
+      <circle cx="22" cy="31.5" r="2.1" fill="#fff" />
     </svg>
   );
 }

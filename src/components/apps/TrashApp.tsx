@@ -1,6 +1,7 @@
 import { useDesktop } from '../../context/DesktopContext';
 import { ROOT_IDS } from '../../data/fileSystemSeed';
-import { NodeIcon, nodeKind } from '../icons/NodeIcon';
+import { NodeIcon } from '../icons/NodeIcon';
+import { nodeKind } from '../../lib/nodeKind';
 import { PlatformBinIcon } from '../icons/PlatformFileIcons';
 import { useOs } from '../../context/SettingsContext';
 import { appTitleFor } from '../../theme/platform';

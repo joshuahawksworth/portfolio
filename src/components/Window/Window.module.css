@@ -376,6 +376,79 @@
   border-top: 1px solid var(--line);
 }
 
+/* ── Alerts (dialog apps) ────────────────────────────────────────────── */
+/* macOS: the Mojave alert. An opaque dark panel with a plain title strip (no traffic
+   lights, no title), a hairline rim and a deep shadow. */
+.dialog .window {
+  border-radius: 10px;
+  background: #323232;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  outline: none;
+  color: #fff;
+}
+
+.dialog .focused,
+.dialog .blurred {
+  box-shadow:
+    0 22px 60px rgba(0, 0, 0, 0.55),
+    0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.dialog .titleBar {
+  height: 22px;
+  background: #292929;
+  border-bottom: 1px solid #1a1a1a;
+  box-shadow: none;
+}
+
+.dialog .body {
+  background: transparent;
+}
+
+/* Windows: the Windows 10 message box. Square, a one-pixel grey border, a white caption
+   with grey title text and a thin Close, nothing else in the caption. */
+.win.dialog .window {
+  border-radius: 0;
+  background: #fff;
+  border: 1px solid #c9c9c9;
+  color: #000;
+}
+
+.win.dialog .focused,
+.win.dialog .blurred {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+}
+
+.win.dialog .titleBar {
+  height: 30px;
+  padding-left: 9px;
+  background: #fff;
+}
+
+.win.dialog .title {
+  color: #6d6d6d;
+}
+
+.win.dialog .caption {
+  height: 30px;
+  color: #000;
+}
+
+.win.dialog .captionClose {
+  border-radius: 0;
+}
+
+.win.dialog .body {
+  border-top: 0;
+}
+
+.caption[hidden],
+.title[hidden] {
+  display: none;
+}
+
 /* ── macOS green-button tile popover ─────────────────────────────────── */
 .snapPopover {
   position: absolute;

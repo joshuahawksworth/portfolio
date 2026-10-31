@@ -8,6 +8,7 @@
 import { FINDER_FILE_CONTENTS } from '../components/apps/TextEditorApp';
 import { CV_URL } from '../lib/cv';
 import { currentOs, isAppleOs } from '../theme/platform';
+import { MALWARE_FILE, MALWARE_NODE_ID } from '../lib/infection';
 
 export type FsNodeType = 'folder' | 'file' | 'image' | 'app';
 
@@ -168,11 +169,11 @@ const SEEDS: Seed[] = [
     type: 'app',
     appId: 'malwarebytes',
   },
-  // Definitely safe to double-click.
+  // Definitely safe to double-click. Named for the platform by nodeDisplayName.
   {
-    id: 'malware-exe',
+    id: MALWARE_NODE_ID,
     parentId: 'desktop',
-    name: 'malware.exe',
+    name: MALWARE_FILE,
     type: 'file',
     content: 'MZ\u0090\u0000\u0003 This program cannot be run in DOS mode.\n',
   },
