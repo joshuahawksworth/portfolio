@@ -1217,6 +1217,15 @@
   background: rgba(243, 243, 243, 0.96);
 }
 
+/* The search field is part of the panel, not a Windows text box: no fill, no focus rectangle */
+:global(html[data-os='windows']) .spotlightInput,
+:global(html[data-os='windows']) .spotlightInput:focus-visible {
+  background: transparent;
+  border: 0;
+  outline: none;
+  box-shadow: none;
+}
+
 /* Notifications sit above the widgets in Notification Center */
 .ncNotifications {
   margin-bottom: 14px;

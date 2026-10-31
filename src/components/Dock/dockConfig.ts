@@ -69,6 +69,7 @@ export const DOCK_LABELS: Record<string, string> = {
   rubberduck: 'Rubber Duck',
   malwarebytes: 'Malwarebytes',
   malware: 'Security Alert',
+  malwarewin: 'Installer',
   candycrush: 'Candy Crush Saga',
 };
 

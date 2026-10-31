@@ -131,11 +131,11 @@ describe('dynamic wallpaper frames', () => {
 });
 
 describe('default wallpapers', () => {
-  it('is The Beach on macOS and iOS now that it ships with the build', () => {
-    expect(defaultWallpaperFor('macos')).toBe('beach');
+  it('is the Golden Gate on macOS and The Beach on iOS', () => {
+    expect(defaultWallpaperFor('macos')).toBe('gold');
     expect(defaultWallpaperFor('ios')).toBe('beach');
-    expect(wallpaperFor('macos', {})).toBe('beach');
-    expect(wallpaperFor('ios', {})).toBe(wallpaperFor('macos', {}));
+    expect(wallpaperFor('macos', {})).toBe('gold');
+    expect(wallpaperFor('ios', {})).toBe('beach');
   });
 
   it('falls back to Golden Gate on both when The Beach is not in the build', () => {

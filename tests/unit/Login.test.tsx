@@ -70,6 +70,11 @@ describe('Login', () => {
   });
 
   it('shows the night frame of The Beach on a late-evening lock screen', () => {
+    // The Beach is the dynamic one; the macOS default is the (static) Golden Gate
+    localStorage.setItem(
+      SETTINGS_STORAGE_KEY,
+      JSON.stringify({ platform: 'apple', wallpaper: { macos: 'beach' } })
+    );
     vi.useFakeTimers();
     vi.setSystemTime(new Date(2026, 8, 14, 23, 30));
     renderLogin(vi.fn(), vi.fn());

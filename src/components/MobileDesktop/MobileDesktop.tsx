@@ -868,7 +868,7 @@ function MobileInner() {
       <DynamicWallpaper wallpaper={wallpaper} className={styles.wallpaper} />
       <DisplayOverlays />
       <StatusBar onTap={() => setShadeOpen((o) => !o)} />
-      <MalwareEffects max={1} />
+      <MalwareEffects phone />
       <NotificationBanners />
       <NotificationShade open={shadeOpen} onClose={() => setShadeOpen(false)} />
 

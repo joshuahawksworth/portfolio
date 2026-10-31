@@ -105,7 +105,7 @@ export const WALLPAPERS_FOR_OS: Record<OsName, WallpaperKey[]> = {
 };
 
 export const DEFAULT_WALLPAPER: Record<OsName, WallpaperKey> = {
-  macos: 'beach',
+  macos: 'gold',
   ios: 'beach',
   windows: 'win11',
   android: 'pixel',
