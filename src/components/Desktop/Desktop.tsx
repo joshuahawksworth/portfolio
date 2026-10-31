@@ -20,6 +20,7 @@ import Taskbar from '../Taskbar/Taskbar';
 import SystemPanels from '../SystemUI/SystemPanels';
 import NotificationBanners from '../SystemUI/NotificationBanners';
 import MalwareEffects from './MalwareEffects';
+import MalwareAssistants from './MalwareAssistants';
 import DynamicWallpaper, { isDynamicDark, useDynamicLook } from './DynamicWallpaper';
 import { useWelcomeNotifications } from '../../hooks/useWelcomeNotifications';
 import { SystemUIProvider } from '../../context/SystemUIContext';
@@ -1449,6 +1450,7 @@ function DesktopSurface() {
 
       <NotificationBanners />
       <MalwareEffects />
+      <MalwareAssistants />
       <SystemPanels />
 
       {/* Context menu */}

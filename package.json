@@ -20,6 +20,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.125.0",
     "@vercel/analytics": "^2.0.1",
+    "clippyjs": "^0.1.0",
     "js-dos": "^8.5.3",
     "mapbox-gl": "^3.33.0",
     "react": "^19.3.1",
