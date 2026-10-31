@@ -72,6 +72,9 @@ export const DOCK_LABELS: Record<string, string> = {
   candycrush: 'Candy Crush Saga',
 };
 
+/** Apps that never get a Dock or taskbar button, even while open: desktop icon only. */
+export const DOCK_HIDDEN = new Set(['malwarebytes']);
+
 /** Apps that live on the desktop as shortcuts — only appear in dock when running */
 export const DOCK_DESKTOP_ONLY = new Set([
   'doom',
@@ -82,7 +85,6 @@ export const DOCK_DESKTOP_ONLY = new Set([
   'outlook',
   'postman',
   'word',
-  'malwarebytes',
   'malware',
 ]);
 

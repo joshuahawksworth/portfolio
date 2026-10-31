@@ -11,7 +11,8 @@ import {
 } from '../../context/DesktopContext';
 import { ROOT_IDS } from '../../data/fileSystemSeed';
 import { openTargetFor } from '../../lib/openNode';
-import { NodeIcon, nodeKind } from '../icons/NodeIcon';
+import { NodeIcon } from '../icons/NodeIcon';
+import { nodeKind } from '../../lib/nodeKind';
 import { PlatformFolderIcon } from '../icons/PlatformFileIcons';
 import { FINDER_DRAG_TYPE } from '../apps/FinderApp';
 import MenuBar from '../MenuBar/MenuBar';

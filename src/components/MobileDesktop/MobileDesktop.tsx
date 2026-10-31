@@ -9,6 +9,8 @@ import ContactApp from '../apps/ContactApp';
 import LocationApp from '../apps/LocationApp';
 import TerminalApp from '../apps/TerminalApp';
 import FinderApp from '../apps/FinderApp';
+import MalwareApp from '../apps/MalwareApp';
+import MalwareEffects from '../Desktop/MalwareEffects';
 import SafariApp from '../apps/SafariApp';
 import MobileSnakeApp from '../apps/MobileSnakeApp';
 import DoomApp from '../apps/DoomApp';
@@ -634,8 +636,12 @@ function MobileInner() {
   const { windows, openApp, closeWindow } = useDesktop();
   const { settings, os, wallpaper } = useSettings();
   const android = os === 'android';
-  const activeWindow = windows.length > 0 ? windows[windows.length - 1] : null;
-  useBackButtonClosesApp(windows.length, () => activeWindow && closeWindow(activeWindow.id));
+  // The scareware pop-ups are alerts laid over whatever is open, not apps of their own.
+  const popups = windows.filter((w) => w.appId === 'malware');
+  const appWindows = windows.filter((w) => w.appId !== 'malware');
+  const activeWindow = appWindows.length > 0 ? appWindows[appWindows.length - 1] : null;
+  const topWindow = windows.length > 0 ? windows[windows.length - 1] : null;
+  useBackButtonClosesApp(windows.length, () => topWindow && closeWindow(topWindow.id));
   const WIDGET_SLOTS = android
     ? settings.showAtAGlance
       ? ANDROID_WIDGET_SLOTS
@@ -862,6 +868,7 @@ function MobileInner() {
       <DynamicWallpaper wallpaper={wallpaper} className={styles.wallpaper} />
       <DisplayOverlays />
       <StatusBar onTap={() => setShadeOpen((o) => !o)} />
+      <MalwareEffects max={3} />
       <NotificationBanners />
       <NotificationShade open={shadeOpen} onClose={() => setShadeOpen(false)} />
 
@@ -1011,6 +1018,17 @@ function MobileInner() {
           </PhoneShell>
         )}
       </div>
+
+      {/* Another app's alerts sit under the app in front, so Malwarebytes can be used to clear them */}
+      {popups.length > 0 && activeWindow?.appId !== 'malwarebytes' && (
+        <div className={styles.alerts}>
+          {popups.map((w, i) => (
+            <div key={w.id} className={styles.alert} style={{ translate: `0 ${i * 12}px` }}>
+              <MalwareApp props={w.props} />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

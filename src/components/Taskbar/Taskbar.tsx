@@ -9,6 +9,7 @@ import { appIconFor } from '../../theme/platformIcons';
 import {
   DOCK_DEFAULT_ORDER,
   DOCK_DESKTOP_ONLY,
+  DOCK_HIDDEN,
   DOCK_LABELS,
   dockAppId,
   getDockAction,
@@ -37,7 +38,10 @@ export default function Taskbar() {
   const pinned: string[] = ['finder', ...DOCK_DEFAULT_ORDER, ...runningKeys];
   // Windows that belong to no pinned app still get a taskbar button while open.
   const extraWindows = windows.filter(
-    (w) => !pinned.some((k) => dockAppId(k) === w.appId) && w.appId !== 'trash'
+    (w) =>
+      !pinned.some((k) => dockAppId(k) === w.appId) &&
+      w.appId !== 'trash' &&
+      !DOCK_HIDDEN.has(w.appId)
   );
 
   function windowsFor(key: string) {

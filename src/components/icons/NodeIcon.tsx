@@ -9,6 +9,8 @@ import { NokiaIcon } from './NokiaIcon';
 import { PlatformBinIcon, PlatformDriveIcon, PlatformFolderIcon } from './PlatformFileIcons';
 import { appIconFor } from '../../theme/platformIcons';
 import { useOs } from '../../context/SettingsContext';
+import { MALWARE_NODE_ID } from '../../lib/infection';
+import { MalwareAlertIcon } from './SecurityIcons';
 
 /** The little white box with a blue arrow Windows puts on the corner of a shortcut. */
 function WinShortcut({ size, children }: { size: number; children: ReactNode }) {
@@ -147,25 +149,7 @@ export function NodeIcon({
     return <PictureIcon size={size} />;
   }
 
+  // The bait wears a red hazard sign rather than a document, so nobody can say they weren't told.
+  if (node.id === MALWARE_NODE_ID) return <MalwareAlertIcon size={size} />;
   return <DocumentIcon name={node.name} size={size} />;
-}
-
-/** Human-readable "Kind" column, like Finder. */
-export function nodeKind(node: FsNode): string {
-  switch (node.type) {
-    case 'folder':
-      return 'Folder';
-    case 'app':
-      return 'Application';
-    case 'image':
-      return 'Image';
-    default: {
-      const ext = node.name.split('.').pop()?.toLowerCase() ?? '';
-      if (node.url || ext === 'pdf') return 'PDF Document';
-      if (ext === 'md') return 'Markdown Document';
-      if (['js', 'ts', 'tsx', 'jsx', 'html', 'css', 'json', 'py', 'sh'].includes(ext))
-        return 'Source Code';
-      return 'Plain Text Document';
-    }
-  }
 }

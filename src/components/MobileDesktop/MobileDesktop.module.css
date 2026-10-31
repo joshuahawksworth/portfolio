@@ -991,3 +991,18 @@
   color: #fff;
   text-shadow: none;
 }
+
+/* ── Scareware alerts: centred over everything but the system bars and banners ─── */
+.alerts {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.alert {
+  grid-area: 1 / 1;
+  pointer-events: auto;
+}
