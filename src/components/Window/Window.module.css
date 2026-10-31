@@ -376,6 +376,38 @@
   border-top: 1px solid var(--line);
 }
 
+/* ── Alerts (dialog apps) ────────────────────────────────────────────── */
+/* macOS: a flat light panel with no title bar, as NSAlert draws it since Big Sur */
+.dialog .window {
+  border-radius: 11px;
+  background: rgba(236, 236, 236, 0.92);
+}
+
+.dialog .titleBar {
+  height: 18px;
+  background: transparent;
+  border-bottom: 0;
+  box-shadow: none;
+}
+
+.dialog .body {
+  background: transparent;
+}
+
+/* Windows: a message box, white above a grey button strip, icon, title and Close only */
+.win.dialog .window {
+  background: #fff;
+}
+
+.win.dialog .body {
+  border-top: 0;
+}
+
+.caption[hidden],
+.title[hidden] {
+  display: none;
+}
+
 /* ── macOS green-button tile popover ─────────────────────────────────── */
 .snapPopover {
   position: absolute;

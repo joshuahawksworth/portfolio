@@ -1,4 +1,5 @@
 import type { FsNode } from '../context/DesktopContext';
+import { popupSize } from './malwarePopups';
 
 export type OpenTarget =
   | { kind: 'folder'; id: string }
@@ -17,7 +18,12 @@ export function openTargetFor(node: FsNode): OpenTarget {
     return {
       kind: 'app',
       appId: 'malware',
-      props: { variant: 'installer', source: node.id, title: node.name },
+      props: {
+        variant: 'installer',
+        source: node.id,
+        title: node.name,
+        ...popupSize(document.documentElement.dataset.os),
+      },
     };
   }
   if (node.type === 'image') {
