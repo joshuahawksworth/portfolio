@@ -442,7 +442,10 @@ export function DesktopProvider({
     };
     // Never open a window larger than the work area (small laptops, short browser windows).
     const { width, height } = fitToWorkArea(appId, wanted.width, wanted.height);
-    const { x, y } = cascadePosition(idx, width, height);
+    const { x, y } =
+      typeof props?.x === 'number' && typeof props?.y === 'number'
+        ? { x: props.x, y: props.y }
+        : cascadePosition(idx, width, height);
 
     setWindows((prev) => {
       const existing = props?.jobId

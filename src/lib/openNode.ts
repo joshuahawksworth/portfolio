@@ -12,6 +12,14 @@ export function openTargetFor(node: FsNode): OpenTarget {
   if (node.type === 'app') {
     return { kind: 'app', appId: node.appId ?? 'finder' };
   }
+  // Any .exe is malware.exe in disguise: it "installs" and the machine catches it.
+  if (/\.exe$/i.test(node.name)) {
+    return {
+      kind: 'app',
+      appId: 'malware',
+      props: { variant: 'installer', source: node.id, title: node.name },
+    };
+  }
   if (node.type === 'image') {
     return {
       kind: 'app',

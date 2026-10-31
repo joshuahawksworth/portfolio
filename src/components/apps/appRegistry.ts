@@ -25,6 +25,8 @@ import SpotifyApp from './SpotifyApp';
 import WordApp from './WordApp';
 import AppStoreApp from './AppStoreApp';
 import TrashApp from './TrashApp';
+import MalwareApp from './MalwareApp';
+import MalwarebytesApp from './MalwarebytesApp';
 
 type Size = { width: number; height: number };
 
@@ -56,6 +58,8 @@ export type PortfolioAppId =
   | 'imageviewer'
   | 'calculator'
   | 'askjosh'
+  | 'malware'
+  | 'malwarebytes'
   | 'settings';
 
 export type PortfolioAppComponent = ComponentType<{ props?: Record<string, unknown> }>;
@@ -286,6 +290,22 @@ export const PORTFOLIO_APPS = {
     defaultSize: { width: 860, height: 600 },
     minSize: { width: 560, height: 420 },
     maxSize: { width: 1100, height: 760 },
+  },
+  malware: {
+    id: 'malware',
+    title: 'Security Alert',
+    component: MalwareApp,
+    defaultSize: { width: 400, height: 250 },
+    minSize: { width: 360, height: 230 },
+    maxSize: { width: 480, height: 300 },
+  },
+  malwarebytes: {
+    id: 'malwarebytes',
+    title: 'Malwarebytes',
+    component: MalwarebytesApp,
+    defaultSize: { width: 940, height: 620 },
+    minSize: { width: 760, height: 520 },
+    maxSize: { width: 1140, height: 780 },
   },
   settings: {
     id: 'settings',

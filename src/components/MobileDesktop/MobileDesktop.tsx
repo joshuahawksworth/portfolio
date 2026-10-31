@@ -12,6 +12,8 @@ import FinderApp from '../apps/FinderApp';
 import SafariApp from '../apps/SafariApp';
 import MobileSnakeApp from '../apps/MobileSnakeApp';
 import DoomApp from '../apps/DoomApp';
+import MalwarebytesApp from '../apps/MalwarebytesApp';
+import { MalwarebytesMark } from '../icons/SecurityIcons';
 import RubberDuckApp from '../apps/RubberDuckApp';
 import KeyboardShortcutsApp from '../apps/KeyboardShortcutsApp';
 import CalculatorApp from '../apps/CalculatorApp';
@@ -42,6 +44,7 @@ import { DARK_WALLPAPERS, WALLPAPERS } from '../../data/wallpapers';
 
 // ── App icon gradients (iOS-style flat two-stop, light top → deep bottom) ──
 const ICON_GRADS: Record<string, [string, string]> = {
+  malwarebytes: ['#2f6bff', '#0d3ecc'],
   about: ['#5aa0ff', '#1f5fd6'],
   experience: ['#ffb340', '#f26f0c'],
   skills: ['#c46bff', '#6b2fd6'],
@@ -427,6 +430,16 @@ function AppIcon({ appId, size = 60 }: { appId: string; size?: number }) {
     );
   }
 
+  if (appId === 'malwarebytes') {
+    return (
+      <IconFrame appId={appId} size={size}>
+        <div className={styles.appIconGlyph}>
+          <MalwarebytesMark size={Math.round(size * 0.6)} />
+        </div>
+      </IconFrame>
+    );
+  }
+
   if (appId === 'calculator') {
     return (
       <IconFrame appId={appId} size={size}>
@@ -466,6 +479,7 @@ const APP_COMPONENTS: Record<string, React.ComponentType<{ props?: Record<string
   safari: SafariApp,
   snake: MobileSnakeApp,
   doom: DoomApp,
+  malwarebytes: MalwarebytesApp,
   rubberduck: RubberDuckApp,
   shortcuts: KeyboardShortcutsApp,
   calculator: CalculatorApp,
@@ -492,6 +506,7 @@ const APP_LABELS: Record<string, string> = {
   calculator: 'Calculator',
   askjosh: 'Ask Claude',
   settings: 'Settings',
+  malwarebytes: 'Malwarebytes',
 };
 
 const TRICKSTER_LABEL = 'My Flaws';
@@ -577,6 +592,7 @@ const BASE_ITEMS = [
   'safari',
   'cv',
   'settings',
+  'malwarebytes',
   'snake',
   'doom',
 ] as const;

@@ -86,6 +86,7 @@ const EXT_TINT: Record<string, string> = {
   yml: '#b0648d',
   yaml: '#b0648d',
   sh: '#3a3a44',
+  exe: '#c84b3c',
   py: '#3776ab',
   png: '#0aa2c4',
   jpg: '#0aa2c4',

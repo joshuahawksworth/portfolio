@@ -14,6 +14,7 @@ import {
   XcodeIcon,
 } from '../icons/DevAppIcons';
 import { OutlookIcon, WordIcon } from '../icons/WindowsIcons';
+import { CandyIcon, MalwareAlertIcon, MalwarebytesAppIcon } from '../icons/SecurityIcons';
 
 export function MacIcon({
   top,
@@ -136,6 +137,9 @@ const DRAWN_ICONS = {
     </MacIcon>
   ),
   github: <GitHubAppIcon />,
+  malwarebytes: <MalwarebytesAppIcon />,
+  malware: <MalwareAlertIcon />,
+  candycrush: <CandyIcon />,
   githubdesktop: <BrandIcon src="/icons/github-desktop.png" fallback={<GitHubDesktopIcon />} />,
   about: <AboutTile />,
   experience: (

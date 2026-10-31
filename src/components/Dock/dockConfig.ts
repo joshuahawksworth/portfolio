@@ -67,6 +67,9 @@ export const DOCK_LABELS: Record<string, string> = {
   settings: 'Settings',
   shortcuts: 'Shortcuts',
   rubberduck: 'Rubber Duck',
+  malwarebytes: 'Malwarebytes',
+  malware: 'Security Alert',
+  candycrush: 'Candy Crush Saga',
 };
 
 /** Apps that live on the desktop as shortcuts — only appear in dock when running */
@@ -79,6 +82,8 @@ export const DOCK_DESKTOP_ONLY = new Set([
   'outlook',
   'postman',
   'word',
+  'malwarebytes',
+  'malware',
 ]);
 
 /** The dock's GitHub button opens Josh's profile in a browser window, not GitHub Desktop. */

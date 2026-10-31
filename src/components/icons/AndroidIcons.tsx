@@ -197,6 +197,7 @@ export const ANDROID_ICONS = {
   safari: <DiscImage src="/icons/brave-lion.png" scale={0.74} />,
   github: <DiscImage src="/icons/github-mark.png" scale={0.62} />,
   askjosh: <DiscImage src="/icons/claude.png" bg="#d97757" scale={0.88} />,
+  malwarebytes: <DiscImage src="/icons/malwarebytes.png" bg="#fff" scale={0.62} />,
   snake: <SnakeLcdIcon round />,
   doom: <DiscImage src="/doom-icon.png" bg="#000" title="DOOM" />,
 } as const;

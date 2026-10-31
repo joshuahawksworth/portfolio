@@ -161,6 +161,21 @@ const SEEDS: Seed[] = [
   { id: 'shortcut-outlook', parentId: 'desktop', name: 'Outlook', type: 'app', appId: 'outlook' },
   { id: 'shortcut-postman', parentId: 'desktop', name: 'Postman', type: 'app', appId: 'postman' },
   { id: 'shortcut-word', parentId: 'desktop', name: 'Word', type: 'app', appId: 'word' },
+  {
+    id: 'shortcut-malwarebytes',
+    parentId: 'desktop',
+    name: 'Malwarebytes',
+    type: 'app',
+    appId: 'malwarebytes',
+  },
+  // Definitely safe to double-click.
+  {
+    id: 'malware-exe',
+    parentId: 'desktop',
+    name: 'malware.exe',
+    type: 'file',
+    content: 'MZ\u0090\u0000\u0003 This program cannot be run in DOS mode.\n',
+  },
   { id: 'shortcut-xcode', parentId: 'desktop', name: 'Xcode', type: 'app', appId: 'xcode' },
   {
     id: 'shortcut-androidstudio',
@@ -236,6 +251,7 @@ const SEEDS: Seed[] = [
   app('app-spotify', 'spotify', 'Spotify.app'),
   app('app-word', 'word', 'Microsoft Word.app'),
   app('app-appstore', 'appstore', 'App Store.app'),
+  app('app-malwarebytes', 'malwarebytes', 'Malwarebytes.app'),
   app('app-preview', 'imageviewer', 'Preview.app'),
   app('app-safari', 'safari', 'Brave Browser.app'),
   app('app-askjosh', 'askjosh', 'Ask Claude.app'),
