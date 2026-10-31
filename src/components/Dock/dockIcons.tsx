@@ -57,7 +57,7 @@ export function MacIcon({
 
 /** The JH tile at the surface's icon size (dock, taskbar, Launchpad, Start, notifications). */
 function AboutTile() {
-  // Same 82% inset as RealIcon's full-bleed squircles, so it reads the same size as Mail or Maps
+  // Same inset as RealIcon's full-bleed squircles, so it reads the same size as Mail or Maps
   return (
     <span
       style={{
@@ -72,8 +72,8 @@ function AboutTile() {
       <AboutLogoIcon
         size={44}
         style={{
-          width: 'calc(var(--app-icon-size, 50px) * 0.82)',
-          height: 'calc(var(--app-icon-size, 50px) * 0.82)',
+          width: 'calc(var(--app-icon-size, 50px) * var(--app-tile-scale, 0.82))',
+          height: 'calc(var(--app-icon-size, 50px) * var(--app-tile-scale, 0.82))',
           borderRadius: '22.5%',
           boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
         }}
@@ -97,8 +97,8 @@ function GitHubAppIcon() {
     >
       <span
         style={{
-          width: 'calc(var(--app-icon-size, 50px) * 0.82)',
-          height: 'calc(var(--app-icon-size, 50px) * 0.82)',
+          width: 'calc(var(--app-icon-size, 50px) * var(--app-tile-scale, 0.82))',
+          height: 'calc(var(--app-icon-size, 50px) * var(--app-tile-scale, 0.82))',
           borderRadius: '22.5%',
           background: '#0d1117',
           boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
@@ -111,7 +111,7 @@ function GitHubAppIcon() {
           src="/icons/github-mark-white.png"
           alt=""
           draggable={false}
-          style={{ width: '68%', height: '68%', display: 'block' }}
+          style={{ width: '78%', height: '78%', display: 'block' }}
         />
       </span>
     </span>
@@ -319,12 +319,12 @@ export type DockIconKey = keyof typeof DOCK_ICONS;
 export function RealIcon({
   src,
   rounded = false,
-  scale = rounded ? 0.82 : 1,
+  scale = rounded ? 'var(--app-tile-scale, 0.82)' : 1,
   onError,
 }: {
   src: string;
   rounded?: boolean;
-  scale?: number;
+  scale?: number | string;
   onError?: () => void;
 }) {
   const size = `calc(var(--app-icon-size, 50px) * ${scale})`;
