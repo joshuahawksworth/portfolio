@@ -85,7 +85,7 @@ export function PlatformBinIcon({
   if (os === 'android') {
     return (
       <span style={{ display: 'inline-flex', width: size, height: size, ...glowStyle, ...style }}>
-        <AndroidBinIcon full={full} />
+        <AndroidBinIcon full={full} size={size} />
       </span>
     );
   }

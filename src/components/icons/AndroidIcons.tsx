@@ -14,13 +14,16 @@ export function AndroidDisc({
   bg = '#fff',
   children,
   title,
+  size = 44,
 }: {
   bg?: string;
   children?: ReactNode;
   title?: string;
+  /** Rendered size; the artwork is always on the 44-unit canvas. */
+  size?: number;
 }) {
   return (
-    <svg viewBox="0 0 44 44" width="44" height="44" fill="none" aria-label={title} role="img">
+    <svg viewBox="0 0 44 44" width={size} height={size} fill="none" aria-label={title} role="img">
       <circle cx="22" cy="22" r="22" fill={bg} />
       {children}
     </svg>
@@ -114,9 +117,9 @@ export function SkillsDiscIcon() {
   );
 }
 
-export function AndroidBinIcon({ full = false }: { full?: boolean }) {
+export function AndroidBinIcon({ full = false, size }: { full?: boolean; size?: number }) {
   return (
-    <AndroidDisc bg="#e7edf5" title="Bin">
+    <AndroidDisc bg="#e7edf5" title="Bin" size={size}>
       {full && <path d="M15 14l3-4 4 3 4-4 3 5z" fill="#fff" stroke="#c3ccd9" />}
       <rect x="13" y="13" width="18" height="3" rx="1.5" fill="#5f6f8a" />
       <rect x="19" y="10" width="6" height="3" rx="1.2" fill="#5f6f8a" />
