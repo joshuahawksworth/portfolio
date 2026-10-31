@@ -346,7 +346,7 @@ export default function Window({ win, children }: Props) {
           onMouseDown={handleTitleMouseDown}
           onDoubleClick={isWindows && !dialog ? handleMaximize : undefined}
         >
-          {isWindows && (
+          {isWindows && !dialog && (
             <span className={styles.winAppIcon} aria-hidden="true">
               {appIconFor(win.appId, os)}
             </span>

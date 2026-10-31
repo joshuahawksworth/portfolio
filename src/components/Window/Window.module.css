@@ -377,10 +377,12 @@
 }
 
 /* ── Alerts (dialog apps) ────────────────────────────────────────────── */
-/* macOS: a flat light panel with no title bar, as NSAlert draws it since Big Sur */
+/* macOS: a flat, opaque light panel with no traffic lights or title, as NSAlert draws it */
 .dialog .window {
   border-radius: 11px;
-  background: rgba(236, 236, 236, 0.92);
+  background: #ececec;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .dialog .titleBar {
