@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { appOnlyName, shortcutPage, youtubeVideoId } from '../../api/browser-utils';
+import { appOnlyName, processHtml, shortcutPage, youtubeVideoId } from '../../api/browser-utils';
 
 describe('browser proxy shortcuts', () => {
   it('finds the video id in every YouTube address shape', () => {
@@ -33,5 +33,24 @@ describe('browser proxy shortcuts', () => {
     expect(reddit).toContain('Open www.reddit.com in a new tab');
     expect(shortcutPage('https://www.youtube.com/')).toContain("YouTube can't run");
     expect(shortcutPage('https://en.wikipedia.org/wiki/React_Native')).toBeNull();
+  });
+});
+
+describe('processHtml', () => {
+  it('injects the final address as the base when the page has none', () => {
+    const out = processHtml(
+      '<html><head><title>x</title></head><body></body></html>',
+      'https://a.test/b/'
+    );
+    expect(out).toContain('<head><base href="https://a.test/b/">');
+  });
+
+  it("resolves a page's own relative base instead of overriding it", () => {
+    const out = processHtml(
+      '<!doctype html><html><head><base href="/bsz/"><script src="mode.js"></script></head></html>',
+      'https://vel.gg/bsz'
+    );
+    expect(out).toContain('<base href="https://vel.gg/bsz/">');
+    expect(out.match(/<base/g)).toHaveLength(1);
   });
 });

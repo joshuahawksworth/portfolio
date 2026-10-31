@@ -55,7 +55,19 @@ export function processHtml(html: string, target: string): string {
   html = html.replace(/<meta[^>]+http-equiv=["']?content-security-policy["']?[^>]*\/?>/gi, '');
   // Links that would escape the frame open inside the browser window instead.
   html = html.replace(/\starget=["']?_(blank|top|parent)["']?/gi, '');
-  const inject = `<base href="${target}">${NAV_RELAY}`;
+  // A page's own <base> (often relative, like "/bsz/") must win over the one injected here,
+  // and only the first <base> on a page counts, so it is lifted out and resolved instead.
+  const own = html.match(/<base\s[^>]*href=["']([^"']+)["'][^>]*>/i);
+  let base = target;
+  if (own) {
+    try {
+      base = new URL(own[1], target).href;
+    } catch {
+      /* keep the target */
+    }
+    html = html.replace(own[0], '');
+  }
+  const inject = `<base href="${base}">${NAV_RELAY}`;
   return /<head[^>]*>/i.test(html)
     ? html.replace(/<head[^>]*>/i, (m) => `${m}${inject}`)
     : inject + html;
@@ -78,6 +90,8 @@ const APP_ONLY: Record<string, string> = {
   'tiktok.com': 'TikTok',
   'linkedin.com': 'LinkedIn',
   'mail.google.com': 'Gmail',
+  // Locks every file to its own origin (Cross-Origin-Resource-Policy), so nothing draws.
+  'vel.gg': 'BO1 Zombies',
 };
 
 /** The web app's name when the target is one the proxy cannot render, else null. */
