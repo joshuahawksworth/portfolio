@@ -279,7 +279,7 @@ export default function PlainPortfolioSite() {
             <h2 className={styles.title}>Want To</h2>
             <div className={styles.triptych}>
               <div>
-                <h3>offer a role?</h3>
+                <h3>Offer a role?</h3>
                 <p>
                   I'm open to senior web and mobile roles, in Manchester or remote. If you have a
                   team that ships React or React Native products and wants someone who can own them
