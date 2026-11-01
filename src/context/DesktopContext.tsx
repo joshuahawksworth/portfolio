@@ -511,6 +511,13 @@ export function DesktopProvider({
         p.map((w) => {
           if (w.id !== id) return w;
           const min = APP_MIN[w.appId] ?? { width: 320, height: 240 };
+          // Nothing goes under the menu bar: a top edge dragged past it stops there and the
+          // bottom edge stays put, as on a Mac.
+          const top = shellInsets().top;
+          if (y < top) {
+            height -= top - y;
+            y = top;
+          }
           return {
             ...w,
             x,

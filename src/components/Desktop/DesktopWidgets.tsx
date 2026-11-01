@@ -55,7 +55,9 @@ export default function DesktopWidgets() {
   const now = useTime();
   const weather = useWeather();
   const { label, kind } = describeWeather(weather?.code ?? 3);
-  const weekday = now.toLocaleDateString('en-GB', { weekday: 'long' });
+  // The Calendar widget's heading, as macOS writes it: red weekday, grey month, big day
+  const weekday = now.toLocaleDateString('en-GB', { weekday: 'short' });
+  const month = now.toLocaleDateString('en-GB', { month: 'short' });
 
   return (
     <div className={styles.widgets} aria-label="Desktop widgets">
@@ -76,9 +78,12 @@ export default function DesktopWidgets() {
         type="button"
         className={`${styles.widget} ${styles.calendar}`}
         onClick={() => openApp('calendar')}
-        aria-label={`${weekday} ${now.getDate()}: open Calendar`}
+        aria-label={`${weekday} ${month} ${now.getDate()}: open Calendar`}
       >
-        <small className={styles.calDay}>{weekday.toUpperCase()}</small>
+        <small>
+          <span className={styles.calDay}>{weekday}</span>{' '}
+          <span className={styles.calMonth}>{month}</span>
+        </small>
         <strong className={styles.calNum}>{now.getDate()}</strong>
         <span>Open to new roles</span>
       </button>

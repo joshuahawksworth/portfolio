@@ -89,3 +89,32 @@ describe('DesktopContext windows opened from a file', () => {
     expect(screen.getByLabelText('window count')).toHaveTextContent('3');
   });
 });
+
+function ResizeHarness() {
+  const { windows, openApp, resizeWindow } = useDesktop();
+  const first = windows[0];
+  return (
+    <div>
+      <button onClick={() => openApp('skills')}>Open Skills</button>
+      <button disabled={!first} onClick={() => first && resizeWindow(first.id, 40, -31, 600, 500)}>
+        Drag top edge past the menu bar
+      </button>
+      <output aria-label="geometry">{first ? `${first.y} ${first.height}` : 'none'}</output>
+    </div>
+  );
+}
+
+describe('DesktopContext resizing', () => {
+  it('stops the top edge at the menu bar and keeps the bottom edge where it was', async () => {
+    const user = userEvent.setup();
+    render(
+      <DesktopProvider startWithLanding={false}>
+        <ResizeHarness />
+      </DesktopProvider>
+    );
+    await user.click(screen.getByRole('button', { name: 'Open Skills' }));
+    await user.click(screen.getByRole('button', { name: 'Drag top edge past the menu bar' }));
+    // Asked for y = -31 and height 500 (bottom at 469); the macOS menu bar is 29 tall
+    expect(screen.getByLabelText('geometry')).toHaveTextContent('29 440');
+  });
+});
