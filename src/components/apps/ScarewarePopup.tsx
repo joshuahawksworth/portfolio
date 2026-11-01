@@ -1,8 +1,8 @@
 /**
  * The dialogs the bait throws up, drawn as the platform's own. Message boxes carry the
  * scareware copy from malwarePopups; the three special kinds (credentials, error, gate)
- * have their own copy per platform here. Every button closes the dialog; the schedule in
- * MalwareEffects brings the next one.
+ * have their own copy per platform here. Every button closes the dialog and reports its
+ * label to MalwareApp, which may open the window it promised (see MalwareFollowup).
  */
 import {
   KINDS,
@@ -115,18 +115,24 @@ type Button = { label: string; primary?: boolean };
 
 function Actions({
   buttons,
-  onClose,
+  onAction,
   help,
 }: {
   buttons: Button[];
-  onClose: () => void;
+  /** Called with the button's label; the dialog closes and the label may lead somewhere. */
+  onAction: (label: string) => void;
   /** macOS alerts carry the round "?" at the far left of the button row. */
   help?: boolean;
 }) {
   return (
     <div className={styles.actions}>
       {help && (
-        <button type="button" className={styles.help} aria-label="Help" onClick={onClose}>
+        <button
+          type="button"
+          className={styles.help}
+          aria-label="Help"
+          onClick={() => onAction('Help')}
+        >
           ?
         </button>
       )}
@@ -135,7 +141,7 @@ function Actions({
           key={b.label}
           type="button"
           className={`${styles.btn} ${b.primary ? styles.primary : ''}`}
-          onClick={onClose}
+          onClick={() => onAction(b.label)}
         >
           {b.label}
         </button>
@@ -147,7 +153,7 @@ function Actions({
 const APP = 'TotalSecure 2010';
 const WIN_PATH = 'C:\\Users\\Josh\\AppData\\Local\\Temp\\TotalSecure\\';
 
-function Auth({ layout, onClose }: { layout: Layout; onClose: () => void }) {
+function Auth({ layout, onAction }: { layout: Layout; onAction: (label: string) => void }) {
   if (layout === 'win') {
     return (
       <div className={styles.popup}>
@@ -166,7 +172,7 @@ function Auth({ layout, onClose }: { layout: Layout; onClose: () => void }) {
           </p>
           <span className={styles.link}>Show more details</span>
         </div>
-        <Actions buttons={[{ label: 'Yes', primary: true }, { label: 'No' }]} onClose={onClose} />
+        <Actions buttons={[{ label: 'Yes', primary: true }, { label: 'No' }]} onAction={onAction} />
       </div>
     );
   }
@@ -190,7 +196,7 @@ function Auth({ layout, onClose }: { layout: Layout; onClose: () => void }) {
         </div>
         <Actions
           buttons={[{ label: 'Cancel' }, { label: 'OK', primary: true }]}
-          onClose={onClose}
+          onAction={onAction}
         />
       </div>
     );
@@ -216,13 +222,13 @@ function Auth({ layout, onClose }: { layout: Layout; onClose: () => void }) {
       </div>
       <Actions
         buttons={[{ label: 'Cancel' }, { label: ios ? 'OK' : 'Verify', primary: true }]}
-        onClose={onClose}
+        onAction={onAction}
       />
     </div>
   );
 }
 
-function Crash({ layout, onClose }: { layout: Layout; onClose: () => void }) {
+function Crash({ layout, onAction }: { layout: Layout; onAction: (label: string) => void }) {
   if (layout === 'win') {
     return (
       <div className={styles.popup}>
@@ -237,7 +243,7 @@ function Crash({ layout, onClose }: { layout: Layout; onClose: () => void }) {
             <p className={styles.body}>The specified module could not be found.</p>
           </div>
         </div>
-        <Actions buttons={[{ label: 'OK', primary: true }]} onClose={onClose} />
+        <Actions buttons={[{ label: 'OK', primary: true }]} onAction={onAction} />
       </div>
     );
   }
@@ -256,7 +262,7 @@ function Crash({ layout, onClose }: { layout: Layout; onClose: () => void }) {
         </div>
         <Actions
           buttons={[{ label: 'Ignore' }, { label: 'Report…' }, { label: 'Reopen', primary: true }]}
-          onClose={onClose}
+          onAction={onAction}
           help
         />
       </div>
@@ -283,13 +289,13 @@ function Crash({ layout, onClose }: { layout: Layout; onClose: () => void }) {
             ? [{ label: 'OK', primary: true }]
             : [{ label: 'App info' }, { label: 'Close app', primary: true }]
         }
-        onClose={onClose}
+        onAction={onAction}
       />
     </div>
   );
 }
 
-function Gate({ layout, onClose }: { layout: Layout; onClose: () => void }) {
+function Gate({ layout, onAction }: { layout: Layout; onAction: (label: string) => void }) {
   if (layout === 'win') {
     return (
       <div className={styles.popup}>
@@ -324,7 +330,7 @@ function Gate({ layout, onClose }: { layout: Layout; onClose: () => void }) {
         </div>
         <Actions
           buttons={[{ label: 'Allow access', primary: true }, { label: 'Cancel' }]}
-          onClose={onClose}
+          onAction={onAction}
         />
       </div>
     );
@@ -347,7 +353,7 @@ function Gate({ layout, onClose }: { layout: Layout; onClose: () => void }) {
         </div>
         <Actions
           buttons={[{ label: 'Move to Bin' }, { label: 'Cancel', primary: true }]}
-          onClose={onClose}
+          onAction={onAction}
           help
         />
       </div>
@@ -374,14 +380,14 @@ function Gate({ layout, onClose }: { layout: Layout; onClose: () => void }) {
             ? [{ label: 'Cancel', primary: true }]
             : [{ label: 'Cancel' }, { label: 'Settings', primary: true }]
         }
-        onClose={onClose}
+        onAction={onAction}
       />
     </div>
   );
 }
 
 /** macOS Installer.app, as the fake Flash Player updates of the time opened it. */
-function FlashInstaller({ onClose }: { onClose: () => void }) {
+function FlashInstaller({ onAction }: { onAction: (label: string) => void }) {
   const steps = [
     'Introduction',
     'Licence',
@@ -413,14 +419,14 @@ function FlashInstaller({ onClose }: { onClose: () => void }) {
       </div>
       <Actions
         buttons={[{ label: 'Go Back' }, { label: 'Continue', primary: true }]}
-        onClose={onClose}
+        onAction={onAction}
       />
     </div>
   );
 }
 
 /** The Software Update window: a list of ticked updates and Install. */
-function SoftwareUpdate({ onClose }: { onClose: () => void }) {
+function SoftwareUpdate({ onAction }: { onAction: (label: string) => void }) {
   const updates = [
     ['Mac OS X Security Update 2010-005', '112.3 MB'],
     ['Adobe Flash Player Plug-in', '9.8 MB'],
@@ -452,13 +458,21 @@ function SoftwareUpdate({ onClose }: { onClose: () => void }) {
       </div>
       <Actions
         buttons={[{ label: 'Not Now' }, { label: 'Install 3 Items', primary: true }]}
-        onClose={onClose}
+        onAction={onAction}
       />
     </div>
   );
 }
 
-function Alert({ popup, layout, onClose }: { popup: Popup; layout: Layout; onClose: () => void }) {
+function Alert({
+  popup,
+  layout,
+  onAction,
+}: {
+  popup: Popup;
+  layout: Layout;
+  onAction: (label: string) => void;
+}) {
   const mac = layout === 'mac';
   return (
     <div className={styles.popup}>
@@ -477,7 +491,7 @@ function Alert({ popup, layout, onClose }: { popup: Popup; layout: Layout; onClo
       </div>
       <Actions
         buttons={[{ label: 'No thanks' }, { label: popup.cta, primary: true }]}
-        onClose={onClose}
+        onAction={onAction}
         help={mac}
       />
     </div>
@@ -487,20 +501,20 @@ function Alert({ popup, layout, onClose }: { popup: Popup; layout: Layout; onClo
 export default function ScarewarePopup({
   variant,
   layout,
-  onClose,
+  onAction,
 }: {
   variant: string;
   layout: Layout;
-  onClose: () => void;
+  onAction: (label: string) => void;
 }) {
   if ((WINDOW_KINDS as string[]).includes(variant)) {
     const Kind = { flash: FlashInstaller, update: SoftwareUpdate }[variant as WindowKind];
-    return <Kind onClose={onClose} />;
+    return <Kind onAction={onAction} />;
   }
   if ((KINDS as string[]).includes(variant)) {
     const Kind = { auth: Auth, error: Crash, gate: Gate }[variant as PopupKind];
-    return <Kind layout={layout} onClose={onClose} />;
+    return <Kind layout={layout} onAction={onAction} />;
   }
   const popup = POPUPS.find((p) => p.title === variant) ?? POPUPS[0];
-  return <Alert popup={popup} layout={layout} onClose={onClose} />;
+  return <Alert popup={popup} layout={layout} onAction={onAction} />;
 }
