@@ -146,7 +146,8 @@ describe('default wallpapers', () => {
   it('hides the git-ignored Windows extras that are not in the build', () => {
     expect(isWallpaperAvailable('win7')).toBe(false);
     expect(isWallpaperAvailable('winxp')).toBe(false);
-    expect(wallpaperFor('windows', { windows: 'winxp' })).toBe('win11');
+    // An unavailable choice falls back to the visit's random pick
+    expect(['win11', 'win10']).toContain(wallpaperFor('windows', { windows: 'winxp' }));
   });
 });
 
