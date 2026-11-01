@@ -1217,9 +1217,11 @@
   background: rgba(243, 243, 243, 0.96);
 }
 
-/* The search field is part of the panel, not a Windows text box: no fill, no focus rectangle */
-:global(html[data-os='windows']) .spotlightInput,
-:global(html[data-os='windows']) .spotlightInput:focus-visible {
+/* The search field is part of the panel, not a Windows text box: no fill, no focus rectangle.
+   Named through .spotlight as well to outrank the shell's 2px focus ring, which the rule
+   above would only tie with. */
+:global(html[data-os='windows']) .spotlight .spotlightInput,
+:global(html[data-os='windows']) .spotlight .spotlightInput:focus-visible {
   background: transparent;
   border: 0;
   outline: none;
