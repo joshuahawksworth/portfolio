@@ -448,13 +448,17 @@ export function DesktopProvider({
         : cascadePosition(idx, width, height);
 
     setWindows((prev) => {
+      // One window per job, per URL, per source file (a second tap on the bait focuses the
+      // installer already running instead of queuing another), and per app opened bare.
       const existing = props?.jobId
         ? prev.find((w) => w.props?.jobId === props.jobId)
         : props?.url
           ? prev.find((w) => w.appId === appId && w.props?.url === props.url)
-          : !props
-            ? prev.find((w) => w.appId === appId && !w.props?.jobId)
-            : undefined;
+          : props?.source
+            ? prev.find((w) => w.appId === appId && w.props?.source === props.source)
+            : !props
+              ? prev.find((w) => w.appId === appId && !w.props?.jobId)
+              : undefined;
 
       if (existing) {
         setFocusedId(existing.id);

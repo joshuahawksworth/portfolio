@@ -58,3 +58,34 @@ describe('DesktopContext window lifecycle', () => {
     expect(screen.getByLabelText('window count')).toHaveTextContent('0');
   });
 });
+
+function SourceHarness() {
+  const { windows, openApp } = useDesktop();
+  return (
+    <div>
+      <button onClick={() => openApp('malware', { variant: 'installer', source: 'malware-exe' })}>
+        Run installer
+      </button>
+      <button onClick={() => openApp('malware', { variant: 'Security Warning' })}>Pop up</button>
+      <output aria-label="window count">{windows.length}</output>
+    </div>
+  );
+}
+
+describe('DesktopContext windows opened from a file', () => {
+  it('keeps one window per source file, so a double tap does not queue a second installer', async () => {
+    const user = userEvent.setup();
+    render(
+      <DesktopProvider startWithLanding={false}>
+        <SourceHarness />
+      </DesktopProvider>
+    );
+    await user.click(screen.getByRole('button', { name: 'Run installer' }));
+    await user.click(screen.getByRole('button', { name: 'Run installer' }));
+    expect(screen.getByLabelText('window count')).toHaveTextContent('1');
+    // Pop-ups have no source and still stack
+    await user.click(screen.getByRole('button', { name: 'Pop up' }));
+    await user.click(screen.getByRole('button', { name: 'Pop up' }));
+    expect(screen.getByLabelText('window count')).toHaveTextContent('3');
+  });
+});

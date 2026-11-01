@@ -469,7 +469,8 @@ export default function FinderApp({ props }: { props?: Record<string, unknown> }
       },
       onDoubleClick: (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (renamingId === node.id) return;
+        // A double tap already opened it twice over through onClick
+        if (renamingId === node.id || coarsePointer) return;
         openNode(node);
       },
       onContextMenu: (e: React.MouseEvent) => {
