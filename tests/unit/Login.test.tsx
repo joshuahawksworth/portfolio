@@ -81,6 +81,7 @@ describe('Login', () => {
     const screenEl = screen
       .getByText('Click or press any key to log in')
       .closest('[data-essential-motion]') as HTMLElement;
-    expect(screenEl.style.backgroundImage).toContain('/wallpapers/the-beach-night.jpg');
+    // Three hours after a September sunset is between the 9 pm and midnight frames
+    expect(screenEl.style.backgroundImage).toMatch(/\/wallpapers\/the-beach-[70]\.jpg/);
   });
 });

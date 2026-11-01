@@ -6,7 +6,7 @@ screenshotsOnly();
 
 test.describe('The Beach, Apple frames', () => {
   test('macOS and iOS on The Beach', async ({ page }) => {
-    await enterPortfolio(page, 'apple');
+    await enterPortfolio(page, 'apple', { wallpaper: { macos: 'beach', ios: 'beach' } });
     await beat(page, 2_000);
     await shot(page, `${test.info().project.name} on The Beach`);
   });

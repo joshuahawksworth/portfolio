@@ -26,13 +26,24 @@ export async function typeSlowly(page: Page, text: string, delay = 60) {
  * project (macOS on desktop, Android on the Pixel profile, because first visits choose the
  * platform that matches the device).
  */
-export async function enterPortfolio(page: Page, platform?: Platform) {
+export async function enterPortfolio(
+  page: Page,
+  platform?: Platform,
+  settings: Record<string, unknown> = {}
+) {
   if (platform) {
-    // Same key and shape as src/lib/settingsStore.ts; only the platform is pinned, every
-    // other setting keeps its default.
-    await page.addInitScript((os: Platform) => {
-      window.localStorage.setItem('portfolio.settings.v1', JSON.stringify({ platform: os }));
-    }, platform);
+    // Same key and shape as src/lib/settingsStore.ts; only the platform (and whatever
+    // `settings` names, say a wallpaper, since the desktop default is a random pick) is
+    // pinned; every other setting keeps its default.
+    await page.addInitScript(
+      ({ os, extra }: { os: Platform; extra: Record<string, unknown> }) => {
+        window.localStorage.setItem(
+          'portfolio.settings.v1',
+          JSON.stringify({ platform: os, ...extra })
+        );
+      },
+      { os: platform, extra: settings }
+    );
   }
   await page.goto('/');
   // macOS and the phones show the name or the swipe hint; the Windows 11 lock screen shows

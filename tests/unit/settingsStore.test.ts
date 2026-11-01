@@ -62,7 +62,8 @@ describe('settings store', () => {
     const loaded = loadSettings();
     expect(loaded.wallpaper.macos).toBe('tahoe');
     expect(loaded.wallpaper.ios).toBe('tahoe');
-    expect(wallpaperFor('windows', loaded.wallpaper)).toBe('win11');
+    // The desktops' default is a random pick of their own set, never the migrated Apple key
+    expect(['win11', 'win10']).toContain(wallpaperFor('windows', loaded.wallpaper));
     expect(wallpaperFor('android', loaded.wallpaper)).toBe('pixel');
   });
 

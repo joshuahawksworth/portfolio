@@ -1,24 +1,36 @@
 /**
- * Time of day for dynamic wallpapers. Like a macOS dynamic desktop, the picture moves through
- * dawn, day, dusk and night frames that cross-fade on the visitor's clock. The fades hang off
- * sunrise and sunset, which follow the date, so a summer evening stays light until late and a
- * winter one goes dark by tea time.
+ * Time of day for dynamic wallpapers, the way a macOS dynamic desktop does it. The picture is
+ * a ring of frames taken through one day (Apple's The Beach has eight, from midnight round to
+ * 9 pm); at any moment the two frames either side of "now" are blended, so the sky moves
+ * continuously rather than switching. Apple anchors its frames to the sun, so the 6 am frame
+ * is sunrise and the 6 pm frame is sunset wherever and whenever you are; here the visitor's
+ * clock is warped the same way, with sunrise and sunset worked out for the date, so a summer
+ * evening stays light until late and a winter one goes dark by tea time.
  */
 export type DayPhase = 'dawn' | 'day' | 'dusk' | 'night';
 
-/** The frames layered over the day image, bottom to top. */
-export const DYNAMIC_FRAMES = ['dawn', 'dusk', 'night'] as const;
-export type DynamicFrame = (typeof DYNAMIC_FRAMES)[number];
+/** How many frames a dynamic wallpaper has, evenly spaced round the (solar) day. */
+export const DYNAMIC_FRAME_COUNT = 8;
+
+/** The nominal hour each frame was made for: frame 2 is sunrise, frame 6 sunset. */
+const FRAME_HOURS = 24 / DYNAMIC_FRAME_COUNT;
+const SUNRISE_FRAME = 2;
+const SUNSET_FRAME = 6;
+
+/** Frames whose sky is dark enough that shell text should flip to white. */
+const DARK_FRAMES = new Set([0, 1, 6, 7]);
 
 export interface DynamicLook {
-  /** The frame that dominates right now (what a single still, such as the lock screen, shows). */
+  /** The frame underneath right now. */
+  from: number;
+  /** The frame being blended in over it. */
+  to: number;
+  /** How far the blend has gone, 0 (all `from`) to 1 (all `to`). */
+  mix: number;
+  /** The frame that dominates (what a single still, such as the lock screen, shows). */
+  frame: number;
+  /** A name for that frame, for anything that wants words rather than a number. */
   phase: DayPhase;
-  /** Opacity of the dawn frame, stacked directly over the day image. */
-  dawn: number;
-  /** Opacity of the dusk frame, above dawn. */
-  dusk: number;
-  /** Opacity of the night frame, on top. */
-  night: number;
   /** Dark enough that shell text should flip to white. */
   dark: boolean;
 }
@@ -34,19 +46,6 @@ export const HOME_LATITUDE = 53.5;
 
 /** Used when no date is to hand: an equinox-ish day. */
 export const DEFAULT_SUN: SunTimes = { sunrise: 6.5, sunset: 19 };
-
-// How long each fade takes, in hours, relative to sunrise (S) and sunset (T):
-const NIGHT_TO_DAWN = 1; // night lifts across S-1 .. S
-const DAWN_TO_DAY = 1; // dawn colours fade across S .. S+1
-const DAY_TO_DUSK = 1.5; // the sun sinks across T-1.5 .. T
-const DUSK_TO_NIGHT = 1.2; // dusk darkens into night across T .. T+1.2
-// A frame that is fully covered by the one above it is switched off (or on) out of sight, this
-// long after the covering frame has become opaque, so the 60 s CSS fade never shows the swap.
-const HIDDEN_SWAP_MARGIN = 0.8;
-
-function ramp(from: number, to: number, x: number): number {
-  return Math.min(1, Math.max(0, (x - from) / (to - from)));
-}
 
 const RAD = Math.PI / 180;
 
@@ -85,28 +84,37 @@ function summerTimeShift(date: Date): number {
   return (standard - date.getTimezoneOffset()) / 60;
 }
 
+/**
+ * Where on the frame ring a moment falls, in nominal hours (0–24): daylight is stretched or
+ * squeezed to fit between the sunrise and sunset frames, night to fit the rest.
+ */
+export function nominalHour(hours: number, sun: SunTimes = DEFAULT_SUN): number {
+  const { sunrise, sunset } = sun;
+  const dayLength = sunset - sunrise;
+  const dawnHour = SUNRISE_FRAME * FRAME_HOURS;
+  const duskHour = SUNSET_FRAME * FRAME_HOURS;
+  if (hours >= sunrise && hours < sunset) {
+    return dawnHour + ((hours - sunrise) / dayLength) * (duskHour - dawnHour);
+  }
+  const sinceSunset = hours >= sunset ? hours - sunset : hours + 24 - sunset;
+  return (duskHour + (sinceSunset / (24 - dayLength)) * (24 - (duskHour - dawnHour))) % 24;
+}
+
+function phaseOf(frame: number): DayPhase {
+  if (frame === SUNRISE_FRAME) return 'dawn';
+  if (frame === SUNSET_FRAME) return 'dusk';
+  if (frame > SUNRISE_FRAME && frame < SUNSET_FRAME) return 'day';
+  return 'night';
+}
+
 /** The look for a moment in the day (hours as a decimal, 0–24) given that day's sun times. */
 export function dynamicLookAt(hours: number, sun: SunTimes = DEFAULT_SUN): DynamicLook {
-  const { sunrise, sunset } = sun;
-
-  let night = 0;
-  if (hours >= sunset) night = ramp(sunset, sunset + DUSK_TO_NIGHT, hours);
-  else if (hours < sunrise) night = 1 - ramp(sunrise - NIGHT_TO_DAWN, sunrise, hours);
-
-  let dusk = 0;
-  if (hours >= sunset - DAY_TO_DUSK && hours < sunset)
-    dusk = ramp(sunset - DAY_TO_DUSK, sunset, hours);
-  else if (hours >= sunset && hours < sunset + DUSK_TO_NIGHT + HIDDEN_SWAP_MARGIN) dusk = 1;
-
-  let dawn = 0;
-  if (hours >= sunrise - NIGHT_TO_DAWN - HIDDEN_SWAP_MARGIN && hours < sunrise) dawn = 1;
-  else if (hours >= sunrise && hours < sunrise + DAWN_TO_DAY)
-    dawn = 1 - ramp(sunrise, sunrise + DAWN_TO_DAY, hours);
-
-  const phase: DayPhase =
-    night >= 0.5 ? 'night' : dusk >= 0.5 ? 'dusk' : dawn >= 0.5 ? 'dawn' : 'day';
-  // Every frame but the day one has a deep sky behind the menu bar.
-  return { phase, dawn, dusk, night, dark: phase !== 'day' };
+  const position = nominalHour(hours, sun) / FRAME_HOURS;
+  const from = Math.floor(position) % DYNAMIC_FRAME_COUNT;
+  const to = (from + 1) % DYNAMIC_FRAME_COUNT;
+  const mix = position - Math.floor(position);
+  const frame = mix < 0.5 ? from : to;
+  return { from, to, mix, frame, phase: phaseOf(frame), dark: DARK_FRAMES.has(frame) };
 }
 
 export function dynamicLookFor(date = new Date()): DynamicLook {
