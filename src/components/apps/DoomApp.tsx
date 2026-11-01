@@ -3,6 +3,7 @@ import type { PointerEvent as ReactPointerEvent, ReactNode } from 'react';
 import { useDesktop } from '../../context/DesktopContext';
 import { useSettings } from '../../context/SettingsContext';
 import { reportAppReady } from '../../lib/appReady';
+import { soundStart } from '../../lib/soundQueue';
 import styles from './DoomApp.module.css';
 
 interface CIEvents {
@@ -185,13 +186,14 @@ export default function DoomApp() {
           let next = 0;
           ev.onSoundPush((samples) => {
             if (mutedRef.current) return;
-            if (ac.state === 'suspended') ac.resume();
+            if (ac.state !== 'running') ac.resume();
+            const t = soundStart(ac.currentTime, next, ac.state === 'running');
+            if (t === null) return;
             const buf = ac.createBuffer(1, samples.length, freq);
             buf.getChannelData(0).set(samples);
             const src = ac.createBufferSource();
             src.buffer = buf;
             src.connect(gain);
-            const t = Math.max(ac.currentTime, next);
             src.start(t);
             next = t + buf.duration;
           });
