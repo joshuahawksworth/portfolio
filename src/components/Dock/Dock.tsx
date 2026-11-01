@@ -213,6 +213,7 @@ export default function Dock({
             if (e.animationName.includes('dockBounce')) onBounceHop?.(key);
           }}
           aria-label={label}
+          data-trash={key === 'trash' ? '' : undefined}
           style={draggable ? { cursor: isDragging ? 'grabbing' : 'grab' } : undefined}
         >
           {icon}

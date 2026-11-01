@@ -567,11 +567,15 @@ const NATIVE_APPS = new Set([
 ]);
 const SELF_LOADING_APPS = new Set(['doom']);
 const launchedOnce = new Set<string>();
+/**
+ * How long a launch takes before the window appears. The first launch of an app in a
+ * session is a short cold start, so the Dock gets a hop or two; relaunching is instant.
+ * Long enough to read as a launch, short enough that a double-click never feels ignored.
+ */
 function launchDelay(appId: string): number {
   const warm = launchedOnce.has(appId);
   launchedOnce.add(appId);
-  const [min, max] = warm ? [350, 900] : [1200, 3200];
-  return min + Math.random() * (max - min);
+  return warm ? 0 : 450 + Math.random() * 450;
 }
 
 function toItem(node: FsNode): DesktopItem {
@@ -955,6 +959,10 @@ function DesktopSurface() {
     } else if (SELF_LOADING_APPS.has(appId)) {
       open();
       at = Infinity; // until the app reports ready
+    } else if (isWindows) {
+      // No Dock bounce to wait for on Windows: the window opens at once
+      open();
+      at = 0;
     } else {
       const delay = launchDelay(appId);
       at = Date.now() + delay;
@@ -1045,7 +1053,8 @@ function DesktopSurface() {
 
     // Returns which specific trash element the cursor is over, or null
     function getHoveredTrash(x: number, y: number): 'dock' | 'desktop' | null {
-      const trashEls = document.querySelectorAll('[aria-label="Trash"]');
+      // Tagged rather than found by name: the bin is "Recycle Bin" on Windows, "Bin" on Android
+      const trashEls = document.querySelectorAll('[data-trash]');
       for (const el of Array.from(trashEls)) {
         const r = (el as HTMLElement).getBoundingClientRect();
         if (r.width === 0) continue;
@@ -1376,6 +1385,7 @@ function DesktopSurface() {
             role="button"
             tabIndex={0}
             aria-label={item.label}
+            data-trash={item.appId === 'trash' ? '' : undefined}
             onKeyDown={(e) => {
               if (e.key === 'Enter') openItem(item);
               if (e.key === 'F2' && canRenameNode(item.node)) startRename(item.id);
