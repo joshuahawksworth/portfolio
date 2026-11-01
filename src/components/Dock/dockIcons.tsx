@@ -139,6 +139,7 @@ const DRAWN_ICONS = {
   github: <GitHubAppIcon />,
   malwarebytes: <MalwarebytesAppIcon />,
   malware: <MalwareAlertIcon />,
+  malwarewin: <MalwareAlertIcon />,
   candycrush: <CandyIcon />,
   githubdesktop: <BrandIcon src="/icons/github-desktop.png" fallback={<GitHubDesktopIcon />} />,
   about: <AboutTile />,

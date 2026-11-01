@@ -59,6 +59,7 @@ export type PortfolioAppId =
   | 'calculator'
   | 'askjosh'
   | 'malware'
+  | 'malwarewin'
   | 'malwarebytes'
   | 'settings';
 
@@ -301,6 +302,16 @@ export const PORTFOLIO_APPS = {
     defaultSize: { width: 400, height: 210 },
     minSize: { width: 260, height: 180 },
     maxSize: { width: 480, height: 360 },
+  },
+  // The pop-ups that are ordinary macOS windows (Installer, Software Update): same component,
+  // no dialog flag, so they get traffic lights and a Close
+  malwarewin: {
+    id: 'malwarewin',
+    title: 'Installer',
+    component: MalwareApp,
+    defaultSize: { width: 560, height: 360 },
+    minSize: { width: 420, height: 260 },
+    maxSize: { width: 640, height: 420 },
   },
   malwarebytes: {
     id: 'malwarebytes',

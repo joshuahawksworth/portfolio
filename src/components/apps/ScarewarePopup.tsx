@@ -1,9 +1,18 @@
 /**
  * The dialogs the bait throws up, drawn as the platform's own. Message boxes carry the
  * scareware copy from malwarePopups; the three special kinds (credentials, error, gate)
- * have their own copy per platform here. Every button only ever opens more of them.
+ * have their own copy per platform here. Every button closes the dialog; the schedule in
+ * MalwareEffects brings the next one.
  */
-import { KINDS, POPUPS, type Popup, type PopupKind, type PopupTone } from '../../lib/malwarePopups';
+import {
+  KINDS,
+  POPUPS,
+  WINDOW_KINDS,
+  type Popup,
+  type PopupKind,
+  type PopupTone,
+  type WindowKind,
+} from '../../lib/malwarePopups';
 import styles from './MalwareApp.module.css';
 
 export type Layout = 'mac' | 'win' | 'ios' | 'android';
@@ -58,25 +67,28 @@ function Shield() {
   );
 }
 
-/** The macOS caution badge, at alert size. */
+/** The macOS caution badge, at alert size: a rounded triangle, amber below, a dark tapered "!". */
 function MacIcon() {
   return (
     <svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
-      <path
-        d="M32 6L60 56H4z"
-        fill="url(#mwCaution)"
-        stroke="#c98a00"
-        strokeWidth="1.2"
-        strokeLinejoin="round"
-      />
       <defs>
         <linearGradient id="mwCaution" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#ffd43b" />
-          <stop offset="1" stopColor="#f5a500" />
+          <stop offset="0" stopColor="#ffe36a" />
+          <stop offset="0.55" stopColor="#ffc60a" />
+          <stop offset="1" stopColor="#f0a000" />
         </linearGradient>
       </defs>
-      <rect x="29.3" y="22" width="5.4" height="18" rx="2.4" fill="#4a3600" />
-      <circle cx="32" cy="47.5" r="3.1" fill="#4a3600" />
+      <path
+        d="M28.3 8.6a4.3 4.3 0 0 1 7.4 0l23.6 40.6a4.3 4.3 0 0 1-3.7 6.4H8.4a4.3 4.3 0 0 1-3.7-6.4z"
+        fill="url(#mwCaution)"
+        stroke="#c98500"
+        strokeWidth="0.8"
+      />
+      <path
+        d="M32 20.5c2 0 3.3 1.2 3.1 3.1L34 39.2a2 2 0 0 1-4 0l-1.1-15.6c-.2-1.9 1.1-3.1 3.1-3.1z"
+        fill="#2b2b2b"
+      />
+      <circle cx="32" cy="46.6" r="3" fill="#2b2b2b" />
     </svg>
   );
 }
@@ -99,22 +111,22 @@ function Lock() {
   );
 }
 
-type Button = { label: string; primary?: boolean; spawns?: number };
+type Button = { label: string; primary?: boolean };
 
 function Actions({
   buttons,
-  more,
+  onClose,
   help,
 }: {
   buttons: Button[];
-  more: (n: number) => void;
+  onClose: () => void;
   /** macOS alerts carry the round "?" at the far left of the button row. */
   help?: boolean;
 }) {
   return (
     <div className={styles.actions}>
       {help && (
-        <button type="button" className={styles.help} aria-label="Help" onClick={() => more(1)}>
+        <button type="button" className={styles.help} aria-label="Help" onClick={onClose}>
           ?
         </button>
       )}
@@ -123,7 +135,7 @@ function Actions({
           key={b.label}
           type="button"
           className={`${styles.btn} ${b.primary ? styles.primary : ''}`}
-          onClick={() => more(b.spawns ?? (b.primary ? 2 : 1))}
+          onClick={onClose}
         >
           {b.label}
         </button>
@@ -135,7 +147,7 @@ function Actions({
 const APP = 'TotalSecure 2010';
 const WIN_PATH = 'C:\\Users\\Josh\\AppData\\Local\\Temp\\TotalSecure\\';
 
-function Auth({ layout, more }: { layout: Layout; more: (n: number) => void }) {
+function Auth({ layout, onClose }: { layout: Layout; onClose: () => void }) {
   if (layout === 'win') {
     return (
       <div className={styles.popup}>
@@ -154,7 +166,7 @@ function Auth({ layout, more }: { layout: Layout; more: (n: number) => void }) {
           </p>
           <span className={styles.link}>Show more details</span>
         </div>
-        <Actions buttons={[{ label: 'Yes', primary: true }, { label: 'No' }]} more={more} />
+        <Actions buttons={[{ label: 'Yes', primary: true }, { label: 'No' }]} onClose={onClose} />
       </div>
     );
   }
@@ -176,7 +188,10 @@ function Auth({ layout, more }: { layout: Layout; more: (n: number) => void }) {
             </label>
           </div>
         </div>
-        <Actions buttons={[{ label: 'Cancel' }, { label: 'OK', primary: true }]} more={more} />
+        <Actions
+          buttons={[{ label: 'Cancel' }, { label: 'OK', primary: true }]}
+          onClose={onClose}
+        />
       </div>
     );
   }
@@ -201,13 +216,13 @@ function Auth({ layout, more }: { layout: Layout; more: (n: number) => void }) {
       </div>
       <Actions
         buttons={[{ label: 'Cancel' }, { label: ios ? 'OK' : 'Verify', primary: true }]}
-        more={more}
+        onClose={onClose}
       />
     </div>
   );
 }
 
-function Crash({ layout, more }: { layout: Layout; more: (n: number) => void }) {
+function Crash({ layout, onClose }: { layout: Layout; onClose: () => void }) {
   if (layout === 'win') {
     return (
       <div className={styles.popup}>
@@ -222,7 +237,7 @@ function Crash({ layout, more }: { layout: Layout; more: (n: number) => void }) 
             <p className={styles.body}>The specified module could not be found.</p>
           </div>
         </div>
-        <Actions buttons={[{ label: 'OK', primary: true }]} more={more} />
+        <Actions buttons={[{ label: 'OK', primary: true }]} onClose={onClose} />
       </div>
     );
   }
@@ -241,7 +256,7 @@ function Crash({ layout, more }: { layout: Layout; more: (n: number) => void }) 
         </div>
         <Actions
           buttons={[{ label: 'Ignore' }, { label: 'Report…' }, { label: 'Reopen', primary: true }]}
-          more={more}
+          onClose={onClose}
           help
         />
       </div>
@@ -268,13 +283,13 @@ function Crash({ layout, more }: { layout: Layout; more: (n: number) => void }) 
             ? [{ label: 'OK', primary: true }]
             : [{ label: 'App info' }, { label: 'Close app', primary: true }]
         }
-        more={more}
+        onClose={onClose}
       />
     </div>
   );
 }
 
-function Gate({ layout, more }: { layout: Layout; more: (n: number) => void }) {
+function Gate({ layout, onClose }: { layout: Layout; onClose: () => void }) {
   if (layout === 'win') {
     return (
       <div className={styles.popup}>
@@ -309,7 +324,7 @@ function Gate({ layout, more }: { layout: Layout; more: (n: number) => void }) {
         </div>
         <Actions
           buttons={[{ label: 'Allow access', primary: true }, { label: 'Cancel' }]}
-          more={more}
+          onClose={onClose}
         />
       </div>
     );
@@ -332,7 +347,7 @@ function Gate({ layout, more }: { layout: Layout; more: (n: number) => void }) {
         </div>
         <Actions
           buttons={[{ label: 'Move to Bin' }, { label: 'Cancel', primary: true }]}
-          more={more}
+          onClose={onClose}
           help
         />
       </div>
@@ -359,21 +374,91 @@ function Gate({ layout, more }: { layout: Layout; more: (n: number) => void }) {
             ? [{ label: 'Cancel', primary: true }]
             : [{ label: 'Cancel' }, { label: 'Settings', primary: true }]
         }
-        more={more}
+        onClose={onClose}
       />
     </div>
   );
 }
 
-function Alert({
-  popup,
-  layout,
-  more,
-}: {
-  popup: Popup;
-  layout: Layout;
-  more: (n: number) => void;
-}) {
+/** macOS Installer.app, as the fake Flash Player updates of the time opened it. */
+function FlashInstaller({ onClose }: { onClose: () => void }) {
+  const steps = [
+    'Introduction',
+    'Licence',
+    'Destination Select',
+    'Installation Type',
+    'Installation',
+    'Summary',
+  ];
+  return (
+    <div className={`${styles.popup} ${styles.installerApp}`}>
+      <div className={styles.installerBody}>
+        <ul className={styles.steps}>
+          {steps.map((step, i) => (
+            <li key={step} className={i === 0 ? styles.stepCurrent : undefined}>
+              {step}
+            </li>
+          ))}
+        </ul>
+        <div className={styles.pane}>
+          <h2 className={styles.heading}>Welcome to the Adobe Flash Player Installer</h2>
+          <p className={styles.body}>
+            You will be guided through the steps necessary to install this software.
+          </p>
+          <p className={styles.body}>
+            Adobe Flash Player 10.1 is required to view this content. Click Continue to update your
+            Flash Player now. This update is mandatory.
+          </p>
+        </div>
+      </div>
+      <Actions
+        buttons={[{ label: 'Go Back' }, { label: 'Continue', primary: true }]}
+        onClose={onClose}
+      />
+    </div>
+  );
+}
+
+/** The Software Update window: a list of ticked updates and Install. */
+function SoftwareUpdate({ onClose }: { onClose: () => void }) {
+  const updates = [
+    ['Mac OS X Security Update 2010-005', '112.3 MB'],
+    ['Adobe Flash Player Plug-in', '9.8 MB'],
+    ['TotalSecure 2010 Definitions', '1,337 KB'],
+  ];
+  return (
+    <div className={styles.popup}>
+      <div className={styles.content}>
+        <div className={styles.text}>
+          <h2 className={styles.heading}>New software is available for your computer.</h2>
+          <p className={styles.body}>
+            If you don’t want to install now, choose Apple menu &gt; Software Update when you’re
+            ready to install.
+          </p>
+          <table className={styles.updates}>
+            <tbody>
+              {updates.map(([name, size]) => (
+                <tr key={name}>
+                  <td>
+                    <input type="checkbox" defaultChecked aria-label={`Install ${name}`} />
+                  </td>
+                  <td>{name}</td>
+                  <td>{size}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <Actions
+        buttons={[{ label: 'Not Now' }, { label: 'Install 3 Items', primary: true }]}
+        onClose={onClose}
+      />
+    </div>
+  );
+}
+
+function Alert({ popup, layout, onClose }: { popup: Popup; layout: Layout; onClose: () => void }) {
   const mac = layout === 'mac';
   return (
     <div className={styles.popup}>
@@ -392,7 +477,7 @@ function Alert({
       </div>
       <Actions
         buttons={[{ label: 'No thanks' }, { label: popup.cta, primary: true }]}
-        more={more}
+        onClose={onClose}
         help={mac}
       />
     </div>
@@ -402,16 +487,20 @@ function Alert({
 export default function ScarewarePopup({
   variant,
   layout,
-  more,
+  onClose,
 }: {
   variant: string;
   layout: Layout;
-  more: (n: number) => void;
+  onClose: () => void;
 }) {
+  if ((WINDOW_KINDS as string[]).includes(variant)) {
+    const Kind = { flash: FlashInstaller, update: SoftwareUpdate }[variant as WindowKind];
+    return <Kind onClose={onClose} />;
+  }
   if ((KINDS as string[]).includes(variant)) {
     const Kind = { auth: Auth, error: Crash, gate: Gate }[variant as PopupKind];
-    return <Kind layout={layout} more={more} />;
+    return <Kind layout={layout} onClose={onClose} />;
   }
   const popup = POPUPS.find((p) => p.title === variant) ?? POPUPS[0];
-  return <Alert popup={popup} layout={layout} more={more} />;
+  return <Alert popup={popup} layout={layout} onClose={onClose} />;
 }

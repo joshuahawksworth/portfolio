@@ -20,6 +20,7 @@ import Taskbar from '../Taskbar/Taskbar';
 import SystemPanels from '../SystemUI/SystemPanels';
 import NotificationBanners from '../SystemUI/NotificationBanners';
 import MalwareEffects from './MalwareEffects';
+import { MALWARE_APP_IDS } from '../../lib/malwarePopups';
 import MalwareAssistants from './MalwareAssistants';
 import DynamicWallpaper, { isDynamicDark, useDynamicLook } from './DynamicWallpaper';
 import { useWelcomeNotifications } from '../../hooks/useWelcomeNotifications';
@@ -561,6 +562,7 @@ const NATIVE_APPS = new Set([
   'appstore',
   'calendar',
   'malware',
+  'malwarewin',
   'malwarebytes',
 ]);
 const SELF_LOADING_APPS = new Set(['doom']);
@@ -1433,7 +1435,9 @@ function DesktopSurface() {
           <Window key={win.id} win={win}>
             {/* The bait's windows know their own id, so the installer can hand over to a pop-up */}
             <Comp
-              props={win.appId === 'malware' ? { ...win.props, windowId: win.id } : win.props}
+              props={
+                MALWARE_APP_IDS.has(win.appId) ? { ...win.props, windowId: win.id } : win.props
+              }
             />
           </Window>
         );
