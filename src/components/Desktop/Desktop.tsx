@@ -568,14 +568,15 @@ const NATIVE_APPS = new Set([
 const SELF_LOADING_APPS = new Set(['doom']);
 const launchedOnce = new Set<string>();
 /**
- * How long a launch takes before the window appears. The first launch of an app in a
- * session is a short cold start, so the Dock gets a hop or two; relaunching is instant.
- * Long enough to read as a launch, short enough that a double-click never feels ignored.
+ * How long a macOS launch takes before the window appears, so the Dock bounces for it the
+ * way a Mac does: the first launch of an app in a session is a cold start of a few hops,
+ * relaunching it is quick. (Windows opens at once; see launch.)
  */
 function launchDelay(appId: string): number {
   const warm = launchedOnce.has(appId);
   launchedOnce.add(appId);
-  return warm ? 0 : 450 + Math.random() * 450;
+  const [min, max] = warm ? [350, 900] : [1200, 3200];
+  return min + Math.random() * (max - min);
 }
 
 function toItem(node: FsNode): DesktopItem {
