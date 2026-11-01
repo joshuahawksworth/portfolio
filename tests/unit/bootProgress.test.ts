@@ -73,8 +73,8 @@ describe('spinnerDot', () => {
 describe('listPublicAssets', () => {
   it('lists the shipped wallpapers and icons as public URL paths', () => {
     const assets = listPublicAssets();
-    expect(assets).toContain('/wallpapers/the-beach.jpg');
-    expect(assets).toContain('/wallpapers/the-beach-night.jpg');
+    expect(assets).toContain('/wallpapers/the-beach-4.jpg');
+    expect(assets).toContain('/wallpapers/the-beach-0.jpg');
     expect(assets).toContain('/icons/trash.png');
     expect(assets.every((p) => p.startsWith('/wallpapers/') || p.startsWith('/icons/'))).toBe(true);
   });

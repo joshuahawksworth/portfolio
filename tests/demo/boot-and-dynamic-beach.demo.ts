@@ -5,8 +5,8 @@ import { beat, onlyOn, shot } from './demo-helpers';
 /**
  * Video: the boot screens and the login cross-fade still play with Reduce Motion switched
  * on (the setting used to snap the macOS bar to full, freeze the Windows spinner and flash
- * the page colour between screens). Stills: The Beach at dawn, dusk and night, the frames a
- * dynamic wallpaper now cross-fades through.
+ * the page colour between screens). Stills: The Beach at dawn, dusk and night, three of the
+ * eight Apple frames the desktop blends through the day.
  */
 
 const SETTINGS_KEY = 'portfolio.settings.v1';
@@ -25,8 +25,12 @@ async function bootWithReduceMotion(page: Page, platform: 'apple' | 'windows') {
 /** Boot straight to the macOS desktop with the clock fixed at a time of day. */
 async function desktopAt(page: Page, time: Date) {
   await page.clock.install({ time });
+  // The desktop default is a random pick of the set now, so ask for The Beach by name
   await page.addInitScript((key: string) => {
-    window.localStorage.setItem(key, JSON.stringify({ platform: 'apple' }));
+    window.localStorage.setItem(
+      key,
+      JSON.stringify({ platform: 'apple', wallpaper: { macos: 'beach', ios: 'beach' } })
+    );
   }, SETTINGS_KEY);
   await page.goto('/');
   await expect(page.getByText('Joshua Hawksworth').first()).toBeVisible({ timeout: 15_000 });
@@ -94,16 +98,16 @@ test.describe('The Beach through the day', () => {
   const { sunrise, sunset } = sunTimesFor(day);
   const at = (hours: number) => new Date(day.getTime() + hours * 3_600_000);
 
-  for (const [caption, time] of [
-    ['The Beach at dawn', at(sunrise + 0.02)],
-    ['The Beach at dusk', at(sunset - 0.05)],
-    ['The Beach at night', at(sunset + 3)],
+  // Frame 2 is sunrise, 6 sunset, 7 the 9 pm frame; the moment is chosen so that frame is on top
+  for (const [caption, time, frame] of [
+    ['The Beach at dawn', at(sunrise + 0.02), 2],
+    ['The Beach at dusk', at(sunset - 0.05), 6],
+    ['The Beach at night', at(sunset + 3.5), 7],
   ] as const) {
     test(caption, async ({ page }) => {
       await desktopAt(page, time);
-      const frame = caption.split(' ').pop()!;
       const layer = page.locator(`[data-frame="${frame}"]`);
-      // The frame is (all but) fully in: the fades are gradual, so allow the last few percent.
+      // The frame is (all but) fully in: the blends are gradual, so allow the last few percent.
       await expect
         .poll(() => layer.evaluate((el) => parseFloat(getComputedStyle(el).opacity)))
         .toBeGreaterThan(0.9);

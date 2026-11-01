@@ -9,6 +9,7 @@ import {
   defaultWallpaperFor,
   dynamicFrameSrc,
   isWallpaperAvailable,
+  resetDefaultWallpaperPicks,
   wallpaperFor,
   wallpaperImageFor,
   type WallpaperKey,
@@ -17,62 +18,50 @@ import {
 const SUN = { sunrise: 6.5, sunset: 19 };
 
 describe('dynamicLookAt', () => {
-  it('shows only the day picture in the middle of the day', () => {
-    const look = dynamicLookAt(12, SUN);
-    expect(look.phase).toBe('day');
-    expect(look).toMatchObject({ dawn: 0, dusk: 0, night: 0, dark: false });
+  it('blends the two frames either side of the moment', () => {
+    // Solar noon (12:45 on these sun times) is frame 4 exactly; a quarter of the way towards
+    // the 3 pm frame, the blend is a quarter in
+    const noon = (SUN.sunrise + SUN.sunset) / 2;
+    const quarter = ((SUN.sunset - SUN.sunrise) / 12) * 3 * 0.25;
+    const look = dynamicLookAt(noon + quarter, SUN);
+    expect(look).toMatchObject({ from: 4, to: 5, frame: 4, phase: 'day', dark: false });
+    expect(look.mix).toBeCloseTo(0.25, 5);
   });
 
-  it('brings the dusk frame in before sunset and the night frame after it', () => {
-    const early = dynamicLookAt(18, SUN);
-    expect(early.dusk).toBeGreaterThan(0);
-    expect(early.dusk).toBeLessThan(1);
-    expect(early.night).toBe(0);
-    const sunset = dynamicLookAt(19, SUN);
-    expect(sunset.phase).toBe('dusk');
-    expect(sunset.dusk).toBe(1);
-    expect(sunset.dark).toBe(true);
-    const late = dynamicLookAt(19.6, SUN);
-    expect(late.night).toBeGreaterThan(0);
-    expect(late.night).toBeLessThan(1);
-    const night = dynamicLookAt(23, SUN);
-    expect(night).toMatchObject({ phase: 'night', night: 1, dark: true });
+  it('anchors sunrise to the dawn frame and sunset to the dusk frame', () => {
+    expect(dynamicLookAt(SUN.sunrise, SUN)).toMatchObject({ from: 2, phase: 'dawn' });
+    expect(dynamicLookAt(SUN.sunrise, SUN).mix).toBeCloseTo(0, 5);
+    expect(dynamicLookAt(SUN.sunset, SUN)).toMatchObject({ from: 6, phase: 'dusk', dark: true });
+    expect(dynamicLookAt(SUN.sunset, SUN).mix).toBeCloseTo(0, 5);
   });
 
-  it('only drops the dusk frame once the night frame fully covers it', () => {
-    // Night is opaque from 20:12; dusk stays up well past that so the swap is never seen.
-    expect(dynamicLookAt(20.5, SUN).dusk).toBe(1);
-    expect(dynamicLookAt(21.5, SUN).dusk).toBe(0);
-    expect(dynamicLookAt(21.5, SUN).night).toBe(1);
+  it('stretches daylight across the day frames and night across the rest', () => {
+    // Halfway through daylight is solar noon, frame 4; halfway through the night is midnight, frame 0
+    const midday = (SUN.sunrise + SUN.sunset) / 2;
+    expect(dynamicLookAt(midday, SUN).from).toBe(4);
+    expect(dynamicLookAt(midday, SUN).mix).toBeCloseTo(0, 5);
+    const midnight = (SUN.sunset + SUN.sunrise + 24) / 2 - 24;
+    expect(dynamicLookAt(midnight, SUN)).toMatchObject({ from: 0, phase: 'night', dark: true });
   });
 
-  it('lifts night into dawn and dawn into day around sunrise', () => {
-    expect(dynamicLookAt(4, SUN)).toMatchObject({ phase: 'night', night: 1, dawn: 0 });
-    // Dawn is raised while night still hides it, then night thins to reveal it.
-    expect(dynamicLookAt(5.2, SUN)).toMatchObject({ night: 1, dawn: 1 });
-    const breaking = dynamicLookAt(6, SUN);
-    expect(breaking.night).toBeCloseTo(0.5);
-    expect(breaking.dawn).toBe(1);
-    expect(dynamicLookAt(6.5, SUN)).toMatchObject({ phase: 'dawn', night: 0, dawn: 1 });
-    const morning = dynamicLookAt(7, SUN);
-    expect(morning.dawn).toBeCloseTo(0.5);
-    expect(dynamicLookAt(8, SUN)).toMatchObject({ phase: 'day', dawn: 0 });
-  });
-
-  it('never sets a frame outside 0–1 across the whole day', () => {
-    for (let h = 0; h < 24; h += 0.05) {
+  it('moves round the ring without a gap or a jump across the whole day', () => {
+    let previous = dynamicLookAt(0, SUN);
+    for (let h = 0.05; h < 24; h += 0.05) {
       const look = dynamicLookAt(h, SUN);
-      for (const v of [look.dawn, look.dusk, look.night]) {
-        expect(v).toBeGreaterThanOrEqual(0);
-        expect(v).toBeLessThanOrEqual(1);
-      }
+      expect(look.mix).toBeGreaterThanOrEqual(0);
+      expect(look.mix).toBeLessThan(1);
+      expect(look.to).toBe((look.from + 1) % 8);
+      // Either the same pair, a little further along, or the next pair just begun
+      if (look.from === previous.from) expect(look.mix).toBeGreaterThanOrEqual(previous.mix);
+      else expect(look.from).toBe(previous.to);
+      previous = look;
     }
   });
 
   it('follows the sun times it is given', () => {
     const winter = { sunrise: 8.25, sunset: 15.75 };
-    expect(dynamicLookAt(17, winter).phase).toBe('night');
-    expect(dynamicLookAt(17, DEFAULT_SUN).phase).toBe('day');
+    expect(dynamicLookAt(17, winter).dark).toBe(true);
+    expect(dynamicLookAt(17, DEFAULT_SUN)).toMatchObject({ phase: 'day', dark: false });
   });
 });
 
@@ -107,42 +96,51 @@ describe('sunTimesFor', () => {
 });
 
 describe('dynamic wallpaper frames', () => {
-  it('ships dawn, dusk and night pictures for The Beach', () => {
+  it("ships Apple's eight frames of The Beach", () => {
     expect(isWallpaperAvailable('beach')).toBe(true);
-    expect(dynamicFrameSrc('beach', 'dawn')).toBe('/wallpapers/the-beach-dawn.jpg');
-    expect(dynamicFrameSrc('beach', 'dusk')).toBe('/wallpapers/the-beach-dusk.jpg');
-    expect(dynamicFrameSrc('beach', 'night')).toBe('/wallpapers/the-beach-night.jpg');
-    expect(dynamicFrameSrc('gold', 'night')).toBeNull();
+    for (let i = 0; i < 8; i++) {
+      expect(dynamicFrameSrc('beach', i)).toBe(`/wallpapers/the-beach-${i}.jpg`);
+    }
+    expect(dynamicFrameSrc('beach', 8)).toBeNull();
+    expect(dynamicFrameSrc('gold', 0)).toBeNull();
   });
 
   it('picks the dominant frame for a single still', () => {
-    expect(wallpaperImageFor('beach', dynamicLookAt(12, SUN))).toBe('/wallpapers/the-beach.jpg');
-    expect(wallpaperImageFor('beach', dynamicLookAt(19, SUN))).toBe(
-      '/wallpapers/the-beach-dusk.jpg'
+    expect(wallpaperImageFor('beach', dynamicLookAt(12, SUN))).toBe('/wallpapers/the-beach-4.jpg');
+    expect(wallpaperImageFor('beach', dynamicLookAt(SUN.sunset, SUN))).toBe(
+      '/wallpapers/the-beach-6.jpg'
     );
-    expect(wallpaperImageFor('beach', dynamicLookAt(23, SUN))).toBe(
-      '/wallpapers/the-beach-night.jpg'
-    );
-    expect(wallpaperImageFor('beach', dynamicLookAt(6.5, SUN))).toBe(
-      '/wallpapers/the-beach-dawn.jpg'
+    expect(wallpaperImageFor('beach', dynamicLookAt(SUN.sunrise, SUN))).toBe(
+      '/wallpapers/the-beach-2.jpg'
     );
     expect(wallpaperImageFor('gold', null)).toBe('/wallpapers/golden-gate.jpg');
   });
 });
 
 describe('default wallpapers', () => {
-  it('is the Golden Gate on macOS and The Beach on iOS', () => {
-    expect(defaultWallpaperFor('macos')).toBe('gold');
+  it('is a random pick of the set on the desktops, held for the visit', () => {
+    resetDefaultWallpaperPicks();
+    expect(defaultWallpaperFor('macos', isWallpaperAvailable, () => 0.99)).toBe('wave');
+    // Later readers get the same pick, whatever their dice
+    expect(defaultWallpaperFor('macos', isWallpaperAvailable, () => 0)).toBe('wave');
+    expect(wallpaperFor('macos', {})).toBe('wave');
+    resetDefaultWallpaperPicks();
+    expect(defaultWallpaperFor('windows', isWallpaperAvailable, () => 0)).toBe('win11');
+    resetDefaultWallpaperPicks();
+  });
+
+  it('keeps The Beach as the iPhone default', () => {
     expect(defaultWallpaperFor('ios')).toBe('beach');
-    expect(wallpaperFor('macos', {})).toBe('gold');
     expect(wallpaperFor('ios', {})).toBe('beach');
   });
 
-  it('falls back to Golden Gate on both when The Beach is not in the build', () => {
+  it('only picks from what is in the build when The Beach is not', () => {
+    resetDefaultWallpaperPicks();
     const withoutBeach = (key: WallpaperKey) => key !== 'beach';
-    expect(defaultWallpaperFor('macos', withoutBeach)).toBe('gold');
+    expect(defaultWallpaperFor('macos', withoutBeach, () => 0)).toBe('gold');
     expect(defaultWallpaperFor('ios', withoutBeach)).toBe('gold');
     expect(wallpaperFor('macos', { macos: 'beach' }, withoutBeach)).toBe('gold');
+    resetDefaultWallpaperPicks();
   });
 
   it('hides the git-ignored Windows extras that are not in the build', () => {

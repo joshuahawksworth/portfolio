@@ -4,14 +4,13 @@
  * through the system settings store so every surface stays in sync.
  */
 import { hasPublicAsset } from '../lib/publicAssets';
-import type { DynamicFrame, DynamicLook } from '../lib/dynamicWallpaper';
+import { DYNAMIC_FRAME_COUNT, type DynamicLook } from '../lib/dynamicWallpaper';
 import type { OsName } from '../lib/settingsStore';
 
 export const WALLPAPERS = {
-  // "The Beach", Apple's dynamic wallpaper (Lake Tahoe) and the macOS / iOS default. the-beach.jpg
-  // is Apple's day frame; DYNAMIC_FRAME_IMAGES lists Apple's dawn, dusk and night frames it
-  // cross-fades through.
-  beach: '/wallpapers/the-beach.jpg',
+  // "The Beach", Apple's macOS Big Sur dynamic wallpaper and the iOS default. This is its noon
+  // frame; DYNAMIC_FRAME_IMAGES lists all eight frames the desktop blends through the day.
+  beach: '/wallpapers/the-beach-4.jpg',
   gold: '/wallpapers/golden-gate.jpg',
   catalina: '/wallpapers/catalina-night.jpg',
   tahoe: '/wallpapers/tahoe-day.jpg',
@@ -72,29 +71,27 @@ const APPLE_SET: WallpaperKey[] = ['beach', 'gold', 'catalina', 'tahoe', 'wave']
 /** Wallpapers that follow the time of day, like macOS dynamic desktops. */
 export const DYNAMIC_WALLPAPERS: ReadonlySet<WallpaperKey> = new Set<WallpaperKey>(['beach']);
 
-/** The dawn, dusk and night pictures a dynamic wallpaper cross-fades through. */
-export const DYNAMIC_FRAME_IMAGES: Partial<Record<WallpaperKey, Record<DynamicFrame, string>>> = {
-  beach: {
-    dawn: '/wallpapers/the-beach-dawn.jpg',
-    dusk: '/wallpapers/the-beach-dusk.jpg',
-    night: '/wallpapers/the-beach-night.jpg',
-  },
+/**
+ * The frames a dynamic wallpaper blends through, in order from midnight: Apple's own eight
+ * for The Beach (00:00, 03:00 … 21:00 nominal; frame 2 is sunrise, frame 6 sunset).
+ */
+export const DYNAMIC_FRAME_IMAGES: Partial<Record<WallpaperKey, string[]>> = {
+  beach: Array.from({ length: DYNAMIC_FRAME_COUNT }, (_, i) => `/wallpapers/the-beach-${i}.jpg`),
 };
 
 /** The image for one frame of a dynamic wallpaper, or null if it was not built in. */
-export function dynamicFrameSrc(key: WallpaperKey, frame: DynamicFrame): string | null {
+export function dynamicFrameSrc(key: WallpaperKey, frame: number): string | null {
   const src = DYNAMIC_FRAME_IMAGES[key]?.[frame];
   return src && hasPublicAsset(src) ? src : null;
 }
 
 /**
  * The single picture to show for a wallpaper right now: the frame that dominates the current
- * look for a dynamic wallpaper (the lock screens show one still rather than the layered
- * cross-fade), otherwise the wallpaper itself.
+ * look for a dynamic wallpaper (the lock screens show one still rather than the blend),
+ * otherwise the wallpaper itself.
  */
 export function wallpaperImageFor(key: WallpaperKey, look: DynamicLook | null): string {
-  if (look && look.phase !== 'day') return dynamicFrameSrc(key, look.phase) ?? WALLPAPERS[key];
-  return WALLPAPERS[key];
+  return (look && dynamicFrameSrc(key, look.frame)) || WALLPAPERS[key];
 }
 
 export const WALLPAPERS_FOR_OS: Record<OsName, WallpaperKey[]> = {
@@ -124,11 +121,29 @@ export function isWallpaperAvailable(key: WallpaperKey): boolean {
   return !OPTIONAL_WALLPAPERS.has(key) || hasPublicAsset(WALLPAPERS[key]);
 }
 
+/** Desktops with no saved choice get a different wallpaper each visit. */
+const RANDOM_DEFAULT: ReadonlySet<OsName> = new Set<OsName>(['macos', 'windows']);
+/** The pick made for this visit, so every reader of the default agrees until the next load. */
+const visitPick: Partial<Record<OsName, WallpaperKey>> = {};
+
+/** Tests only: forget this visit's random picks. */
+export function resetDefaultWallpaperPicks() {
+  for (const os of Object.keys(visitPick) as OsName[]) delete visitPick[os];
+}
+
 export function defaultWallpaperFor(
   os: OsName,
-  available: (key: WallpaperKey) => boolean = isWallpaperAvailable
+  available: (key: WallpaperKey) => boolean = isWallpaperAvailable,
+  random: () => number = Math.random
 ): WallpaperKey {
-  // The first of the OS's set that is actually in the build, else the shipped fallback.
+  if (RANDOM_DEFAULT.has(os)) {
+    const set = WALLPAPERS_FOR_OS[os].filter(available);
+    if (set.length > 0) {
+      visitPick[os] ??= set[Math.floor(random() * set.length)];
+      return visitPick[os];
+    }
+  }
+  // The preferred one if it is actually in the build, else the first that is, else the fallback.
   const preferred = DEFAULT_WALLPAPER[os];
   if (available(preferred)) return preferred;
   return WALLPAPERS_FOR_OS[os].find(available) ?? FALLBACK_WALLPAPER[os];
@@ -201,7 +216,7 @@ export function preloadWallpapers(os: OsName) {
   const sources: string[] = [];
   for (const key of availableWallpapersFor(os)) {
     sources.push(WALLPAPERS[key]);
-    for (const frame of Object.values(DYNAMIC_FRAME_IMAGES[key] ?? {})) {
+    for (const frame of DYNAMIC_FRAME_IMAGES[key] ?? []) {
       if (hasPublicAsset(frame)) sources.push(frame);
     }
   }
